@@ -6,4 +6,4 @@ program:
   description: Library to analyze propositional formulas with Sat4J.
   authors: Sebastian Krieter
   url: https://github.com/skrieter/formula-analysis-sat4j
-  year: 2021
+  year: 2021-2022

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Formula-Analysis-Sat4J Lib - Library to analyze propositional formulas with Sat4J.
- * Copyright (C) 2021  Sebastian Krieter
+ * Copyright (C) 2021-2022  Sebastian Krieter
  * 
  * This file is part of Formula-Analysis-Sat4J Lib.
  * 
@@ -27,6 +27,7 @@ import java.util.*;
 import org.spldev.analysis.sat4j.solver.*;
 import org.spldev.analysis.sat4j.twise.TWiseStatisticGenerator.*;
 import org.spldev.clauses.*;
+import org.spldev.clauses.solutions.combinations.*;
 
 /**
  * Tests whether a set of configurations achieves t-wise feature coverage.
@@ -127,14 +128,17 @@ public class TWiseConfigurationTester {
 		final ArrayList<ClauseList> uncoveredConditions = new ArrayList<>();
 		final TWiseCombiner combiner = new TWiseCombiner(getUtil().getCnf().getVariableMap().size());
 		ClauseList combinedCondition = new ClauseList();
+		final PresenceCondition[] clauseListArray = new PresenceCondition[t];
 
 		groupLoop: for (final List<PresenceCondition> expressions : presenceConditionManager
 			.getGroupedPresenceConditions()) {
-			for (final ICombinationIterator iterator = new LexicographicIterator(t, expressions); iterator.hasNext();) {
-				final PresenceCondition[] clauseListArray = iterator.next();
-				if (clauseListArray == null) {
+			for (final CombinationIterator iterator = new LexicographicIterator(t, expressions.size()); iterator
+				.hasNext();) {
+				final int[] next = iterator.next();
+				if (next == null) {
 					break;
 				}
+				CombinationIterator.select(expressions, next, clauseListArray);
 
 				combinedCondition.clear();
 				combiner.combineConditions(clauseListArray, combinedCondition);

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Formula-Analysis-Sat4J Lib - Library to analyze propositional formulas with Sat4J.
- * Copyright (C) 2021  Sebastian Krieter
+ * Copyright (C) 2021-2022  Sebastian Krieter
  * 
  * This file is part of Formula-Analysis-Sat4J Lib.
  * 
@@ -24,17 +24,18 @@ package org.spldev.analysis.sat4j.twise;
 
 import java.util.*;
 
-import org.spldev.analysis.sat4j.twise.IteratorFactory.*;
+import org.spldev.clauses.solutions.combinations.*;
+import org.spldev.clauses.solutions.combinations.IteratorFactory.*;
 
 /**
- * Combines multiple {@link ICombinationIterator iterators} and returns results
+ * Combines multiple {@link CombinationIterator iterators} and returns results
  * from each iterator by turns.
  *
  * @author Sebastian Krieter
  */
-public class MergeIterator implements ICombinationIterator {
+public class MergeIterator implements CombinationIterator {
 
-	protected final List<ICombinationIterator> setIterators;
+	protected final List<CombinationIterator> setIterators;
 	protected final long numberOfCombinations;
 	protected final int t;
 
@@ -45,7 +46,7 @@ public class MergeIterator implements ICombinationIterator {
 		setIterators = new ArrayList<>(expressionSets.size());
 		long sumNumberOfCombinations = 0;
 		for (final List<PresenceCondition> expressions : expressionSets) {
-			final ICombinationIterator iterator = IteratorFactory.getIterator(id, expressions, t);
+			final CombinationIterator iterator = IteratorFactory.getIterator(id, expressions.size(), t);
 			setIterators.add(iterator);
 			sumNumberOfCombinations += iterator.size();
 		}
@@ -54,7 +55,7 @@ public class MergeIterator implements ICombinationIterator {
 
 	@Override
 	public boolean hasNext() {
-		for (final ICombinationIterator iterator : setIterators) {
+		for (final CombinationIterator iterator : setIterators) {
 			if (iterator.hasNext()) {
 				return true;
 			}
@@ -63,12 +64,12 @@ public class MergeIterator implements ICombinationIterator {
 	}
 
 	@Override
-	public PresenceCondition[] next() {
+	public int[] next() {
 		for (int i = 0; i < setIterators.size(); i++) {
 			iteratorIndex = (iteratorIndex + 1) % setIterators.size();
-			final ICombinationIterator iterator = setIterators.get(iteratorIndex);
+			final CombinationIterator iterator = setIterators.get(iteratorIndex);
 			if (iterator.hasNext()) {
-				final PresenceCondition[] next = iterator.next();
+				final int[] next = iterator.next();
 				if (next != null) {
 					return next;
 				}
@@ -89,13 +90,13 @@ public class MergeIterator implements ICombinationIterator {
 	@Override
 	public void reset() {
 		iteratorIndex = 0;
-		for (final ICombinationIterator iterator : setIterators) {
+		for (final CombinationIterator iterator : setIterators) {
 			iterator.reset();
 		}
 	}
 
 	@Override
-	public Iterator<PresenceCondition[]> iterator() {
+	public Iterator<int[]> iterator() {
 		return this;
 	}
 

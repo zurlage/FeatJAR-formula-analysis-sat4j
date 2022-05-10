@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
  * Formula-Analysis-Sat4J Lib - Library to analyze propositional formulas with Sat4J.
- * Copyright (C) 2021  Sebastian Krieter
+ * Copyright (C) 2021-2022  Sebastian Krieter
  * 
  * This file is part of Formula-Analysis-Sat4J Lib.
  * 
@@ -23,6 +23,8 @@
 package org.spldev.analysis.sat4j.twise;
 
 import java.util.*;
+
+import org.spldev.clauses.solutions.combinations.*;
 
 /**
  * Presence condition combination supplier that uses the combinatorial number
