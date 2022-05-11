@@ -85,7 +85,7 @@ public class CNFTest {
 	}
 
 	private void executeAnalysis(ModelRepresentation rep, Analysis<?> analysis) {
-		final Result<?> result = analysis.getResult(rep);
+		final Result<?> result = rep.getResult(analysis);
 		Logger.logInfo(analysis.getClass().getName());
 		result.map(Object::toString).orElse(this::reportProblems);
 	}

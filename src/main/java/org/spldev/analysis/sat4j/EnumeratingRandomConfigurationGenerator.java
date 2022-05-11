@@ -40,7 +40,7 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
 	public static final Identifier<SolutionList> identifier = new Identifier<>();
 
 	@Override
-	protected Identifier<SolutionList> getIdentifier() {
+	public Identifier<SolutionList> getIdentifier() {
 		return identifier;
 	}
 

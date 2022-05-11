@@ -67,7 +67,7 @@ public class TseytinTransformTest {
 		final AllConfigurationGenerator analysis = new AllConfigurationGenerator();
 		analysis.getAssumptions().setAll(assignment.getAll());
 		analysis.setLimit(2);
-		final int numSolutions = analysis.getResult(rep).orElseThrow().getSolutions().size();
+		final int numSolutions = rep.getResult(analysis).orElseThrow().getSolutions().size();
 		assertTrue(numSolutions < 2);
 		return numSolutions == 1;
 	}

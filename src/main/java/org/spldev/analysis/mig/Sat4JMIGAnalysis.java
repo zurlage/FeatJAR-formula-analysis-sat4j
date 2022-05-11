@@ -50,7 +50,7 @@ public abstract class Sat4JMIGAnalysis<T> extends AbstractAnalysis<T, Sat4JMIGSo
 	}
 
 	@Override
-	protected Object getParameters() {
+	public Object getParameters() {
 		return assumptions != null ? assumptions : super.getParameters();
 	}
 

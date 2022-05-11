@@ -44,7 +44,7 @@ public class CNFTransformTest {
 		final Formula formula = FileHandler.load(modelFile, FormatSupplier.of(new KConfigReaderFormat())).orElseThrow();
 
 		final ModelRepresentation rep = new ModelRepresentation(formula);
-		final List<LiteralList> atomicSets = new AtomicSetAnalysis().getResult(rep).orElseThrow();
+		final List<LiteralList> atomicSets = rep.getResult(new AtomicSetAnalysis()).orElseThrow();
 		assertEquals(5, atomicSets.size());
 	}
 

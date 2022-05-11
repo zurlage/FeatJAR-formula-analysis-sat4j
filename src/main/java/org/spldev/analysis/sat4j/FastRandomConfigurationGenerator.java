@@ -37,7 +37,7 @@ public class FastRandomConfigurationGenerator extends RandomConfigurationGenerat
 	private SStrategy originalSelectionStrategy;
 
 	@Override
-	protected Identifier<SolutionList> getIdentifier() {
+	public Identifier<SolutionList> getIdentifier() {
 		return identifier;
 	}
 

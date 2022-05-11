@@ -51,7 +51,7 @@ public abstract class Sat4JAnalysis<T> extends AbstractAnalysis<T, Sat4JSolver, 
 	}
 
 	@Override
-	protected Object getParameters() {
+	public Object getParameters() {
 		return assumptions != null ? assumptions : super.getParameters();
 	}
 
