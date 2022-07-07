@@ -41,7 +41,7 @@ public class CNFTransformTest {
 	@Test
 	public void testDistributiveBug() {
 		final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-		final Formula formula = FileHandler.load(modelFile, FormatSupplier.of(new KConfigReaderFormat())).orElseThrow();
+		final Formula formula = IO.load(modelFile, FormatSupplier.of(new KConfigReaderFormat())).orElseThrow();
 
 		final ModelRepresentation rep = new ModelRepresentation(formula);
 		final List<LiteralList> atomicSets = rep.getResult(new AtomicSetAnalysis()).orElseThrow();

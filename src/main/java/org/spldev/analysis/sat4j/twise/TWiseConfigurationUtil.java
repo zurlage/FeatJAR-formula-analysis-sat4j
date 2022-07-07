@@ -116,7 +116,7 @@ public class TWiseConfigurationUtil {
 	public void computeMIG(Path migPath) {
 		Logger.logDebug("Init graph... ");
 		Logger.logDebug("\tLoad graph from " + migPath);
-		mig = FileHandler.load(migPath, new MIGFormat()).get();
+		mig = IO.load(migPath, new MIGFormat()).get();
 		setupMIG();
 	}
 
