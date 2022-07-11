@@ -282,7 +282,8 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
 		final List<List<PresenceCondition>> groupedPresenceConditions = presenceConditionManager
 			.getGroupedPresenceConditions();
 		if (groupedPresenceConditions.size() == 1) {
-			it = new SingleIterator(t, util.getCnf().getVariableMap().getVariableCount(), groupedPresenceConditions.get(0));
+			it = new SingleIterator(t, util.getCnf().getVariableMap().getVariableCount(), groupedPresenceConditions.get(
+				0));
 		} else {
 			it = new MergeIterator3(t, util.getCnf().getVariableMap().getVariableCount(), groupedPresenceConditions);
 		}

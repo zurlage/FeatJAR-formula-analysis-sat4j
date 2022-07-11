@@ -67,7 +67,7 @@ public class CNFTest {
 		final Literal e = variables.createLiteral("e");
 
 		final And formula = new And(new Or(d), new Or(e.flip()), new Or(a, b), new Or(a.flip(), c),
-				new Or(d, b, e.flip()), new Or(b.flip(), c, d), new Or(c.flip(), d.flip(), e.flip()));
+			new Or(d, b, e.flip()), new Or(b.flip(), c, d), new Or(c.flip(), d.flip(), e.flip()));
 
 		final ModelRepresentation rep = new ModelRepresentation(formula);
 
