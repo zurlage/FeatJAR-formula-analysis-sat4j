@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.mig;
 
-import java.util.*;
+import java.util.Random;
 
 import de.featjar.analysis.AbstractAnalysis;
 import de.featjar.analysis.mig.solver.MIG;
@@ -31,10 +31,6 @@ import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.*;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.util.job.*;
 
 /**
  * Base class for analyses using a {@link Sat4JMIGSolver}.

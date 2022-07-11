@@ -22,14 +22,11 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.Random;
 
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.job.*;
 
 /**
  * Finds random valid solutions of propositional formulas.

@@ -22,7 +22,10 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+
+import org.sat4j.core.VecInt;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
@@ -30,12 +33,6 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
-import org.sat4j.core.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
 
 /**
  * Finds indeterminate features.

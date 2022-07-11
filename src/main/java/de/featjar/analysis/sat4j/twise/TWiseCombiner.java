@@ -22,12 +22,15 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
+
+import org.sat4j.core.VecInt;
 
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
-import org.sat4j.core.*;
-import de.featjar.clauses.*;
 
 /**
  * Combines multiple presence conditions into one.

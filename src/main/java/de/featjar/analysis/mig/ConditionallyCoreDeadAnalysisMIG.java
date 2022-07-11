@@ -22,6 +22,8 @@
  */
 package de.featjar.analysis.mig;
 
+import org.sat4j.core.VecInt;
+
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.mig.solver.Vertex;
@@ -31,13 +33,6 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
-import org.sat4j.core.*;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.analysis.mig.solver.visitor.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
 
 /**
  * Finds core and dead features using a {@link MIG model implication graph}.
@@ -78,11 +73,11 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
 
 	@Override
 	public LiteralList analyze(Sat4JMIGSolver solver, InternalMonitor monitor) throws Exception {
-		monitor.setTotalWork(solver.getVariables().size() + 2);
+		monitor.setTotalWork(solver.getVariables().getVariableCount() + 2);
 
 		final Traverser traverser = solver.mig.traverse();
 		solver.getAssumptions().ensureSize(fixedVariables.length + 1);
-		final int[] knownValues = new int[solver.getVariables().size()];
+		final int[] knownValues = new int[solver.getVariables().getVariableCount()];
 
 		for (final int fixedVar : fixedVariables) {
 			final int var = Math.abs(fixedVar);

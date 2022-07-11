@@ -22,7 +22,9 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.Arrays;
+
+import org.sat4j.core.VecInt;
 
 import de.featjar.analysis.mig.solver.visitor.DefaultVisitor;
 import de.featjar.analysis.mig.solver.visitor.Traverser;
@@ -31,10 +33,6 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
-import org.sat4j.core.*;
-import de.featjar.analysis.mig.solver.visitor.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
 
 /**
  * Represent a solution within a covering array.
@@ -145,7 +143,7 @@ public class TWiseConfiguration extends LiteralList {
 	}
 
 	public TWiseConfiguration(TWiseConfigurationUtil util) {
-		super(new int[util.getCnf().getVariableMap().size()], Order.INDEX, false);
+		super(new int[util.getCnf().getVariableMap().getVariableCount()], Order.INDEX, false);
 		countLiterals = 0;
 		this.util = util;
 		if (util.hasSolver()) {

@@ -22,13 +22,25 @@
  */
 package de.featjar.assignment;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import java.util.*;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import de.featjar.analysis.Analysis;
 import de.featjar.analysis.mig.ConditionallyCoreDeadAnalysisMIG;
-import de.featjar.analysis.sat4j.*;
+import de.featjar.analysis.sat4j.AddRedundancyAnalysis;
+import de.featjar.analysis.sat4j.AtomicSetAnalysis;
+import de.featjar.analysis.sat4j.CauseAnalysis;
+import de.featjar.analysis.sat4j.ContradictionAnalysis;
+import de.featjar.analysis.sat4j.CoreDeadAnalysis;
+import de.featjar.analysis.sat4j.CountSolutionsAnalysis;
+import de.featjar.analysis.sat4j.HasSolutionAnalysis;
+import de.featjar.analysis.sat4j.IndependentContradictionAnalysis;
+import de.featjar.analysis.sat4j.IndependentRedundancyAnalysis;
+import de.featjar.analysis.sat4j.IndeterminateAnalysis;
+import de.featjar.analysis.sat4j.RemoveRedundancyAnalysis;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.CNFProvider;
 import de.featjar.clauses.LiteralList;
@@ -42,40 +54,20 @@ import de.featjar.util.data.Problem;
 import de.featjar.util.data.Result;
 import de.featjar.util.job.Executor;
 import de.featjar.util.logging.Logger;
-import org.junit.jupiter.api.*;
-import de.featjar.analysis.*;
-import de.featjar.analysis.mig.*;
-import de.featjar.analysis.sat4j.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.*;
-import de.featjar.formula.structure.atomic.literal.*;
-import de.featjar.formula.structure.compound.*;
-import de.featjar.formula.structure.term.bool.*;
-import de.featjar.transform.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
-import de.featjar.util.logging.*;
 
 public class CNFTest {
 
 	@Test
 	public void testAnalyses() {
-		final VariableMap variables = VariableMap.fromNames(
-			Arrays.asList("a", "b", "c", "d", "e"));
-		final Literal a = new LiteralPredicate((BoolVariable) variables.getVariable("a").get(), true);
-		final Literal b = new LiteralPredicate((BoolVariable) variables.getVariable("b").get(), true);
-		final Literal c = new LiteralPredicate((BoolVariable) variables.getVariable("c").get(), true);
-		final Literal d = new LiteralPredicate((BoolVariable) variables.getVariable("d").get(), true);
-		final Literal e = new LiteralPredicate((BoolVariable) variables.getVariable("e").get(), true);
+		final VariableMap variables = new VariableMap();
+		final Literal a = variables.createLiteral("a");
+		final Literal b = variables.createLiteral("b");
+		final Literal c = variables.createLiteral("c");
+		final Literal d = variables.createLiteral("d");
+		final Literal e = variables.createLiteral("e");
 
-		final And formula = new And(
-			new Or(d),
-			new Or(e.flip()),
-			new Or(a, b),
-			new Or(a.flip(), c),
-			new Or(d, b, e.flip()),
-			new Or(b.flip(), c, d),
-			new Or(c.flip(), d.flip(), e.flip()));
+		final And formula = new And(new Or(d), new Or(e.flip()), new Or(a, b), new Or(a.flip(), c),
+				new Or(d, b, e.flip()), new Or(b.flip(), c, d), new Or(c.flip(), d.flip(), e.flip()));
 
 		final ModelRepresentation rep = new ModelRepresentation(formula);
 

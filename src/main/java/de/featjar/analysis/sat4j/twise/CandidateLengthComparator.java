@@ -22,12 +22,10 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.Comparator;
 
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Pair;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
 
 /**
  * Compares two candidates for covering, consisting of a partial configuration

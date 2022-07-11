@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.nio.file.*;
+import java.nio.file.Path;
 
 import de.featjar.analysis.mig.io.MIGFormat;
 import de.featjar.clauses.CNFProvider;
@@ -31,10 +31,6 @@ import de.featjar.util.data.Identifier;
 import de.featjar.util.data.Provider;
 import de.featjar.util.data.Result;
 import de.featjar.util.io.format.FormatSupplier;
-import de.featjar.analysis.mig.io.*;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
-import de.featjar.util.io.format.*;
 
 /**
  * Abstract creator to derive an element from a {@link Cache }.

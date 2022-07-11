@@ -22,9 +22,18 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.util.*;
-import java.util.stream.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import de.featjar.analysis.mig.solver.Vertex.Status;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
@@ -32,10 +41,6 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.job.InternalMonitor;
 import de.featjar.util.job.MonitorableFunction;
-import de.featjar.analysis.mig.solver.Vertex.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.job.*;
 
 /**
  * Adjacency matrix implementation for a feature graph.

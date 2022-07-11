@@ -22,20 +22,17 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.ArrayList;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.formula.ModelRepresentation;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.formula.*;
-import de.featjar.util.job.*;
 
 /**
  * Finds certain solutions of propositional formulas.

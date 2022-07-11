@@ -22,10 +22,9 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
+import java.util.Random;
 
 import de.featjar.analysis.mig.solver.MIGDistribution;
-import de.featjar.analysis.mig.solver.*;
 
 public interface SStrategy {
 

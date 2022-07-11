@@ -22,10 +22,10 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.*;
 
 /**
  * Combines multiple {@link ICombinationSupplier supplies} of {@link ClauseList}

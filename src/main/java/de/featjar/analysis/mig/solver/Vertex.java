@@ -22,10 +22,12 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 public class Vertex implements Comparable<Vertex> {
 

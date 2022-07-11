@@ -22,18 +22,14 @@
  */
 package de.featjar.analysis.sat4j;
 
+import org.sat4j.core.VecInt;
+
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
-import org.sat4j.core.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
 
 /**
  * Generates configurations for a given propositional formula such that one-wise

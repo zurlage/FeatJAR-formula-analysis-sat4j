@@ -23,7 +23,6 @@
 package de.featjar.analysis.mig.solver.visitor;
 
 import de.featjar.analysis.mig.solver.MIG;
-import de.featjar.analysis.mig.solver.*;
 
 abstract class ATraverser implements ITraverser {
 

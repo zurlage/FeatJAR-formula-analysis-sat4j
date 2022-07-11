@@ -22,11 +22,12 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 /**
  * Represents a presence condition as an expression.

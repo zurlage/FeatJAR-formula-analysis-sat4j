@@ -29,11 +29,6 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
 
 /**
  * Attempts to count the number of possible solutions of a given {@link CNF}.

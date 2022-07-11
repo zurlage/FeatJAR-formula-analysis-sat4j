@@ -22,10 +22,9 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.Random;
 
 import de.featjar.clauses.solutions.combinations.BinomialCalculator;
-import de.featjar.clauses.solutions.combinations.*;
 
 /**
  * Presence condition combination supplier that uses the combinatorial number

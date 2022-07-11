@@ -22,9 +22,20 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.nio.file.*;
-import java.util.*;
-import java.util.stream.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Stream;
+
+import org.sat4j.core.VecInt;
 
 import de.featjar.analysis.mig.io.MIGFormat;
 import de.featjar.analysis.mig.solver.MIG;
@@ -43,17 +54,6 @@ import de.featjar.util.data.Pair;
 import de.featjar.util.io.IO;
 import de.featjar.util.job.Executor;
 import de.featjar.util.logging.Logger;
-import org.sat4j.core.*;
-import de.featjar.analysis.mig.io.*;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.analysis.sat4j.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
-import de.featjar.util.io.*;
-import de.featjar.util.job.*;
-import de.featjar.util.logging.*;
 
 /**
  * Contains several intermediate results and functions for generating a t-wise
@@ -158,7 +158,7 @@ public class TWiseConfigurationUtil {
 		if (hasSolver()) {
 			coreDead = new LiteralList();
 		} else {
-			final int[] coreDeadArray = new int[cnf.getVariableMap().size()];
+			final int[] coreDeadArray = new int[cnf.getVariableMap().getVariableCount()];
 			int index = 0;
 			for (final Vertex vertex : mig.getVertices()) {
 				if (vertex.isCore()) {

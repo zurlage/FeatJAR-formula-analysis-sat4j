@@ -22,7 +22,11 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
@@ -31,11 +35,6 @@ import de.featjar.util.job.Executor;
 import de.featjar.util.job.InternalMonitor;
 import de.featjar.util.job.NullMonitor;
 import de.featjar.util.logging.Logger;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
-import de.featjar.util.logging.*;
 
 /**
  * Finds clauses responsible for core and dead features.

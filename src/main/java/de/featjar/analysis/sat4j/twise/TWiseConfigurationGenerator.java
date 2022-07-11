@@ -22,7 +22,12 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.sat4j.AbstractConfigurationGenerator;
@@ -35,14 +40,6 @@ import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
 import de.featjar.util.job.UpdateThread;
 import de.featjar.util.logging.Logger;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.analysis.sat4j.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
-import de.featjar.util.logging.*;
 
 /**
  * YASA sampling algorithm. Generates configurations for a given propositional
@@ -211,7 +208,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
 		// TODO Variation Point: Sorting Nodes
 		presenceConditionManager = new PresenceConditionManager(util, nodes);
 		// TODO Variation Point: Building Combinations
-		combiner = new TWiseCombiner(cnf.getVariableMap().size());
+		combiner = new TWiseCombiner(cnf.getVariableMap().getVariableCount());
 
 		phaseCount = 0;
 
@@ -285,9 +282,9 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
 		final List<List<PresenceCondition>> groupedPresenceConditions = presenceConditionManager
 			.getGroupedPresenceConditions();
 		if (groupedPresenceConditions.size() == 1) {
-			it = new SingleIterator(t, util.getCnf().getVariableMap().size(), groupedPresenceConditions.get(0));
+			it = new SingleIterator(t, util.getCnf().getVariableMap().getVariableCount(), groupedPresenceConditions.get(0));
 		} else {
-			it = new MergeIterator3(t, util.getCnf().getVariableMap().size(), groupedPresenceConditions);
+			it = new MergeIterator3(t, util.getCnf().getVariableMap().getVariableCount(), groupedPresenceConditions);
 		}
 		numberOfCombinations = it.size();
 

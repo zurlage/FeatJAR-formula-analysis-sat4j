@@ -22,7 +22,13 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.sat4j.core.VecInt;
+import org.sat4j.specs.ContradictionException;
+import org.sat4j.specs.IConstr;
 
 import de.featjar.analysis.solver.AbstractDynamicFormula;
 import de.featjar.analysis.solver.RuntimeContradictionException;
@@ -30,12 +36,6 @@ import de.featjar.clauses.FormulaToCNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.Formula;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import org.sat4j.core.*;
-import org.sat4j.specs.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.structure.*;
-import de.featjar.formula.structure.atomic.literal.*;
 
 /**
  * Modifiable formula for a {@link Sat4JSolver}.

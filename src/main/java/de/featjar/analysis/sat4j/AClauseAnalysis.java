@@ -22,10 +22,9 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.List;
 
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 /**
  * Base class for an analysis that works on a list of clauses. Clauses can be

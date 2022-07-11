@@ -22,21 +22,22 @@
  */
 package de.featjar.configuration.list;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.sat4j.twise.*;
+import de.featjar.analysis.sat4j.twise.CoverageStatistic;
+import de.featjar.analysis.sat4j.twise.PresenceConditionManager;
+import de.featjar.analysis.sat4j.twise.TWiseConfigurationGenerator;
+import de.featjar.analysis.sat4j.twise.TWiseConfigurationUtil;
+import de.featjar.analysis.sat4j.twise.TWiseConfigurationUtil.InvalidClausesList;
+import de.featjar.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.Clauses;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.clauses.solutions.metrics.SampleMetric;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.sat4j.twise.*;
-import de.featjar.analysis.sat4j.twise.TWiseConfigurationUtil.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.clauses.solutions.metrics.*;
 
 /**
  * Tests whether a set of configurations achieves t-wise feature coverage.
@@ -111,7 +112,7 @@ public class TWiseCoverageMetrics {
 			util.computeMIG(false, false);
 		}
 		if (expressions == null) {
-			expressions = TWiseConfigurationGenerator.convertLiterals(Clauses.getLiterals(cnf.getVariables()));
+			expressions = TWiseConfigurationGenerator.convertLiterals(Clauses.getLiterals(cnf.getVariableMap()));
 		}
 		presenceConditionManager = new PresenceConditionManager(util, expressions);
 	}

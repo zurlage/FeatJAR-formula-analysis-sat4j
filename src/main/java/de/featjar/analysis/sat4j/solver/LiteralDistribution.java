@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
+import java.util.Random;
 
 /**
  * Uses a sample of configurations to achieve a phase selection that corresponds

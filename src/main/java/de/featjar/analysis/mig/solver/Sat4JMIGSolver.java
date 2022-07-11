@@ -23,7 +23,6 @@
 package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.sat4j.solver.*;
 
 /**
  * Sat solver using Sat4J and MIGs.

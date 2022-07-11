@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.Random;
 
 import de.featjar.analysis.AbstractAnalysis;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
@@ -31,11 +31,6 @@ import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.CNFProvider;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.job.*;
 
 /**
  * Base class for analyses using a {@link Sat4JSolver}.

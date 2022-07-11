@@ -22,13 +22,17 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
-import java.util.Map.*;
-import java.util.stream.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 /**
  * Manages and manipulates a list of {@link PresenceCondition presence
@@ -43,7 +47,7 @@ public class PresenceConditionManager {
 
 	public PresenceConditionManager(TWiseConfigurationUtil util, List<List<ClauseList>> expressions) {
 		final LiteralList coreDeadFeature = util.getDeadCoreFeatures();
-		final int numberOfVariables = util.getCnf().getVariableMap().size();
+		final int numberOfVariables = util.getCnf().getVariableMap().getVariableCount();
 
 		final HashMap<PresenceCondition, PresenceCondition> presenceConditionSet = new HashMap<>();
 

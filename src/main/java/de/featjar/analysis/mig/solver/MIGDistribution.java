@@ -22,12 +22,10 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.util.*;
+import java.util.Arrays;
 
 import de.featjar.analysis.sat4j.solver.LiteralDistribution;
 import de.featjar.clauses.LiteralList;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
 
 /**
  * Uses a sample of configurations to achieve a phase selection that corresponds

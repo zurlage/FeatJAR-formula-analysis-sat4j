@@ -22,18 +22,17 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.analysis.sat4j.twise.TWiseStatisticGenerator.ConfigurationScore;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.combinations.CombinationIterator;
 import de.featjar.clauses.solutions.combinations.LexicographicIterator;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.sat4j.twise.TWiseStatisticGenerator.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.combinations.*;
 
 /**
  * Tests whether a set of configurations achieves t-wise feature coverage.
@@ -132,7 +131,7 @@ public class TWiseConfigurationTester {
 
 	private List<ClauseList> getUncoveredConditions(boolean cancelAfterFirst) {
 		final ArrayList<ClauseList> uncoveredConditions = new ArrayList<>();
-		final TWiseCombiner combiner = new TWiseCombiner(getUtil().getCnf().getVariableMap().size());
+		final TWiseCombiner combiner = new TWiseCombiner(getUtil().getCnf().getVariableMap().getVariableCount());
 		ClauseList combinedCondition = new ClauseList();
 		final PresenceCondition[] clauseListArray = new PresenceCondition[t];
 

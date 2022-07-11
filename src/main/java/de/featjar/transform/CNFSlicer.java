@@ -22,8 +22,16 @@
  */
 package de.featjar.transform;
 
-import java.util.*;
-import java.util.stream.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.sat4j.specs.TimeoutException;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
@@ -34,12 +42,6 @@ import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.util.job.InternalMonitor;
 import de.featjar.util.job.MonitorableFunction;
-import org.sat4j.specs.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.structure.atomic.literal.*;
-import de.featjar.util.job.*;
 
 /**
  * Removes features from a model while retaining dependencies of all other
@@ -92,7 +94,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 		this.orgCNF = orgCNF;
 		cnfCopy = new CNF(orgCNF.getVariableMap());
 
-		map = new DirtyFeature[orgCNF.getVariableMap().size() + 1];
+		map = new DirtyFeature[orgCNF.getVariableMap().getVariableCount() + 1];
 		numberOfDirtyFeatures = 0;
 		for (final int curFeature : dirtyVariables.getLiterals()) {
 			map[curFeature] = new DirtyFeature(curFeature);
@@ -144,11 +146,11 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 		addCleanClauses();
 
 		release();
-		final HashSet<String> names = new HashSet<>(orgCNF.getVariableMap().getNames());
+		final HashSet<String> names = new HashSet<>(orgCNF.getVariableMap().getVariableNames());
 		for (final int literal : dirtyVariables.getLiterals()) {
-			names.remove(orgCNF.getVariableMap().getName(Math.abs(literal)).get());
+			names.remove(orgCNF.getVariableMap().getVariableName(Math.abs(literal)).get());
 		}
-		final VariableMap slicedVariableMap = VariableMap.fromNames(names);
+		final VariableMap slicedVariableMap = new VariableMap(names);
 		final List<LiteralList> slicedClauseList = cleanClauseList.stream()
 			.map(clause -> clause.adapt(orgCNF.getVariableMap(), slicedVariableMap).get())
 			.collect(Collectors.toList());

@@ -22,19 +22,29 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
-import de.featjar.analysis.sat4j.solver.strategy.*;
+import org.sat4j.minisat.SolverFactory;
+import org.sat4j.minisat.core.IOrder;
+import org.sat4j.minisat.core.Solver;
+import org.sat4j.minisat.orders.NegativeLiteralSelectionStrategy;
+import org.sat4j.minisat.orders.PositiveLiteralSelectionStrategy;
+import org.sat4j.minisat.orders.RSATPhaseSelectionStrategy;
+import org.sat4j.minisat.orders.VarOrderHeap;
+
+import de.featjar.analysis.sat4j.solver.SStrategy.FixedStrategy;
+import de.featjar.analysis.sat4j.solver.SStrategy.InverseFixedStrategy;
+import de.featjar.analysis.sat4j.solver.SStrategy.MIGRandomStrategy;
+import de.featjar.analysis.sat4j.solver.SStrategy.UniformRandomStrategy;
+import de.featjar.analysis.sat4j.solver.strategy.FixedLiteralSelectionStrategy;
+import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap;
+import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap2;
+import de.featjar.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
+import de.featjar.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import org.sat4j.minisat.*;
-import org.sat4j.minisat.core.*;
-import org.sat4j.minisat.orders.*;
-import de.featjar.analysis.sat4j.solver.SStrategy.*;
-import de.featjar.analysis.sat4j.solver.strategy.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.structure.atomic.literal.*;
 
 /**
  * Sat solver using Sat4J.
@@ -49,14 +59,14 @@ public class Sat4JSolver extends AbstractSat4JSolver<Solver<?>> {
 	public Sat4JSolver(CNF cnf) {
 		super(cnf);
 		strategy = SStrategy.original();
-		order = new int[cnf.getVariableMap().size()];
+		order = new int[cnf.getVariableMap().getVariableCount()];
 		setOrderFix();
 	}
 
 	public Sat4JSolver(VariableMap variableMap) {
 		super(variableMap);
 		strategy = SStrategy.original();
-		order = new int[variableMap.size()];
+		order = new int[variableMap.getVariableCount()];
 		setOrderFix();
 	}
 

@@ -22,16 +22,15 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import de.featjar.analysis.mig.solver.Vertex.Status;
 import de.featjar.analysis.mig.solver.visitor.Traverser;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import de.featjar.analysis.mig.solver.Vertex.*;
-import de.featjar.analysis.mig.solver.visitor.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
 
 /**
  * Adjacency list implementation for a feature graph.
@@ -64,7 +63,7 @@ public class MIG {
 
 	public MIG(CNF cnf) {
 		this.cnf = cnf;
-		final int numVariables = cnf.getVariableMap().size();
+		final int numVariables = cnf.getVariableMap().getVariableCount();
 		adjList = new ArrayList<>(numVariables << 1);
 		for (int i = 0; i < numVariables; i++) {
 			addVertex();

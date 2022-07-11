@@ -22,19 +22,21 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.sat4j.core.VecInt;
+import org.sat4j.specs.ISolver;
+import org.sat4j.specs.IVecInt;
+import org.sat4j.specs.TimeoutException;
 
 import de.featjar.analysis.solver.SolutionSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.util.data.Pair;
-import org.sat4j.core.*;
-import org.sat4j.specs.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.structure.atomic.literal.*;
-import de.featjar.util.data.*;
 
 /**
  * Base class for solvers using Sat4J.
@@ -165,7 +167,7 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
 	 */
 	protected void initSolver(List<LiteralList> clauses) {
 //		final int size = satInstance.getVariableMap().getMaxIndex();
-		final int size = formula.getVariableMap().getMaxIndex();
+		final int size = formula.getVariableMap().getVariableCount();
 //		final List<LiteralList> clauses = satInstance.getClauses();
 		try {
 			if (!clauses.isEmpty()) {

@@ -22,15 +22,15 @@
  */
 package de.featjar.analysis.mig.solver.visitor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+
+import org.sat4j.core.VecInt;
+import org.sat4j.specs.IteratorInt;
 
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.clauses.LiteralList;
-import org.sat4j.core.*;
-import org.sat4j.specs.*;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.clauses.*;
 
 public class RecursiveTraverser extends ATraverser {
 

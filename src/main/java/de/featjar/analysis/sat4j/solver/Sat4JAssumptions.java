@@ -22,15 +22,16 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.sat4j.core.VecInt;
 
 import de.featjar.formula.structure.atomic.Assignment;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.util.data.Pair;
-import org.sat4j.core.*;
-import de.featjar.formula.structure.atomic.*;
-import de.featjar.formula.structure.atomic.literal.*;
-import de.featjar.util.data.*;
 
 /**
  * Assumptions for a {@link Sat4JSolver}.
@@ -48,7 +49,7 @@ public class Sat4JAssumptions implements Assignment {
 
 	public Sat4JAssumptions(VariableMap variables) {
 		this.variables = variables;
-		assumptions = new VecInt(variables.size());
+		assumptions = new VecInt(variables.getVariableCount());
 	}
 
 	public void clear() {
@@ -132,7 +133,7 @@ public class Sat4JAssumptions implements Assignment {
 	}
 
 	public void set(String name, Object assignment) {
-		final int index = variables.getIndex(name).orElse(-1);
+		final int index = variables.getVariableIndex(name).orElse(-1);
 		if (index > 0) {
 			set(index, assignment);
 		}
@@ -166,7 +167,7 @@ public class Sat4JAssumptions implements Assignment {
 	}
 
 	public Optional<Object> get(String name) {
-		final int index = variables.getIndex(name).orElse(-1);
+		final int index = variables.getVariableIndex(name).orElse(-1);
 		return index > 0 ? get(index) : Optional.empty();
 	}
 

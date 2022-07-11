@@ -22,9 +22,16 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.util.*;
-import java.util.stream.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import de.featjar.analysis.mig.solver.MIG.BuildStatus;
+import de.featjar.analysis.mig.solver.Vertex.Status;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
@@ -33,13 +40,6 @@ import de.featjar.clauses.Clauses;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.mig.solver.MIG.*;
-import de.featjar.analysis.mig.solver.Vertex.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.structure.atomic.literal.*;
-import de.featjar.util.job.*;
 
 public class IncrementalMIGBuilder extends MIGBuilder {
 
@@ -110,9 +110,9 @@ public class IncrementalMIGBuilder extends MIGBuilder {
 	}
 
 	public static double getChangeRatio(CNF cnf1, CNF cnf2) {
-		final Set<String> allVariables = new HashSet<>(cnf2.getVariableMap().getNames());
-		allVariables.addAll(cnf1.getVariableMap().getNames());
-		final VariableMap variables = VariableMap.fromNames(allVariables);
+		final Set<String> allVariables = new HashSet<>(cnf2.getVariableMap().getVariableNames());
+		allVariables.addAll(cnf1.getVariableMap().getVariableNames());
+		final VariableMap variables = new VariableMap(allVariables);
 
 		final HashSet<LiteralList> adaptedNewClauses = cnf1.getClauses().stream()
 			.map(c -> c.adapt(cnf1.getVariableMap(), variables).get()) //
@@ -139,9 +139,9 @@ public class IncrementalMIGBuilder extends MIGBuilder {
 		init(cnf);
 
 		final CNF oldCnf = oldMig.getCnf();
-		final Set<String> allVariables = new HashSet<>(oldCnf.getVariableMap().getNames());
-		allVariables.addAll(cnf.getVariableMap().getNames());
-		variables = VariableMap.fromNames(allVariables);
+		final Set<String> allVariables = new HashSet<>(oldCnf.getVariableMap().getVariableNames());
+		allVariables.addAll(cnf.getVariableMap().getVariableNames());
+		variables = new VariableMap(allVariables);
 
 		final HashSet<LiteralList> adaptedNewClauses = cnf.getClauses().stream()
 			.map(c -> c.adapt(cnf.getVariableMap(), variables).get()) //

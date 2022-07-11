@@ -22,10 +22,9 @@
  */
 package de.featjar.transform;
 
-import java.util.*;
+import java.util.HashSet;
 
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 /**
  * Used by {@link CNFSlicer}.

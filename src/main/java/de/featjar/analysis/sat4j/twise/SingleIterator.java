@@ -22,10 +22,9 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.List;
 
 import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.*;
 
 /**
  * Uses a {@link RandomPartitionSupplier} to construct a combined presence

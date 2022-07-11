@@ -22,12 +22,11 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Pair;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
 
 /**
  * Calculates statistics regarding t-wise feature coverage of a set of

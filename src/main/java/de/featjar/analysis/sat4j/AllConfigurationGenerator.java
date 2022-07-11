@@ -26,10 +26,6 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
 
 /**
  * Generates all configurations for a given propositional formula.

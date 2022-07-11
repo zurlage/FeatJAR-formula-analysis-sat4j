@@ -22,11 +22,12 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import de.featjar.clauses.solutions.combinations.CombinationIterator;
 import de.featjar.clauses.solutions.combinations.IteratorFactory;
-import de.featjar.clauses.solutions.combinations.*;
 
 /**
  * Combines multiple {@link CombinationIterator iterators} and returns results

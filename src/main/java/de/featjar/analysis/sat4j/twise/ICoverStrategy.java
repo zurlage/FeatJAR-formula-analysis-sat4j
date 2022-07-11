@@ -23,7 +23,6 @@
 package de.featjar.analysis.sat4j.twise;
 
 import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.*;
 
 /**
  * A strategy for covering a given {@link ClauseList expressions} within a list

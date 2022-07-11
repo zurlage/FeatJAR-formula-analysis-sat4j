@@ -22,20 +22,15 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import de.featjar.analysis.Analysis;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.formula.ModelRepresentation;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.formula.*;
-import de.featjar.util.job.*;
 
 /**
  * Interface for configuration generators. Can be used as a {@link Supplier} or

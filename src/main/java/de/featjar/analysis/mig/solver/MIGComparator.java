@@ -22,10 +22,9 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.util.*;
+import java.util.Comparator;
 
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 /**
  * Compares the dependencies of the {@link LiteralList literals} using a

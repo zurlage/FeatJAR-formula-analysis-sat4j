@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.function.*;
+import java.util.function.Supplier;
 
 /**
  * An abstract supplier for combinations of elements.

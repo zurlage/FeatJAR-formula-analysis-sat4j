@@ -22,9 +22,11 @@
  */
 package de.featjar.analysis.sat4j.solver.strategy;
 
-import static org.sat4j.core.LiteralsUtils.*;
+import static org.sat4j.core.LiteralsUtils.negLit;
+import static org.sat4j.core.LiteralsUtils.posLit;
+import static org.sat4j.core.LiteralsUtils.var;
 
-import org.sat4j.minisat.core.*;
+import org.sat4j.minisat.core.IPhaseSelectionStrategy;
 
 public class FixedLiteralSelectionStrategy implements IPhaseSelectionStrategy {
 

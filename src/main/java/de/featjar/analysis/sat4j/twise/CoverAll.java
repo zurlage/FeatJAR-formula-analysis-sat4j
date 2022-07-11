@@ -22,13 +22,12 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Pair;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
 
 /**
  * Covers a given {@link ClauseList expressions} within a list of

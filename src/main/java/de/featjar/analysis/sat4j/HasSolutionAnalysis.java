@@ -27,10 +27,6 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
 
 /**
  * Determines whether a given {@link CNF} is satisfiable and returns the found

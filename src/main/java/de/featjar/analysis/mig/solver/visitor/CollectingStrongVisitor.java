@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.mig.solver.visitor;
 
-import org.sat4j.core.*;
+import org.sat4j.core.VecInt;
 
 public class CollectingStrongVisitor implements Visitor<VecInt[]> {
 

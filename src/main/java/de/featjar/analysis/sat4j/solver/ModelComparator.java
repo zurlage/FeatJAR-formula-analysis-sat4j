@@ -22,11 +22,11 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
+import org.sat4j.specs.TimeoutException;
+
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import org.sat4j.specs.*;
-import de.featjar.clauses.*;
 
 public abstract class ModelComparator {
 

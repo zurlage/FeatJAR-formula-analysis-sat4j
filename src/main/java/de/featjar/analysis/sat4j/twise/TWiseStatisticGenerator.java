@@ -22,13 +22,12 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Pair;
-import de.featjar.clauses.*;
-import de.featjar.util.data.*;
 
 /**
  * Calculates statistics regarding t-wise feature coverage of a set of
@@ -65,7 +64,7 @@ public class TWiseStatisticGenerator {
 		ConfigurationScore configurationScoreType, boolean identifyValidCombinations) {
 		final int sampleListSize = samples.size();
 
-		final TWiseCombiner combiner = new TWiseCombiner(util.getCnf().getVariableMap().size());
+		final TWiseCombiner combiner = new TWiseCombiner(util.getCnf().getVariableMap().getVariableCount());
 		final ClauseList combinedCondition = new ClauseList();
 		final PresenceCondition[] clauseListArray = new PresenceCondition[t];
 		final ArrayList<ArrayList<List<Pair<Integer, LiteralList>>>> configurationSubLists = new ArrayList<>(

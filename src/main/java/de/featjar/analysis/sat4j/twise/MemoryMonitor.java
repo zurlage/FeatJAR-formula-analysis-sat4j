@@ -23,7 +23,6 @@
 package de.featjar.analysis.sat4j.twise;
 
 import de.featjar.util.job.UpdateFunction;
-import de.featjar.util.job.*;
 
 public final class MemoryMonitor implements UpdateFunction {
 

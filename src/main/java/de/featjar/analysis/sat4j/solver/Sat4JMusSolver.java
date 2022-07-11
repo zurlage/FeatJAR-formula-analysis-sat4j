@@ -22,19 +22,21 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import java.util.*;
-import java.util.stream.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import org.sat4j.minisat.SolverFactory;
+import org.sat4j.specs.IConstr;
+import org.sat4j.specs.ISolver;
+import org.sat4j.specs.TimeoutException;
+import org.sat4j.tools.xplain.Xplain;
 
 import de.featjar.analysis.solver.MusSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.CNFProvider;
 import de.featjar.formula.ModelRepresentation;
-import org.sat4j.minisat.*;
-import org.sat4j.specs.*;
-import org.sat4j.tools.xplain.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.*;
 
 /**
  * Implements a {@link MusSolver} using Sat4J.

@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.sat4j.solver.strategy;
 
-import org.sat4j.specs.*;
+import org.sat4j.specs.ISolver;
 
 /**
  * Modified variable order for {@link ISolver}.<br>

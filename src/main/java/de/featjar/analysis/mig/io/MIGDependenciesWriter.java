@@ -22,15 +22,12 @@
  */
 package de.featjar.analysis.mig.io;
 
-import java.util.*;
+import java.util.List;
 
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.formula.structure.atomic.literal.*;
 
 /**
  * Computes a textual representation of the feature relationships in a modal
@@ -52,7 +49,7 @@ public class MIGDependenciesWriter {
 			if (!vertex.isCore() && !vertex.isDead()) {
 				final int var = vertex.getVar();
 				if (var > 0) {
-					final String name = variables.getName(var).get();
+					final String name = variables.getVariableName(var).get();
 					for (final Vertex otherVertex : vertex.getStrongEdges()) {
 						if (!otherVertex.isCore() && !otherVertex.isDead()) {
 							sb.append(name);
@@ -61,7 +58,7 @@ public class MIGDependenciesWriter {
 							} else {
 								sb.append(" NEVER ");
 							}
-							sb.append(variables.getName(otherVertex.getVar()));
+							sb.append(variables.getVariableName(otherVertex.getVar()));
 							sb.append("\n");
 						}
 					}
@@ -70,7 +67,7 @@ public class MIGDependenciesWriter {
 							if ((otherVar > 0) && (var != otherVar)) {
 								sb.append(name);
 								sb.append(" MAYBE ");
-								sb.append(variables.getName(otherVar));
+								sb.append(variables.getVariableName(otherVar));
 								sb.append("\n");
 							}
 						}

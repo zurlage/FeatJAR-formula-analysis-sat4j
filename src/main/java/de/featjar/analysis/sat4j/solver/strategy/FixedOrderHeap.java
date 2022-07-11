@@ -22,9 +22,10 @@
  */
 package de.featjar.analysis.sat4j.solver.strategy;
 
-import org.sat4j.minisat.core.*;
-import org.sat4j.minisat.orders.*;
-import org.sat4j.specs.*;
+import org.sat4j.minisat.core.Heap;
+import org.sat4j.minisat.core.IPhaseSelectionStrategy;
+import org.sat4j.minisat.orders.VarOrderHeap;
+import org.sat4j.specs.ISolver;
 
 /**
  * Modified variable order for {@link ISolver}.<br>

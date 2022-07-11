@@ -22,11 +22,12 @@
  */
 package de.featjar.analysis.sat4j.solver.strategy;
 
-import static org.sat4j.core.LiteralsUtils.*;
+import static org.sat4j.core.LiteralsUtils.negLit;
+import static org.sat4j.core.LiteralsUtils.posLit;
 
-import java.util.*;
+import java.util.Random;
 
-import org.sat4j.minisat.core.*;
+import org.sat4j.minisat.core.IPhaseSelectionStrategy;
 
 /**
  * Random phase selection.

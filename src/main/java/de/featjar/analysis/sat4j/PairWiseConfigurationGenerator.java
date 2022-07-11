@@ -22,7 +22,8 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.MIGBuilder;
@@ -36,13 +37,6 @@ import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.Executor;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
 
 /**
  * IncLing sampling algorithm. Generates configurations for a given
@@ -392,7 +386,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
 
 	@Override
 	protected void init(InternalMonitor monitor) {
-		numVariables = solver.getCnf().getVariableMap().size();
+		numVariables = solver.getCnf().getVariableMap().getVariableCount();
 		solver.rememberSolutionHistory(Math.min(numVariables, AbstractSat4JSolver.MAX_SOLUTION_BUFFER));
 
 		final MIGBuilder migBuilder = new RegularMIGBuilder();

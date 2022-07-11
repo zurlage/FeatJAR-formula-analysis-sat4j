@@ -23,7 +23,6 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.*;
 
 /**
  * Base class for an analysis that works on a list of variables.

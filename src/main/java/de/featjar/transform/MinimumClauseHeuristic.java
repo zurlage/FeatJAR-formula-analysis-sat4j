@@ -22,7 +22,7 @@
  */
 package de.featjar.transform;
 
-import java.util.*;
+import java.util.Iterator;
 
 /**
  * Returns features dependent on the current clauses in the formula.

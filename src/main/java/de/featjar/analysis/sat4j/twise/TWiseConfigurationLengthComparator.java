@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.*;
+import java.util.Comparator;
 
 /**
  * Compares two solutions regarding their number of contained literals.

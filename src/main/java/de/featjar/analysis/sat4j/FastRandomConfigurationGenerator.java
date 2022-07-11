@@ -26,9 +26,6 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
 
 /**
  * Generates random configurations for a given propositional formula.

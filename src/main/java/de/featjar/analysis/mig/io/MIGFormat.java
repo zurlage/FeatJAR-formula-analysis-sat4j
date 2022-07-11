@@ -24,8 +24,6 @@ package de.featjar.analysis.mig.io;
 
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.util.io.format.Format;
-import de.featjar.analysis.mig.solver.*;
-import de.featjar.util.io.format.*;
 
 /**
  * Reads / Writes a MIG.

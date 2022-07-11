@@ -25,9 +25,6 @@ package de.featjar.analysis.mig.solver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.CNF;
 import de.featjar.util.job.InternalMonitor;
-import de.featjar.analysis.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.util.job.*;
 
 /**
  * Adjacency matrix implementation for a feature graph.

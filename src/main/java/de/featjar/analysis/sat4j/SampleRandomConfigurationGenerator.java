@@ -22,7 +22,7 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.*;
+import java.util.List;
 
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.SampleDistribution;
@@ -34,12 +34,6 @@ import de.featjar.util.data.Identifier;
 import de.featjar.util.job.Executor;
 import de.featjar.util.job.InternalMonitor;
 import de.featjar.util.logging.Logger;
-import de.featjar.analysis.sat4j.solver.*;
-import de.featjar.clauses.*;
-import de.featjar.clauses.solutions.*;
-import de.featjar.util.data.*;
-import de.featjar.util.job.*;
-import de.featjar.util.logging.*;
 
 /**
  * Finds certain solutions of propositional formulas.
