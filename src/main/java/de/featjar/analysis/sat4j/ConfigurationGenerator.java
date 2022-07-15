@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import de.featjar.analysis.Analysis;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.formula.ModelRepresentation;
+import de.featjar.util.data.Cache;
 import de.featjar.util.job.InternalMonitor;
 
 /**
@@ -41,7 +41,7 @@ import de.featjar.util.job.InternalMonitor;
 public interface ConfigurationGenerator extends Analysis<SolutionList>, Supplier<LiteralList>,
 	Spliterator<LiteralList> {
 
-	void init(ModelRepresentation rep, InternalMonitor monitor);
+	void init(Cache rep, InternalMonitor monitor);
 
 	int getLimit();
 

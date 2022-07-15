@@ -31,7 +31,7 @@ import java.util.stream.StreamSupport;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.formula.ModelRepresentation;
+import de.featjar.util.data.Cache;
 import de.featjar.util.job.InternalMonitor;
 
 /**
@@ -93,8 +93,8 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
 	}
 
 	@Override
-	public void init(ModelRepresentation rep, InternalMonitor monitor) {
-		solver = createSolver(rep.get(solverInputProvider));
+	public void init(Cache c, InternalMonitor monitor) {
+		solver = createSolver(c.get(solverInputProvider).get());
 		monitor.checkCancel();
 		prepareSolver(solver);
 		init(monitor);

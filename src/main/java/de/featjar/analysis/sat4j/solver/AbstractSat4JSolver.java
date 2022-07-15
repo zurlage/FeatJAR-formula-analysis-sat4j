@@ -166,7 +166,6 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
 	 * Add clauses to the solver. Initializes the order instance.
 	 */
 	protected void initSolver(List<LiteralList> clauses) {
-//		final int size = satInstance.getVariableMap().getMaxIndex();
 		final int size = formula.getVariableMap().getVariableCount();
 //		final List<LiteralList> clauses = satInstance.getClauses();
 		try {
