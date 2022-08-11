@@ -1,0 +1,9 @@
+plugins {
+    id 'de.featjar.java-library'
+}
+
+dependencies {
+    implementation 'de.featjar:util'
+    implementation 'de.featjar:formula'
+    api 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.5'
+}
