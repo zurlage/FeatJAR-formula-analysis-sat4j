@@ -20,104 +20,104 @@
  */
 package de.featjar.analysis.mig.solver;
 
+import de.featjar.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import de.featjar.clauses.LiteralList;
-
 public class Vertex implements Comparable<Vertex> {
 
-	public enum Status {
-		Normal, Core, Dead
-	}
+    public enum Status {
+        Normal,
+        Core,
+        Dead
+    }
 
-	private final int literal;
+    private final int literal;
 
-	private Status status = Status.Normal;
+    private Status status = Status.Normal;
 
-	ArrayList<LiteralList> complexClauses = new ArrayList<>();
-	ArrayList<Vertex> stronglyConnectedVertices = new ArrayList<>();
+    ArrayList<LiteralList> complexClauses = new ArrayList<>();
+    ArrayList<Vertex> stronglyConnectedVertices = new ArrayList<>();
 
-	public Vertex(int literal) {
-		this.literal = literal;
-	}
+    public Vertex(int literal) {
+        this.literal = literal;
+    }
 
-	public int getVar() {
-		return literal;
-	}
+    public int getVar() {
+        return literal;
+    }
 
-	public List<LiteralList> getComplexClauses() {
-		return complexClauses;
-	}
+    public List<LiteralList> getComplexClauses() {
+        return complexClauses;
+    }
 
-	public List<Vertex> getStrongEdges() {
-		return stronglyConnectedVertices;
-	}
+    public List<Vertex> getStrongEdges() {
+        return stronglyConnectedVertices;
+    }
 
-	public void addStronglyConnected(Vertex vertex) {
-		stronglyConnectedVertices.add(vertex);
-	}
+    public void addStronglyConnected(Vertex vertex) {
+        stronglyConnectedVertices.add(vertex);
+    }
 
-	public void addWeaklyConnected(LiteralList clause) {
-		complexClauses.add(clause);
-	}
+    public void addWeaklyConnected(LiteralList clause) {
+        complexClauses.add(clause);
+    }
 
-	public Status getStatus() {
-		return status;
-	}
+    public Status getStatus() {
+        return status;
+    }
 
-	public boolean isCore() {
-		return status == Status.Core;
-	}
+    public boolean isCore() {
+        return status == Status.Core;
+    }
 
-	public boolean isDead() {
-		return status == Status.Dead;
-	}
+    public boolean isDead() {
+        return status == Status.Dead;
+    }
 
-	public boolean isNormal() {
-		return status == Status.Normal;
-	}
+    public boolean isNormal() {
+        return status == Status.Normal;
+    }
 
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 
-	@Override
-	public int hashCode() {
-		return literal;
-	}
+    @Override
+    public int hashCode() {
+        return literal;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if ((obj == null) || (getClass() != obj.getClass())) {
-			return false;
-		}
-		return literal == ((Vertex) obj).literal;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        return literal == ((Vertex) obj).literal;
+    }
 
-	@Override
-	public int compareTo(Vertex other) {
-		return literal - other.literal;
-	}
+    @Override
+    public int compareTo(Vertex other) {
+        return literal - other.literal;
+    }
 
-	@Override
-	public String toString() {
-		return String.valueOf(literal);
-	}
+    @Override
+    public String toString() {
+        return String.valueOf(literal);
+    }
 
-	public void finish() {
-		complexClauses = new ArrayList<>(new HashSet<>(complexClauses));
-		stronglyConnectedVertices = new ArrayList<>(new HashSet<>(stronglyConnectedVertices));
-		stronglyConnectedVertices.remove(this);
-		Collections.sort(complexClauses);
-		Collections.sort(stronglyConnectedVertices);
-//		complexClauses.trimToSize();
-//		stronglyConnectedVertices.trimToSize();
-	}
-
+    public void finish() {
+        complexClauses = new ArrayList<>(new HashSet<>(complexClauses));
+        stronglyConnectedVertices = new ArrayList<>(new HashSet<>(stronglyConnectedVertices));
+        stronglyConnectedVertices.remove(this);
+        Collections.sort(complexClauses);
+        Collections.sort(stronglyConnectedVertices);
+        //		complexClauses.trimToSize();
+        //		stronglyConnectedVertices.trimToSize();
+    }
 }

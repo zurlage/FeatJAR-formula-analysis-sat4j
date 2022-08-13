@@ -20,10 +20,6 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
@@ -31,6 +27,9 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Finds contradicting clauses with respect to a given {@link CNF}. This
@@ -49,72 +48,71 @@ import de.featjar.util.job.InternalMonitor;
  */
 public class ContradictionAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
-	public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
+    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<List<LiteralList>> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<List<LiteralList>> getIdentifier() {
+        return identifier;
+    }
 
-	public ContradictionAnalysis() {
-		super();
-	}
+    public ContradictionAnalysis() {
+        super();
+    }
 
-	public ContradictionAnalysis(List<LiteralList> clauseList) {
-		super();
-		this.clauseList = clauseList;
-	}
+    public ContradictionAnalysis(List<LiteralList> clauseList) {
+        super();
+        this.clauseList = clauseList;
+    }
 
-	@Override
-	public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
-		if (clauseList == null) {
-			clauseList = solver.getCnf().getClauses();
-		}
-		if (clauseGroupSize == null) {
-			clauseGroupSize = new int[clauseList.size()];
-			Arrays.fill(clauseGroupSize, 1);
-		}
-		monitor.setTotalWork(clauseList.size() + 1);
+    @Override
+    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+        if (clauseList == null) {
+            clauseList = solver.getCnf().getClauses();
+        }
+        if (clauseGroupSize == null) {
+            clauseGroupSize = new int[clauseList.size()];
+            Arrays.fill(clauseGroupSize, 1);
+        }
+        monitor.setTotalWork(clauseList.size() + 1);
 
-		final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
-		for (int i = 0; i < clauseList.size(); i++) {
-			resultList.add(null);
-		}
-		monitor.step();
+        final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+        for (int i = 0; i < clauseList.size(); i++) {
+            resultList.add(null);
+        }
+        monitor.step();
 
-		int endIndex = 0;
-		for (int i = 0; i < clauseGroupSize.length; i++) {
-			final int startIndex = endIndex;
-			endIndex += clauseGroupSize[i];
-			final List<LiteralList> subList = clauseList.subList(startIndex, endIndex);
+        int endIndex = 0;
+        for (int i = 0; i < clauseGroupSize.length; i++) {
+            final int startIndex = endIndex;
+            endIndex += clauseGroupSize[i];
+            final List<LiteralList> subList = clauseList.subList(startIndex, endIndex);
 
-			try {
-				solver.getFormula().push(subList);
-			} catch (final RuntimeContradictionException e) {
-				resultList.set(i, clauseList.get(startIndex));
-				monitor.step();
-				continue;
-			}
+            try {
+                solver.getFormula().push(subList);
+            } catch (final RuntimeContradictionException e) {
+                resultList.set(i, clauseList.get(startIndex));
+                monitor.step();
+                continue;
+            }
 
-			final SatSolver.SatResult hasSolution = solver.hasSolution();
-			switch (hasSolution) {
-			case FALSE:
-				resultList.set(i, clauseList.get(startIndex));
-				solver.getFormula().pop(subList.size());
-				break;
-			case TIMEOUT:
-				reportTimeout();
-				break;
-			case TRUE:
-				break;
-			default:
-				throw new AssertionError(hasSolution);
-			}
+            final SatSolver.SatResult hasSolution = solver.hasSolution();
+            switch (hasSolution) {
+                case FALSE:
+                    resultList.set(i, clauseList.get(startIndex));
+                    solver.getFormula().pop(subList.size());
+                    break;
+                case TIMEOUT:
+                    reportTimeout();
+                    break;
+                case TRUE:
+                    break;
+                default:
+                    throw new AssertionError(hasSolution);
+            }
 
-			monitor.step();
-		}
+            monitor.step();
+        }
 
-		return resultList;
-	}
-
+        return resultList;
+    }
 }

@@ -20,10 +20,6 @@
  */
 package de.featjar.configuration.list;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.analysis.sat4j.twise.PresenceConditionManager;
@@ -36,6 +32,9 @@ import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.Clauses;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.clauses.solutions.metrics.SampleMetric;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests whether a set of configurations achieves t-wise feature coverage.
@@ -44,104 +43,103 @@ import de.featjar.clauses.solutions.metrics.SampleMetric;
  */
 public class TWiseCoverageMetrics {
 
-	public final class TWiseCoverageMetric implements SampleMetric {
-		private final int t;
-		private boolean firstUse = true;
+    public final class TWiseCoverageMetric implements SampleMetric {
+        private final int t;
+        private boolean firstUse = true;
 
-		public TWiseCoverageMetric(int t) {
-			this.t = t;
-		}
+        public TWiseCoverageMetric(int t) {
+            this.t = t;
+        }
 
-		@Override
-		public double get(SolutionList sample) {
-			final TWiseStatisticGenerator tWiseStatisticGenerator = new TWiseStatisticGenerator(util);
-			if (firstUse) {
-				firstUse = false;
-			} else {
-				util.setInvalidClausesList(InvalidClausesList.Use);
-			}
+        @Override
+        public double get(SolutionList sample) {
+            final TWiseStatisticGenerator tWiseStatisticGenerator = new TWiseStatisticGenerator(util);
+            if (firstUse) {
+                firstUse = false;
+            } else {
+                util.setInvalidClausesList(InvalidClausesList.Use);
+            }
 
-			final CoverageStatistic statistic = tWiseStatisticGenerator
-				.getCoverage(Arrays.asList(sample.getSolutions()), //
-					presenceConditionManager.getGroupedPresenceConditions(), //
-					t, //
-					TWiseStatisticGenerator.ConfigurationScore.NONE, //
-					true).get(0);
+            final CoverageStatistic statistic = tWiseStatisticGenerator
+                    .getCoverage(
+                            Arrays.asList(sample.getSolutions()), //
+                            presenceConditionManager.getGroupedPresenceConditions(), //
+                            t, //
+                            TWiseStatisticGenerator.ConfigurationScore.NONE, //
+                            true)
+                    .get(0);
 
-			final long numberOfValidConditions = statistic.getNumberOfValidConditions();
-			final long numberOfCoveredConditions = statistic.getNumberOfCoveredConditions();
-			if (numberOfValidConditions == 0) {
-				return 1;
-			} else {
-				return (double) numberOfCoveredConditions / numberOfValidConditions;
-			}
-		}
+            final long numberOfValidConditions = statistic.getNumberOfValidConditions();
+            final long numberOfCoveredConditions = statistic.getNumberOfCoveredConditions();
+            if (numberOfValidConditions == 0) {
+                return 1;
+            } else {
+                return (double) numberOfCoveredConditions / numberOfValidConditions;
+            }
+        }
 
-		@Override
-		public String getName() {
-			return "T" + t + "_" + name + "_" + "Coverage";
-		}
+        @Override
+        public String getName() {
+            return "T" + t + "_" + name + "_" + "Coverage";
+        }
+    }
 
-	}
+    private TWiseConfigurationUtil util;
+    private PresenceConditionManager presenceConditionManager;
+    private String name;
+    private CNF cnf;
+    private List<List<ClauseList>> expressions;
 
-	private TWiseConfigurationUtil util;
-	private PresenceConditionManager presenceConditionManager;
-	private String name;
-	private CNF cnf;
-	private List<List<ClauseList>> expressions;
+    public void setCNF(CNF cnf) {
+        this.cnf = cnf;
+    }
 
-	public void setCNF(CNF cnf) {
-		this.cnf = cnf;
-	}
+    public void setExpressions(List<List<ClauseList>> expressions) {
+        this.expressions = expressions;
+    }
 
-	public void setExpressions(List<List<ClauseList>> expressions) {
-		this.expressions = expressions;
-	}
+    public void init() {
+        if (!cnf.getClauses().isEmpty()) {
+            util = new TWiseConfigurationUtil(cnf, new Sat4JSolver(cnf));
+        } else {
+            util = new TWiseConfigurationUtil(cnf, null);
+        }
+        util.setInvalidClausesList(InvalidClausesList.Create);
+        util.computeRandomSample(1000);
+        if (!cnf.getClauses().isEmpty()) {
+            util.computeMIG(false, false);
+        }
+        if (expressions == null) {
+            expressions = TWiseConfigurationGenerator.convertLiterals(Clauses.getLiterals(cnf.getVariableMap()));
+        }
+        presenceConditionManager = new PresenceConditionManager(util, expressions);
+    }
 
-	public void init() {
-		if (!cnf.getClauses().isEmpty()) {
-			util = new TWiseConfigurationUtil(cnf, new Sat4JSolver(cnf));
-		} else {
-			util = new TWiseConfigurationUtil(cnf, null);
-		}
-		util.setInvalidClausesList(InvalidClausesList.Create);
-		util.computeRandomSample(1000);
-		if (!cnf.getClauses().isEmpty()) {
-			util.computeMIG(false, false);
-		}
-		if (expressions == null) {
-			expressions = TWiseConfigurationGenerator.convertLiterals(Clauses.getLiterals(cnf.getVariableMap()));
-		}
-		presenceConditionManager = new PresenceConditionManager(util, expressions);
-	}
+    public TWiseCoverageMetric getTWiseCoverageMetric(int t) {
+        return new TWiseCoverageMetric(t);
+    }
 
-	public TWiseCoverageMetric getTWiseCoverageMetric(int t) {
-		return new TWiseCoverageMetric(t);
-	}
+    public static List<TWiseCoverageMetric> getTWiseCoverageMetrics(
+            CNF cnf, List<List<ClauseList>> expressions, String name, int... tValues) {
+        final TWiseCoverageMetrics metrics = new TWiseCoverageMetrics();
+        metrics.setName(name);
+        metrics.setExpressions(expressions);
+        metrics.setCNF(cnf);
+        if (cnf != null) {
+            metrics.init();
+        }
+        final List<TWiseCoverageMetric> coverageMetrics = new ArrayList<>(tValues.length);
+        for (final int t : tValues) {
+            coverageMetrics.add(metrics.getTWiseCoverageMetric(t));
+        }
+        return coverageMetrics;
+    }
 
-	public static List<TWiseCoverageMetric> getTWiseCoverageMetrics(CNF cnf, List<List<ClauseList>> expressions,
-		String name,
-		int... tValues) {
-		final TWiseCoverageMetrics metrics = new TWiseCoverageMetrics();
-		metrics.setName(name);
-		metrics.setExpressions(expressions);
-		metrics.setCNF(cnf);
-		if (cnf != null) {
-			metrics.init();
-		}
-		final List<TWiseCoverageMetric> coverageMetrics = new ArrayList<>(tValues.length);
-		for (final int t : tValues) {
-			coverageMetrics.add(metrics.getTWiseCoverageMetric(t));
-		}
-		return coverageMetrics;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
+    public void setName(String name) {
+        this.name = name;
+    }
 }

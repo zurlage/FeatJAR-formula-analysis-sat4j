@@ -20,11 +20,10 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.Random;
-
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.job.InternalMonitor;
+import java.util.Random;
 
 /**
  * Finds random valid solutions of propositional formulas.
@@ -33,46 +32,44 @@ import de.featjar.util.job.InternalMonitor;
  */
 public abstract class RandomConfigurationGenerator extends AbstractConfigurationGenerator {
 
-	protected boolean satisfiable = true;
+    protected boolean satisfiable = true;
 
-	public RandomConfigurationGenerator() {
-		super();
-		setRandom(new Random());
-	}
+    public RandomConfigurationGenerator() {
+        super();
+        setRandom(new Random());
+    }
 
-	@Override
-	protected void init(InternalMonitor monitor) {
-		super.init(monitor);
-		satisfiable = true;
-	}
+    @Override
+    protected void init(InternalMonitor monitor) {
+        super.init(monitor);
+        satisfiable = true;
+    }
 
-	@Override
-	public LiteralList get() {
-		if (!satisfiable) {
-			return null;
-		}
-		reset();
-		solver.shuffleOrder(random);
-		final LiteralList solution = solver.findSolution();
-		if (solution == null) {
-			satisfiable = false;
-			return null;
-		}
-		if (!allowDuplicates) {
-			try {
-				forbidSolution(solution.negate());
-			} catch (final RuntimeContradictionException e) {
-				satisfiable = false;
-			}
-		}
-		return solution;
-	}
+    @Override
+    public LiteralList get() {
+        if (!satisfiable) {
+            return null;
+        }
+        reset();
+        solver.shuffleOrder(random);
+        final LiteralList solution = solver.findSolution();
+        if (solution == null) {
+            satisfiable = false;
+            return null;
+        }
+        if (!allowDuplicates) {
+            try {
+                forbidSolution(solution.negate());
+            } catch (final RuntimeContradictionException e) {
+                satisfiable = false;
+            }
+        }
+        return solution;
+    }
 
-	protected void forbidSolution(final LiteralList negate) {
-		solver.getFormula().push(negate);
-	}
+    protected void forbidSolution(final LiteralList negate) {
+        solver.getFormula().push(negate);
+    }
 
-	protected void reset() {
-	}
-
+    protected void reset() {}
 }

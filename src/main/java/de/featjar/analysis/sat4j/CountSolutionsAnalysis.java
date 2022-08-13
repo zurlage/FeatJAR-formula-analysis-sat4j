@@ -35,29 +35,28 @@ import de.featjar.util.job.InternalMonitor;
  */
 public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
 
-	public static final Identifier<Long> identifier = new Identifier<>();
+    public static final Identifier<Long> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<Long> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<Long> getIdentifier() {
+        return identifier;
+    }
 
-	@Override
-	public Long analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
-		solver.setGlobalTimeout(true);
-		long solutionCount = 0;
-		SatSolver.SatResult hasSolution = solver.hasSolution();
-		while (hasSolution == SatSolver.SatResult.TRUE) {
-			solutionCount++;
-			final int[] solution = solver.getInternalSolution();
-			try {
-				solver.getFormula().push(new LiteralList(solution, LiteralList.Order.INDEX, false).negate());
-			} catch (final RuntimeContradictionException e) {
-				break;
-			}
-			hasSolution = solver.hasSolution();
-		}
-		return hasSolution == SatSolver.SatResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
-	}
-
+    @Override
+    public Long analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+        solver.setGlobalTimeout(true);
+        long solutionCount = 0;
+        SatSolver.SatResult hasSolution = solver.hasSolution();
+        while (hasSolution == SatSolver.SatResult.TRUE) {
+            solutionCount++;
+            final int[] solution = solver.getInternalSolution();
+            try {
+                solver.getFormula().push(new LiteralList(solution, LiteralList.Order.INDEX, false).negate());
+            } catch (final RuntimeContradictionException e) {
+                break;
+            }
+            hasSolution = solver.hasSolution();
+        }
+        return hasSolution == SatSolver.SatResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
+    }
 }

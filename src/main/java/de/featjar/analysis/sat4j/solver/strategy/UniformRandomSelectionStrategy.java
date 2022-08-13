@@ -23,10 +23,9 @@ package de.featjar.analysis.sat4j.solver.strategy;
 import static org.sat4j.core.LiteralsUtils.negLit;
 import static org.sat4j.core.LiteralsUtils.posLit;
 
+import de.featjar.analysis.sat4j.solver.LiteralDistribution;
 import org.sat4j.core.LiteralsUtils;
 import org.sat4j.minisat.core.IPhaseSelectionStrategy;
-
-import de.featjar.analysis.sat4j.solver.LiteralDistribution;
 
 /**
  * Uses a sample of configurations to achieve a phase selection that corresponds
@@ -36,47 +35,42 @@ import de.featjar.analysis.sat4j.solver.LiteralDistribution;
  */
 public class UniformRandomSelectionStrategy implements IPhaseSelectionStrategy {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private final LiteralDistribution dist;
+    private final LiteralDistribution dist;
 
-	public UniformRandomSelectionStrategy(LiteralDistribution dist) {
-		this.dist = dist;
-	}
+    public UniformRandomSelectionStrategy(LiteralDistribution dist) {
+        this.dist = dist;
+    }
 
-	public void undo(int var) {
-		dist.unset(var);
-	}
+    public void undo(int var) {
+        dist.unset(var);
+    }
 
-	@Override
-	public void assignLiteral(int p) {
-		dist.set(LiteralsUtils.toDimacs(p));
-	}
+    @Override
+    public void assignLiteral(int p) {
+        dist.set(LiteralsUtils.toDimacs(p));
+    }
 
-	@Override
-	public void init(int nlength) {
-	}
+    @Override
+    public void init(int nlength) {}
 
-	@Override
-	public void init(int var, int p) {
-	}
+    @Override
+    public void init(int var, int p) {}
 
-	@Override
-	public int select(int var) {
-		return dist.getRandomLiteral(var) > 0 ? posLit(var) : negLit(var);
-	}
+    @Override
+    public int select(int var) {
+        return dist.getRandomLiteral(var) > 0 ? posLit(var) : negLit(var);
+    }
 
-	@Override
-	public void updateVar(int p) {
-	}
+    @Override
+    public void updateVar(int p) {}
 
-	@Override
-	public void updateVarAtDecisionLevel(int q) {
-	}
+    @Override
+    public void updateVarAtDecisionLevel(int q) {}
 
-	@Override
-	public String toString() {
-		return "uniform random phase selection";
-	}
-
+    @Override
+    public String toString() {
+        return "uniform random phase selection";
+    }
 }

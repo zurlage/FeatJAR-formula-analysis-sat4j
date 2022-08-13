@@ -20,11 +20,6 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import de.featjar.analysis.sat4j.solver.AbstractSat4JSolver;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
@@ -33,6 +28,10 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Finds redundant clauses with respect to a given {@link CNF}. This analysis
@@ -48,77 +47,78 @@ import de.featjar.util.job.InternalMonitor;
  */
 public class IndependentRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
-	public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
+    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<List<LiteralList>> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<List<LiteralList>> getIdentifier() {
+        return identifier;
+    }
 
-	public IndependentRedundancyAnalysis() {
-		super();
-	}
+    public IndependentRedundancyAnalysis() {
+        super();
+    }
 
-	public IndependentRedundancyAnalysis(List<LiteralList> clauseList) {
-		super();
-		this.clauseList = clauseList;
-	}
+    public IndependentRedundancyAnalysis(List<LiteralList> clauseList) {
+        super();
+        this.clauseList = clauseList;
+    }
 
-	@Override
-	public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
-		if (clauseList == null) {
-			return Collections.emptyList();
-		}
-		if (clauseGroupSize == null) {
-			clauseGroupSize = new int[clauseList.size()];
-			Arrays.fill(clauseGroupSize, 1);
-		}
-		monitor.setTotalWork(clauseList.size() + 1);
+    @Override
+    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+        if (clauseList == null) {
+            return Collections.emptyList();
+        }
+        if (clauseGroupSize == null) {
+            clauseGroupSize = new int[clauseList.size()];
+            Arrays.fill(clauseGroupSize, 1);
+        }
+        monitor.setTotalWork(clauseList.size() + 1);
 
-		final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
-		for (int i = 0; i < clauseList.size(); i++) {
-			resultList.add(null);
-		}
-		monitor.step();
+        final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+        for (int i = 0; i < clauseList.size(); i++) {
+            resultList.add(null);
+        }
+        monitor.step();
 
-		final List<LiteralList> solutionList = solver.rememberSolutionHistory(AbstractSat4JSolver.MAX_SOLUTION_BUFFER);
+        final List<LiteralList> solutionList = solver.rememberSolutionHistory(AbstractSat4JSolver.MAX_SOLUTION_BUFFER);
 
-		if (solver.hasSolution() == SatSolver.SatResult.TRUE) {
-			solver.setSelectionStrategy(SStrategy.random(getRandom()));
+        if (solver.hasSolution() == SatSolver.SatResult.TRUE) {
+            solver.setSelectionStrategy(SStrategy.random(getRandom()));
 
-			int endIndex = 0;
-			groupLoop: for (int i = 0; i < clauseGroupSize.length; i++) {
-				final int startIndex = endIndex;
-				endIndex += clauseGroupSize[i];
-				clauseLoop: for (int j = startIndex; j < endIndex; j++) {
-					final LiteralList clause = clauseList.get(j);
-					final LiteralList complement = clause.negate();
+            int endIndex = 0;
+            groupLoop:
+            for (int i = 0; i < clauseGroupSize.length; i++) {
+                final int startIndex = endIndex;
+                endIndex += clauseGroupSize[i];
+                clauseLoop:
+                for (int j = startIndex; j < endIndex; j++) {
+                    final LiteralList clause = clauseList.get(j);
+                    final LiteralList complement = clause.negate();
 
-					for (final LiteralList solution : solutionList) {
-						if (solution.containsAll(complement)) {
-							continue clauseLoop;
-						}
-					}
+                    for (final LiteralList solution : solutionList) {
+                        if (solution.containsAll(complement)) {
+                            continue clauseLoop;
+                        }
+                    }
 
-					final SatSolver.SatResult hasSolution = solver.hasSolution(complement);
-					switch (hasSolution) {
-					case FALSE:
-						resultList.set(i, clause);
-						continue groupLoop;
-					case TIMEOUT:
-						reportTimeout();
-						break;
-					case TRUE:
-						solver.shuffleOrder(getRandom());
-						break;
-					default:
-						throw new AssertionError(hasSolution);
-					}
-				}
-			}
-		}
+                    final SatSolver.SatResult hasSolution = solver.hasSolution(complement);
+                    switch (hasSolution) {
+                        case FALSE:
+                            resultList.set(i, clause);
+                            continue groupLoop;
+                        case TIMEOUT:
+                            reportTimeout();
+                            break;
+                        case TRUE:
+                            solver.shuffleOrder(getRandom());
+                            break;
+                        default:
+                            throw new AssertionError(hasSolution);
+                    }
+                }
+            }
+        }
 
-		return resultList;
-	}
-
+        return resultList;
+    }
 }

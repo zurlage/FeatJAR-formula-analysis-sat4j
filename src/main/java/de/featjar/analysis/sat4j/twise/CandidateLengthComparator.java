@@ -20,10 +20,9 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.Comparator;
-
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Pair;
+import java.util.Comparator;
 
 /**
  * Compares two candidates for covering, consisting of a partial configuration
@@ -34,10 +33,9 @@ import de.featjar.util.data.Pair;
  */
 class CandidateLengthComparator implements Comparator<Pair<LiteralList, TWiseConfiguration>> {
 
-	@Override
-	public int compare(Pair<LiteralList, TWiseConfiguration> o1, Pair<LiteralList, TWiseConfiguration> o2) {
-		final int diff = o2.getValue().countLiterals - o1.getValue().countLiterals;
-		return diff != 0 ? diff : o2.getKey().size() - o1.getKey().size();
-	}
-
+    @Override
+    public int compare(Pair<LiteralList, TWiseConfiguration> o1, Pair<LiteralList, TWiseConfiguration> o2) {
+        final int diff = o2.getValue().countLiterals - o1.getValue().countLiterals;
+        return diff != 0 ? diff : o2.getKey().size() - o1.getKey().size();
+    }
 }

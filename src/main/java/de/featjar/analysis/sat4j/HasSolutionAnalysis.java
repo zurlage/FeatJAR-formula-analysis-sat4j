@@ -34,27 +34,26 @@ import de.featjar.util.job.InternalMonitor;
  */
 public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
 
-	public static final Identifier<Boolean> identifier = new Identifier<>();
+    public static final Identifier<Boolean> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<Boolean> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<Boolean> getIdentifier() {
+        return identifier;
+    }
 
-	@Override
-	public Boolean analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
-		final SatSolver.SatResult hasSolution = solver.hasSolution();
-		switch (hasSolution) {
-		case FALSE:
-			return false;
-		case TIMEOUT:
-			reportTimeout();
-			return false;
-		case TRUE:
-			return true;
-		default:
-			throw new AssertionError(hasSolution);
-		}
-	}
-
+    @Override
+    public Boolean analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+        final SatSolver.SatResult hasSolution = solver.hasSolution();
+        switch (hasSolution) {
+            case FALSE:
+                return false;
+            case TIMEOUT:
+                reportTimeout();
+                return false;
+            case TRUE:
+                return true;
+            default:
+                throw new AssertionError(hasSolution);
+        }
+    }
 }

@@ -24,15 +24,14 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 
 /**
  * Sat solver using Sat4J and MIGs.
- * 
+ *
  * @author Sebastian Krieter
  */
 public class Sat4JMIGSolver extends Sat4JSolver {
-	public MIG mig;
+    public MIG mig;
 
-	public Sat4JMIGSolver(MIG mig) {
-		super(mig.getCnf());
-		this.mig = mig;
-	}
-
+    public Sat4JMIGSolver(MIG mig) {
+        super(mig.getCnf());
+        this.mig = mig;
+    }
 }

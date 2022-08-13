@@ -20,8 +20,6 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.Random;
-
 import de.featjar.analysis.AbstractAnalysis;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
@@ -29,6 +27,7 @@ import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.CNFProvider;
 import de.featjar.util.job.InternalMonitor;
+import java.util.Random;
 
 /**
  * Base class for analyses using a {@link Sat4JSolver}.
@@ -39,74 +38,73 @@ import de.featjar.util.job.InternalMonitor;
  */
 public abstract class Sat4JAnalysis<T> extends AbstractAnalysis<T, Sat4JSolver, CNF> {
 
-	protected boolean timeoutOccurred = false;
-	private boolean throwTimeoutException = true;
-	private int timeout = 1000;
+    protected boolean timeoutOccurred = false;
+    private boolean throwTimeoutException = true;
+    private int timeout = 1000;
 
-	protected Random random = new Random(112358);
+    protected Random random = new Random(112358);
 
-	public Sat4JAnalysis() {
-		super();
-		solverInputProvider = CNFProvider.fromFormula();
-	}
+    public Sat4JAnalysis() {
+        super();
+        solverInputProvider = CNFProvider.fromFormula();
+    }
 
-	@Override
-	public Object getParameters() {
-		return assumptions != null ? assumptions : super.getParameters();
-	}
+    @Override
+    public Object getParameters() {
+        return assumptions != null ? assumptions : super.getParameters();
+    }
 
-	public Random getRandom() {
-		return random;
-	}
+    public Random getRandom() {
+        return random;
+    }
 
-	public void setRandom(Random random) {
-		this.random = random;
-	}
+    public void setRandom(Random random) {
+        this.random = random;
+    }
 
-	public final T execute(CNF cnf, InternalMonitor monitor) {
-		if (solver == null) {
-			solver = createSolver(cnf);
-		}
-		return execute(solver, monitor);
-	}
+    public final T execute(CNF cnf, InternalMonitor monitor) {
+        if (solver == null) {
+            solver = createSolver(cnf);
+        }
+        return execute(solver, monitor);
+    }
 
-	@Override
-	protected Sat4JSolver createSolver(CNF input) throws RuntimeContradictionException {
-		return new Sat4JSolver(input);
-	}
+    @Override
+    protected Sat4JSolver createSolver(CNF input) throws RuntimeContradictionException {
+        return new Sat4JSolver(input);
+    }
 
-	@Override
-	protected void prepareSolver(Sat4JSolver solver) {
-		super.prepareSolver(solver);
-		solver.setTimeout(timeout);
-		timeoutOccurred = false;
-	}
+    @Override
+    protected void prepareSolver(Sat4JSolver solver) {
+        super.prepareSolver(solver);
+        solver.setTimeout(timeout);
+        timeoutOccurred = false;
+    }
 
-	protected final void reportTimeout() throws RuntimeTimeoutException {
-		timeoutOccurred = true;
-		if (throwTimeoutException) {
-			throw new RuntimeTimeoutException();
-		}
-	}
+    protected final void reportTimeout() throws RuntimeTimeoutException {
+        timeoutOccurred = true;
+        if (throwTimeoutException) {
+            throw new RuntimeTimeoutException();
+        }
+    }
 
-	public final boolean isThrowTimeoutException() {
-		return throwTimeoutException;
-	}
+    public final boolean isThrowTimeoutException() {
+        return throwTimeoutException;
+    }
 
-	public final void setThrowTimeoutException(boolean throwTimeoutException) {
-		this.throwTimeoutException = throwTimeoutException;
-	}
+    public final void setThrowTimeoutException(boolean throwTimeoutException) {
+        this.throwTimeoutException = throwTimeoutException;
+    }
 
-	public final boolean isTimeoutOccurred() {
-		return timeoutOccurred;
-	}
+    public final boolean isTimeoutOccurred() {
+        return timeoutOccurred;
+    }
 
-	public int getTimeout() {
-		return timeout;
-	}
+    public int getTimeout() {
+        return timeout;
+    }
 
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
-	}
-
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
 }

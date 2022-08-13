@@ -20,10 +20,9 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
+import de.featjar.clauses.ClauseList;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.featjar.clauses.ClauseList;
 
 /**
  * Combines multiple {@link ICombinationSupplier supplies} of {@link ClauseList}
@@ -33,70 +32,70 @@ import de.featjar.clauses.ClauseList;
  */
 public class MergeIterator3 implements ICombinationSupplier<ClauseList> {
 
-	private final List<List<PresenceCondition>> expressionSets;
-	private final ICombinationSupplier<int[]>[] suppliers;
-	private final long numberOfCombinations;
+    private final List<List<PresenceCondition>> expressionSets;
+    private final ICombinationSupplier<int[]>[] suppliers;
+    private final long numberOfCombinations;
 
-	private final List<ClauseList> buffer = new ArrayList<>();
-	private final TWiseCombiner combiner;
-	private final PresenceCondition[] nextCombination;
+    private final List<ClauseList> buffer = new ArrayList<>();
+    private final TWiseCombiner combiner;
+    private final PresenceCondition[] nextCombination;
 
-	private int bufferIndex = 0;
-	private final int maxIteratorIndex;
+    private int bufferIndex = 0;
+    private final int maxIteratorIndex;
 
-	@SuppressWarnings("unchecked")
-	public MergeIterator3(int t, int n, List<List<PresenceCondition>> expressionSets) {
-		this.expressionSets = expressionSets;
+    @SuppressWarnings("unchecked")
+    public MergeIterator3(int t, int n, List<List<PresenceCondition>> expressionSets) {
+        this.expressionSets = expressionSets;
 
-		maxIteratorIndex = expressionSets.size() - 1;
-		suppliers = new ICombinationSupplier[expressionSets.size()];
-		combiner = new TWiseCombiner(n);
-		nextCombination = new PresenceCondition[t];
+        maxIteratorIndex = expressionSets.size() - 1;
+        suppliers = new ICombinationSupplier[expressionSets.size()];
+        combiner = new TWiseCombiner(n);
+        nextCombination = new PresenceCondition[t];
 
-		long sumNumberOfCombinations = 0;
-		for (int i = 0; i <= maxIteratorIndex; i++) {
-			final ICombinationSupplier<int[]> supplier = new RandomPartitionSupplier(t, expressionSets.get(i).size());
-			suppliers[i] = supplier;
-			sumNumberOfCombinations += supplier.size();
-		}
-		numberOfCombinations = sumNumberOfCombinations;
-	}
+        long sumNumberOfCombinations = 0;
+        for (int i = 0; i <= maxIteratorIndex; i++) {
+            final ICombinationSupplier<int[]> supplier =
+                    new RandomPartitionSupplier(t, expressionSets.get(i).size());
+            suppliers[i] = supplier;
+            sumNumberOfCombinations += supplier.size();
+        }
+        numberOfCombinations = sumNumberOfCombinations;
+    }
 
-	@Override
-	public ClauseList get() {
-		if (buffer.isEmpty()) {
-			for (int i = 0; i <= maxIteratorIndex; i++) {
-				final ICombinationSupplier<int[]> supplier = suppliers[i];
-				if (supplier != null) {
-					final int[] js = supplier.get();
-					if (js != null) {
-						final List<PresenceCondition> expressionSet = expressionSets.get(i);
-						for (int j = 0; j < js.length; j++) {
-							nextCombination[j] = expressionSet.get(js[j]);
-						}
-						final ClauseList combinedCondition = new ClauseList();
-						combiner.combineConditions(nextCombination, combinedCondition);
-						buffer.add(combinedCondition);
-					} else {
-						suppliers[i] = null;
-					}
-				}
-			}
-			if (buffer.isEmpty()) {
-				return null;
-			}
-		}
-		final ClauseList remove = buffer.get(bufferIndex++);
-		if (bufferIndex == buffer.size()) {
-			buffer.clear();
-			bufferIndex = 0;
-		}
-		return remove;
-	}
+    @Override
+    public ClauseList get() {
+        if (buffer.isEmpty()) {
+            for (int i = 0; i <= maxIteratorIndex; i++) {
+                final ICombinationSupplier<int[]> supplier = suppliers[i];
+                if (supplier != null) {
+                    final int[] js = supplier.get();
+                    if (js != null) {
+                        final List<PresenceCondition> expressionSet = expressionSets.get(i);
+                        for (int j = 0; j < js.length; j++) {
+                            nextCombination[j] = expressionSet.get(js[j]);
+                        }
+                        final ClauseList combinedCondition = new ClauseList();
+                        combiner.combineConditions(nextCombination, combinedCondition);
+                        buffer.add(combinedCondition);
+                    } else {
+                        suppliers[i] = null;
+                    }
+                }
+            }
+            if (buffer.isEmpty()) {
+                return null;
+            }
+        }
+        final ClauseList remove = buffer.get(bufferIndex++);
+        if (bufferIndex == buffer.size()) {
+            buffer.clear();
+            bufferIndex = 0;
+        }
+        return remove;
+    }
 
-	@Override
-	public long size() {
-		return numberOfCombinations;
-	}
-
+    @Override
+    public long size() {
+        return numberOfCombinations;
+    }
 }

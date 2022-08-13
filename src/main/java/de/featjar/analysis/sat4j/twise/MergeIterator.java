@@ -20,12 +20,11 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
+import de.featjar.clauses.solutions.combinations.CombinationIterator;
+import de.featjar.clauses.solutions.combinations.IteratorFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import de.featjar.clauses.solutions.combinations.CombinationIterator;
-import de.featjar.clauses.solutions.combinations.IteratorFactory;
 
 /**
  * Combines multiple {@link CombinationIterator iterators} and returns results
@@ -35,74 +34,73 @@ import de.featjar.clauses.solutions.combinations.IteratorFactory;
  */
 public class MergeIterator implements CombinationIterator {
 
-	protected final List<CombinationIterator> setIterators;
-	protected final long numberOfCombinations;
-	protected final int t;
+    protected final List<CombinationIterator> setIterators;
+    protected final long numberOfCombinations;
+    protected final int t;
 
-	private int iteratorIndex = -1;
+    private int iteratorIndex = -1;
 
-	public MergeIterator(int t, List<List<PresenceCondition>> expressionSets, IteratorFactory.IteratorID id) {
-		this.t = t;
-		setIterators = new ArrayList<>(expressionSets.size());
-		long sumNumberOfCombinations = 0;
-		for (final List<PresenceCondition> expressions : expressionSets) {
-			final CombinationIterator iterator = IteratorFactory.getIterator(id, expressions.size(), t);
-			setIterators.add(iterator);
-			sumNumberOfCombinations += iterator.size();
-		}
-		numberOfCombinations = sumNumberOfCombinations;
-	}
+    public MergeIterator(int t, List<List<PresenceCondition>> expressionSets, IteratorFactory.IteratorID id) {
+        this.t = t;
+        setIterators = new ArrayList<>(expressionSets.size());
+        long sumNumberOfCombinations = 0;
+        for (final List<PresenceCondition> expressions : expressionSets) {
+            final CombinationIterator iterator = IteratorFactory.getIterator(id, expressions.size(), t);
+            setIterators.add(iterator);
+            sumNumberOfCombinations += iterator.size();
+        }
+        numberOfCombinations = sumNumberOfCombinations;
+    }
 
-	@Override
-	public boolean hasNext() {
-		for (final CombinationIterator iterator : setIterators) {
-			if (iterator.hasNext()) {
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean hasNext() {
+        for (final CombinationIterator iterator : setIterators) {
+            if (iterator.hasNext()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public int[] next() {
-		for (int i = 0; i < setIterators.size(); i++) {
-			iteratorIndex = (iteratorIndex + 1) % setIterators.size();
-			final CombinationIterator iterator = setIterators.get(iteratorIndex);
-			if (iterator.hasNext()) {
-				final int[] next = iterator.next();
-				if (next != null) {
-					return next;
-				}
-			}
-		}
-		return null;
-	}
+    @Override
+    public int[] next() {
+        for (int i = 0; i < setIterators.size(); i++) {
+            iteratorIndex = (iteratorIndex + 1) % setIterators.size();
+            final CombinationIterator iterator = setIterators.get(iteratorIndex);
+            if (iterator.hasNext()) {
+                final int[] next = iterator.next();
+                if (next != null) {
+                    return next;
+                }
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public long getIndex() {
-		long mergedIndex = setIterators.get(iteratorIndex).getIndex();
-		for (int i = iteratorIndex - 1; i >= 0; i--) {
-			mergedIndex += setIterators.get(i).size();
-		}
-		return mergedIndex;
-	}
+    @Override
+    public long getIndex() {
+        long mergedIndex = setIterators.get(iteratorIndex).getIndex();
+        for (int i = iteratorIndex - 1; i >= 0; i--) {
+            mergedIndex += setIterators.get(i).size();
+        }
+        return mergedIndex;
+    }
 
-	@Override
-	public void reset() {
-		iteratorIndex = 0;
-		for (final CombinationIterator iterator : setIterators) {
-			iterator.reset();
-		}
-	}
+    @Override
+    public void reset() {
+        iteratorIndex = 0;
+        for (final CombinationIterator iterator : setIterators) {
+            iterator.reset();
+        }
+    }
 
-	@Override
-	public Iterator<int[]> iterator() {
-		return this;
-	}
+    @Override
+    public Iterator<int[]> iterator() {
+        return this;
+    }
 
-	@Override
-	public long size() {
-		return numberOfCombinations;
-	}
-
+    @Override
+    public long size() {
+        return numberOfCombinations;
+    }
 }

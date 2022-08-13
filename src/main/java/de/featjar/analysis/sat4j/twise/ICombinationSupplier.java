@@ -31,6 +31,5 @@ import java.util.function.Supplier;
  */
 public interface ICombinationSupplier<T> extends Supplier<T> {
 
-	long size();
-
+    long size();
 }

@@ -24,30 +24,29 @@ import de.featjar.analysis.mig.solver.MIG;
 
 abstract class ATraverser implements ITraverser {
 
-	protected final boolean[] dfsMark;
-	protected final MIG mig;
+    protected final boolean[] dfsMark;
+    protected final MIG mig;
 
-	protected Visitor<?> visitor = null;
-	protected int[] currentConfiguration = null;
+    protected Visitor<?> visitor = null;
+    protected int[] currentConfiguration = null;
 
-	public ATraverser(MIG mig) {
-		this.mig = mig;
-		dfsMark = new boolean[mig.getVertices().size()];
-	}
+    public ATraverser(MIG mig) {
+        this.mig = mig;
+        dfsMark = new boolean[mig.getVertices().size()];
+    }
 
-	@Override
-	public Visitor<?> getVisitor() {
-		return visitor;
-	}
+    @Override
+    public Visitor<?> getVisitor() {
+        return visitor;
+    }
 
-	@Override
-	public void setVisitor(Visitor<?> visitor) {
-		this.visitor = visitor;
-	}
+    @Override
+    public void setVisitor(Visitor<?> visitor) {
+        this.visitor = visitor;
+    }
 
-	@Override
-	public void setModel(int[] currentConfiguration) {
-		this.currentConfiguration = currentConfiguration;
-	}
-
+    @Override
+    public void setModel(int[] currentConfiguration) {
+        this.currentConfiguration = currentConfiguration;
+    }
 }

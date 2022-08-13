@@ -20,12 +20,11 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Pair;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Covers a given {@link ClauseList expressions} within a list of
@@ -35,42 +34,41 @@ import de.featjar.util.data.Pair;
  */
 class CoverAll implements ICoverStrategy {
 
-	private final TWiseConfigurationUtil util;
+    private final TWiseConfigurationUtil util;
 
-	public CoverAll(TWiseConfigurationUtil util) {
-		this.util = util;
-	}
+    public CoverAll(TWiseConfigurationUtil util) {
+        this.util = util;
+    }
 
-	private final List<Pair<LiteralList, TWiseConfiguration>> candidatesList = new ArrayList<>();
+    private final List<Pair<LiteralList, TWiseConfiguration>> candidatesList = new ArrayList<>();
 
-	@Override
-	public CombinationStatus cover(ClauseList nextCondition) {
-		if (util.isCovered(nextCondition)) {
-			return CombinationStatus.COVERED;
-		}
+    @Override
+    public CombinationStatus cover(ClauseList nextCondition) {
+        if (util.isCovered(nextCondition)) {
+            return CombinationStatus.COVERED;
+        }
 
-		util.initCandidatesList(nextCondition, candidatesList);
+        util.initCandidatesList(nextCondition, candidatesList);
 
-		if (util.hasSolver) {
-			if (util.coverSol(candidatesList)) {
-				return CombinationStatus.COVERED;
-			}
+        if (util.hasSolver) {
+            if (util.coverSol(candidatesList)) {
+                return CombinationStatus.COVERED;
+            }
 
-			if (util.removeInvalidClauses(nextCondition, candidatesList)) {
-				return CombinationStatus.INVALID;
-			}
+            if (util.removeInvalidClauses(nextCondition, candidatesList)) {
+                return CombinationStatus.INVALID;
+            }
 
-			if (util.coverSat(candidatesList)) {
-				return CombinationStatus.COVERED;
-			}
-		} else {
-			if (util.coverNoSat(candidatesList)) {
-				return CombinationStatus.COVERED;
-			}
-		}
+            if (util.coverSat(candidatesList)) {
+                return CombinationStatus.COVERED;
+            }
+        } else {
+            if (util.coverNoSat(candidatesList)) {
+                return CombinationStatus.COVERED;
+            }
+        }
 
-		util.newConfiguration(nextCondition.get(0));
-		return CombinationStatus.COVERED;
-	}
-
+        util.newConfiguration(nextCondition.get(0));
+        return CombinationStatus.COVERED;
+    }
 }

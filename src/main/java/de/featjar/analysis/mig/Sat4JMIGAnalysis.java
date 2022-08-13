@@ -20,8 +20,6 @@
  */
 package de.featjar.analysis.mig;
 
-import java.util.Random;
-
 import de.featjar.analysis.AbstractAnalysis;
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.MIGProvider;
@@ -29,6 +27,7 @@ import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.util.job.InternalMonitor;
+import java.util.Random;
 
 /**
  * Base class for analyses using a {@link Sat4JMIGSolver}.
@@ -39,71 +38,70 @@ import de.featjar.util.job.InternalMonitor;
  */
 public abstract class Sat4JMIGAnalysis<T> extends AbstractAnalysis<T, Sat4JMIGSolver, MIG> {
 
-	protected boolean timeoutOccurred = false;
-	private boolean throwTimeoutException = true;
-	private int timeout = 1000;
+    protected boolean timeoutOccurred = false;
+    private boolean throwTimeoutException = true;
+    private int timeout = 1000;
 
-	protected Random random = new Random(112358);
+    protected Random random = new Random(112358);
 
-	public Sat4JMIGAnalysis() {
-		super();
-		solverInputProvider = MIGProvider.fromFormula();
-	}
+    public Sat4JMIGAnalysis() {
+        super();
+        solverInputProvider = MIGProvider.fromFormula();
+    }
 
-	@Override
-	public Object getParameters() {
-		return assumptions != null ? assumptions : super.getParameters();
-	}
+    @Override
+    public Object getParameters() {
+        return assumptions != null ? assumptions : super.getParameters();
+    }
 
-	public Random getRandom() {
-		return random;
-	}
+    public Random getRandom() {
+        return random;
+    }
 
-	public void setRandom(Random random) {
-		this.random = random;
-	}
+    public void setRandom(Random random) {
+        this.random = random;
+    }
 
-	public final T execute(InternalMonitor monitor) {
-		return solver != null ? execute(solver, monitor) : null;
-	}
+    public final T execute(InternalMonitor monitor) {
+        return solver != null ? execute(solver, monitor) : null;
+    }
 
-	@Override
-	protected Sat4JMIGSolver createSolver(MIG input) throws RuntimeContradictionException {
-		return new Sat4JMIGSolver(input);
-	}
+    @Override
+    protected Sat4JMIGSolver createSolver(MIG input) throws RuntimeContradictionException {
+        return new Sat4JMIGSolver(input);
+    }
 
-	@Override
-	protected void prepareSolver(Sat4JMIGSolver solver) {
-		super.prepareSolver(solver);
-		solver.setTimeout(timeout);
-		timeoutOccurred = false;
-	}
+    @Override
+    protected void prepareSolver(Sat4JMIGSolver solver) {
+        super.prepareSolver(solver);
+        solver.setTimeout(timeout);
+        timeoutOccurred = false;
+    }
 
-	protected final void reportTimeout() throws RuntimeTimeoutException {
-		timeoutOccurred = true;
-		if (throwTimeoutException) {
-			throw new RuntimeTimeoutException();
-		}
-	}
+    protected final void reportTimeout() throws RuntimeTimeoutException {
+        timeoutOccurred = true;
+        if (throwTimeoutException) {
+            throw new RuntimeTimeoutException();
+        }
+    }
 
-	public final boolean isThrowTimeoutException() {
-		return throwTimeoutException;
-	}
+    public final boolean isThrowTimeoutException() {
+        return throwTimeoutException;
+    }
 
-	public final void setThrowTimeoutException(boolean throwTimeoutException) {
-		this.throwTimeoutException = throwTimeoutException;
-	}
+    public final void setThrowTimeoutException(boolean throwTimeoutException) {
+        this.throwTimeoutException = throwTimeoutException;
+    }
 
-	public final boolean isTimeoutOccurred() {
-		return timeoutOccurred;
-	}
+    public final boolean isTimeoutOccurred() {
+        return timeoutOccurred;
+    }
 
-	public int getTimeout() {
-		return timeout;
-	}
+    public int getTimeout() {
+        return timeout;
+    }
 
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
-	}
-
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
 }

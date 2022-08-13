@@ -28,42 +28,41 @@ package de.featjar.analysis.sat4j.twise;
  */
 public class ValidityStatistic {
 
-	protected final boolean[] configValidities;
-	protected int numberOfValidConfigurations;
+    protected final boolean[] configValidities;
+    protected int numberOfValidConfigurations;
 
-	public ValidityStatistic(int sampleSize) {
-		configValidities = new boolean[sampleSize];
-	}
+    public ValidityStatistic(int sampleSize) {
+        configValidities = new boolean[sampleSize];
+    }
 
-	public void setConfigValidity(int index, boolean valid) {
-		configValidities[index] = valid;
-		if (valid) {
-			numberOfValidConfigurations++;
-		}
-	}
+    public void setConfigValidity(int index, boolean valid) {
+        configValidities[index] = valid;
+        if (valid) {
+            numberOfValidConfigurations++;
+        }
+    }
 
-	public boolean[] getConfigValidities() {
-		return configValidities;
-	}
+    public boolean[] getConfigValidities() {
+        return configValidities;
+    }
 
-	public int getNumberOfConfigurations() {
-		return configValidities.length;
-	}
+    public int getNumberOfConfigurations() {
+        return configValidities.length;
+    }
 
-	public int getNumberOfValidConfigurations() {
-		return numberOfValidConfigurations;
-	}
+    public int getNumberOfValidConfigurations() {
+        return numberOfValidConfigurations;
+    }
 
-	public int getNumberOfInvalidConfigurations() {
-		return configValidities.length - numberOfValidConfigurations;
-	}
+    public int getNumberOfInvalidConfigurations() {
+        return configValidities.length - numberOfValidConfigurations;
+    }
 
-	public double getValidInvalidRatio() {
-		if (configValidities.length != 0) {
-			return ((double) numberOfValidConfigurations / (double) configValidities.length);
-		} else {
-			return 1.0;
-		}
-	}
-
+    public double getValidInvalidRatio() {
+        if (configValidities.length != 0) {
+            return ((double) numberOfValidConfigurations / (double) configValidities.length);
+        } else {
+            return 1.0;
+        }
+    }
 }

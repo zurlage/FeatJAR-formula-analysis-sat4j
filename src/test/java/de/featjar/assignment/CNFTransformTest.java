@@ -22,12 +22,6 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
 import de.featjar.analysis.sat4j.AtomicSetAnalysis;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.ModelRepresentation;
@@ -35,17 +29,22 @@ import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.Formula;
 import de.featjar.util.io.IO;
 import de.featjar.util.io.format.FormatSupplier;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class CNFTransformTest {
 
-	@Test
-	public void testDistributiveBug() {
-		final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-		final Formula formula = IO.load(modelFile, FormatSupplier.of(new KConfigReaderFormat())).orElseThrow();
+    @Test
+    public void testDistributiveBug() {
+        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
+        final Formula formula =
+                IO.load(modelFile, FormatSupplier.of(new KConfigReaderFormat())).orElseThrow();
 
-		final ModelRepresentation rep = new ModelRepresentation(formula);
-		final List<LiteralList> atomicSets = rep.getResult(new AtomicSetAnalysis()).orElseThrow();
-		assertEquals(5, atomicSets.size());
-	}
-
+        final ModelRepresentation rep = new ModelRepresentation(formula);
+        final List<LiteralList> atomicSets =
+                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
+        assertEquals(5, atomicSets.size());
+    }
 }

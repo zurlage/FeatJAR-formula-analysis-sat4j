@@ -37,32 +37,31 @@ import de.featjar.util.logging.Logger;
  */
 public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerator {
 
-	public static final Identifier<SolutionList> identifier = new Identifier<>();
+    public static final Identifier<SolutionList> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<SolutionList> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<SolutionList> getIdentifier() {
+        return identifier;
+    }
 
-	private MIGDistribution dist;
+    private MIGDistribution dist;
 
-	@Override
-	protected void init(InternalMonitor monitor) {
-		final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
-		final MIG mig = Executor.run(migBuilder, solver.getCnf()).orElse(Logger::logProblems);
-		satisfiable = mig != null;
-		if (!satisfiable) {
-			return;
-		}
+    @Override
+    protected void init(InternalMonitor monitor) {
+        final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
+        final MIG mig = Executor.run(migBuilder, solver.getCnf()).orElse(Logger::logProblems);
+        satisfiable = mig != null;
+        if (!satisfiable) {
+            return;
+        }
 
-		dist = new MIGDistribution(mig);
-		dist.setRandom(random);
-		solver.setSelectionStrategy(SStrategy.mig(dist));
-	}
+        dist = new MIGDistribution(mig);
+        dist.setRandom(random);
+        solver.setSelectionStrategy(SStrategy.mig(dist));
+    }
 
-	@Override
-	protected void reset() {
-		dist.reset();
-	}
-
+    @Override
+    protected void reset() {
+        dist.reset();
+    }
 }

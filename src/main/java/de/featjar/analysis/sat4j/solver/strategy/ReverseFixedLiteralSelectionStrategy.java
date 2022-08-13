@@ -25,17 +25,16 @@ import static org.sat4j.core.LiteralsUtils.posLit;
 
 public class ReverseFixedLiteralSelectionStrategy extends FixedLiteralSelectionStrategy {
 
-	public ReverseFixedLiteralSelectionStrategy(int[] model) {
-		super(model);
-	}
+    public ReverseFixedLiteralSelectionStrategy(int[] model) {
+        super(model);
+    }
 
-	private static final long serialVersionUID = -1563968211094190882L;
+    private static final long serialVersionUID = -1563968211094190882L;
 
-	@Override
-	protected void reset(int nlength) {
-		for (int i = 1; i < nlength; i++) {
-			phase[i] = model[i - 1] < 0 ? posLit(i) : negLit(i);
-		}
-	}
-
+    @Override
+    protected void reset(int nlength) {
+        for (int i = 1; i < nlength; i++) {
+            phase[i] = model[i - 1] < 0 ? posLit(i) : negLit(i);
+        }
+    }
 }

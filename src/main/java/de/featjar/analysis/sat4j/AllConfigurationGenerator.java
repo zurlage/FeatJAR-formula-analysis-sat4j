@@ -32,31 +32,30 @@ import de.featjar.util.data.Identifier;
  */
 public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
 
-	public static final Identifier<SolutionList> identifier = new Identifier<>();
+    public static final Identifier<SolutionList> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<SolutionList> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<SolutionList> getIdentifier() {
+        return identifier;
+    }
 
-	private boolean satisfiable = true;
+    private boolean satisfiable = true;
 
-	@Override
-	public LiteralList get() {
-		if (!satisfiable) {
-			return null;
-		}
-		final LiteralList solution = solver.findSolution();
-		if (solution == null) {
-			satisfiable = false;
-			return null;
-		}
-		try {
-			solver.getFormula().push(solution.negate());
-		} catch (final RuntimeContradictionException e) {
-			satisfiable = false;
-		}
-		return solution;
-	}
-
+    @Override
+    public LiteralList get() {
+        if (!satisfiable) {
+            return null;
+        }
+        final LiteralList solution = solver.findSolution();
+        if (solution == null) {
+            satisfiable = false;
+            return null;
+        }
+        try {
+            solver.getFormula().push(solution.negate());
+        } catch (final RuntimeContradictionException e) {
+            satisfiable = false;
+        }
+        return solution;
+    }
 }

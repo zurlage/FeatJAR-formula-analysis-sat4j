@@ -30,10 +30,9 @@ import java.util.Comparator;
  */
 class TWiseConfigurationRankComparator implements Comparator<TWiseConfiguration> {
 
-	@Override
-	public int compare(TWiseConfiguration arg0, TWiseConfiguration arg1) {
-		final int rankDiff = arg1.rank - arg0.rank;
-		return rankDiff != 0 ? rankDiff : arg0.countLiterals - arg1.countLiterals;
-	}
-
+    @Override
+    public int compare(TWiseConfiguration arg0, TWiseConfiguration arg1) {
+        final int rankDiff = arg1.rank - arg0.rank;
+        return rankDiff != 0 ? rankDiff : arg0.countLiterals - arg1.countLiterals;
+    }
 }

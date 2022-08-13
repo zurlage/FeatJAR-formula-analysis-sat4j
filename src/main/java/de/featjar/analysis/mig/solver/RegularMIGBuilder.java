@@ -29,44 +29,42 @@ import de.featjar.util.job.InternalMonitor;
  *
  * @author Sebastian Krieter
  */
-
 public class RegularMIGBuilder extends MIGBuilder {
 
-	@Override
-	public MIG execute(CNF cnf, InternalMonitor monitor) throws Exception {
-		monitor.setTotalWork(24 + (detectStrong ? 1020 : 0) + (checkRedundancy ? 100 : 10));
+    @Override
+    public MIG execute(CNF cnf, InternalMonitor monitor) throws Exception {
+        monitor.setTotalWork(24 + (detectStrong ? 1020 : 0) + (checkRedundancy ? 100 : 10));
 
-		init(cnf);
-		monitor.step();
+        init(cnf);
+        monitor.step();
 
-		if (!satCheck(cnf)) {
-			throw new RuntimeContradictionException("CNF is not satisfiable!");
-		}
-		monitor.step();
-		findCoreFeatures(monitor.subTask(10));
+        if (!satCheck(cnf)) {
+            throw new RuntimeContradictionException("CNF is not satisfiable!");
+        }
+        monitor.step();
+        findCoreFeatures(monitor.subTask(10));
 
-		cleanClauses();
-		monitor.step();
+        cleanClauses();
+        monitor.step();
 
-		if (detectStrong) {
-			addClauses(cnf, false, monitor.subTask(10));
+        if (detectStrong) {
+            addClauses(cnf, false, monitor.subTask(10));
 
-			bfsStrong(monitor.subTask(10));
+            bfsStrong(monitor.subTask(10));
 
-			bfsWeak(null, monitor.subTask(1000));
-			mig.setStrongStatus(MIG.BuildStatus.Complete);
-		} else {
-			mig.setStrongStatus(MIG.BuildStatus.None);
-		}
+            bfsWeak(null, monitor.subTask(1000));
+            mig.setStrongStatus(MIG.BuildStatus.Complete);
+        } else {
+            mig.setStrongStatus(MIG.BuildStatus.None);
+        }
 
-		addClauses(cnf, checkRedundancy, monitor.subTask(checkRedundancy ? 100 : 10));
+        addClauses(cnf, checkRedundancy, monitor.subTask(checkRedundancy ? 100 : 10));
 
-		bfsStrong(monitor.subTask(10));
+        bfsStrong(monitor.subTask(10));
 
-		finish();
-		monitor.step();
+        finish();
+        monitor.step();
 
-		return mig;
-	}
-
+        return mig;
+    }
 }

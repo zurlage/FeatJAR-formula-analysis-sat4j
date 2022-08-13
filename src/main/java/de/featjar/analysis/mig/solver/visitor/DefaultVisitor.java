@@ -22,19 +22,18 @@ package de.featjar.analysis.mig.solver.visitor;
 
 public class DefaultVisitor implements Visitor<Void> {
 
-	@Override
-	public VisitResult visitStrong(int curLiteral) {
-		return VisitResult.Continue;
-	}
+    @Override
+    public VisitResult visitStrong(int curLiteral) {
+        return VisitResult.Continue;
+    }
 
-	@Override
-	public VisitResult visitWeak(int curLiteral) {
-		return VisitResult.Continue;
-	}
+    @Override
+    public VisitResult visitWeak(int curLiteral) {
+        return VisitResult.Continue;
+    }
 
-	@Override
-	public Void getResult() {
-		return null;
-	}
-
+    @Override
+    public Void getResult() {
+        return null;
+    }
 }

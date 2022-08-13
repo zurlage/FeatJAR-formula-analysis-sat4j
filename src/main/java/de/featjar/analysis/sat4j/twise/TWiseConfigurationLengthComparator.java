@@ -29,9 +29,8 @@ import java.util.Comparator;
  */
 class TWiseConfigurationLengthComparator implements Comparator<TWiseConfiguration> {
 
-	@Override
-	public int compare(TWiseConfiguration arg0, TWiseConfiguration arg1) {
-		return arg1.countLiterals - arg0.countLiterals;
-	}
-
+    @Override
+    public int compare(TWiseConfiguration arg0, TWiseConfiguration arg1) {
+        return arg1.countLiterals - arg0.countLiterals;
+    }
 }

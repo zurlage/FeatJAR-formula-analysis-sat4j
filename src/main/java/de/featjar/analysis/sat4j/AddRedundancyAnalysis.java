@@ -20,17 +20,16 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Finds redundant clauses with respect to a given {@link CNF}. This analysis
@@ -50,69 +49,68 @@ import de.featjar.util.job.InternalMonitor;
  */
 public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
-	public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
+    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<List<LiteralList>> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<List<LiteralList>> getIdentifier() {
+        return identifier;
+    }
 
-	public AddRedundancyAnalysis() {
-		super();
-	}
+    public AddRedundancyAnalysis() {
+        super();
+    }
 
-	public AddRedundancyAnalysis(List<LiteralList> clauseList) {
-		super();
-		this.clauseList = clauseList;
-	}
+    public AddRedundancyAnalysis(List<LiteralList> clauseList) {
+        super();
+        this.clauseList = clauseList;
+    }
 
-	@Override
-	public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
-		if (clauseList == null) {
-			return Collections.emptyList();
-		}
-		if (clauseGroupSize == null) {
-			clauseGroupSize = new int[clauseList.size()];
-			Arrays.fill(clauseGroupSize, 1);
-		}
-		monitor.setTotalWork(clauseList.size() + 1);
+    @Override
+    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+        if (clauseList == null) {
+            return Collections.emptyList();
+        }
+        if (clauseGroupSize == null) {
+            clauseGroupSize = new int[clauseList.size()];
+            Arrays.fill(clauseGroupSize, 1);
+        }
+        monitor.setTotalWork(clauseList.size() + 1);
 
-		final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
-		for (int i = 0; i < clauseList.size(); i++) {
-			resultList.add(null);
-		}
-		// TODO Find a better way of sorting
-		// final Integer[] index = Functional.getSortedIndex(resultList, new
-		// ClauseLengthComparatorDsc());
-		monitor.step();
+        final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+        for (int i = 0; i < clauseList.size(); i++) {
+            resultList.add(null);
+        }
+        // TODO Find a better way of sorting
+        // final Integer[] index = Functional.getSortedIndex(resultList, new
+        // ClauseLengthComparatorDsc());
+        monitor.step();
 
-		int endIndex = 0;
-		for (int i = 0; i < clauseGroupSize.length; i++) {
-			final int startIndex = endIndex;
-			endIndex += clauseGroupSize[i];
-			boolean completelyRedundant = true;
-			for (int j = startIndex; j < endIndex; j++) {
-				final LiteralList clause = clauseList.get(j);
-				final SatSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
-				switch (hasSolution) {
-				case FALSE:
-					break;
-				case TIMEOUT:
-					reportTimeout();
-				case TRUE:
-					solver.getFormula().push(clause);
-					completelyRedundant = false;
-					break;
-				default:
-					throw new AssertionError(hasSolution);
-				}
-			}
-			if (completelyRedundant) {
-				resultList.set(i, clauseList.get(startIndex));
-			}
-		}
+        int endIndex = 0;
+        for (int i = 0; i < clauseGroupSize.length; i++) {
+            final int startIndex = endIndex;
+            endIndex += clauseGroupSize[i];
+            boolean completelyRedundant = true;
+            for (int j = startIndex; j < endIndex; j++) {
+                final LiteralList clause = clauseList.get(j);
+                final SatSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
+                switch (hasSolution) {
+                    case FALSE:
+                        break;
+                    case TIMEOUT:
+                        reportTimeout();
+                    case TRUE:
+                        solver.getFormula().push(clause);
+                        completelyRedundant = false;
+                        break;
+                    default:
+                        throw new AssertionError(hasSolution);
+                }
+            }
+            if (completelyRedundant) {
+                resultList.set(i, clauseList.get(startIndex));
+            }
+        }
 
-		return resultList;
-	}
-
+        return resultList;
+    }
 }

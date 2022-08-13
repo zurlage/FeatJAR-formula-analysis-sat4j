@@ -20,9 +20,8 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import java.util.List;
-
 import de.featjar.clauses.ClauseList;
+import java.util.List;
 
 /**
  * Uses a {@link RandomPartitionSupplier} to construct a combined presence
@@ -32,41 +31,40 @@ import de.featjar.clauses.ClauseList;
  */
 public class SingleIterator implements ICombinationSupplier<ClauseList> {
 
-	private final List<PresenceCondition> expressionSet;
-	private final ICombinationSupplier<int[]> supplier;
-	private final long numberOfCombinations;
+    private final List<PresenceCondition> expressionSet;
+    private final ICombinationSupplier<int[]> supplier;
+    private final long numberOfCombinations;
 
-	private final TWiseCombiner combiner;
-	private final PresenceCondition[] nextCombination;
+    private final TWiseCombiner combiner;
+    private final PresenceCondition[] nextCombination;
 
-	public SingleIterator(int t, int n, List<PresenceCondition> expressionSet) {
-		this.expressionSet = expressionSet;
+    public SingleIterator(int t, int n, List<PresenceCondition> expressionSet) {
+        this.expressionSet = expressionSet;
 
-		combiner = new TWiseCombiner(n);
-		nextCombination = new PresenceCondition[t];
+        combiner = new TWiseCombiner(n);
+        nextCombination = new PresenceCondition[t];
 
-		supplier = new RandomPartitionSupplier(t, expressionSet.size());
-		numberOfCombinations = supplier.size();
-	}
+        supplier = new RandomPartitionSupplier(t, expressionSet.size());
+        numberOfCombinations = supplier.size();
+    }
 
-	@Override
-	public ClauseList get() {
-		final int[] js = supplier.get();
-		if (js != null) {
-			for (int j = 0; j < js.length; j++) {
-				nextCombination[j] = expressionSet.get(js[j]);
-			}
-			final ClauseList combinedCondition = new ClauseList();
-			combiner.combineConditions(nextCombination, combinedCondition);
-			return combinedCondition;
-		} else {
-			return null;
-		}
-	}
+    @Override
+    public ClauseList get() {
+        final int[] js = supplier.get();
+        if (js != null) {
+            for (int j = 0; j < js.length; j++) {
+                nextCombination[j] = expressionSet.get(js[j]);
+            }
+            final ClauseList combinedCondition = new ClauseList();
+            combiner.combineConditions(nextCombination, combinedCondition);
+            return combinedCondition;
+        } else {
+            return null;
+        }
+    }
 
-	@Override
-	public long size() {
-		return numberOfCombinations;
-	}
-
+    @Override
+    public long size() {
+        return numberOfCombinations;
+    }
 }

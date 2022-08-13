@@ -20,9 +20,8 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.List;
-
 import de.featjar.clauses.LiteralList;
+import java.util.List;
 
 /**
  * Base class for an analysis that works on a list of clauses. Clauses can be
@@ -35,23 +34,22 @@ import de.featjar.clauses.LiteralList;
  */
 public abstract class AClauseAnalysis<T> extends Sat4JAnalysis<T> {
 
-	protected List<LiteralList> clauseList;
-	protected int[] clauseGroupSize;
+    protected List<LiteralList> clauseList;
+    protected int[] clauseGroupSize;
 
-	public List<LiteralList> getClauseList() {
-		return clauseList;
-	}
+    public List<LiteralList> getClauseList() {
+        return clauseList;
+    }
 
-	public void setClauseList(List<LiteralList> clauseList) {
-		this.clauseList = clauseList;
-	}
+    public void setClauseList(List<LiteralList> clauseList) {
+        this.clauseList = clauseList;
+    }
 
-	public int[] getClauseGroups() {
-		return clauseGroupSize;
-	}
+    public int[] getClauseGroups() {
+        return clauseGroupSize;
+    }
 
-	public void setClauseGroupSize(int[] clauseGroups) {
-		this.clauseGroupSize = clauseGroups;
-	}
-
+    public void setClauseGroupSize(int[] clauseGroups) {
+        this.clauseGroupSize = clauseGroups;
+    }
 }

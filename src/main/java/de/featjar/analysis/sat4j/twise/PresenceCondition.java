@@ -20,12 +20,11 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
+import de.featjar.clauses.ClauseList;
+import de.featjar.clauses.LiteralList;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
-
-import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.LiteralList;
 
 /**
  * Represents a presence condition as an expression.
@@ -34,37 +33,36 @@ import de.featjar.clauses.LiteralList;
  */
 public class PresenceCondition extends ClauseList {
 
-	private static final long serialVersionUID = -292364320078721008L;
+    private static final long serialVersionUID = -292364320078721008L;
 
-	private transient final TreeSet<Integer> groups = new TreeSet<>();
+    private final transient TreeSet<Integer> groups = new TreeSet<>();
 
-	public PresenceCondition() {
-		super();
-	}
+    public PresenceCondition() {
+        super();
+    }
 
-	public PresenceCondition(ClauseList otherClauseList) {
-		super(otherClauseList);
-	}
+    public PresenceCondition(ClauseList otherClauseList) {
+        super(otherClauseList);
+    }
 
-	public PresenceCondition(Collection<? extends LiteralList> c) {
-		super(c);
-	}
+    public PresenceCondition(Collection<? extends LiteralList> c) {
+        super(c);
+    }
 
-	public PresenceCondition(int size) {
-		super(size);
-	}
+    public PresenceCondition(int size) {
+        super(size);
+    }
 
-	public void addGroup(int group) {
-		groups.add(group);
-	}
+    public void addGroup(int group) {
+        groups.add(group);
+    }
 
-	public Set<Integer> getGroups() {
-		return groups;
-	}
+    public Set<Integer> getGroups() {
+        return groups;
+    }
 
-	@Override
-	public String toString() {
-		return "Expression [" + super.toString() + "]";
-	}
-
+    @Override
+    public String toString() {
+        return "Expression [" + super.toString() + "]";
+    }
 }

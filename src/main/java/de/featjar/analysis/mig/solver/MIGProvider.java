@@ -20,8 +20,6 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import java.nio.file.Path;
-
 import de.featjar.analysis.mig.io.MIGFormat;
 import de.featjar.clauses.CNFProvider;
 import de.featjar.util.data.Cache;
@@ -29,6 +27,7 @@ import de.featjar.util.data.Identifier;
 import de.featjar.util.data.Provider;
 import de.featjar.util.data.Result;
 import de.featjar.util.io.format.FormatSupplier;
+import java.nio.file.Path;
 
 /**
  * Abstract creator to derive an element from a {@link Cache }.
@@ -38,35 +37,35 @@ import de.featjar.util.io.format.FormatSupplier;
 @FunctionalInterface
 public interface MIGProvider extends Provider<MIG> {
 
-	Identifier<MIG> identifier = new Identifier<>();
+    Identifier<MIG> identifier = new Identifier<>();
 
-	@Override
-	default Identifier<MIG> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    default Identifier<MIG> getIdentifier() {
+        return identifier;
+    }
 
-	static MIGProvider empty() {
-		return (c, m) -> Result.empty();
-	}
+    static MIGProvider empty() {
+        return (c, m) -> Result.empty();
+    }
 
-	static MIGProvider of(MIG mig) {
-		return (c, m) -> Result.of(mig);
-	}
+    static MIGProvider of(MIG mig) {
+        return (c, m) -> Result.of(mig);
+    }
 
-	static MIGProvider loader(Path path) {
-		return (c, m) -> Provider.load(path, FormatSupplier.of(new MIGFormat()));
-	}
+    static MIGProvider loader(Path path) {
+        return (c, m) -> Provider.load(path, FormatSupplier.of(new MIGFormat()));
+    }
 
-	static <T> MIGProvider fromFormula() {
-		return (c, m) -> Provider.convert(c, CNFProvider.identifier, new RegularMIGBuilder(), m);
-	}
+    static <T> MIGProvider fromFormula() {
+        return (c, m) -> Provider.convert(c, CNFProvider.identifier, new RegularMIGBuilder(), m);
+    }
 
-	static <T> MIGProvider fromCNF() {
-		return (c, m) -> Provider.convert(c, CNFProvider.fromFormula(), new RegularMIGBuilder(), m);
-	}
+    static <T> MIGProvider fromCNF() {
+        return (c, m) -> Provider.convert(c, CNFProvider.fromFormula(), new RegularMIGBuilder(), m);
+    }
 
-//	static <T> MIGProvider fromOldMig(MIG oldMig) {
-//		return (c, m) -> Provider.convert(c, CNFProvider.identifier, new IncrementalMIGBuilder(oldMig), m);
-//	}
+    //	static <T> MIGProvider fromOldMig(MIG oldMig) {
+    //		return (c, m) -> Provider.convert(c, CNFProvider.identifier, new IncrementalMIGBuilder(oldMig), m);
+    //	}
 
 }

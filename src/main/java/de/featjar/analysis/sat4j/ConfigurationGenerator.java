@@ -20,33 +20,31 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.Spliterator;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import de.featjar.analysis.Analysis;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Cache;
 import de.featjar.util.job.InternalMonitor;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Interface for configuration generators. Can be used as a {@link Supplier} or
  * to get a {@link Stream} or a {@link SolutionList} of configurations.
- * 
+ *
  * @author Sebastian Krieter
  */
-public interface ConfigurationGenerator extends Analysis<SolutionList>, Supplier<LiteralList>,
-	Spliterator<LiteralList> {
+public interface ConfigurationGenerator
+        extends Analysis<SolutionList>, Supplier<LiteralList>, Spliterator<LiteralList> {
 
-	void init(Cache rep, InternalMonitor monitor);
+    void init(Cache rep, InternalMonitor monitor);
 
-	int getLimit();
+    int getLimit();
 
-	void setLimit(int limit);
+    void setLimit(int limit);
 
-	boolean isAllowDuplicates();
+    boolean isAllowDuplicates();
 
-	void setAllowDuplicates(boolean allowDuplicates);
-
+    void setAllowDuplicates(boolean allowDuplicates);
 }

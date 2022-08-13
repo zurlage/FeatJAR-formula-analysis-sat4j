@@ -30,31 +30,30 @@ import de.featjar.util.io.format.Format;
  */
 public class MIGFormat implements Format<MIG> {
 
-	public static final String ID = "format.mig." + MIGFormat.class.getSimpleName();
+    public static final String ID = "format.mig." + MIGFormat.class.getSimpleName();
 
-	@Override
-	public boolean supportsParse() {
-		return true;
-	}
+    @Override
+    public boolean supportsParse() {
+        return true;
+    }
 
-	@Override
-	public boolean supportsSerialize() {
-		return true;
-	}
+    @Override
+    public boolean supportsSerialize() {
+        return true;
+    }
 
-	@Override
-	public String getIdentifier() {
-		return ID;
-	}
+    @Override
+    public String getIdentifier() {
+        return ID;
+    }
 
-	@Override
-	public String getName() {
-		return "ModalImplicationGraph";
-	}
+    @Override
+    public String getName() {
+        return "ModalImplicationGraph";
+    }
 
-	@Override
-	public String getFileExtension() {
-		return "mig";
-	}
-
+    @Override
+    public String getFileExtension() {
+        return "mig";
+    }
 }

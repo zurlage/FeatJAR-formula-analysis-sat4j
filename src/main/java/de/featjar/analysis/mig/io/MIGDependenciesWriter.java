@@ -20,12 +20,11 @@
  */
 package de.featjar.analysis.mig.io;
 
-import java.util.List;
-
 import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
+import java.util.List;
 
 /**
  * Computes a textual representation of the feature relationships in a modal
@@ -35,45 +34,44 @@ import de.featjar.formula.structure.atomic.literal.VariableMap;
  */
 public class MIGDependenciesWriter {
 
-	public String write(final MIG mig, final VariableMap variables) {
-		final StringBuilder sb = new StringBuilder();
-		sb.append("X ALWAYS Y := If X is selected then Y is selected in every valid configuration.\n");
-		sb.append(
-			"X MAYBE  Y := If X is selected then Y is selected in at least one but not all valid configurations. \n");
-		sb.append("X NEVER  Y := If X is selected then Y cannot be selected in any valid configuration.\n\n");
+    public String write(final MIG mig, final VariableMap variables) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("X ALWAYS Y := If X is selected then Y is selected in every valid configuration.\n");
+        sb.append(
+                "X MAYBE  Y := If X is selected then Y is selected in at least one but not all valid configurations. \n");
+        sb.append("X NEVER  Y := If X is selected then Y cannot be selected in any valid configuration.\n\n");
 
-		final List<Vertex> adjList = mig.getVertices();
-		for (final Vertex vertex : adjList) {
-			if (!vertex.isCore() && !vertex.isDead()) {
-				final int var = vertex.getVar();
-				if (var > 0) {
-					final String name = variables.getVariableName(var).get();
-					for (final Vertex otherVertex : vertex.getStrongEdges()) {
-						if (!otherVertex.isCore() && !otherVertex.isDead()) {
-							sb.append(name);
-							if (otherVertex.getVar() > 0) {
-								sb.append(" ALWAYS ");
-							} else {
-								sb.append(" NEVER ");
-							}
-							sb.append(variables.getVariableName(otherVertex.getVar()));
-							sb.append("\n");
-						}
-					}
-					for (final LiteralList clause : vertex.getComplexClauses()) {
-						for (final int otherVar : clause.getLiterals()) {
-							if ((otherVar > 0) && (var != otherVar)) {
-								sb.append(name);
-								sb.append(" MAYBE ");
-								sb.append(variables.getVariableName(otherVar));
-								sb.append("\n");
-							}
-						}
-					}
-				}
-			}
-		}
-		return sb.toString();
-	}
-
+        final List<Vertex> adjList = mig.getVertices();
+        for (final Vertex vertex : adjList) {
+            if (!vertex.isCore() && !vertex.isDead()) {
+                final int var = vertex.getVar();
+                if (var > 0) {
+                    final String name = variables.getVariableName(var).get();
+                    for (final Vertex otherVertex : vertex.getStrongEdges()) {
+                        if (!otherVertex.isCore() && !otherVertex.isDead()) {
+                            sb.append(name);
+                            if (otherVertex.getVar() > 0) {
+                                sb.append(" ALWAYS ");
+                            } else {
+                                sb.append(" NEVER ");
+                            }
+                            sb.append(variables.getVariableName(otherVertex.getVar()));
+                            sb.append("\n");
+                        }
+                    }
+                    for (final LiteralList clause : vertex.getComplexClauses()) {
+                        for (final int otherVar : clause.getLiterals()) {
+                            if ((otherVar > 0) && (var != otherVar)) {
+                                sb.append(name);
+                                sb.append(" MAYBE ");
+                                sb.append(variables.getVariableName(otherVar));
+                                sb.append("\n");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
 }

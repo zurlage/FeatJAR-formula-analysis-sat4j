@@ -22,14 +22,13 @@ package de.featjar.analysis.mig.solver.visitor;
 
 public interface ITraverser {
 
-	Visitor<?> getVisitor();
+    Visitor<?> getVisitor();
 
-	void setVisitor(Visitor<?> visitor);
+    void setVisitor(Visitor<?> visitor);
 
-	void setModel(int[] model);
+    void setModel(int[] model);
 
-	void traverse(int... curLiterals);
+    void traverse(int... curLiterals);
 
-	void traverseStrong(int... curLiterals);
-
+    void traverseStrong(int... curLiterals);
 }

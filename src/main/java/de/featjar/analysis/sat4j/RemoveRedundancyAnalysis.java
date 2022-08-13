@@ -20,19 +20,17 @@
  */
 package de.featjar.analysis.sat4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.sat4j.specs.IConstr;
-
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
 import de.featjar.util.job.InternalMonitor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.sat4j.specs.IConstr;
 
 /**
  * Finds redundant clauses with respect to a given {@link CNF}. This analysis
@@ -53,86 +51,85 @@ import de.featjar.util.job.InternalMonitor;
  */
 public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
-	public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
+    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
 
-	@Override
-	public Identifier<List<LiteralList>> getIdentifier() {
-		return identifier;
-	}
+    @Override
+    public Identifier<List<LiteralList>> getIdentifier() {
+        return identifier;
+    }
 
-	public RemoveRedundancyAnalysis() {
-		super();
-	}
+    public RemoveRedundancyAnalysis() {
+        super();
+    }
 
-	public RemoveRedundancyAnalysis(List<LiteralList> clauseList) {
-		this.clauseList = clauseList;
-	}
+    public RemoveRedundancyAnalysis(List<LiteralList> clauseList) {
+        this.clauseList = clauseList;
+    }
 
-	@Override
-	public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
-		if (clauseList == null) {
-			return Collections.emptyList();
-		}
-		if (clauseGroupSize == null) {
-			clauseGroupSize = new int[clauseList.size()];
-			Arrays.fill(clauseGroupSize, 1);
-		}
-		monitor.setTotalWork(clauseGroupSize.length + 1);
+    @Override
+    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+        if (clauseList == null) {
+            return Collections.emptyList();
+        }
+        if (clauseGroupSize == null) {
+            clauseGroupSize = new int[clauseList.size()];
+            Arrays.fill(clauseGroupSize, 1);
+        }
+        monitor.setTotalWork(clauseGroupSize.length + 1);
 
-		final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
-		for (int i = 0; i < clauseList.size(); i++) {
-			resultList.add(null);
-		}
+        final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+        for (int i = 0; i < clauseList.size(); i++) {
+            resultList.add(null);
+        }
 
-		final List<IConstr> constrs = new ArrayList<>(clauseList.size());
-		for (final LiteralList clause : clauseList) {
-			constrs.add(solver.getFormula().push(clause));
-		}
+        final List<IConstr> constrs = new ArrayList<>(clauseList.size());
+        for (final LiteralList clause : clauseList) {
+            constrs.add(solver.getFormula().push(clause));
+        }
 
-		monitor.step();
+        monitor.step();
 
-		int endIndex = 0;
-		for (int i = 0; i < clauseGroupSize.length; i++) {
-			final int startIndex = endIndex;
-			endIndex += clauseGroupSize[i];
-			boolean completelyRedundant = true;
-			boolean removedAtLeastOne = false;
-			for (int j = startIndex; j < endIndex; j++) {
-				final IConstr cm = constrs.get(j);
-				if (cm != null) {
-					removedAtLeastOne = true;
-					solver.getFormula().remove(cm);
-				}
-			}
+        int endIndex = 0;
+        for (int i = 0; i < clauseGroupSize.length; i++) {
+            final int startIndex = endIndex;
+            endIndex += clauseGroupSize[i];
+            boolean completelyRedundant = true;
+            boolean removedAtLeastOne = false;
+            for (int j = startIndex; j < endIndex; j++) {
+                final IConstr cm = constrs.get(j);
+                if (cm != null) {
+                    removedAtLeastOne = true;
+                    solver.getFormula().remove(cm);
+                }
+            }
 
-			if (removedAtLeastOne) {
-				for (int j = startIndex; j < endIndex; j++) {
-					final LiteralList clause = clauseList.get(j);
+            if (removedAtLeastOne) {
+                for (int j = startIndex; j < endIndex; j++) {
+                    final LiteralList clause = clauseList.get(j);
 
-					final SatSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
-					switch (hasSolution) {
-					case FALSE:
-						break;
-					case TIMEOUT:
-						reportTimeout();
-						break;
-					case TRUE:
-						solver.getFormula().push(clause);
-						completelyRedundant = false;
-						break;
-					default:
-						throw new AssertionError(hasSolution);
-					}
-				}
-			}
+                    final SatSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
+                    switch (hasSolution) {
+                        case FALSE:
+                            break;
+                        case TIMEOUT:
+                            reportTimeout();
+                            break;
+                        case TRUE:
+                            solver.getFormula().push(clause);
+                            completelyRedundant = false;
+                            break;
+                        default:
+                            throw new AssertionError(hasSolution);
+                    }
+                }
+            }
 
-			if (completelyRedundant) {
-				resultList.set(i, clauseList.get(startIndex));
-			}
-			monitor.step();
-		}
+            if (completelyRedundant) {
+                resultList.set(i, clauseList.get(startIndex));
+            }
+            monitor.step();
+        }
 
-		return resultList;
-	}
-
+        return resultList;
+    }
 }

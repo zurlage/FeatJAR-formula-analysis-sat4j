@@ -30,10 +30,11 @@ import de.featjar.clauses.ClauseList;
  */
 interface ICoverStrategy {
 
-	enum CombinationStatus {
-		NOT_COVERED, COVERED, INVALID,
-	}
+    enum CombinationStatus {
+        NOT_COVERED,
+        COVERED,
+        INVALID,
+    }
 
-	CombinationStatus cover(final ClauseList nextCondition);
-
+    CombinationStatus cover(final ClauseList nextCondition);
 }
