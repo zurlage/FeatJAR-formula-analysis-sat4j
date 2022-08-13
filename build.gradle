@@ -6,3 +6,10 @@ dependencies {
     api 'de.featjar:formula'
     api 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.5'
 }
+
+license {
+    ext {
+        author = 'Sebastian Krieter'
+        url = 'https://github.com/FeatJAR/formula-analysis-sat4j'
+    }
+}
