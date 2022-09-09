@@ -25,7 +25,7 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import org.sat4j.core.VecInt;
 
 /**
@@ -82,7 +82,7 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
     }
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         initialAssignmentLength = solver.getAssumptions().size();
 
         switch (coverStrategy) {

@@ -28,8 +28,8 @@ import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
-import de.featjar.util.job.UpdateThread;
+import de.featjar.util.task.Monitor;
+import de.featjar.util.task.IntervalThread;
 import de.featjar.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,8 +132,8 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     private List<TWiseConfiguration> curResult = null;
     private ArrayList<TWiseConfiguration> bestResult = null;
 
-    protected UpdateThread samplingMonitor;
-    protected UpdateThread memoryMonitor;
+    protected IntervalThread samplingMonitor;
+    protected IntervalThread memoryMonitor;
 
     private int maxSampleSize = Integer.MAX_VALUE;
 
@@ -172,7 +172,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     }
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         Logger.logDebug("Create util instance... ");
         final CNF cnf = solver.getCnf();
         solver.rememberSolutionHistory(10);
@@ -228,7 +228,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         } finally {
             //			memoryMonitor.finish();
             if (TWiseConfigurationGenerator.VERBOSE) {
-                samplingMonitor.finish();
+                samplingMonitor.interrupt();
             }
         }
     }

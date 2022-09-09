@@ -26,7 +26,7 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +63,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public List<LiteralList> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             clauseList = solver.getCnf().getClauses();
         }
@@ -71,13 +71,13 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
             clauseGroupSize = new int[clauseList.size()];
             Arrays.fill(clauseGroupSize, 1);
         }
-        monitor.setTotalWork(clauseList.size() + 1);
+        monitor.setTotalSteps(clauseList.size() + 1);
 
         final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
         for (int i = 0; i < clauseList.size(); i++) {
             resultList.add(null);
         }
-        monitor.step();
+        monitor.addStep();
 
         int endIndex = 0;
         for (int i = 0; i < clauseGroupSize.length; i++) {
@@ -89,7 +89,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
                 solver.getFormula().push(subList);
             } catch (final RuntimeContradictionException e) {
                 resultList.set(i, clauseList.get(startIndex));
-                monitor.step();
+                monitor.addStep();
                 continue;
             }
 
@@ -108,7 +108,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
             }
 
             solver.getFormula().pop(subList.size());
-            monitor.step();
+            monitor.addStep();
         }
 
         return resultList;

@@ -35,7 +35,7 @@ import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Pair;
 import de.featjar.util.io.IO;
-import de.featjar.util.job.Executor;
+import de.featjar.util.task.Executor;
 import de.featjar.util.logging.Logger;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public class TWiseConfigurationUtil {
         randomGenerator.setAllowDuplicates(true);
         randomGenerator.setRandom(random);
         randomGenerator.setLimit(randomSampleSize);
-        randomSample = Executor.run(randomGenerator::execute, cnf) //
+        randomSample = Executor.apply(randomGenerator::execute, cnf) //
                 .map(SolutionList::getSolutions) //
                 .orElse(Logger::logProblems);
 
@@ -122,7 +122,7 @@ public class TWiseConfigurationUtil {
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(migCheckRedundancy);
         migBuilder.setDetectStrong(migDetectStrong);
-        mig = Executor.run(migBuilder, cnf).get();
+        mig = Executor.apply(migBuilder, cnf).get();
         setupMIG();
     }
 

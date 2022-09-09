@@ -30,8 +30,8 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.Executor;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Executor;
+import de.featjar.util.task.Monitor;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -381,14 +381,14 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
     }
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         numVariables = solver.getCnf().getVariableMap().getVariableCount();
         solver.rememberSolutionHistory(Math.min(numVariables, AbstractSat4JSolver.MAX_SOLUTION_BUFFER));
 
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(true);
         migBuilder.setDetectStrong(true);
-        final MIG mig = Executor.run(migBuilder, solver.getCnf()).get();
+        final MIG mig = Executor.apply(migBuilder, solver.getCnf()).get();
 
         combinations = new byte[numVariables * numVariables];
         combinations2 = new byte[numVariables * numVariables];

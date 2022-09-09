@@ -27,8 +27,8 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.Executor;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Executor;
+import de.featjar.util.task.Monitor;
 import de.featjar.util.logging.Logger;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
     private SampleDistribution dist;
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         satisfiable = findCoreFeatures(solver);
         if (!satisfiable) {
             return;
@@ -61,7 +61,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         gen.setAllowDuplicates(false);
         gen.setRandom(getRandom());
         gen.setLimit(sampleSize);
-        sample = Executor.run(gen::execute, solver.getCnf())
+        sample = Executor.apply(gen::execute, solver.getCnf())
                 .map(SolutionList::getSolutions)
                 .orElse(Logger::logProblems);
         if ((sample == null) || sample.isEmpty()) {

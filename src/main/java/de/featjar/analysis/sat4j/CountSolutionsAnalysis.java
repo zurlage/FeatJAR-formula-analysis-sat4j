@@ -26,7 +26,7 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 
 /**
  * Attempts to count the number of possible solutions of a given {@link CNF}.
@@ -43,7 +43,7 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
     }
 
     @Override
-    public Long analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public Long analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         solver.setGlobalTimeout(true);
         long solutionCount = 0;
         SatSolver.SatResult hasSolution = solver.hasSolution();

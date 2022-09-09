@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class TWiseCoverageMetrics {
 
-    public final class TWiseCoverageMetric implements SampleMetric {
+    public class TWiseCoverageMetric implements SampleMetric {
         private final int t;
         private boolean firstUse = true;
 

@@ -26,8 +26,8 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.job.InternalMonitor;
-import de.featjar.util.job.MonitorableFunction;
+import de.featjar.util.task.Monitor;
+import de.featjar.util.task.MonitorableFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,8 +73,8 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
         return fixedFeatures != null;
     }
 
-    protected void findCoreFeatures(InternalMonitor monitor) {
-        monitor.setTotalWork(fixedFeatures.length);
+    protected void findCoreFeatures(Monitor monitor) {
+        monitor.setTotalSteps(fixedFeatures.length);
 
         solver.setSelectionStrategy(SStrategy.inverse(fixedFeatures));
 
@@ -100,29 +100,29 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                         break;
                 }
             }
-            monitor.step();
+            monitor.addStep();
         }
-        monitor.done();
+        monitor.setDone();
     }
 
-    protected long addClauses(CNF cnf, boolean checkRedundancy, InternalMonitor monitor) {
-        monitor.setTotalWork(cleanedClausesList.size());
+    protected long addClauses(CNF cnf, boolean checkRedundancy, Monitor monitor) {
+        monitor.setTotalSteps(cleanedClausesList.size());
         Stream<LiteralList> stream = cleanedClausesList.stream();
         if (checkRedundancy) {
             final Sat4JSolver newSolver = new Sat4JSolver(new CNF(cnf.getVariableMap()));
             stream = stream.sorted(lengthComparator)
                     .distinct()
-                    .peek(c -> monitor.step())
+                    .peek(c -> monitor.addStep())
                     .filter(
                             clause -> //
                             (clause.getLiterals().length < 3) //
                                             || !isRedundant(newSolver, clause)) //
                     .peek(newSolver.getFormula()::push); //
         } else {
-            stream = stream.distinct().peek(c -> monitor.step());
+            stream = stream.distinct().peek(c -> monitor.addStep());
         }
         final long count = stream.peek(mig::addClause).count();
-        monitor.done();
+        monitor.setDone();
         return count;
     }
 
@@ -251,8 +251,8 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
         return solver.hasSolution(curClause.negate()) == SatSolver.SatResult.FALSE;
     }
 
-    protected void bfsStrong(InternalMonitor monitor) {
-        monitor.setTotalWork(mig.getVertices().size());
+    protected void bfsStrong(Monitor monitor) {
+        monitor.setTotalSteps(mig.getVertices().size());
         final boolean[] mark = new boolean[mig.size() + 1];
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
         for (final Vertex vertex : mig.getVertices()) {
@@ -278,13 +278,13 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                     }
                 }
             }
-            monitor.step();
+            monitor.addStep();
         }
-        monitor.done();
+        monitor.setDone();
     }
 
-    protected void bfsWeak(LiteralList affectedVariables, InternalMonitor monitor) {
-        monitor.setTotalWork(mig.getVertices().size());
+    protected void bfsWeak(LiteralList affectedVariables, Monitor monitor) {
+        monitor.setTotalSteps(mig.getVertices().size());
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
         final ArrayList<Integer> literals = new ArrayList<>();
         final boolean[] mark = new boolean[mig.size() + 1];
@@ -419,13 +419,13 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                 }
             }
             solver.getAssumptions().clear(orgSize);
-            monitor.step();
+            monitor.addStep();
         }
         for (final Vertex vertex : mig.getVertices()) {
             vertex.getStrongEdges().clear();
             vertex.getComplexClauses().clear();
         }
-        monitor.done();
+        monitor.setDone();
     }
 
     protected void finish() {

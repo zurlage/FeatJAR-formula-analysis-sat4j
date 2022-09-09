@@ -25,7 +25,7 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,7 +67,7 @@ public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>>
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public List<LiteralList> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             return Collections.emptyList();
         }
@@ -75,7 +75,7 @@ public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>>
             clauseGroupSize = new int[clauseList.size()];
             Arrays.fill(clauseGroupSize, 1);
         }
-        monitor.setTotalWork(clauseGroupSize.length + 1);
+        monitor.setTotalSteps(clauseGroupSize.length + 1);
 
         final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
         for (int i = 0; i < clauseList.size(); i++) {
@@ -87,7 +87,7 @@ public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>>
             constrs.add(solver.getFormula().push(clause));
         }
 
-        monitor.step();
+        monitor.addStep();
 
         int endIndex = 0;
         for (int i = 0; i < clauseGroupSize.length; i++) {
@@ -127,7 +127,7 @@ public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>>
             if (completelyRedundant) {
                 resultList.set(i, clauseList.get(startIndex));
             }
-            monitor.step();
+            monitor.addStep();
         }
 
         return resultList;

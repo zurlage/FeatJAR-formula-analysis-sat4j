@@ -25,7 +25,7 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Arrays;
 import java.util.List;
 import org.sat4j.core.VecInt;
@@ -47,11 +47,11 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
     }
 
     @Override
-    public LiteralList analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public LiteralList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         if (variables == null) {
             variables = LiteralList.getVariables(solver.getVariables());
         }
-        monitor.setTotalWork(variables.getLiterals().length);
+        monitor.setTotalSteps(variables.getLiterals().length);
 
         final VecInt resultList = new VecInt();
         variableLoop:
@@ -64,11 +64,11 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
                     try {
                         modSolver.getFormula().push(newClause);
                     } catch (final RuntimeContradictionException e) {
-                        monitor.step();
+                        monitor.addStep();
                         continue variableLoop;
                     }
                 } else {
-                    monitor.step();
+                    monitor.addStep();
                     continue variableLoop;
                 }
             }
@@ -86,7 +86,7 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
                 default:
                     throw new AssertionError(hasSolution);
             }
-            monitor.step();
+            monitor.addStep();
         }
         return new LiteralList(Arrays.copyOf(resultList.toArray(), resultList.size()));
     }

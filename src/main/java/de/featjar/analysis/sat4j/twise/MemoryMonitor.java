@@ -20,9 +20,7 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import de.featjar.util.job.UpdateFunction;
-
-public final class MemoryMonitor implements UpdateFunction {
+public class MemoryMonitor implements UpdateFunction {
 
     public long maxUsedMemory = 0;
     public long maxAllocatedMemory = 0;

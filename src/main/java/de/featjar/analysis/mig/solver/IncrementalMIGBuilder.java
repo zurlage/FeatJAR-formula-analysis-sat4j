@@ -29,7 +29,7 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.Clauses;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -60,30 +60,30 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     }
 
     @Override
-    public MIG execute(CNF cnf, InternalMonitor monitor) throws Exception {
+    public MIG execute(CNF cnf, Monitor monitor) {
         Objects.requireNonNull(cnf);
         Objects.requireNonNull(oldMig);
 
         collect(cnf);
-        monitor.step();
+        monitor.addStep();
 
         if (!satCheck(cnf)) {
             throw new RuntimeContradictionException("CNF is not satisfiable!");
         }
-        monitor.step();
+        monitor.addStep();
         core(cnf, monitor);
-        monitor.step();
+        monitor.addStep();
 
         cleanClauses();
-        monitor.step();
+        monitor.addStep();
 
         if (detectStrong) {
             checkOldStrong();
 
             if (add) {
-                addClauses(cnf, false, monitor.subTask(10));
+                addClauses(cnf, false, monitor.createChildMonitor(10));
 
-                bfsStrong(monitor.subTask(10));
+                bfsStrong(monitor.createChildMonitor(10));
 
                 final LiteralList affectedVariables = new LiteralList(
                         addedClauses.stream() //
@@ -94,7 +94,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                 .distinct() //
                                 .toArray(), //
                         LiteralList.Order.NATURAL);
-                bfsWeak(affectedVariables, monitor.subTask(1000));
+                bfsWeak(affectedVariables, monitor.createChildMonitor(1000));
             }
             mig.setStrongStatus(BuildStatus.Incremental);
         } else {
@@ -104,10 +104,10 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         add(cnf, checkRedundancy, addedClauses);
 
         bfsStrong(monitor);
-        monitor.step();
+        monitor.addStep();
 
         finish();
-        monitor.step();
+        monitor.addStep();
         return mig;
     }
 
@@ -172,7 +172,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         //		changeRatio = (addedClauses.size() + removedClauses.size()) / (double) allClauses.size();
     }
 
-    private void core(CNF cnf, InternalMonitor monitor) {
+    private void core(CNF cnf, Monitor monitor) {
         final int[] coreDead = oldMig.getVertices().stream() //
                 .filter(Vertex::isCore) //
                 .mapToInt(Vertex::getVar) //

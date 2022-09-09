@@ -26,8 +26,8 @@ import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.Executor;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Executor;
+import de.featjar.util.task.Monitor;
 import de.featjar.util.logging.Logger;
 
 /**
@@ -47,9 +47,9 @@ public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerato
     private MIGDistribution dist;
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
-        final MIG mig = Executor.run(migBuilder, solver.getCnf()).orElse(Logger::logProblems);
+        final MIG mig = Executor.apply(migBuilder, solver.getCnf()).orElse(Logger::logProblems);
         satisfiable = mig != null;
         if (!satisfiable) {
             return;

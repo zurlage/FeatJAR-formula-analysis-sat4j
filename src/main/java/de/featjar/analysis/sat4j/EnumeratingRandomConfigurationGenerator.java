@@ -23,8 +23,8 @@ package de.featjar.analysis.sat4j;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.Executor;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Executor;
+import de.featjar.util.task.Monitor;
 import de.featjar.util.logging.Logger;
 import java.util.Collections;
 import java.util.List;
@@ -46,9 +46,9 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
     private List<LiteralList> allConfigurations;
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         final AllConfigurationGenerator gen = new AllConfigurationGenerator();
-        allConfigurations = Executor.run(gen::execute, solver.getCnf(), monitor)
+        allConfigurations = Executor.apply(gen::execute, solver.getCnf(), monitor)
                 .map(SolutionList::getSolutions)
                 .orElse(Collections::emptyList, Logger::logProblems);
         if (!allowDuplicates) {

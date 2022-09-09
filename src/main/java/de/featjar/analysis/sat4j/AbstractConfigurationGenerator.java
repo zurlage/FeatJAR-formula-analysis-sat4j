@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Cache;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -90,24 +90,24 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
     }
 
     @Override
-    public void init(Cache c, InternalMonitor monitor) {
+    public void init(Cache c, Monitor monitor) {
         solver = createSolver(c.get(solverInputProvider).get());
         monitor.checkCancel();
         prepareSolver(solver);
         init(monitor);
     }
 
-    protected void init(InternalMonitor monitor) {}
+    protected void init(Monitor monitor) {}
 
     @Override
-    public final SolutionList analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public final SolutionList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         init(monitor);
-        monitor.setTotalWork(maxSampleSize);
+        monitor.setTotalSteps(maxSampleSize);
         return new SolutionList(
                 solver.getVariables(),
                 StreamSupport.stream(this, false) //
                         .limit(maxSampleSize) //
-                        .peek(c -> monitor.step()) //
+                        .peek(c -> monitor.addStep()) //
                         .collect(Collectors.toCollection(ArrayList::new)));
     }
 }

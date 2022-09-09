@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 
 /**
  * Determines whether a given {@link CNF} is satisfiable and returns the found
@@ -42,7 +42,7 @@ public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
     }
 
     @Override
-    public Boolean analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public Boolean analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         final SatSolver.SatResult hasSolution = solver.hasSolution();
         switch (hasSolution) {
             case FALSE:

@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Random;
 
 /**
@@ -40,7 +40,7 @@ public abstract class RandomConfigurationGenerator extends AbstractConfiguration
     }
 
     @Override
-    protected void init(InternalMonitor monitor) {
+    protected void init(Monitor monitor) {
         super.init(monitor);
         satisfiable = true;
     }

@@ -24,7 +24,7 @@ import de.featjar.analysis.Analysis;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Cache;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Spliterator;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 public interface ConfigurationGenerator
         extends Analysis<SolutionList>, Supplier<LiteralList>, Spliterator<LiteralList> {
 
-    void init(Cache rep, InternalMonitor monitor);
+    void init(Cache rep, Monitor monitor);
 
     int getLimit();
 

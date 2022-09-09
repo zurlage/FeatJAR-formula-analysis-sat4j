@@ -28,7 +28,7 @@ import de.featjar.analysis.mig.solver.visitor.Traverser;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import org.sat4j.core.VecInt;
 
 /**
@@ -69,8 +69,8 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
     }
 
     @Override
-    public LiteralList analyze(Sat4JMIGSolver solver, InternalMonitor monitor) throws Exception {
-        monitor.setTotalWork(solver.getVariables().getVariableCount() + 2);
+    public LiteralList analyze(Sat4JMIGSolver solver, Monitor monitor) throws Exception {
+        monitor.setTotalSteps(solver.getVariables().getVariableCount() + 2);
 
         final Traverser traverser = solver.mig.traverse();
         solver.getAssumptions().ensureSize(fixedVariables.length + 1);
@@ -79,7 +79,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
         for (final int fixedVar : fixedVariables) {
             final int var = Math.abs(fixedVar);
             knownValues[var - 1] = fixedVar;
-            monitor.step();
+            monitor.addStep();
         }
 
         // get core / dead variables
@@ -87,7 +87,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
             if (vertex.isCore()) {
                 final int var = vertex.getVar();
                 knownValues[Math.abs(var) - 1] = var;
-                monitor.step();
+                monitor.addStep();
             }
         }
 
@@ -100,13 +100,13 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
         final VecInt computedValues = visitor.getResult()[0];
         VecInt valuesToCompute = visitor.getResult()[1];
 
-        monitor.setTotalWork(valuesToCompute.size() + computedValues.size() + 3);
+        monitor.setTotalSteps(valuesToCompute.size() + computedValues.size() + 3);
 
         for (int i = 0; i < computedValues.size(); i++) {
             final int computedVar = computedValues.get(i);
             final int var = Math.abs(computedVar);
             knownValues[var - 1] = computedVar;
-            monitor.step();
+            monitor.addStep();
         }
 
         if (variableOrder != null) {
@@ -133,12 +133,12 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
         if (!valuesToCompute.isEmpty()) {
             solver.setSelectionStrategy(SStrategy.positive());
             final int[] unknownValues = solver.findSolution().getLiterals();
-            monitor.step();
+            monitor.addStep();
 
             if (unknownValues != null) {
                 solver.setSelectionStrategy(SStrategy.negative());
                 final int[] model2 = solver.findSolution().getLiterals();
-                monitor.step();
+                monitor.addStep();
 
                 LiteralList.resetConflicts(unknownValues, model2);
                 solver.setSelectionStrategy(SStrategy.inverse(unknownValues));
@@ -149,7 +149,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
                         unknownValues[k] = 0;
                     }
                 }
-                monitor.step();
+                monitor.addStep();
 
                 sat(solver, unknownValues, valuesToCompute, monitor, traverser);
             }
@@ -162,7 +162,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
             Sat4JMIGSolver solver,
             int[] unknownValues,
             VecInt valuesToCalculate,
-            InternalMonitor monitor,
+            Monitor monitor,
             Traverser traverser) {
         final CollectingVisitor visitor = new CollectingVisitor();
         traverser.setVisitor(visitor);
@@ -177,20 +177,20 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);
                         unknownValues[i] = 0;
-                        monitor.step();
+                        monitor.addStep();
                         traverser.traverseStrong(varX);
                         final VecInt newFoundValues = visitor.getResult()[0];
                         for (int j = 0; j < newFoundValues.size(); j++) {
                             final int var = newFoundValues.get(j);
                             solver.getAssumptions().push(var);
                             unknownValues[Math.abs(var) - 1] = 0;
-                            monitor.step();
+                            monitor.addStep();
                         }
                         break;
                     case TIMEOUT:
                         solver.getAssumptions().pop();
                         unknownValues[Math.abs(varX) - 1] = 0;
-                        monitor.step();
+                        monitor.addStep();
                         break;
                     case TRUE:
                         solver.getAssumptions().pop();

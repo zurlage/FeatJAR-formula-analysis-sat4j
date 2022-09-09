@@ -25,7 +25,7 @@ import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -66,7 +66,7 @@ public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public List<LiteralList> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             return Collections.emptyList();
         }
@@ -74,7 +74,7 @@ public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
             clauseGroupSize = new int[clauseList.size()];
             Arrays.fill(clauseGroupSize, 1);
         }
-        monitor.setTotalWork(clauseList.size() + 1);
+        monitor.setTotalSteps(clauseList.size() + 1);
 
         final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
         for (int i = 0; i < clauseList.size(); i++) {
@@ -83,7 +83,7 @@ public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
         // TODO Find a better way of sorting
         // final Integer[] index = Functional.getSortedIndex(resultList, new
         // ClauseLengthComparatorDsc());
-        monitor.step();
+        monitor.addStep();
 
         int endIndex = 0;
         for (int i = 0; i < clauseGroupSize.length; i++) {

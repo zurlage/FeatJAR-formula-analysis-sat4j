@@ -46,7 +46,7 @@ import de.featjar.formula.structure.compound.Or;
 import de.featjar.transform.CNFSlicer;
 import de.featjar.util.data.Problem;
 import de.featjar.util.data.Result;
-import de.featjar.util.job.Executor;
+import de.featjar.util.task.Executor;
 import de.featjar.util.logging.Logger;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -88,7 +88,7 @@ public class CNFTest {
 
         final CNF cnf = rep.get(CNFProvider.fromFormula());
         final CNFSlicer slicer = new CNFSlicer(new LiteralList(2));
-        final CNF slicedCNF = Executor.run(slicer, cnf).orElse(Logger::logProblems);
+        final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Logger::logProblems);
 
         cnf.adapt(slicedCNF.getVariableMap()).orElse(Logger::logProblems);
         slicedCNF.adapt(cnf.getVariableMap()).orElse(Logger::logProblems);

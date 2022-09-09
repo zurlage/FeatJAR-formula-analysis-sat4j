@@ -22,7 +22,7 @@ package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.CNF;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 
 /**
  * Adjacency matrix implementation for a feature graph.
@@ -32,38 +32,38 @@ import de.featjar.util.job.InternalMonitor;
 public class RegularMIGBuilder extends MIGBuilder {
 
     @Override
-    public MIG execute(CNF cnf, InternalMonitor monitor) throws Exception {
-        monitor.setTotalWork(24 + (detectStrong ? 1020 : 0) + (checkRedundancy ? 100 : 10));
+    public MIG execute(CNF cnf, Monitor monitor) {
+        monitor.setTotalSteps(24 + (detectStrong ? 1020 : 0) + (checkRedundancy ? 100 : 10));
 
         init(cnf);
-        monitor.step();
+        monitor.addStep();
 
         if (!satCheck(cnf)) {
             throw new RuntimeContradictionException("CNF is not satisfiable!");
         }
-        monitor.step();
-        findCoreFeatures(monitor.subTask(10));
+        monitor.addStep();
+        findCoreFeatures(monitor.createChildMonitor(10));
 
         cleanClauses();
-        monitor.step();
+        monitor.addStep();
 
         if (detectStrong) {
-            addClauses(cnf, false, monitor.subTask(10));
+            addClauses(cnf, false, monitor.createChildMonitor(10));
 
-            bfsStrong(monitor.subTask(10));
+            bfsStrong(monitor.createChildMonitor(10));
 
-            bfsWeak(null, monitor.subTask(1000));
+            bfsWeak(null, monitor.createChildMonitor(1000));
             mig.setStrongStatus(MIG.BuildStatus.Complete);
         } else {
             mig.setStrongStatus(MIG.BuildStatus.None);
         }
 
-        addClauses(cnf, checkRedundancy, monitor.subTask(checkRedundancy ? 100 : 10));
+        addClauses(cnf, checkRedundancy, monitor.createChildMonitor(checkRedundancy ? 100 : 10));
 
-        bfsStrong(monitor.subTask(10));
+        bfsStrong(monitor.createChildMonitor(10));
 
         finish();
-        monitor.step();
+        monitor.addStep();
 
         return mig;
     }

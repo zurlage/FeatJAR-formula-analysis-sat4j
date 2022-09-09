@@ -26,7 +26,7 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.CNFProvider;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Random;
 
 /**
@@ -62,7 +62,8 @@ public abstract class Sat4JAnalysis<T> extends AbstractAnalysis<T, Sat4JSolver, 
         this.random = random;
     }
 
-    public final T execute(CNF cnf, InternalMonitor monitor) {
+    @Override
+    public final T execute(CNF cnf, Monitor monitor) {
         if (solver == null) {
             solver = createSolver(cnf);
         }

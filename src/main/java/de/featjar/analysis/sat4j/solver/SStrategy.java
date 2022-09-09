@@ -38,28 +38,28 @@ public interface SStrategy {
 
     Strategy strategy();
 
-    public static final class OriginalStrategy implements SStrategy {
+    class OriginalStrategy implements SStrategy {
         @Override
         public Strategy strategy() {
             return Strategy.Original;
         }
     }
 
-    public static final class NegativeStrategy implements SStrategy {
+    class NegativeStrategy implements SStrategy {
         @Override
         public Strategy strategy() {
             return Strategy.Negative;
         }
     }
 
-    public static final class PositiveStrategy implements SStrategy {
+    class PositiveStrategy implements SStrategy {
         @Override
         public Strategy strategy() {
             return Strategy.Positive;
         }
     }
 
-    public static final class FixedStrategy implements SStrategy {
+    class FixedStrategy implements SStrategy {
         private final int[] model;
 
         public FixedStrategy(int[] model) {
@@ -76,7 +76,7 @@ public interface SStrategy {
         }
     }
 
-    public static final class InverseFixedStrategy implements SStrategy {
+    class InverseFixedStrategy implements SStrategy {
         private final int[] model;
 
         public InverseFixedStrategy(int[] model) {
@@ -93,7 +93,7 @@ public interface SStrategy {
         }
     }
 
-    public static final class FastRandomStrategy implements SStrategy {
+    class FastRandomStrategy implements SStrategy {
         private final Random random;
 
         public FastRandomStrategy(Random random) {
@@ -110,7 +110,7 @@ public interface SStrategy {
         }
     }
 
-    public static final class UniformRandomStrategy implements SStrategy {
+    class UniformRandomStrategy implements SStrategy {
         private final LiteralDistribution dist;
 
         public UniformRandomStrategy(LiteralDistribution dist) {
@@ -127,7 +127,7 @@ public interface SStrategy {
         }
     }
 
-    public static final class MIGRandomStrategy implements SStrategy {
+    class MIGRandomStrategy implements SStrategy {
         private final MIGDistribution dist;
 
         public MIGRandomStrategy(MIGDistribution dist) {

@@ -23,9 +23,9 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.Executor;
-import de.featjar.util.job.InternalMonitor;
-import de.featjar.util.job.NullMonitor;
+import de.featjar.util.task.Executor;
+import de.featjar.util.task.Monitor;
+import de.featjar.util.task.CancelableMonitor;
 import de.featjar.util.logging.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,7 +97,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
     }
 
     @Override
-    public List<Anomalies> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public List<Anomalies> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             return Collections.emptyList();
         }
@@ -112,26 +112,26 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
         if (anomalies == null) {
             return resultList;
         }
-        monitor.setTotalWork(clauseList.size() + 3);
+        monitor.setTotalSteps(clauseList.size() + 3);
 
         LiteralList remainingVariables = anomalies.deadVariables.getVariables();
         final List<LiteralList> remainingClauses = new ArrayList<>(anomalies.redundantClauses);
-        monitor.step();
+        monitor.addStep();
 
         if (!remainingClauses.isEmpty()) {
-            final List<LiteralList> result = Executor.run(
+            final List<LiteralList> result = Executor.apply(
                             new IndependentRedundancyAnalysis(remainingClauses)::execute, solver.getCnf())
                     .orElse(Logger::logProblems);
             remainingClauses.removeIf(result::contains);
         }
-        monitor.step();
+        monitor.addStep();
 
         if (remainingVariables.getLiterals().length > 0) {
             remainingVariables = remainingVariables.removeAll(
-                    Executor.run(new CoreDeadAnalysis(remainingVariables)::execute, solver.getCnf())
+                    Executor.apply(new CoreDeadAnalysis(remainingVariables)::execute, solver.getCnf())
                             .orElse(Logger::logProblems));
         }
-        monitor.step();
+        monitor.addStep();
 
         int endIndex = 0;
         for (int i = 0; i < clauseGroupSize.length; i++) {
@@ -145,7 +145,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
             if (relevantConstraint[i]) {
                 if (remainingVariables.getLiterals().length > 0) {
                     final LiteralList deadVariables =
-                            new CoreDeadAnalysis(remainingVariables).execute(solver, new NullMonitor());
+                            new CoreDeadAnalysis(remainingVariables).execute(solver, new CancelableMonitor());
                     if (deadVariables.getLiterals().length != 0) {
                         getAnomalies(resultList, i).setDeadVariables(deadVariables);
                         remainingVariables = remainingVariables.removeAll(deadVariables);
@@ -154,7 +154,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
 
                 if (!remainingClauses.isEmpty()) {
                     final List<LiteralList> newClauseList =
-                            new IndependentRedundancyAnalysis(remainingClauses).execute(solver, new NullMonitor());
+                            new IndependentRedundancyAnalysis(remainingClauses).execute(solver, new CancelableMonitor());
                     newClauseList.removeIf(Objects::isNull);
                     if (!newClauseList.isEmpty()) {
                         getAnomalies(resultList, i).setRedundantClauses(newClauseList);
@@ -163,7 +163,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
                 }
             }
 
-            monitor.step();
+            monitor.addStep();
         }
 
         return resultList;

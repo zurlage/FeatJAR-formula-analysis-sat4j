@@ -25,7 +25,7 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Arrays;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.IteratorInt;
@@ -56,13 +56,13 @@ public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
     }
 
     @Override
-    public LiteralList analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public LiteralList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         this.solver = solver;
         return analyze1(monitor);
     }
 
     // currently unused (divide & conquer)
-    public LiteralList analyze2(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public LiteralList analyze2(Sat4JSolver solver, Monitor monitor) throws Exception {
         final int initialAssignmentLength = solver.getAssumptions().size();
         solver.setSelectionStrategy(SStrategy.positive());
         int[] model1 = solver.findSolution().getLiterals();
@@ -173,7 +173,7 @@ public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
         }
     }
 
-    public LiteralList analyze1(InternalMonitor monitor) throws Exception {
+    public LiteralList analyze1(Monitor monitor) throws Exception {
         final int initialAssignmentLength = solver.getAssumptions().size();
         solver.setSelectionStrategy(SStrategy.positive());
         int[] model1 = solver.findSolution().getLiterals();

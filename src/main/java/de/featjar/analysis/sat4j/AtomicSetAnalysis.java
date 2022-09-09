@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.data.Identifier;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +48,7 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<LiteralList>> { // tod
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolver solver, InternalMonitor monitor) throws Exception {
+    public List<LiteralList> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         final List<LiteralList> result = new ArrayList<>();
         //		if (variables == null) {
         //			variables = LiteralList.getVariables(solver.getVariables());

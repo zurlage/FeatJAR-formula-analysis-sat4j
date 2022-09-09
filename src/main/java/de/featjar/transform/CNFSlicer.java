@@ -27,8 +27,8 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.ClauseLengthComparatorDsc;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import de.featjar.util.job.InternalMonitor;
-import de.featjar.util.job.MonitorableFunction;
+import de.featjar.util.task.Monitor;
+import de.featjar.util.task.MonitorableFunction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,7 +37,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.sat4j.specs.TimeoutException;
 
 /**
  * Removes features from a model while retaining dependencies of all other
@@ -86,7 +85,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
 
     @Override
-    public CNF execute(CNF orgCNF, InternalMonitor monitor) throws TimeoutException {
+    public CNF execute(CNF orgCNF, Monitor monitor) {
         this.orgCNF = orgCNF;
         cnfCopy = new CNF(orgCNF.getVariableMap());
 
@@ -105,7 +104,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             return new CNF(orgCNF.getVariableMap(), orgCNF.getClauses());
         }
 
-        monitor.setTotalWork(heuristic.size());
+        monitor.setTotalSteps(heuristic.size());
         monitor.checkCancel();
 
         while (heuristic.hasNext()) {
@@ -130,7 +129,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             // Merge new dirty list into the old list
             updateLists();
 
-            monitor.step();
+            monitor.addStep();
 
             // If ALL dirty clauses exclusively consists of dirty features, they can just be
             // removed without applying resolution

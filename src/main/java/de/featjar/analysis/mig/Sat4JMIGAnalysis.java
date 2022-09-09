@@ -26,7 +26,7 @@ import de.featjar.analysis.mig.solver.MIGProvider;
 import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
-import de.featjar.util.job.InternalMonitor;
+import de.featjar.util.task.Monitor;
 import java.util.Random;
 
 /**
@@ -62,7 +62,7 @@ public abstract class Sat4JMIGAnalysis<T> extends AbstractAnalysis<T, Sat4JMIGSo
         this.random = random;
     }
 
-    public final T execute(InternalMonitor monitor) {
+    public final T execute(Monitor monitor) {
         return solver != null ? execute(solver, monitor) : null;
     }
 
