@@ -25,7 +25,7 @@ import de.featjar.clauses.LiteralList;
 /**
  * Base class for an analysis that works on a list of variables.
  *
- * @param <T> Type of the analysis result.
+ * @param <T> the type of the analysis result.
  *
  * @author Sebastian Krieter
  */

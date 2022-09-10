@@ -32,7 +32,7 @@ import java.util.Random;
 /**
  * Base class for analyses using a {@link Sat4JSolver}.
  *
- * @param <T> Type of the analysis result.
+ * @param <T> the type of the analysis result.
  *
  * @author Sebastian Krieter
  */

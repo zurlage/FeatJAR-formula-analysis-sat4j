@@ -28,7 +28,7 @@ import java.util.List;
  * grouped together, for instance if they belong to the same constraint. Grouped
  * clauses should be handled as a unit by the implementing analysis.
  *
- * @param <T> Type of the analysis result.
+ * @param <T> the type of the analysis result.
  *
  * @author Sebastian Krieter
  */
