@@ -23,7 +23,6 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 
 /**
@@ -33,13 +32,6 @@ import de.featjar.util.task.Monitor;
  * @author Sebastian Krieter
  */
 public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-
-    public static final Identifier<Boolean> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<Boolean> getIdentifier() {
-        return identifier;
-    }
 
     @Override
     public Boolean analyze(Sat4JSolver solver, Monitor monitor) throws Exception {

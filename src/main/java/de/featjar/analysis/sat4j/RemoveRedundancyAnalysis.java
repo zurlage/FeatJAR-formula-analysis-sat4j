@@ -24,7 +24,6 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,13 +49,6 @@ import org.sat4j.specs.IConstr;
  * @see IndependentRedundancyAnalysis
  */
 public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
-
-    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<List<LiteralList>> getIdentifier() {
-        return identifier;
-    }
 
     public RemoveRedundancyAnalysis() {
         super();

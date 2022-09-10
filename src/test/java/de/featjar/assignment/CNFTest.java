@@ -36,7 +36,7 @@ import de.featjar.analysis.sat4j.IndependentRedundancyAnalysis;
 import de.featjar.analysis.sat4j.IndeterminateAnalysis;
 import de.featjar.analysis.sat4j.RemoveRedundancyAnalysis;
 import de.featjar.clauses.CNF;
-import de.featjar.clauses.CNFProvider;
+import de.featjar.clauses.CNFComputation;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.ModelRepresentation;
 import de.featjar.formula.structure.atomic.literal.Literal;
@@ -47,7 +47,7 @@ import de.featjar.transform.CNFSlicer;
 import de.featjar.util.data.Problem;
 import de.featjar.util.data.Result;
 import de.featjar.util.task.Executor;
-import de.featjar.util.logging.Logger;
+import de.featjar.util.log.Logger;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -86,7 +86,7 @@ public class CNFTest {
         executeAnalysis(rep, new RemoveRedundancyAnalysis());
         executeAnalysis(rep, new ConditionallyCoreDeadAnalysisMIG());
 
-        final CNF cnf = rep.get(CNFProvider.fromFormula());
+        final CNF cnf = rep.get(CNFComputation.fromFormula());
         final CNFSlicer slicer = new CNFSlicer(new LiteralList(2));
         final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Logger::logProblems);
 

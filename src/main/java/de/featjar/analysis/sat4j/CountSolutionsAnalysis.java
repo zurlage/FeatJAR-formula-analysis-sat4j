@@ -25,7 +25,6 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 
 /**
@@ -34,13 +33,6 @@ import de.featjar.util.task.Monitor;
  * @author Sebastian Krieter
  */
 public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
-
-    public static final Identifier<Long> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<Long> getIdentifier() {
-        return identifier;
-    }
 
     @Override
     public Long analyze(Sat4JSolver solver, Monitor monitor) throws Exception {

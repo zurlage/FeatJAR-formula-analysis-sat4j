@@ -22,11 +22,10 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
 import de.featjar.util.task.CancelableMonitor;
-import de.featjar.util.logging.Logger;
+import de.featjar.util.log.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,14 +38,6 @@ import java.util.Objects;
  * @author Sebastian Krieter
  */
 public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>> {
-
-    public static final Identifier<List<Anomalies>> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<List<CauseAnalysis.Anomalies>> getIdentifier() {
-        return identifier;
-    }
-
     public static class Anomalies {
 
         protected LiteralList deadVariables = new LiteralList();

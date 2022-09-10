@@ -23,7 +23,6 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,14 +34,6 @@ import java.util.List;
  * @author Sebastian Krieter
  */
 public class AtomicSetAnalysis extends Sat4JAnalysis<List<LiteralList>> { // todo: AVariableAnalysis
-
-    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<List<LiteralList>> getIdentifier() {
-        return identifier;
-    }
-
     public AtomicSetAnalysis() {
         super();
     }

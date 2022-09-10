@@ -22,10 +22,9 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
-import de.featjar.util.logging.Logger;
+import de.featjar.util.log.Logger;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,13 +34,6 @@ import java.util.List;
  * @author Sebastian Krieter
  */
 public class EnumeratingRandomConfigurationGenerator extends RandomConfigurationGenerator {
-
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
 
     private List<LiteralList> allConfigurations;
 

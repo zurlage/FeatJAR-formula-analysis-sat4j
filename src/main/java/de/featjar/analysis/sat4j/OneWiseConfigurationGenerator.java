@@ -23,8 +23,6 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import org.sat4j.core.VecInt;
 
@@ -35,13 +33,6 @@ import org.sat4j.core.VecInt;
  * @author Sebastian Krieter
  */
 public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerator {
-
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
 
     public enum CoverStrategy {
         POSITIVE,

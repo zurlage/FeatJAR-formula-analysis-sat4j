@@ -21,47 +21,39 @@
 package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.mig.io.MIGFormat;
-import de.featjar.clauses.CNFProvider;
-import de.featjar.util.data.Cache;
-import de.featjar.util.data.Identifier;
-import de.featjar.util.data.Provider;
+import de.featjar.clauses.CNFComputation;
+import de.featjar.util.data.Store;
+import de.featjar.util.data.Computation;
 import de.featjar.util.data.Result;
-import de.featjar.util.io.format.FormatSupplier;
+import de.featjar.util.io.IO;
+
 import java.nio.file.Path;
 
 /**
- * Abstract creator to derive an element from a {@link Cache }.
+ * Abstract creator to derive an element from a {@link Store }.
  *
  * @author Sebastian Krieter
  */
 @FunctionalInterface
-public interface MIGProvider extends Provider<MIG> {
-
-    Identifier<MIG> identifier = new Identifier<>();
-
-    @Override
-    default Identifier<MIG> getIdentifier() {
-        return identifier;
-    }
-
-    static MIGProvider empty() {
+public interface MIGComputation extends Computation<MIG> {
+    static MIGComputation empty() {
         return (c, m) -> Result.empty();
     }
 
-    static MIGProvider of(MIG mig) {
+    static MIGComputation of(MIG mig) {
         return (c, m) -> Result.of(mig);
     }
 
-    static MIGProvider loader(Path path) {
-        return (c, m) -> Provider.load(path, FormatSupplier.of(new MIGFormat()));
+    static MIGComputation loader(Path path) {
+        return (c, m) -> IO.load(path, new MIGFormat());
     }
 
-    static <T> MIGProvider fromFormula() {
-        return (c, m) -> Provider.convert(c, CNFProvider.identifier, new RegularMIGBuilder(), m);
+    static <T> MIGComputation fromFormula() {
+        return (c, m) -> Computation.convert(c, CNFComputation.identifier, new RegularMIGBuilder(), m);
     }
 
-    static <T> MIGProvider fromCNF() {
-        return (c, m) -> Provider.convert(c, CNFProvider.fromFormula(), new RegularMIGBuilder(), m);
+    static <T> MIGComputation fromCNF() {
+        return (c, m) -> Computation.convert(c, CNFComputation.fromFormula(), new RegularMIGBuilder(), m);
     }
 
     //	static <T> MIGProvider fromOldMig(MIG oldMig) {

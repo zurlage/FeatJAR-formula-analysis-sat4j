@@ -27,7 +27,6 @@ import de.featjar.analysis.mig.solver.visitor.CollectingVisitor;
 import de.featjar.analysis.mig.solver.visitor.Traverser;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import org.sat4j.core.VecInt;
 
@@ -37,9 +36,6 @@ import org.sat4j.core.VecInt;
  * @author Sebastian Krieter
  */
 public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralList> {
-
-    public static final Identifier<LiteralList> identifier = new Identifier<>();
-
     protected int[] fixedVariables;
     protected int[] variableOrder;
     protected int newCount;
@@ -56,11 +52,6 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
     public void resetFixedFeatures() {
         fixedVariables = new int[0];
         newCount = 0;
-    }
-
-    @Override
-    public Identifier<LiteralList> getIdentifier() {
-        return identifier;
     }
 
     public ConditionallyCoreDeadAnalysisMIG() {

@@ -24,11 +24,9 @@ import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.MIGDistribution;
 import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.sat4j.solver.SStrategy;
-import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
-import de.featjar.util.logging.Logger;
+import de.featjar.util.log.Logger;
 
 /**
  * Finds certain solutions of propositional formulas.
@@ -36,13 +34,6 @@ import de.featjar.util.logging.Logger;
  * @author Sebastian Krieter
  */
 public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerator {
-
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
 
     private MIGDistribution dist;
 

@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.analysis.solver.MusSolver;
 import de.featjar.clauses.CNF;
-import de.featjar.clauses.CNFProvider;
+import de.featjar.clauses.CNFComputation;
 import de.featjar.formula.ModelRepresentation;
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +56,7 @@ import org.sat4j.tools.xplain.Xplain;
 public class Sat4JMusSolver extends AbstractSat4JSolver<Xplain<ISolver>> implements MusSolver<IConstr> {
 
     public Sat4JMusSolver(ModelRepresentation modelRepresentation) {
-        this(modelRepresentation.getCache().get(CNFProvider.fromFormula()).get());
+        this(modelRepresentation.getCache().get(CNFComputation.fromFormula()).get());
     }
 
     public Sat4JMusSolver(CNF cnf) {

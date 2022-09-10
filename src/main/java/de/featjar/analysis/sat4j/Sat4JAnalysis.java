@@ -25,7 +25,7 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.clauses.CNF;
-import de.featjar.clauses.CNFProvider;
+import de.featjar.clauses.CNFComputation;
 import de.featjar.util.task.Monitor;
 import java.util.Random;
 
@@ -46,7 +46,7 @@ public abstract class Sat4JAnalysis<T> extends AbstractAnalysis<T, Sat4JSolver, 
 
     public Sat4JAnalysis() {
         super();
-        solverInputProvider = CNFProvider.fromFormula();
+        solverInputComputation = CNFComputation.fromFormula();
     }
 
     @Override

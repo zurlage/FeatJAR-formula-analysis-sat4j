@@ -25,7 +25,6 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,13 +44,6 @@ import java.util.List;
  * @see ContradictionAnalysis
  */
 public class IndependentContradictionAnalysis extends AClauseAnalysis<List<LiteralList>> {
-
-    public static final Identifier<List<LiteralList>> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<List<LiteralList>> getIdentifier() {
-        return identifier;
-    }
 
     public IndependentContradictionAnalysis() {
         super();

@@ -28,8 +28,6 @@ import de.featjar.analysis.sat4j.solver.AbstractSat4JSolver;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
 import java.util.Arrays;
@@ -42,13 +40,6 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerator {
-
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
 
     private static class FeatureIndex implements Comparable<FeatureIndex> {
 

@@ -22,7 +22,7 @@ package de.featjar.analysis.mig;
 
 import de.featjar.analysis.AbstractAnalysis;
 import de.featjar.analysis.mig.solver.MIG;
-import de.featjar.analysis.mig.solver.MIGProvider;
+import de.featjar.analysis.mig.solver.MIGComputation;
 import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
@@ -46,7 +46,7 @@ public abstract class Sat4JMIGAnalysis<T> extends AbstractAnalysis<T, Sat4JMIGSo
 
     public Sat4JMIGAnalysis() {
         super();
-        solverInputProvider = MIGProvider.fromFormula();
+        solverInputComputation = MIGComputation.fromFormula();
     }
 
     @Override

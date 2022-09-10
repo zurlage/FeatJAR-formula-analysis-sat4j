@@ -40,7 +40,7 @@ public class CNFTransformTest {
     public void testDistributiveBug() {
         final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
         final Formula formula =
-                IO.load(modelFile, FormatSupplier.of(new KConfigReaderFormat())).orElseThrow();
+                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
 
         final ModelRepresentation rep = new ModelRepresentation(formula);
         final List<LiteralList> atomicSets =

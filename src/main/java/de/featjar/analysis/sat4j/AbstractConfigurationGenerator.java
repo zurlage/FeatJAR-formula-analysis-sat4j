@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Cache;
+import de.featjar.util.data.Store;
 import de.featjar.util.task.Monitor;
 import java.util.ArrayList;
 import java.util.Spliterator;
@@ -90,8 +90,8 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
     }
 
     @Override
-    public void init(Cache c, Monitor monitor) {
-        solver = createSolver(c.get(solverInputProvider).get());
+    public void init(Store c, Monitor monitor) {
+        solver = createSolver(c.get(solverInputComputation).get());
         monitor.checkCancel();
         prepareSolver(solver);
         init(monitor);

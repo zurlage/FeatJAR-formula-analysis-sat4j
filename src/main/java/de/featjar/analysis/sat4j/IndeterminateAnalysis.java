@@ -24,7 +24,6 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import java.util.Arrays;
 import java.util.List;
@@ -38,13 +37,6 @@ import org.sat4j.core.VecInt;
 public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // todo: variable-analysis does not work
     // reliably (false positives) (use old
     // analysis first?)
-
-    public static final Identifier<LiteralList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<LiteralList> getIdentifier() {
-        return identifier;
-    }
 
     @Override
     public LiteralList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {

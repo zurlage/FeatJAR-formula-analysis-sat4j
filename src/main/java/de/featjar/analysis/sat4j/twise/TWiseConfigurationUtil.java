@@ -36,7 +36,7 @@ import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Pair;
 import de.featjar.util.io.IO;
 import de.featjar.util.task.Executor;
-import de.featjar.util.logging.Logger;
+import de.featjar.util.log.Logger;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;

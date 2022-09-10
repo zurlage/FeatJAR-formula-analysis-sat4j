@@ -22,8 +22,6 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 
 /**
  * Generates random configurations for a given propositional formula.
@@ -32,13 +30,7 @@ import de.featjar.util.data.Identifier;
  */
 public class FastRandomConfigurationGenerator extends RandomConfigurationGenerator {
 
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
     private SStrategy originalSelectionStrategy;
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
 
     @Override
     protected void prepareSolver(Sat4JSolver solver) {

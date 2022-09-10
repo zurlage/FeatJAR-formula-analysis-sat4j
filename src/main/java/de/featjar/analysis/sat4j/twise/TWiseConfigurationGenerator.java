@@ -26,11 +26,9 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import de.featjar.util.task.IntervalThread;
-import de.featjar.util.logging.Logger;
+import de.featjar.util.log.Logger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,14 +43,6 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator {
-
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
-
     enum Deduce {
         DP,
         AC,

@@ -22,8 +22,6 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.data.Identifier;
 
 /**
  * Generates all configurations for a given propositional formula.
@@ -31,14 +29,6 @@ import de.featjar.util.data.Identifier;
  * @author Sebastian Krieter
  */
 public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
-
-    public static final Identifier<SolutionList> identifier = new Identifier<>();
-
-    @Override
-    public Identifier<SolutionList> getIdentifier() {
-        return identifier;
-    }
-
     private boolean satisfiable = true;
 
     @Override

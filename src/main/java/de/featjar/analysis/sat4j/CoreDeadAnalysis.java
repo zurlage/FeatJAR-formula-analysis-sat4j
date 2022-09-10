@@ -24,7 +24,6 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.data.Identifier;
 import de.featjar.util.task.Monitor;
 import java.util.Arrays;
 import org.sat4j.core.VecInt;
@@ -37,14 +36,7 @@ import org.sat4j.specs.IteratorInt;
  */
 public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
 
-    public static final Identifier<LiteralList> identifier = new Identifier<>();
-
     private Sat4JSolver solver;
-
-    @Override
-    public Identifier<LiteralList> getIdentifier() {
-        return identifier;
-    }
 
     public CoreDeadAnalysis() {
         super();
