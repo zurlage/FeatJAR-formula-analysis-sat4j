@@ -22,9 +22,9 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.task.Executor;
-import de.featjar.util.task.Monitor;
-import de.featjar.util.log.Log;
+import de.featjar.base.task.Executor;
+import de.featjar.base.task.Monitor;
+import de.featjar.base.log.Log;
 import java.util.Collections;
 import java.util.List;
 

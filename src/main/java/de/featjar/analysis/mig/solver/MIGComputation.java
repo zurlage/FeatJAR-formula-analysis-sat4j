@@ -22,10 +22,10 @@ package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.mig.io.MIGFormat;
 import de.featjar.clauses.CNFComputation;
-import de.featjar.util.data.Store;
-import de.featjar.util.data.Computation;
-import de.featjar.util.data.Result;
-import de.featjar.util.io.IO;
+import de.featjar.base.data.Store;
+import de.featjar.base.data.Computation;
+import de.featjar.base.data.Result;
+import de.featjar.base.io.IO;
 
 import java.nio.file.Path;
 

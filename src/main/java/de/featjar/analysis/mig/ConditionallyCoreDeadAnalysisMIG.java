@@ -27,7 +27,7 @@ import de.featjar.analysis.mig.solver.visitor.CollectingVisitor;
 import de.featjar.analysis.mig.solver.visitor.Traverser;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import org.sat4j.core.VecInt;
 
 /**

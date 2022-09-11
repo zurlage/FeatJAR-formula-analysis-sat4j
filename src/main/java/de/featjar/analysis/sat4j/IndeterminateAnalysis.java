@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import java.util.Arrays;
 import java.util.List;
 import org.sat4j.core.VecInt;

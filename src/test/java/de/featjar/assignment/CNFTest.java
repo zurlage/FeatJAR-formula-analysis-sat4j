@@ -44,10 +44,10 @@ import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.formula.structure.compound.And;
 import de.featjar.formula.structure.compound.Or;
 import de.featjar.transform.CNFSlicer;
-import de.featjar.util.data.Problem;
-import de.featjar.util.data.Result;
-import de.featjar.util.task.Executor;
-import de.featjar.util.log.Log;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Result;
+import de.featjar.base.task.Executor;
+import de.featjar.base.log.Log;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 

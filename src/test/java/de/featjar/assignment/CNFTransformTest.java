@@ -27,8 +27,8 @@ import de.featjar.clauses.LiteralList;
 import de.featjar.formula.ModelRepresentation;
 import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.Formula;
-import de.featjar.util.io.IO;
-import de.featjar.util.io.format.FormatSupplier;
+import de.featjar.base.io.IO;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;

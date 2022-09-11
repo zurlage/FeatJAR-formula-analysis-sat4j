@@ -24,9 +24,9 @@ import de.featjar.analysis.mig.solver.MIG;
 import de.featjar.analysis.mig.solver.MIGDistribution;
 import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.sat4j.solver.SStrategy;
-import de.featjar.util.task.Executor;
-import de.featjar.util.task.Monitor;
-import de.featjar.util.log.Log;
+import de.featjar.base.task.Executor;
+import de.featjar.base.task.Monitor;
+import de.featjar.base.log.Log;
 
 /**
  * Finds certain solutions of propositional formulas.

@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import java.util.Random;
 
 /**

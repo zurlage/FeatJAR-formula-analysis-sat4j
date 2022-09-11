@@ -26,7 +26,7 @@ import de.featjar.analysis.mig.solver.MIGComputation;
 import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import java.util.Random;
 
 /**

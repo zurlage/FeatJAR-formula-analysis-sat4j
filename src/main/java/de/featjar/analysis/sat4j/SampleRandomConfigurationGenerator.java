@@ -26,9 +26,9 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
-import de.featjar.util.task.Executor;
-import de.featjar.util.task.Monitor;
-import de.featjar.util.log.Log;
+import de.featjar.base.task.Executor;
+import de.featjar.base.task.Monitor;
+import de.featjar.base.log.Log;
 import java.util.List;
 
 /**

@@ -26,7 +26,7 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.RuntimeTimeoutException;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.CNFComputation;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import java.util.Random;
 
 /**

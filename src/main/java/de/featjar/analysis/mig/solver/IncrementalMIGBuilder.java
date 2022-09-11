@@ -29,7 +29,7 @@ import de.featjar.clauses.CNF;
 import de.featjar.clauses.Clauses;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;

@@ -24,7 +24,7 @@ import de.featjar.analysis.solver.SolutionSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
-import de.featjar.util.data.Pair;
+import de.featjar.base.data.Pair;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;

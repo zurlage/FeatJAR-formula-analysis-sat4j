@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 
 /**
  * Determines whether a given {@link CNF} is satisfiable and returns the found

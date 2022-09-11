@@ -26,9 +26,9 @@ import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.task.Monitor;
-import de.featjar.util.task.IntervalThread;
-import de.featjar.util.log.Log;
+import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IntervalThread;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

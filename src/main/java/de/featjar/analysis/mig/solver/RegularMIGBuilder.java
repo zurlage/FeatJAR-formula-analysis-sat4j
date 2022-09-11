@@ -22,7 +22,7 @@ package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.clauses.CNF;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 
 /**
  * Adjacency matrix implementation for a feature graph.

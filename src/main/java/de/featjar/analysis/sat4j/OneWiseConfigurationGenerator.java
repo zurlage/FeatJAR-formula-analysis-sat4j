@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 import org.sat4j.core.VecInt;
 
 /**

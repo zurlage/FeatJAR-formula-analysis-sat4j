@@ -25,7 +25,7 @@ import de.featjar.analysis.solver.RuntimeContradictionException;
 import de.featjar.analysis.solver.SatSolver;
 import de.featjar.clauses.CNF;
 import de.featjar.clauses.LiteralList;
-import de.featjar.util.task.Monitor;
+import de.featjar.base.task.Monitor;
 
 /**
  * Attempts to count the number of possible solutions of a given {@link CNF}.
