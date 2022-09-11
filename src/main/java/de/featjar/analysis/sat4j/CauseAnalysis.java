@@ -25,7 +25,7 @@ import de.featjar.clauses.LiteralList;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
 import de.featjar.util.task.CancelableMonitor;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -112,7 +112,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
         if (!remainingClauses.isEmpty()) {
             final List<LiteralList> result = Executor.apply(
                             new IndependentRedundancyAnalysis(remainingClauses)::execute, solver.getCnf())
-                    .orElse(Logger::logProblems);
+                    .orElse(Log::problems);
             remainingClauses.removeIf(result::contains);
         }
         monitor.addStep();
@@ -120,7 +120,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
         if (remainingVariables.getLiterals().length > 0) {
             remainingVariables = remainingVariables.removeAll(
                     Executor.apply(new CoreDeadAnalysis(remainingVariables)::execute, solver.getCnf())
-                            .orElse(Logger::logProblems));
+                            .orElse(Log::problems));
         }
         monitor.addStep();
 

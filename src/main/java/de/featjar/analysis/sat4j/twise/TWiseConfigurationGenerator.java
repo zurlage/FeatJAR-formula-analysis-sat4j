@@ -28,7 +28,7 @@ import de.featjar.clauses.ClauseList;
 import de.featjar.clauses.LiteralList;
 import de.featjar.util.task.Monitor;
 import de.featjar.util.task.IntervalThread;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -163,7 +163,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
 
     @Override
     protected void init(Monitor monitor) {
-        Logger.logDebug("Create util instance... ");
+        Feat.log().debug("Create util instance... ");
         final CNF cnf = solver.getCnf();
         solver.rememberSolutionHistory(10);
         solver.setSelectionStrategy(SStrategy.random(getRandom()));
@@ -181,7 +181,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         util.setCreateConfigurationDeduce(createConfigurationDeduce);
         util.setExtendConfigurationDeduce(extendConfigurationDeduce);
 
-        Logger.logDebug("Compute random sample... ");
+        Feat.log().debug("Compute random sample... ");
 
         if (!cnf.getClauses().isEmpty()) {
             util.computeRandomSample(randomSampleSize);
@@ -194,7 +194,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             }
         }
 
-        Logger.logDebug("Set up PresenceConditionManager... ");
+        Feat.log().debug("Set up PresenceConditionManager... ");
 
         // TODO Variation Point: Sorting Nodes
         presenceConditionManager = new PresenceConditionManager(util, nodes);
@@ -393,7 +393,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             sb.append(" (");
             sb.append(invalidCount);
             sb.append(")");
-            Logger.logProgress(sb.toString());
+            Feat.log().progress(sb.toString());
         }
         return true;
     }

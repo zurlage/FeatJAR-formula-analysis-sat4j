@@ -26,7 +26,7 @@ import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 
 /**
  * Finds certain solutions of propositional formulas.
@@ -40,7 +40,7 @@ public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerato
     @Override
     protected void init(Monitor monitor) {
         final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
-        final MIG mig = Executor.apply(migBuilder, solver.getCnf()).orElse(Logger::logProblems);
+        final MIG mig = Executor.apply(migBuilder, solver.getCnf()).orElse(Log::problems);
         satisfiable = mig != null;
         if (!satisfiable) {
             return;

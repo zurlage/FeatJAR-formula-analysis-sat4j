@@ -36,7 +36,7 @@ import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.data.Pair;
 import de.featjar.util.io.IO;
 import de.featjar.util.task.Executor;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +109,7 @@ public class TWiseConfigurationUtil {
         randomGenerator.setLimit(randomSampleSize);
         randomSample = Executor.apply(randomGenerator::execute, cnf) //
                 .map(SolutionList::getSolutions) //
-                .orElse(Logger::logProblems);
+                .orElse(Log::problems);
 
         for (final LiteralList solution : randomSample) {
             addSolverSolution(solution.getLiterals());
@@ -117,8 +117,8 @@ public class TWiseConfigurationUtil {
     }
 
     public void computeMIG(boolean migCheckRedundancy, boolean migDetectStrong) {
-        Logger.logDebug("Init graph... ");
-        Logger.logDebug("\tCompute graph... ");
+        Feat.log().debug("Init graph... ");
+        Feat.log().debug("\tCompute graph... ");
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(migCheckRedundancy);
         migBuilder.setDetectStrong(migDetectStrong);
@@ -127,8 +127,8 @@ public class TWiseConfigurationUtil {
     }
 
     public void computeMIG(Path migPath) {
-        Logger.logDebug("Init graph... ");
-        Logger.logDebug("\tLoad graph from " + migPath);
+        Feat.log().debug("Init graph... ");
+        Feat.log().debug("\tLoad graph from " + migPath);
         mig = IO.load(migPath, new MIGFormat()).get();
         setupMIG();
     }

@@ -47,7 +47,7 @@ import de.featjar.transform.CNFSlicer;
 import de.featjar.util.data.Problem;
 import de.featjar.util.data.Result;
 import de.featjar.util.task.Executor;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -88,20 +88,20 @@ public class CNFTest {
 
         final CNF cnf = rep.get(CNFComputation.fromFormula());
         final CNFSlicer slicer = new CNFSlicer(new LiteralList(2));
-        final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Logger::logProblems);
+        final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Log::problems);
 
-        cnf.adapt(slicedCNF.getVariableMap()).orElse(Logger::logProblems);
-        slicedCNF.adapt(cnf.getVariableMap()).orElse(Logger::logProblems);
+        cnf.adapt(slicedCNF.getVariableMap()).orElse(Log::problems);
+        slicedCNF.adapt(cnf.getVariableMap()).orElse(Log::problems);
     }
 
     private void executeAnalysis(ModelRepresentation rep, Analysis<?> analysis) {
         final Result<?> result = rep.getResult(analysis);
-        Logger.logInfo(analysis.getClass().getName());
+        Feat.log().info(analysis.getClass().getName());
         result.map(Object::toString).orElse(this::reportProblems);
     }
 
     private void reportProblems(List<Problem> problems) {
-        Logger.logProblems(problems);
+        Log.problems(problems);
         fail();
     }
 }

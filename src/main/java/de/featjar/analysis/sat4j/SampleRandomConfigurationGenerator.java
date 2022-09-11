@@ -28,7 +28,7 @@ import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 import java.util.List;
 
 /**
@@ -55,7 +55,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         gen.setLimit(sampleSize);
         sample = Executor.apply(gen::execute, solver.getCnf())
                 .map(SolutionList::getSolutions)
-                .orElse(Logger::logProblems);
+                .orElse(Log::problems);
         if ((sample == null) || sample.isEmpty()) {
             satisfiable = false;
             return;

@@ -24,7 +24,7 @@ import de.featjar.clauses.LiteralList;
 import de.featjar.clauses.solutions.SolutionList;
 import de.featjar.util.task.Executor;
 import de.featjar.util.task.Monitor;
-import de.featjar.util.log.Logger;
+import de.featjar.util.log.Log;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
         final AllConfigurationGenerator gen = new AllConfigurationGenerator();
         allConfigurations = Executor.apply(gen::execute, solver.getCnf(), monitor)
                 .map(SolutionList::getSolutions)
-                .orElse(Collections::emptyList, Logger::logProblems);
+                .orElse(Collections::emptyList, Log::problems);
         if (!allowDuplicates) {
             Collections.shuffle(allConfigurations, getRandom());
         }
