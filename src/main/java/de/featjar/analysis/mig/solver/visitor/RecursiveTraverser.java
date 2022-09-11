@@ -20,9 +20,9 @@
  */
 package de.featjar.analysis.mig.solver.visitor;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Vertex;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
 import java.util.List;
 import org.sat4j.core.VecInt;
@@ -30,8 +30,8 @@ import org.sat4j.specs.IteratorInt;
 
 public class RecursiveTraverser extends ATraverser {
 
-    public RecursiveTraverser(MIG mig) {
-        super(mig);
+    public RecursiveTraverser(ModalImplicationGraph modalImplicationGraph) {
+        super(modalImplicationGraph);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class RecursiveTraverser extends ATraverser {
     }
 
     private void traverseStrongRec(int curLiteral) {
-        final Vertex vertex = mig.getVertex(curLiteral);
+        final Vertex vertex = modalImplicationGraph.getVertex(curLiteral);
 
         // Strong Edges
         for (final Vertex stronglyConnectedVertex : vertex.getStrongEdges()) {
@@ -110,7 +110,7 @@ public class RecursiveTraverser extends ATraverser {
     }
 
     private void traverse(boolean strongPath, int curLiteral) {
-        final Vertex vertex = mig.getVertex(curLiteral);
+        final Vertex vertex = modalImplicationGraph.getVertex(curLiteral);
 
         if (strongPath) {
             final int modelIndex = Math.abs(curLiteral) - 1;
@@ -120,7 +120,7 @@ public class RecursiveTraverser extends ATraverser {
             }
         }
 
-        final int vertexIndex = MIG.getVertexIndex(curLiteral);
+        final int vertexIndex = ModalImplicationGraph.getVertexIndex(curLiteral);
         if (!dfsMark[vertexIndex]) {
             dfsMark[vertexIndex] = true;
             if (!strongPath) {

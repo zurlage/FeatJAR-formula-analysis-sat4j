@@ -20,9 +20,8 @@
  */
 package de.featjar.analysis.sat4j;
 
-import de.featjar.analysis.Analysis;
-import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.data.Store;
 import de.featjar.base.task.Monitor;
 import java.util.Spliterator;
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
  * @author Sebastian Krieter
  */
 public interface ConfigurationGenerator
-        extends Analysis<SolutionList>, Supplier<LiteralList>, Spliterator<LiteralList> {
+        extends Supplier<LiteralList>, Spliterator<LiteralList>, de.featjar.base.data.Computation {
 
     void init(Store rep, Monitor monitor);
 

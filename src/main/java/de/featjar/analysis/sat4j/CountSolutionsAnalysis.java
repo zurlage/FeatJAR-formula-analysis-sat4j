@@ -21,10 +21,10 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 
 /**
@@ -38,8 +38,8 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
     public Long analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         solver.setGlobalTimeout(true);
         long solutionCount = 0;
-        SatSolver.SatResult hasSolution = solver.hasSolution();
-        while (hasSolution == SatSolver.SatResult.TRUE) {
+        SATSolver.SatResult hasSolution = solver.hasSolution();
+        while (hasSolution == SATSolver.SatResult.TRUE) {
             solutionCount++;
             final int[] solution = solver.getInternalSolution();
             try {
@@ -49,6 +49,6 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
             }
             hasSolution = solver.hasSolution();
         }
-        return hasSolution == SatSolver.SatResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
+        return hasSolution == SATSolver.SatResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
     }
 }

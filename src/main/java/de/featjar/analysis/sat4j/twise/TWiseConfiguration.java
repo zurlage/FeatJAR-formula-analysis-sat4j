@@ -25,8 +25,8 @@ import de.featjar.analysis.mig.solver.visitor.Traverser;
 import de.featjar.analysis.mig.solver.visitor.Visitor;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
 import org.sat4j.core.VecInt;
 
@@ -336,7 +336,7 @@ public class TWiseConfiguration extends LiteralList {
                     final Sat4JSolver solver = util.getSolver();
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
-                        if (solver.hasSolution() == SatSolver.SatResult.TRUE) {
+                        if (solver.hasSolution() == SATSolver.SatResult.TRUE) {
                             System.arraycopy(solver.getInternalSolution(), 0, literals, 0, literals.length);
                         }
                     } finally {
@@ -372,7 +372,7 @@ public class TWiseConfiguration extends LiteralList {
                     final Sat4JSolver solver = util.getSolver();
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
-                        final SatSolver.SatResult satResult = solver.hasSolution();
+                        final SATSolver.SatResult satResult = solver.hasSolution();
                         switch (satResult) {
                             case FALSE:
                                 throw new RuntimeException("Solution Invalid!");
@@ -427,7 +427,7 @@ public class TWiseConfiguration extends LiteralList {
         final int orgAssignmentSize = setUpSolver(solver);
         solver.setSelectionStrategy(SStrategy.original());
         try {
-            return solver.hasSolution() == SatSolver.SatResult.TRUE;
+            return solver.hasSolution() == SATSolver.SatResult.TRUE;
         } finally {
             solver.getAssumptions().clear(orgAssignmentSize);
             solver.setSelectionStrategy(selectionStrategy);

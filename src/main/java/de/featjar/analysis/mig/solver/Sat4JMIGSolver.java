@@ -28,10 +28,10 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
  * @author Sebastian Krieter
  */
 public class Sat4JMIGSolver extends Sat4JSolver {
-    public MIG mig;
+    public ModalImplicationGraph modalImplicationGraph;
 
-    public Sat4JMIGSolver(MIG mig) {
-        super(mig.getCnf());
-        this.mig = mig;
+    public Sat4JMIGSolver(ModalImplicationGraph modalImplicationGraph) {
+        super(modalImplicationGraph.getCnf());
+        this.modalImplicationGraph = modalImplicationGraph;
     }
 }

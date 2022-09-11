@@ -22,7 +22,7 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.featjar.analysis.Analysis;
+import de.featjar.formula.analysis.Analysis;
 import de.featjar.analysis.mig.ConditionallyCoreDeadAnalysisMIG;
 import de.featjar.analysis.sat4j.AddRedundancyAnalysis;
 import de.featjar.analysis.sat4j.AtomicSetAnalysis;
@@ -35,9 +35,8 @@ import de.featjar.analysis.sat4j.IndependentContradictionAnalysis;
 import de.featjar.analysis.sat4j.IndependentRedundancyAnalysis;
 import de.featjar.analysis.sat4j.IndeterminateAnalysis;
 import de.featjar.analysis.sat4j.RemoveRedundancyAnalysis;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.CNFComputation;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.ModelRepresentation;
 import de.featjar.formula.structure.atomic.literal.Literal;
 import de.featjar.formula.structure.atomic.literal.VariableMap;

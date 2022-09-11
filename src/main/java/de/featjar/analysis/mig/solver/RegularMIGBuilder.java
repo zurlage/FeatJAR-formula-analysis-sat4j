@@ -20,8 +20,8 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.clauses.CNF;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.clauses.CNF;
 import de.featjar.base.task.Monitor;
 
 /**
@@ -32,7 +32,7 @@ import de.featjar.base.task.Monitor;
 public class RegularMIGBuilder extends MIGBuilder {
 
     @Override
-    public MIG execute(CNF cnf, Monitor monitor) {
+    public ModalImplicationGraph execute(CNF cnf, Monitor monitor) {
         monitor.setTotalSteps(24 + (detectStrong ? 1020 : 0) + (checkRedundancy ? 100 : 10));
 
         init(cnf);
@@ -53,9 +53,9 @@ public class RegularMIGBuilder extends MIGBuilder {
             bfsStrong(monitor.createChildMonitor(10));
 
             bfsWeak(null, monitor.createChildMonitor(1000));
-            mig.setStrongStatus(MIG.BuildStatus.Complete);
+            modalImplicationGraph.setStrongStatus(ModalImplicationGraph.BuildStatus.Complete);
         } else {
-            mig.setStrongStatus(MIG.BuildStatus.None);
+            modalImplicationGraph.setStrongStatus(ModalImplicationGraph.BuildStatus.None);
         }
 
         addClauses(cnf, checkRedundancy, monitor.createChildMonitor(checkRedundancy ? 100 : 10));
@@ -65,6 +65,6 @@ public class RegularMIGBuilder extends MIGBuilder {
         finish();
         monitor.addStep();
 
-        return mig;
+        return modalImplicationGraph;
     }
 }

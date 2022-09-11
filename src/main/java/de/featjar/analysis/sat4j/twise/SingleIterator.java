@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import de.featjar.clauses.ClauseList;
+import de.featjar.formula.clauses.ClauseList;
 import java.util.List;
 
 /**

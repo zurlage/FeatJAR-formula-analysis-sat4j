@@ -22,11 +22,11 @@ package de.featjar.analysis.sat4j.twise;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.analysis.sat4j.twise.TWiseStatisticGenerator.ConfigurationScore;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.combinations.CombinationIterator;
-import de.featjar.clauses.solutions.combinations.LexicographicIterator;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.combinations.CombinationIterator;
+import de.featjar.formula.clauses.solutions.combinations.LexicographicIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

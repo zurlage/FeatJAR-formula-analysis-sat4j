@@ -20,12 +20,12 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.AbstractConfigurationGenerator;
 import de.featjar.analysis.sat4j.solver.SStrategy;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.IntervalThread;
 
@@ -104,7 +104,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     private int randomSampleSize = DEFAULT_RANDOM_SAMPLE_SIZE;
     private int logFrequency = DEFAULT_LOG_FREQUENCY;
     private boolean useMig = true;
-    private MIG mig;
+    private ModalImplicationGraph modalImplicationGraph;
     private Deduce createConfigurationDeduce = Deduce.DP;
     private Deduce extendConfigurationDeduce = Deduce.NONE;
 
@@ -186,8 +186,8 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         if (!cnf.getClauses().isEmpty()) {
             util.computeRandomSample(randomSampleSize);
             if (useMig) {
-                if (mig != null) {
-                    util.setMIG(mig);
+                if (modalImplicationGraph != null) {
+                    util.setMIG(modalImplicationGraph);
                 } else {
                     util.computeMIG(false, false);
                 }
@@ -426,16 +426,16 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         this.useMig = useMig;
     }
 
-    public void setMIG(MIG mig) {
-        this.mig = mig;
+    public void setMIG(ModalImplicationGraph modalImplicationGraph) {
+        this.modalImplicationGraph = modalImplicationGraph;
     }
 
-    public MIG getMig() {
-        return mig;
+    public ModalImplicationGraph getMig() {
+        return modalImplicationGraph;
     }
 
-    public void setMig(MIG mig) {
-        this.mig = mig;
+    public void setMig(ModalImplicationGraph modalImplicationGraph) {
+        this.modalImplicationGraph = modalImplicationGraph;
     }
 
     public int getLogFrequency() {

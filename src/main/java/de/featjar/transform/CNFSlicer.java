@@ -21,11 +21,11 @@
 package de.featjar.transform;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.ClauseLengthComparatorDsc;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseLengthComparatorDsc;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
@@ -370,7 +370,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         } catch (final RuntimeContradictionException e) {
             return false;
         }
-        return newSolver.hasSolution() == SatSolver.SatResult.TRUE;
+        return newSolver.hasSolution() == SATSolver.SatResult.TRUE;
     }
 
     protected void release() {

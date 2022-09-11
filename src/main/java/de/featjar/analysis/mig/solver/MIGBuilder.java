@@ -23,9 +23,9 @@ package de.featjar.analysis.mig.solver;
 import de.featjar.analysis.mig.solver.Vertex.Status;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
 import java.util.ArrayDeque;
@@ -44,7 +44,7 @@ import java.util.stream.Stream;
  *
  * @author Sebastian Krieter
  */
-public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
+public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplicationGraph> {
 
     /**
      * For sorting clauses by length. Starting with the longest.
@@ -60,10 +60,10 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
     protected List<LiteralList> cleanedClausesList;
     protected int[] fixedFeatures;
 
-    protected MIG mig;
+    protected ModalImplicationGraph modalImplicationGraph;
 
     protected void init(CNF cnf) {
-        mig = new MIG(cnf);
+        modalImplicationGraph = new ModalImplicationGraph(cnf);
     }
 
     protected boolean satCheck(CNF cnf) {
@@ -83,12 +83,12 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
             final int varX = fixedFeatures[i];
             if (varX != 0) {
                 solver.getAssumptions().push(-varX);
-                final SatSolver.SatResult hasSolution = solver.hasSolution();
+                final SATSolver.SatResult hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);
-                        mig.getVertex(-varX).setStatus(Status.Dead);
-                        mig.getVertex(varX).setStatus(Status.Core);
+                        modalImplicationGraph.getVertex(-varX).setStatus(Status.Dead);
+                        modalImplicationGraph.getVertex(varX).setStatus(Status.Core);
                         break;
                     case TIMEOUT:
                         solver.getAssumptions().pop();
@@ -121,7 +121,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
         } else {
             stream = stream.distinct().peek(c -> monitor.addStep());
         }
-        final long count = stream.peek(mig::addClause).count();
+        final long count = stream.peek(modalImplicationGraph::addClause).count();
         monitor.setDone();
         return count;
     }
@@ -198,14 +198,14 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
     //	}
 
     protected void cleanClauses() {
-        cleanedClausesList = new ArrayList<>(mig.getCnf().getClauses().size());
-        mig.getCnf().getClauses().stream()
-                .map(c -> cleanClause(c, mig))
+        cleanedClausesList = new ArrayList<>(modalImplicationGraph.getCnf().getClauses().size());
+        modalImplicationGraph.getCnf().getClauses().stream()
+                .map(c -> cleanClause(c, modalImplicationGraph))
                 .filter(Objects::nonNull)
                 .forEach(cleanedClausesList::add);
     }
 
-    protected LiteralList cleanClause(LiteralList clause, MIG mig) {
+    protected LiteralList cleanClause(LiteralList clause, ModalImplicationGraph modalImplicationGraph) {
         final int[] literals = clause.getLiterals();
         final LinkedHashSet<Integer> literalSet = new LinkedHashSet<>(literals.length << 1);
 
@@ -213,8 +213,8 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
         int childrenCount = clause.size();
         for (int i = 0; i < childrenCount; i++) {
             final int var = literals[i];
-            mig.size();
-            final Status status = mig.getVertex(var).getStatus();
+            modalImplicationGraph.size();
+            final Status status = modalImplicationGraph.getVertex(var).getStatus();
             switch (status) {
                 case Core:
                     return null;
@@ -248,16 +248,16 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
     }
 
     protected final boolean isRedundant(Sat4JSolver solver, LiteralList curClause) {
-        return solver.hasSolution(curClause.negate()) == SatSolver.SatResult.FALSE;
+        return solver.hasSolution(curClause.negate()) == SATSolver.SatResult.FALSE;
     }
 
     protected void bfsStrong(Monitor monitor) {
-        monitor.setTotalSteps(mig.getVertices().size());
-        final boolean[] mark = new boolean[mig.size() + 1];
+        monitor.setTotalSteps(modalImplicationGraph.getVertices().size());
+        final boolean[] mark = new boolean[modalImplicationGraph.size() + 1];
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             Arrays.fill(mark, false);
-            final Vertex complement = mig.getVertex(-vertex.getVar());
+            final Vertex complement = modalImplicationGraph.getVertex(-vertex.getVar());
 
             mark[Math.abs(vertex.getVar())] = true;
             for (final Vertex stronglyConnectedVertex : vertex.getStrongEdges()) {
@@ -272,7 +272,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                         mark[index] = true;
                         queue.add(stronglyConnectedVertex);
 
-                        final Vertex stronglyConnectedComplement = mig.getVertex(-stronglyConnectedVertex.getVar());
+                        final Vertex stronglyConnectedComplement = modalImplicationGraph.getVertex(-stronglyConnectedVertex.getVar());
                         vertex.addStronglyConnected(stronglyConnectedVertex);
                         stronglyConnectedComplement.addStronglyConnected(complement);
                     }
@@ -284,14 +284,14 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
     }
 
     protected void bfsWeak(LiteralList affectedVariables, Monitor monitor) {
-        monitor.setTotalSteps(mig.getVertices().size());
+        monitor.setTotalSteps(modalImplicationGraph.getVertices().size());
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
         final ArrayList<Integer> literals = new ArrayList<>();
-        final boolean[] mark = new boolean[mig.size() + 1];
-        final int[] fixed = new int[mig.size() + 1];
+        final boolean[] mark = new boolean[modalImplicationGraph.size() + 1];
+        final int[] fixed = new int[modalImplicationGraph.size() + 1];
         final int orgSize = solver.getAssumptions().size();
         solver.setSelectionStrategy(SStrategy.original());
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             if (vertex.isNormal()
                     && ((affectedVariables == null)
                             || affectedVariables.containsAnyVariable(Math.abs(vertex.getVar())))) {
@@ -338,7 +338,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                     final int index = Math.abs(literal);
                     if (!mark[index]) {
                         mark[index] = true;
-                        queue.add(mig.getVertex(literal));
+                        queue.add(modalImplicationGraph.getVertex(literal));
                     }
                 }
                 literals.clear();
@@ -348,7 +348,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
 
                     final int varX = model[Math.abs(curVertex.getVar()) - 1];
                     if (varX != 0) {
-                        curVertex = mig.getVertex(varX);
+                        curVertex = modalImplicationGraph.getVertex(varX);
                         solver.getAssumptions().push(-varX);
                         switch (solver.hasSolution()) {
                             case FALSE:
@@ -356,7 +356,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                                 fixed[Math.abs(varX)] = varX;
                                 final LiteralList literalList = new LiteralList(negVar, varX);
                                 cleanedClausesList.add(literalList);
-                                mig.getDetectedStrong().add(literalList);
+                                modalImplicationGraph.getDetectedStrong().add(literalList);
                                 for (final Vertex strongVertex : curVertex.getStrongEdges()) {
                                     final int index = Math.abs(strongVertex.getVar());
                                     mark[index] = true;
@@ -412,7 +412,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
                         final int index = Math.abs(literal);
                         if (!mark[index]) {
                             mark[index] = true;
-                            queue.add(mig.getVertex(literal));
+                            queue.add(modalImplicationGraph.getVertex(literal));
                         }
                     }
                     literals.clear();
@@ -421,7 +421,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
             solver.getAssumptions().clear(orgSize);
             monitor.addStep();
         }
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             vertex.getStrongEdges().clear();
             vertex.getComplexClauses().clear();
         }
@@ -429,10 +429,10 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, MIG> {
     }
 
     protected void finish() {
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             vertex.finish();
         }
-        mig.getDetectedStrong().trimToSize();
+        modalImplicationGraph.getDetectedStrong().trimToSize();
     }
 
     public boolean isCheckRedundancy() {

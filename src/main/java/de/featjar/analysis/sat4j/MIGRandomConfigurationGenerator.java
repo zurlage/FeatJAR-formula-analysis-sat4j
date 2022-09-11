@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.MIGDistribution;
 import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.sat4j.solver.SStrategy;
@@ -40,13 +40,13 @@ public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerato
     @Override
     protected void init(Monitor monitor) {
         final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
-        final MIG mig = Executor.apply(migBuilder, solver.getCnf()).orElse(Log::problems);
-        satisfiable = mig != null;
+        final ModalImplicationGraph modalImplicationGraph = Executor.apply(migBuilder, solver.getCnf()).orElse(Log::problems);
+        satisfiable = modalImplicationGraph != null;
         if (!satisfiable) {
             return;
         }
 
-        dist = new MIGDistribution(mig);
+        dist = new MIGDistribution(modalImplicationGraph);
         dist.setRandom(random);
         solver.setSelectionStrategy(SStrategy.mig(dist));
     }

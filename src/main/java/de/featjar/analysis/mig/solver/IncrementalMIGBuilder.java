@@ -20,14 +20,14 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import de.featjar.analysis.mig.solver.MIG.BuildStatus;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph.BuildStatus;
 import de.featjar.analysis.mig.solver.Vertex.Status;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.Clauses;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.Clauses;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import de.featjar.base.task.Monitor;
 import java.util.Collection;
@@ -47,7 +47,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         REPLACED
     }
 
-    private final MIG oldMig;
+    private final ModalImplicationGraph oldModalImplicationGraph;
 
     private boolean add = false;
 
@@ -55,14 +55,14 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     private HashSet<LiteralList> addedClauses;
     private VariableMap variables;
 
-    public IncrementalMIGBuilder(MIG oldMig) {
-        this.oldMig = oldMig;
+    public IncrementalMIGBuilder(ModalImplicationGraph oldModalImplicationGraph) {
+        this.oldModalImplicationGraph = oldModalImplicationGraph;
     }
 
     @Override
-    public MIG execute(CNF cnf, Monitor monitor) {
+    public ModalImplicationGraph execute(CNF cnf, Monitor monitor) {
         Objects.requireNonNull(cnf);
-        Objects.requireNonNull(oldMig);
+        Objects.requireNonNull(oldModalImplicationGraph);
 
         collect(cnf);
         monitor.addStep();
@@ -96,9 +96,9 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                         LiteralList.Order.NATURAL);
                 bfsWeak(affectedVariables, monitor.createChildMonitor(1000));
             }
-            mig.setStrongStatus(BuildStatus.Incremental);
+            modalImplicationGraph.setStrongStatus(BuildStatus.Incremental);
         } else {
-            mig.setStrongStatus(BuildStatus.None);
+            modalImplicationGraph.setStrongStatus(BuildStatus.None);
         }
 
         add(cnf, checkRedundancy, addedClauses);
@@ -108,7 +108,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
 
         finish();
         monitor.addStep();
-        return mig;
+        return modalImplicationGraph;
     }
 
     public static double getChangeRatio(CNF cnf1, CNF cnf2) {
@@ -141,7 +141,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     private void collect(CNF cnf) {
         init(cnf);
 
-        final CNF oldCnf = oldMig.getCnf();
+        final CNF oldCnf = oldModalImplicationGraph.getCnf();
         final Set<String> allVariables = new HashSet<>(oldCnf.getVariableMap().getVariableNames());
         allVariables.addAll(cnf.getVariableMap().getVariableNames());
         variables = new VariableMap(allVariables);
@@ -173,14 +173,14 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     }
 
     private void core(CNF cnf, Monitor monitor) {
-        final int[] coreDead = oldMig.getVertices().stream() //
+        final int[] coreDead = oldModalImplicationGraph.getVertices().stream() //
                 .filter(Vertex::isCore) //
                 .mapToInt(Vertex::getVar) //
-                .map(l -> Clauses.adapt(l, oldMig.getCnf().getVariableMap(), cnf.getVariableMap())) //
+                .map(l -> Clauses.adapt(l, oldModalImplicationGraph.getCnf().getVariableMap(), cnf.getVariableMap())) //
                 .filter(l -> l != 0) //
                 .peek(l -> {
-                    mig.getVertex(l).setStatus(Status.Core);
-                    mig.getVertex(-l).setStatus(Status.Dead);
+                    modalImplicationGraph.getVertex(l).setStatus(Status.Core);
+                    modalImplicationGraph.getVertex(-l).setStatus(Status.Dead);
                 })
                 .toArray();
         switch (changes) {
@@ -211,16 +211,16 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     private long add(CNF cnf, boolean checkRedundancy, Collection<LiteralList> addedClauses) {
         Stream<LiteralList> cnfStream = cleanedClausesList.stream();
         if (checkRedundancy) {
-            final Set<LiteralList> oldMigClauses = oldMig.getVertices().stream()
+            final Set<LiteralList> oldMigClauses = oldModalImplicationGraph.getVertices().stream()
                     .flatMap(v -> v.getComplexClauses().stream())
                     .collect(Collectors.toCollection(HashSet::new));
-            final HashSet<LiteralList> redundantClauses = oldMig.getCnf().getClauses().stream()
-                    .map(c -> cleanClause(c, oldMig)) //
+            final HashSet<LiteralList> redundantClauses = oldModalImplicationGraph.getCnf().getClauses().stream()
+                    .map(c -> cleanClause(c, oldModalImplicationGraph)) //
                     .filter(Objects::nonNull) //
                     .filter(c -> c.size() > 2) //
                     .filter(c -> !oldMigClauses.contains(c)) //
                     .map(c ->
-                            c.adapt(oldMig.getCnf().getVariableMap(), variables).get()) //
+                            c.adapt(oldModalImplicationGraph.getCnf().getVariableMap(), variables).get()) //
                     .peek(c -> c.setOrder(LiteralList.Order.NATURAL)) //
                     .collect(Collectors.toCollection(HashSet::new));
 
@@ -259,7 +259,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                 .distinct()
                                 .filter(c -> (c.size() < 3) || !redundantClauses.contains(c));
                     }
-                    mig.setRedundancyStatus(BuildStatus.Incremental);
+                    modalImplicationGraph.setRedundancyStatus(BuildStatus.Incremental);
                     break;
                 }
                 case REMOVED: {
@@ -277,7 +277,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                 return true;
                             })
                             .peek(redundancySolver.getFormula()::push);
-                    mig.setRedundancyStatus(mig.getRedundancyStatus());
+                    modalImplicationGraph.setRedundancyStatus(modalImplicationGraph.getRedundancyStatus());
                     break;
                 }
                 case REPLACED: {
@@ -315,12 +315,12 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                         || !isRedundant(redundancySolver, c))
                                 .peek(redundancySolver.getFormula()::push);
                     }
-                    mig.setRedundancyStatus(BuildStatus.Incremental);
+                    modalImplicationGraph.setRedundancyStatus(BuildStatus.Incremental);
                     break;
                 }
                 case UNCHANGED: {
                     cnfStream = cnfStream.distinct().filter(c -> (c.size() < 3) || !redundantClauses.contains(c));
-                    mig.setRedundancyStatus(mig.getRedundancyStatus());
+                    modalImplicationGraph.setRedundancyStatus(modalImplicationGraph.getRedundancyStatus());
                     break;
                 }
                 default:
@@ -331,9 +331,9 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                     .peek(c -> c.setOrder(LiteralList.Order.NATURAL));
         } else {
             cnfStream = cnfStream.distinct();
-            mig.setRedundancyStatus(BuildStatus.None);
+            modalImplicationGraph.setRedundancyStatus(BuildStatus.None);
         }
-        return cnfStream.peek(mig::addClause).count();
+        return cnfStream.peek(modalImplicationGraph::addClause).count();
     }
 
     protected void checkOldStrong() {
@@ -341,11 +341,11 @@ public class IncrementalMIGBuilder extends MIGBuilder {
             case REMOVED:
             case REPLACED:
                 loop:
-                for (final LiteralList strongEdge : oldMig.getDetectedStrong()) {
+                for (final LiteralList strongEdge : oldModalImplicationGraph.getDetectedStrong()) {
                     final LiteralList adaptClause = strongEdge
                             .adapt(
-                                    oldMig.getCnf().getVariableMap(),
-                                    mig.getCnf().getVariableMap())
+                                    oldModalImplicationGraph.getCnf().getVariableMap(),
+                                    modalImplicationGraph.getCnf().getVariableMap())
                             .get();
                     if (adaptClause != null) {
                         final int[] literals = adaptClause.getLiterals();
@@ -361,7 +361,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                         switch (solver.hasSolution()) {
                             case FALSE:
                                 cleanedClausesList.add(adaptClause);
-                                mig.getDetectedStrong().add(adaptClause);
+                                modalImplicationGraph.getDetectedStrong().add(adaptClause);
                             case TIMEOUT:
                             case TRUE:
                                 break;
@@ -373,15 +373,15 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                 break;
             case ADDED:
             case UNCHANGED:
-                for (final LiteralList strongEdge : oldMig.getDetectedStrong()) {
+                for (final LiteralList strongEdge : oldModalImplicationGraph.getDetectedStrong()) {
                     final LiteralList adaptClause = strongEdge
                             .adapt(
-                                    oldMig.getCnf().getVariableMap(),
-                                    mig.getCnf().getVariableMap())
+                                    oldModalImplicationGraph.getCnf().getVariableMap(),
+                                    modalImplicationGraph.getCnf().getVariableMap())
                             .get();
                     if (adaptClause != null) {
                         cleanedClausesList.add(adaptClause);
-                        mig.getDetectedStrong().add(adaptClause);
+                        modalImplicationGraph.getDetectedStrong().add(adaptClause);
                     }
                 }
                 break;
@@ -395,26 +395,26 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         for (final int literal : coreDead) {
             final int varX = fixedFeatures[Math.abs(literal) - 1];
             if (varX == 0) {
-                mig.getVertex(-literal).setStatus(Status.Normal);
-                mig.getVertex(literal).setStatus(Status.Normal);
+                modalImplicationGraph.getVertex(-literal).setStatus(Status.Normal);
+                modalImplicationGraph.getVertex(literal).setStatus(Status.Normal);
             } else {
                 solver.getAssumptions().push(-varX);
                 switch (solver.hasSolution()) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);
-                        mig.getVertex(varX).setStatus(Status.Core);
-                        mig.getVertex(-varX).setStatus(Status.Dead);
+                        modalImplicationGraph.getVertex(varX).setStatus(Status.Core);
+                        modalImplicationGraph.getVertex(-varX).setStatus(Status.Dead);
                         break;
                     case TIMEOUT:
                         solver.getAssumptions().pop();
                         fixedFeatures[Math.abs(literal) - 1] = 0;
-                        mig.getVertex(-varX).setStatus(Status.Normal);
-                        mig.getVertex(varX).setStatus(Status.Normal);
+                        modalImplicationGraph.getVertex(-varX).setStatus(Status.Normal);
+                        modalImplicationGraph.getVertex(varX).setStatus(Status.Normal);
                         break;
                     case TRUE:
                         solver.getAssumptions().pop();
-                        mig.getVertex(-varX).setStatus(Status.Normal);
-                        mig.getVertex(varX).setStatus(Status.Normal);
+                        modalImplicationGraph.getVertex(-varX).setStatus(Status.Normal);
+                        modalImplicationGraph.getVertex(varX).setStatus(Status.Normal);
                         LiteralList.resetConflicts(fixedFeatures, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                         break;

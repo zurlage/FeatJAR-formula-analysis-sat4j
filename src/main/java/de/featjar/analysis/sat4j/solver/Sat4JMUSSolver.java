@@ -20,9 +20,8 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import de.featjar.analysis.solver.MusSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.CNFComputation;
+import de.featjar.formula.analysis.solver.MUSSolver;
+import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.ModelRepresentation;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ import org.sat4j.specs.TimeoutException;
 import org.sat4j.tools.xplain.Xplain;
 
 /**
- * Implements a {@link MusSolver} using Sat4J.
+ * Implements a {@link MUSSolver} using Sat4J.
  *
  * <br>
  * <br>
@@ -53,13 +52,13 @@ import org.sat4j.tools.xplain.Xplain;
  * @author Joshua Sprey
  * @author Sebastian Krieter
  */
-public class Sat4JMusSolver extends AbstractSat4JSolver<Xplain<ISolver>> implements MusSolver<IConstr> {
+public class Sat4JMUSSolver extends AbstractSat4JSolver<Xplain<ISolver>> implements MUSSolver<IConstr> {
 
-    public Sat4JMusSolver(ModelRepresentation modelRepresentation) {
+    public Sat4JMUSSolver(ModelRepresentation modelRepresentation) {
         this(modelRepresentation.getCache().get(CNFComputation.fromFormula()).get());
     }
 
-    public Sat4JMusSolver(CNF cnf) {
+    public Sat4JMUSSolver(CNF cnf) {
         super(cnf);
     }
 

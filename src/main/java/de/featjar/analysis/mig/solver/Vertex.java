@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;

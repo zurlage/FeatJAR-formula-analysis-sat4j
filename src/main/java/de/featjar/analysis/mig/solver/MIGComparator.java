@@ -20,12 +20,12 @@
  */
 package de.featjar.analysis.mig.solver;
 
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Comparator;
 
 /**
  * Compares the dependencies of the {@link LiteralList literals} using a
- * {@link MIG}.
+ * {@link ModalImplicationGraph}.
  *
  * @author Sebastian Krieter
  */
@@ -44,22 +44,22 @@ public class MIGComparator implements Comparator<LiteralList> {
 
     private final VertexInfo[] vertexInfos;
 
-    public MIGComparator(MIG mig) {
-        vertexInfos = new VertexInfo[mig.getVertices().size()];
-        for (final Vertex vertex : mig.getVertices()) {
-            vertexInfos[MIG.getVertexIndex(vertex)] = new VertexInfo();
+    public MIGComparator(ModalImplicationGraph modalImplicationGraph) {
+        vertexInfos = new VertexInfo[modalImplicationGraph.getVertices().size()];
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
+            vertexInfos[ModalImplicationGraph.getVertexIndex(vertex)] = new VertexInfo();
         }
-        for (final Vertex vertex : mig.getVertices()) {
-            final VertexInfo vertexInfo = vertexInfos[MIG.getVertexIndex(vertex)];
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
+            final VertexInfo vertexInfo = vertexInfos[ModalImplicationGraph.getVertexIndex(vertex)];
             vertexInfo.strongOut = vertex.getStrongEdges().size();
             vertexInfo.weakOut = vertex.getComplexClauses().size();
             for (final Vertex strongEdge : vertex.getStrongEdges()) {
-                vertexInfos[MIG.getVertexIndex(strongEdge)].strongIn++;
+                vertexInfos[ModalImplicationGraph.getVertexIndex(strongEdge)].strongIn++;
             }
             for (final LiteralList clause : vertex.getComplexClauses()) {
                 for (final int literal : clause.getLiterals()) {
                     if (literal != vertex.getVar()) {
-                        vertexInfos[MIG.getVertexIndex(literal)].weakIn++;
+                        vertexInfos[ModalImplicationGraph.getVertexIndex(literal)].weakIn++;
                     }
                 }
             }
@@ -74,7 +74,7 @@ public class MIGComparator implements Comparator<LiteralList> {
     }
 
     public String getValue(LiteralList o1) {
-        final VertexInfo vi1 = vertexInfos[MIG.getVertexIndex(o1.getLiterals()[0])];
+        final VertexInfo vi1 = vertexInfos[ModalImplicationGraph.getVertexIndex(o1.getLiterals()[0])];
         final double f1 = computeValue(o1);
         return o1 + " | " + vi1 + " -> " + f1;
     }
@@ -84,7 +84,7 @@ public class MIGComparator implements Comparator<LiteralList> {
         int vOut = 0;
         for (final LiteralList literalSet : set) {
             for (final int literal : literalSet.getLiterals()) {
-                final VertexInfo info = vertexInfos[MIG.getVertexIndex(literal)];
+                final VertexInfo info = vertexInfos[ModalImplicationGraph.getVertexIndex(literal)];
                 vIn += (info.strongIn) + info.weakIn;
                 vOut += (info.strongOut) + info.weakOut;
             }
@@ -96,7 +96,7 @@ public class MIGComparator implements Comparator<LiteralList> {
         int vOut = 0;
         for (final LiteralList literalSet : set) {
             for (final int literal : literalSet.getLiterals()) {
-                final VertexInfo info = vertexInfos[MIG.getVertexIndex(literal)];
+                final VertexInfo info = vertexInfos[ModalImplicationGraph.getVertexIndex(literal)];
                 vOut += info.strongOut + info.weakOut;
             }
         }

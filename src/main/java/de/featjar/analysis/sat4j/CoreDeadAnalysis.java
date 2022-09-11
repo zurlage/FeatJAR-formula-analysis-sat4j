@@ -22,8 +22,8 @@ package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;
 import org.sat4j.core.VecInt;

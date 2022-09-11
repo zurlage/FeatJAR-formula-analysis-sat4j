@@ -21,18 +21,18 @@
 package de.featjar.analysis.sat4j.twise;
 
 import de.featjar.analysis.mig.io.MIGFormat;
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.MIGBuilder;
 import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.analysis.sat4j.FastRandomConfigurationGenerator;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.ClauseList;
-import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.data.Pair;
 import de.featjar.base.io.IO;
 import de.featjar.base.task.Executor;
@@ -85,7 +85,7 @@ public class TWiseConfigurationUtil {
     protected final Sat4JSolver localSolver;
     protected final boolean hasSolver;
 
-    protected MIG mig;
+    protected ModalImplicationGraph modalImplicationGraph;
     protected LiteralList[] strongHull;
     protected LiteralList coreDead;
 
@@ -122,22 +122,22 @@ public class TWiseConfigurationUtil {
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(migCheckRedundancy);
         migBuilder.setDetectStrong(migDetectStrong);
-        mig = Executor.apply(migBuilder, cnf).get();
+        modalImplicationGraph = Executor.apply(migBuilder, cnf).get();
         setupMIG();
     }
 
     public void computeMIG(Path migPath) {
         Feat.log().debug("Init graph... ");
         Feat.log().debug("\tLoad graph from " + migPath);
-        mig = IO.load(migPath, new MIGFormat()).get();
+        modalImplicationGraph = IO.load(migPath, new MIGFormat()).get();
         setupMIG();
     }
 
     private void setupMIG() {
-        strongHull = new LiteralList[mig.getVertices().size()];
+        strongHull = new LiteralList[modalImplicationGraph.getVertices().size()];
 
-        for (final Vertex vertex : mig.getVertices()) {
-            strongHull[MIG.getVertexIndex(vertex)] = new LiteralList(
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
+            strongHull[ModalImplicationGraph.getVertexIndex(vertex)] = new LiteralList(
                     vertex.getStrongEdges().stream().mapToInt(Vertex::getVar).toArray());
         }
     }
@@ -159,7 +159,7 @@ public class TWiseConfigurationUtil {
         } else {
             final int[] coreDeadArray = new int[cnf.getVariableMap().getVariableCount()];
             int index = 0;
-            for (final Vertex vertex : mig.getVertices()) {
+            for (final Vertex vertex : modalImplicationGraph.getVertices()) {
                 if (vertex.isCore()) {
                     coreDeadArray[index++] = vertex.getVar();
                 }
@@ -221,8 +221,8 @@ public class TWiseConfigurationUtil {
         return localSolver;
     }
 
-    public MIG getMig() {
-        return mig;
+    public ModalImplicationGraph getMig() {
+        return modalImplicationGraph;
     }
 
     public boolean hasSolver() {
@@ -230,7 +230,7 @@ public class TWiseConfigurationUtil {
     }
 
     public boolean hasMig() {
-        return mig != null;
+        return modalImplicationGraph != null;
     }
 
     public Random getRandom() {
@@ -305,7 +305,7 @@ public class TWiseConfigurationUtil {
     public boolean isCombinationInvalidMIG(LiteralList literals) {
         if (hasMig()) {
             for (final int literal : literals.getLiterals()) {
-                if (strongHull[MIG.getVertexIndex(literal)].hasConflicts(literals)) {
+                if (strongHull[ModalImplicationGraph.getVertexIndex(literal)].hasConflicts(literals)) {
                     return true;
                 }
             }
@@ -326,7 +326,7 @@ public class TWiseConfigurationUtil {
             final int orgAssignmentLength = solver.getAssumptions().size();
             try {
                 solver.getAssumptions().pushAll(literals.getLiterals());
-                final SatSolver.SatResult hasSolution = solver.hasSolution();
+                final SATSolver.SatResult hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case TRUE:
                         final int[] solution = solver.getInternalSolution();
@@ -459,7 +459,7 @@ public class TWiseConfigurationUtil {
                     }
                 }
                 if (orgAssignmentSize < localSolver.getAssumptions().size()) {
-                    if (localSolver.hasSolution() == SatSolver.SatResult.TRUE) {
+                    if (localSolver.hasSolution() == SATSolver.SatResult.TRUE) {
                         final int[] solution = localSolver.getInternalSolution();
                         addSolverSolution(Arrays.copyOf(solution, solution.length));
                         localSolver.shuffleOrder(random);
@@ -675,8 +675,8 @@ public class TWiseConfigurationUtil {
         this.extendConfigurationDeduce = extendConfigurationDeduce;
     }
 
-    public void setMIG(MIG mig) {
-        this.mig = mig;
+    public void setMIG(ModalImplicationGraph modalImplicationGraph) {
+        this.modalImplicationGraph = modalImplicationGraph;
         setupMIG();
     }
 

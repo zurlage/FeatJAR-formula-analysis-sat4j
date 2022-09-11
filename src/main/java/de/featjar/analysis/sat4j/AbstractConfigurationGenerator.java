@@ -21,8 +21,8 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.data.Store;
 import de.featjar.base.task.Monitor;
 import java.util.ArrayList;

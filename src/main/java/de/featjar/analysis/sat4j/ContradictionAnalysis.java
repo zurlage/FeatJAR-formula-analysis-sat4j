@@ -21,10 +21,10 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +86,7 @@ public class ContradictionAnalysis extends AClauseAnalysis<List<LiteralList>> {
                 continue;
             }
 
-            final SatSolver.SatResult hasSolution = solver.hasSolution();
+            final SATSolver.SatResult hasSolution = solver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     resultList.set(i, clauseList.get(startIndex));

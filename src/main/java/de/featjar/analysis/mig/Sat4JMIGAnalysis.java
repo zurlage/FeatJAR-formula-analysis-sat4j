@@ -20,12 +20,11 @@
  */
 package de.featjar.analysis.mig;
 
-import de.featjar.analysis.AbstractAnalysis;
-import de.featjar.analysis.mig.solver.MIG;
-import de.featjar.analysis.mig.solver.MIGComputation;
+import de.featjar.formula.analysis.Analysis;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.analysis.solver.RuntimeTimeoutException;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.RuntimeTimeoutException;
 import de.featjar.base.task.Monitor;
 import java.util.Random;
 
@@ -36,7 +35,7 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public abstract class Sat4JMIGAnalysis<T> extends AbstractAnalysis<T, Sat4JMIGSolver, MIG> {
+public abstract class Sat4JMIGAnalysis<T> extends Analysis<T, Sat4JMIGSolver, ModalImplicationGraph> {
 
     protected boolean timeoutOccurred = false;
     private boolean throwTimeoutException = true;
@@ -67,7 +66,7 @@ public abstract class Sat4JMIGAnalysis<T> extends AbstractAnalysis<T, Sat4JMIGSo
     }
 
     @Override
-    protected Sat4JMIGSolver createSolver(MIG input) throws RuntimeContradictionException {
+    protected Sat4JMIGSolver createSolver(ModalImplicationGraph input) throws RuntimeContradictionException {
         return new Sat4JMIGSolver(input);
     }
 

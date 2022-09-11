@@ -21,8 +21,8 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.SStrategy;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import org.sat4j.core.VecInt;
 
@@ -87,7 +87,7 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
                 throw new RuntimeException("Unknown " + CoverStrategy.class.getName() + ": " + coverStrategy);
         }
 
-        if (solver.hasSolution() == SatSolver.SatResult.TRUE) {
+        if (solver.hasSolution() == SATSolver.SatResult.TRUE) {
             variablesToCover = new VecInt();
 
             if (variables != null) {

@@ -20,7 +20,7 @@
  */
 package de.featjar.transform;
 
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.HashSet;
 
 /**

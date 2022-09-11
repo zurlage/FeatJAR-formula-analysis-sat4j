@@ -20,19 +20,19 @@
  */
 package de.featjar.analysis.mig.solver.visitor;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 
 abstract class ATraverser implements ITraverser {
 
     protected final boolean[] dfsMark;
-    protected final MIG mig;
+    protected final ModalImplicationGraph modalImplicationGraph;
 
     protected Visitor<?> visitor = null;
     protected int[] currentConfiguration = null;
 
-    public ATraverser(MIG mig) {
-        this.mig = mig;
-        dfsMark = new boolean[mig.getVertices().size()];
+    public ATraverser(ModalImplicationGraph modalImplicationGraph) {
+        this.modalImplicationGraph = modalImplicationGraph;
+        dfsMark = new boolean[modalImplicationGraph.getVertices().size()];
     }
 
     @Override

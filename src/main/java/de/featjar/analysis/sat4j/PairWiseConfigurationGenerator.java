@@ -20,14 +20,14 @@
  */
 package de.featjar.analysis.sat4j;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.MIGBuilder;
 import de.featjar.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.analysis.sat4j.solver.AbstractSat4JSolver;
 import de.featjar.analysis.sat4j.solver.SStrategy;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;
@@ -379,12 +379,12 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(true);
         migBuilder.setDetectStrong(true);
-        final MIG mig = Executor.apply(migBuilder, solver.getCnf()).get();
+        final ModalImplicationGraph modalImplicationGraph = Executor.apply(migBuilder, solver.getCnf()).get();
 
         combinations = new byte[numVariables * numVariables];
         combinations2 = new byte[numVariables * numVariables];
         core = new byte[numVariables];
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             if (vertex.isCore()) {
                 core[Math.abs(vertex.getVar()) - 1] = (byte) (vertex.getVar() < 0 ? -1 : 1);
                 solver.getAssumptions().push(vertex.getVar());

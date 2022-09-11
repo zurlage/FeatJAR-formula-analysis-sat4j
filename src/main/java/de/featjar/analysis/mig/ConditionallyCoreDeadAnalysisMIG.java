@@ -20,18 +20,18 @@
  */
 package de.featjar.analysis.mig;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Sat4JMIGSolver;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.analysis.mig.solver.visitor.CollectingVisitor;
 import de.featjar.analysis.mig.solver.visitor.Traverser;
 import de.featjar.analysis.sat4j.solver.SStrategy;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import org.sat4j.core.VecInt;
 
 /**
- * Finds core and dead features using a {@link MIG model implication graph}.
+ * Finds core and dead features using a {@link ModalImplicationGraph model implication graph}.
  *
  * @author Sebastian Krieter
  */
@@ -63,7 +63,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
     public LiteralList analyze(Sat4JMIGSolver solver, Monitor monitor) throws Exception {
         monitor.setTotalSteps(solver.getVariables().getVariableCount() + 2);
 
-        final Traverser traverser = solver.mig.traverse();
+        final Traverser traverser = solver.modalImplicationGraph.traverse();
         solver.getAssumptions().ensureSize(fixedVariables.length + 1);
         final int[] knownValues = new int[solver.getVariables().getVariableCount()];
 
@@ -74,7 +74,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
         }
 
         // get core / dead variables
-        for (final Vertex vertex : solver.mig.getVertices()) {
+        for (final Vertex vertex : solver.modalImplicationGraph.getVertices()) {
             if (vertex.isCore()) {
                 final int var = vertex.getVar();
                 knownValues[Math.abs(var) - 1] = var;

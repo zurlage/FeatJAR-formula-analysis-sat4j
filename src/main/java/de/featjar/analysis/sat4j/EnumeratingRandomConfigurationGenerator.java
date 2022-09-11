@@ -20,8 +20,8 @@
  */
 package de.featjar.analysis.sat4j;
 
-import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.log.Log;

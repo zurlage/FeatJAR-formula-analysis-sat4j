@@ -23,9 +23,9 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.AbstractSat4JSolver;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +74,7 @@ public class IndependentRedundancyAnalysis extends AClauseAnalysis<List<LiteralL
 
         final List<LiteralList> solutionList = solver.rememberSolutionHistory(AbstractSat4JSolver.MAX_SOLUTION_BUFFER);
 
-        if (solver.hasSolution() == SatSolver.SatResult.TRUE) {
+        if (solver.hasSolution() == SATSolver.SatResult.TRUE) {
             solver.setSelectionStrategy(SStrategy.random(getRandom()));
 
             int endIndex = 0;
@@ -93,7 +93,7 @@ public class IndependentRedundancyAnalysis extends AClauseAnalysis<List<LiteralL
                         }
                     }
 
-                    final SatSolver.SatResult hasSolution = solver.hasSolution(complement);
+                    final SATSolver.SatResult hasSolution = solver.hasSolution(complement);
                     switch (hasSolution) {
                         case FALSE:
                             resultList.set(i, clause);

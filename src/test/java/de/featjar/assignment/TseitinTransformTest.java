@@ -33,7 +33,7 @@ import de.featjar.base.tree.Trees;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class TseytinTransformTest {
+public class TseitinTransformTest {
 
     @Test
     public void testImplies() {
@@ -51,14 +51,14 @@ public class TseytinTransformTest {
         final VariableMap mapClone = map.clone();
 
         final ModelRepresentation rep = new ModelRepresentation(formulaOrg);
-        // TODO Fix tseytin transformer
-        //		CNF cnf = rep.get(CNFProvider.fromTseytinFormula());
+        // TODO Fix tseitin transformer
+        //		CNF cnf = rep.get(CNFProvider.fromTseitinFormula());
 
         FormulaCreator.testAllAssignments(map, assignment -> {
             final Boolean orgEval =
                     (Boolean) Formulas.evaluate(formulaOrg, assignment).orElseThrow();
-            final Boolean tseytinEval = evaluate(rep, assignment);
-            Assertions.assertEquals(orgEval, tseytinEval, assignment.toString());
+            final Boolean tseitinEval = evaluate(rep, assignment);
+            Assertions.assertEquals(orgEval, tseitinEval, assignment.toString());
         });
         assertTrue(Trees.equals(formulaOrg, formulaClone));
         assertEquals(mapClone, map);

@@ -21,9 +21,9 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -99,7 +99,7 @@ public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>>
                 for (int j = startIndex; j < endIndex; j++) {
                     final LiteralList clause = clauseList.get(j);
 
-                    final SatSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
+                    final SATSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
                     switch (hasSolution) {
                         case FALSE:
                             break;

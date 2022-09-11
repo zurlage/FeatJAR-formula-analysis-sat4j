@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.List;

@@ -20,10 +20,10 @@
  */
 package de.featjar.analysis.mig.solver.visitor;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.analysis.mig.solver.visitor.Visitor.VisitResult;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,8 +39,8 @@ public class Traverser extends ATraverser {
         private static final long serialVersionUID = 4872529212110156314L;
     }
 
-    public Traverser(MIG mig) {
-        super(mig);
+    public Traverser(ModalImplicationGraph modalImplicationGraph) {
+        super(modalImplicationGraph);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class Traverser extends ATraverser {
                     for (final IteratorInt literalIterator = openClause.iterator(); literalIterator.hasNext(); ) {
                         final int literal = literalIterator.next();
                         if (currentConfiguration[getIndex(literal)] == 0) {
-                            final int vertexIndex = MIG.getVertexIndex(literal);
+                            final int vertexIndex = ModalImplicationGraph.getVertexIndex(literal);
                             if (!dfsMark[vertexIndex]) {
                                 dfsMark[vertexIndex] = true;
                                 boolean changed = false;
@@ -75,7 +75,7 @@ public class Traverser extends ATraverser {
                                     case Cancel:
                                         return;
                                     case Continue:
-                                        changed |= addComplexClauses(openClauseMap, mig.getVertex(literal)) > 0;
+                                        changed |= addComplexClauses(openClauseMap, modalImplicationGraph.getVertex(literal)) > 0;
                                         break;
                                     case Select:
                                         changed |= attemptStrongSelect(literal, openClauseMap);
@@ -172,7 +172,7 @@ public class Traverser extends ATraverser {
                     throw new AssertionError(visitStrongResult);
             }
 
-            final Vertex curVertex = mig.getVertex(curLiteral);
+            final Vertex curVertex = modalImplicationGraph.getVertex(curLiteral);
             addComplexClauses(complexClauseMap, curVertex);
 
             for (final Vertex strongVertex : curVertex.getStrongEdges()) {

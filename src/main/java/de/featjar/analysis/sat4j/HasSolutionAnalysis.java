@@ -21,8 +21,8 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.CNF;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.CNF;
 import de.featjar.base.task.Monitor;
 
 /**
@@ -35,7 +35,7 @@ public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
 
     @Override
     public Boolean analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
-        final SatSolver.SatResult hasSolution = solver.hasSolution();
+        final SATSolver.SatResult hasSolution = solver.hasSolution();
         switch (hasSolution) {
             case FALSE:
                 return false;

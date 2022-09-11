@@ -23,9 +23,9 @@ package de.featjar.analysis.sat4j;
 import de.featjar.analysis.sat4j.solver.SStrategy;
 import de.featjar.analysis.sat4j.solver.SampleDistribution;
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.LiteralList;
-import de.featjar.clauses.solutions.SolutionList;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.log.Log;
@@ -83,7 +83,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
             final int varX = fixedFeatures[i];
             if (varX != 0) {
                 solver.getAssumptions().push(-varX);
-                final SatSolver.SatResult hasSolution = solver.hasSolution();
+                final SATSolver.SatResult hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);

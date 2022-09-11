@@ -20,10 +20,10 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import de.featjar.analysis.solver.AbstractDynamicFormula;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.clauses.FormulaToCNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.AbstractDynamicFormula;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.clauses.FormulaToCNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.Formula;
 import de.featjar.formula.structure.atomic.literal.VariableMap;
 import java.util.ArrayList;

@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.mig.io;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.base.io.format.Format;
 
 /**
@@ -28,7 +28,7 @@ import de.featjar.base.io.format.Format;
  *
  * @author Sebastian Krieter
  */
-public class MIGFormat implements Format<MIG> {
+public class MIGFormat implements Format<ModalImplicationGraph> {
 
     public static final String ID = "format.mig." + MIGFormat.class.getSimpleName();
 

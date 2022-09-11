@@ -21,7 +21,7 @@
 package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.sat4j.solver.LiteralDistribution;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
 
 /**
@@ -33,14 +33,14 @@ import java.util.Arrays;
 public class MIGDistribution extends LiteralDistribution {
 
     private final byte[] model;
-    private final MIG mig;
+    private final ModalImplicationGraph modalImplicationGraph;
     private int count;
 
-    public MIGDistribution(MIG mig) {
-        this.mig = mig;
-        model = new byte[mig.size()];
+    public MIGDistribution(ModalImplicationGraph modalImplicationGraph) {
+        this.modalImplicationGraph = modalImplicationGraph;
+        model = new byte[modalImplicationGraph.size()];
         count = 0;
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             if (vertex.isNormal()) {
                 count++;
             }
@@ -78,7 +78,7 @@ public class MIGDistribution extends LiteralDistribution {
         int weakInNegative = 0;
 
         //		count = 0;
-        for (final Vertex vertex : mig.getVertices()) {
+        for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             if (vertex.isNormal() && (model[Math.abs(vertex.getVar()) - 1] == 0)) {
                 //				if (vertex.getVar() > 0) {
                 //					count++;

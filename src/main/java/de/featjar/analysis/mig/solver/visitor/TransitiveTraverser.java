@@ -20,10 +20,10 @@
  */
 package de.featjar.analysis.mig.solver.visitor;
 
-import de.featjar.analysis.mig.solver.MIG;
+import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.analysis.mig.solver.visitor.Visitor.VisitResult;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,8 +35,8 @@ import org.sat4j.specs.IteratorInt;
 
 public class TransitiveTraverser extends ATraverser {
 
-    public TransitiveTraverser(MIG mig) {
-        super(mig);
+    public TransitiveTraverser(ModalImplicationGraph modalImplicationGraph) {
+        super(modalImplicationGraph);
     }
 
     @Override
@@ -56,10 +56,10 @@ public class TransitiveTraverser extends ATraverser {
                     for (final IteratorInt iterator = v.iterator(); iterator.hasNext(); ) {
                         final int literal = iterator.next();
                         if (currentConfiguration[Math.abs(literal) - 1] == 0) {
-                            final int vertexIndex = MIG.getVertexIndex(literal);
+                            final int vertexIndex = ModalImplicationGraph.getVertexIndex(literal);
                             if (!dfsMark[vertexIndex]) {
                                 dfsMark[vertexIndex] = true;
-                                final Vertex vertex = mig.getVertex(literal);
+                                final Vertex vertex = modalImplicationGraph.getVertex(literal);
                                 boolean changed = false;
                                 final VisitResult visitWeakResult = visitor.visitWeak(literal);
                                 switch (visitWeakResult) {
@@ -158,7 +158,7 @@ public class TransitiveTraverser extends ATraverser {
                 default:
                     throw new AssertionError(visitStrongResult);
             }
-            final Vertex curVertex = mig.getVertex(curLiteral);
+            final Vertex curVertex = modalImplicationGraph.getVertex(curLiteral);
             if (complexClauseMap != null) {
                 addComplexClauses(complexClauseMap, curVertex);
             }

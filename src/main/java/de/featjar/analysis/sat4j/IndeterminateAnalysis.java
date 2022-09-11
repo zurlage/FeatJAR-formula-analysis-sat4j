@@ -21,9 +21,9 @@
 package de.featjar.analysis.sat4j;
 
 import de.featjar.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.analysis.solver.SatSolver;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +65,7 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
                 }
             }
 
-            final SatSolver.SatResult hasSolution = modSolver.hasSolution();
+            final SATSolver.SatResult hasSolution = modSolver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     break;

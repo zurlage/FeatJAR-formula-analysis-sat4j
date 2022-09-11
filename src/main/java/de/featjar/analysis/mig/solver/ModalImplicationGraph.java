@@ -22,9 +22,9 @@ package de.featjar.analysis.mig.solver;
 
 import de.featjar.analysis.mig.solver.Vertex.Status;
 import de.featjar.analysis.mig.solver.visitor.Traverser;
-import de.featjar.analysis.solver.RuntimeContradictionException;
-import de.featjar.clauses.CNF;
-import de.featjar.clauses.LiteralList;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class MIG {
+public class ModalImplicationGraph {
 
     public enum BuildStatus {
         None,
@@ -58,7 +58,7 @@ public class MIG {
     private BuildStatus redundancyStatus = BuildStatus.None;
     private BuildStatus strongStatus = BuildStatus.None;
 
-    public MIG(CNF cnf) {
+    public ModalImplicationGraph(CNF cnf) {
         this.cnf = cnf;
         final int numVariables = cnf.getVariableMap().getVariableCount();
         adjList = new ArrayList<>(numVariables << 1);
@@ -73,7 +73,7 @@ public class MIG {
         adjList.add(new Vertex(nextID));
     }
 
-    public void copyValues(MIG other) {
+    public void copyValues(ModalImplicationGraph other) {
         adjList.addAll(other.adjList);
     }
 
