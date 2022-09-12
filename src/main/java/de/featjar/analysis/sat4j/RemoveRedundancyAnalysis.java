@@ -51,7 +51,6 @@ import org.sat4j.specs.IConstr;
 public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
     public RemoveRedundancyAnalysis() {
-        super();
     }
 
     public RemoveRedundancyAnalysis(List<LiteralList> clauseList) {

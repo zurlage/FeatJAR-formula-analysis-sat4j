@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j.solver;
 import de.featjar.formula.analysis.solver.SolutionSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.atomic.literal.VariableMap;
+import de.featjar.formula.structure.VariableMap;
 import de.featjar.base.data.Pair;
 import java.util.Arrays;
 import java.util.Collections;

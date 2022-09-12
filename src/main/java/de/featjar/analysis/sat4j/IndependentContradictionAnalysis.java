@@ -46,11 +46,9 @@ import java.util.List;
 public class IndependentContradictionAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
     public IndependentContradictionAnalysis() {
-        super();
     }
 
     public IndependentContradictionAnalysis(List<LiteralList> clauseList) {
-        super();
         this.clauseList = clauseList;
     }
 

@@ -55,7 +55,6 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<LiteralLi
     }
 
     public ConditionallyCoreDeadAnalysisMIG() {
-        super();
         resetFixedFeatures();
     }
 

@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.formula.analysis.solver.MUSSolver;
 import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.ModelRepresentation;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;

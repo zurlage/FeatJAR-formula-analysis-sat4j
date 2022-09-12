@@ -20,8 +20,8 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import de.featjar.formula.structure.atomic.Assignment;
-import de.featjar.formula.structure.atomic.literal.VariableMap;
+import de.featjar.formula.structure.assignment.Assignment;
+import de.featjar.formula.structure.VariableMap;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;

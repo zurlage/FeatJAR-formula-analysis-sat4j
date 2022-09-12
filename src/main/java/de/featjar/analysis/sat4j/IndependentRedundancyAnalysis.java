@@ -47,11 +47,9 @@ import java.util.List;
 public class IndependentRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
 
     public IndependentRedundancyAnalysis() {
-        super();
     }
 
     public IndependentRedundancyAnalysis(List<LiteralList> clauseList) {
-        super();
         this.clauseList = clauseList;
     }
 

@@ -48,11 +48,9 @@ import java.util.List;
  */
 public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
     public AddRedundancyAnalysis() {
-        super();
     }
 
     public AddRedundancyAnalysis(List<LiteralList> clauseList) {
-        super();
         this.clauseList = clauseList;
     }
 

@@ -39,11 +39,9 @@ public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
     private Sat4JSolver solver;
 
     public CoreDeadAnalysis() {
-        super();
     }
 
     public CoreDeadAnalysis(LiteralList variables) {
-        super();
         this.variables = variables;
     }
 

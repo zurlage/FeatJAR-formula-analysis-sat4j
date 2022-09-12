@@ -52,7 +52,6 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
     }
 
     public OneWiseConfigurationGenerator(int[] features) {
-        super();
         setFeatures(features);
     }
 

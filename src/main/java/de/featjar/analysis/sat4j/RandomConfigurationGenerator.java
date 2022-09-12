@@ -35,7 +35,6 @@ public abstract class RandomConfigurationGenerator extends AbstractConfiguration
     protected boolean satisfiable = true;
 
     public RandomConfigurationGenerator() {
-        super();
         setRandom(new Random());
     }
 

@@ -38,7 +38,6 @@ public class PresenceCondition extends ClauseList {
     private final transient TreeSet<Integer> groups = new TreeSet<>();
 
     public PresenceCondition() {
-        super();
     }
 
     public PresenceCondition(ClauseList otherClauseList) {

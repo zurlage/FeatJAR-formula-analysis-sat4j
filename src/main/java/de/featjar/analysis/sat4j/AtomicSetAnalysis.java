@@ -35,7 +35,6 @@ import java.util.List;
  */
 public class AtomicSetAnalysis extends Sat4JAnalysis<List<LiteralList>> { // todo: AVariableAnalysis
     public AtomicSetAnalysis() {
-        super();
     }
 
     @Override

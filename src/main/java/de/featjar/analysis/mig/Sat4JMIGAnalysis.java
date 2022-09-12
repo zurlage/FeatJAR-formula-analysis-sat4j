@@ -44,7 +44,6 @@ public abstract class Sat4JMIGAnalysis<T> extends Analysis<T, Sat4JMIGSolver, Mo
     protected Random random = new Random(112358);
 
     public Sat4JMIGAnalysis() {
-        super();
         solverInputComputation = MIGComputation.fromFormula();
     }
 

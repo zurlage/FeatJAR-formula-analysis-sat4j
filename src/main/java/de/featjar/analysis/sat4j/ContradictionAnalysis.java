@@ -47,11 +47,9 @@ import java.util.List;
  */
 public class ContradictionAnalysis extends AClauseAnalysis<List<LiteralList>> {
     public ContradictionAnalysis() {
-        super();
     }
 
     public ContradictionAnalysis(List<LiteralList> clauseList) {
-        super();
         this.clauseList = clauseList;
     }
 

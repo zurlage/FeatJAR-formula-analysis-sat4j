@@ -44,7 +44,6 @@ public abstract class Sat4JAnalysis<T> extends Analysis<T, Sat4JSolver, CNF> {
     protected Random random = new Random(112358);
 
     public Sat4JAnalysis() {
-        super();
         solverInputComputation = CNFComputation.fromFormula();
     }
 
