@@ -31,7 +31,7 @@ import de.featjar.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.TermMap;
+import de.featjar.formula.tmp.TermMap;
 import java.util.List;
 import java.util.Random;
 import org.sat4j.minisat.SolverFactory;

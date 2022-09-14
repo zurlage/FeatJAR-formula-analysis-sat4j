@@ -31,6 +31,7 @@ import de.featjar.base.io.IO;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 public class CNFTransformTest {

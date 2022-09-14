@@ -25,7 +25,7 @@ import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.clauses.FormulaToCNF;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.Formula;
-import de.featjar.formula.structure.TermMap;
+import de.featjar.formula.tmp.TermMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

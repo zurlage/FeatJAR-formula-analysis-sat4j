@@ -23,7 +23,7 @@ package de.featjar.analysis.mig.io;
 import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.TermMap;
+import de.featjar.formula.tmp.TermMap;
 import java.util.List;
 
 /**

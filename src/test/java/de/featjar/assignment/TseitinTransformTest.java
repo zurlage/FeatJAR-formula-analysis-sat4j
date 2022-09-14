@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.analysis.sat4j.AllConfigurationGenerator;
 import de.featjar.formula.structure.Formula;
-import de.featjar.formula.structure.Formulas;
+import de.featjar.formula.tmp.Formulas;
 import de.featjar.formula.structure.assignment.Assignment;
-import de.featjar.formula.structure.TermMap;
+import de.featjar.formula.tmp.TermMap;
 import de.featjar.base.tree.Trees;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

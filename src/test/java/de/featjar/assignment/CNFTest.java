@@ -37,10 +37,10 @@ import de.featjar.analysis.sat4j.IndeterminateAnalysis;
 import de.featjar.analysis.sat4j.RemoveRedundancyAnalysis;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.atomic.literal.Literal;
-import de.featjar.formula.structure.TermMap;
-import de.featjar.formula.structure.connective.And;
-import de.featjar.formula.structure.connective.Or;
+import de.featjar.formula.structure.formula.literal.Literal;
+import de.featjar.formula.tmp.TermMap;
+import de.featjar.formula.structure.formula.connective.And;
+import de.featjar.formula.structure.formula.connective.Or;
 import de.featjar.transform.CNFSlicer;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
@@ -62,12 +62,12 @@ public class CNFTest {
 
         final And formula = new And(
                 new Or(d),
-                new Or(e.flip()),
+                new Or(e.invert()),
                 new Or(a, b),
-                new Or(a.flip(), c),
-                new Or(d, b, e.flip()),
-                new Or(b.flip(), c, d),
-                new Or(c.flip(), d.flip(), e.flip()));
+                new Or(a.invert(), c),
+                new Or(d, b, e.invert()),
+                new Or(b.invert(), c, d),
+                new Or(c.invert(), d.invert(), e.invert()));
 
         final ModelRepresentation rep = new ModelRepresentation(formula);
 

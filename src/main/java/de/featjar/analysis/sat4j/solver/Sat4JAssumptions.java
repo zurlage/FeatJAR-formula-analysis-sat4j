@@ -21,7 +21,7 @@
 package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.formula.structure.assignment.Assignment;
-import de.featjar.formula.structure.TermMap;
+import de.featjar.formula.tmp.TermMap;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
