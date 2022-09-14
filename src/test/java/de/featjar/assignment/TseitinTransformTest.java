@@ -27,7 +27,7 @@ import de.featjar.analysis.sat4j.AllConfigurationGenerator;
 import de.featjar.formula.structure.Formula;
 import de.featjar.formula.structure.Formulas;
 import de.featjar.formula.structure.assignment.Assignment;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import de.featjar.base.tree.Trees;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,8 +46,8 @@ public class TseitinTransformTest {
 
     private void testTransform(final Formula formulaOrg) {
         final Formula formulaClone = Trees.clone(formulaOrg);
-        final VariableMap map = formulaOrg.getVariableMap().orElseThrow();
-        final VariableMap mapClone = map.clone();
+        final TermMap map = formulaOrg.getTermMap().orElseThrow();
+        final TermMap mapClone = map.clone();
 
         final ModelRepresentation rep = new ModelRepresentation(formulaOrg);
         // TODO Fix tseitin transformer
@@ -61,7 +61,7 @@ public class TseitinTransformTest {
         });
         assertTrue(Trees.equals(formulaOrg, formulaClone));
         assertEquals(mapClone, map);
-        assertEquals(mapClone, formulaOrg.getVariableMap().orElseThrow());
+        assertEquals(mapClone, formulaOrg.getTermMap().orElseThrow());
     }
 
     private Boolean evaluate(ModelRepresentation rep, final Assignment assignment) {

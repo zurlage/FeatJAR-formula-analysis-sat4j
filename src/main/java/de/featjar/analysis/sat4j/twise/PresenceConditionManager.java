@@ -56,7 +56,7 @@ public class PresenceConditionManager {
 
         int groupIndex = 0;
         for (final List<ClauseList> group : expressions) {
-            final List<PresenceCondition> newNodeList = new ArrayList<>();
+            final List<PresenceCondition> newFormulaList = new ArrayList<>();
             expressionLoop:
             for (final ClauseList clauses : group) {
                 final List<LiteralList> newClauses = new ArrayList<>();
@@ -87,10 +87,10 @@ public class PresenceConditionManager {
                     }
                     mappedPc.addGroup(groupIndex);
                     Collections.sort(mappedPc, (o1, o2) -> o1.size() - o2.size());
-                    newNodeList.add(mappedPc);
+                    newFormulaList.add(mappedPc);
                 }
             }
-            groupedPresenceConditions.add(newNodeList);
+            groupedPresenceConditions.add(newFormulaList);
             groupIndex++;
         }
     }

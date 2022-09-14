@@ -31,7 +31,7 @@ import de.featjar.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import java.util.List;
 import java.util.Random;
 import org.sat4j.minisat.SolverFactory;
@@ -59,10 +59,10 @@ public class Sat4JSolver extends AbstractSat4JSolver<Solver<?>> {
         setOrderFix();
     }
 
-    public Sat4JSolver(VariableMap variableMap) {
-        super(variableMap);
+    public Sat4JSolver(TermMap termMap) {
+        super(termMap);
         strategy = SStrategy.original();
-        order = new int[variableMap.getVariableCount()];
+        order = new int[termMap.getVariableCount()];
         setOrderFix();
     }
 

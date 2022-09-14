@@ -21,7 +21,7 @@
 package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.formula.structure.assignment.Assignment;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,13 +37,13 @@ import org.sat4j.core.VecInt;
 public class Sat4JAssumptions implements Assignment {
 
     protected final VecInt assumptions;
-    protected final VariableMap variables;
+    protected final TermMap variables;
 
     public VecInt getAssumptions() {
         return assumptions;
     }
 
-    public Sat4JAssumptions(VariableMap variables) {
+    public Sat4JAssumptions(TermMap variables) {
         this.variables = variables;
         assumptions = new VecInt(variables.getVariableCount());
     }
@@ -167,7 +167,7 @@ public class Sat4JAssumptions implements Assignment {
         return index > 0 ? get(index) : Optional.empty();
     }
 
-    public VariableMap getVariables() {
+    public TermMap getVariables() {
         return variables;
     }
 

@@ -25,7 +25,7 @@ import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.clauses.FormulaToCNF;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.Formula;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,8 +42,8 @@ public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
 
     private final AbstractSat4JSolver<?> sat4jSolver;
 
-    public Sat4JFormula(AbstractSat4JSolver<?> solver, VariableMap variableMap) {
-        super(variableMap);
+    public Sat4JFormula(AbstractSat4JSolver<?> solver, TermMap termMap) {
+        super(termMap);
         sat4jSolver = solver;
     }
 
@@ -54,7 +54,7 @@ public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
 
     @Override
     public List<IConstr> push(Formula formula) throws RuntimeContradictionException {
-        return push(FormulaToCNF.convert(formula, variableMap).getClauses());
+        return push(FormulaToCNF.convert(formula, termMap).getClauses());
     }
 
     public List<IConstr> push(List<? extends LiteralList> clauses) {

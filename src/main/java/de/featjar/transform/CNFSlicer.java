@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.ClauseLengthComparatorDsc;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
 import java.util.ArrayList;
@@ -78,8 +78,8 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         this.dirtyVariables = dirtyVariables;
     }
 
-    public CNFSlicer(Collection<String> dirtyVariableNames, VariableMap variableMap) {
-        dirtyVariables = LiteralList.getVariables(variableMap, dirtyVariableNames);
+    public CNFSlicer(Collection<String> dirtyVariableNames, TermMap termMap) {
+        dirtyVariables = LiteralList.getVariables(termMap, dirtyVariableNames);
     }
 
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
@@ -146,13 +146,13 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             names.remove(
                     orgCNF.getVariableMap().getVariableName(Math.abs(literal)).get());
         }
-        final VariableMap slicedVariableMap = new VariableMap(names);
+        final TermMap slicedTermMap = new TermMap(names);
         final List<LiteralList> slicedClauseList = cleanClauseList.stream()
                 .map(clause ->
-                        clause.adapt(orgCNF.getVariableMap(), slicedVariableMap).get())
+                        clause.adapt(orgCNF.getVariableMap(), slicedTermMap).get())
                 .collect(Collectors.toList());
 
-        return new CNF(slicedVariableMap, slicedClauseList);
+        return new CNF(slicedTermMap, slicedClauseList);
     }
 
     private void addNewClause(final DirtyClause curClause) {

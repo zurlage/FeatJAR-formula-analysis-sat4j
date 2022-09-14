@@ -23,7 +23,7 @@ package de.featjar.analysis.mig.io;
 import de.featjar.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.analysis.mig.solver.Vertex;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import java.util.List;
 
 /**
@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class MIGDependenciesWriter {
 
-    public String write(final ModalImplicationGraph modalImplicationGraph, final VariableMap variables) {
+    public String write(final ModalImplicationGraph modalImplicationGraph, final TermMap variables) {
         final StringBuilder sb = new StringBuilder();
         sb.append("X ALWAYS Y := If X is selected then Y is selected in every valid configuration.\n");
         sb.append(

@@ -38,7 +38,7 @@ import de.featjar.analysis.sat4j.RemoveRedundancyAnalysis;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.atomic.literal.Literal;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import de.featjar.formula.structure.connective.And;
 import de.featjar.formula.structure.connective.Or;
 import de.featjar.transform.CNFSlicer;
@@ -53,7 +53,7 @@ public class CNFTest {
 
     @Test
     public void testAnalyses() {
-        final VariableMap variables = new VariableMap();
+        final TermMap variables = new TermMap();
         final Literal a = variables.createLiteral("a");
         final Literal b = variables.createLiteral("b");
         final Literal c = variables.createLiteral("c");

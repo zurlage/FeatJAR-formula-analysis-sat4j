@@ -28,7 +28,7 @@ import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.Clauses;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import de.featjar.base.task.Monitor;
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,7 +53,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
 
     private Changes changes;
     private HashSet<LiteralList> addedClauses;
-    private VariableMap variables;
+    private TermMap variables;
 
     public IncrementalMIGBuilder(ModalImplicationGraph oldModalImplicationGraph) {
         this.oldModalImplicationGraph = oldModalImplicationGraph;
@@ -114,7 +114,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     public static double getChangeRatio(CNF cnf1, CNF cnf2) {
         final Set<String> allVariables = new HashSet<>(cnf2.getVariableMap().getVariableNames());
         allVariables.addAll(cnf1.getVariableMap().getVariableNames());
-        final VariableMap variables = new VariableMap(allVariables);
+        final TermMap variables = new TermMap(allVariables);
 
         final HashSet<LiteralList> adaptedNewClauses = cnf1.getClauses().stream()
                 .map(c -> c.adapt(cnf1.getVariableMap(), variables).get()) //
@@ -144,7 +144,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         final CNF oldCnf = oldModalImplicationGraph.getCnf();
         final Set<String> allVariables = new HashSet<>(oldCnf.getVariableMap().getVariableNames());
         allVariables.addAll(cnf.getVariableMap().getVariableNames());
-        variables = new VariableMap(allVariables);
+        variables = new TermMap(allVariables);
 
         final HashSet<LiteralList> adaptedNewClauses = cnf.getClauses().stream()
                 .map(c -> c.adapt(cnf.getVariableMap(), variables).get()) //

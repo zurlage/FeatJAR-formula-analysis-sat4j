@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j.solver;
 import de.featjar.formula.analysis.solver.SolutionSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.VariableMap;
+import de.featjar.formula.structure.TermMap;
 import de.featjar.base.data.Pair;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,14 +58,14 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
 
     private boolean contradiction = false;
 
-    public AbstractSat4JSolver(VariableMap variableMap) {
+    public AbstractSat4JSolver(TermMap termMap) {
         satInstance = null;
         solver = createSolver();
         configureSolver();
-        formula = new Sat4JFormula(this, variableMap);
+        formula = new Sat4JFormula(this, termMap);
         initSolver(Collections.emptyList());
 
-        assumptions = new Sat4JAssumptions(variableMap);
+        assumptions = new Sat4JAssumptions(termMap);
     }
 
     public AbstractSat4JSolver(CNF cnf) {
@@ -96,7 +96,7 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
     }
 
     @Override
-    public VariableMap getVariables() {
+    public TermMap getVariables() {
         return formula.getVariableMap();
     }
 
