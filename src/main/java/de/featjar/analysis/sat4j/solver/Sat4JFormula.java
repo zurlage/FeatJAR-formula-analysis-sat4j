@@ -24,7 +24,7 @@ import de.featjar.formula.analysis.solver.AbstractDynamicFormula;
 import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.clauses.FormulaToCNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.Formula;
+import de.featjar.formula.structure.Expression;
 import de.featjar.formula.tmp.TermMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,8 +53,8 @@ public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
     }
 
     @Override
-    public List<IConstr> push(Formula formula) throws RuntimeContradictionException {
-        return push(FormulaToCNF.convert(formula, termMap).getClauses());
+    public List<IConstr> push(Expression expression) throws RuntimeContradictionException {
+        return push(FormulaToCNF.convert(expression, termMap).getClauses());
     }
 
     public List<IConstr> push(List<? extends LiteralList> clauses) {

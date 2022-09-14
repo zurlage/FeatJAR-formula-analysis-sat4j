@@ -37,7 +37,7 @@ import de.featjar.analysis.sat4j.IndeterminateAnalysis;
 import de.featjar.analysis.sat4j.RemoveRedundancyAnalysis;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.formula.literal.Literal;
+import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.tmp.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
 import de.featjar.formula.structure.formula.connective.Or;

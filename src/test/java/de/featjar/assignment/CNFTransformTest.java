@@ -25,13 +25,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import de.featjar.analysis.sat4j.AtomicSetAnalysis;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Formula;
+import de.featjar.formula.structure.Expression;
 import de.featjar.base.io.IO;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 public class CNFTransformTest {
@@ -39,10 +38,10 @@ public class CNFTransformTest {
     @Test
     public void testDistributiveBug() {
         final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Formula formula =
+        final Expression expression =
                 IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
 
-        final ModelRepresentation rep = new ModelRepresentation(formula);
+        final ModelRepresentation rep = new ModelRepresentation(expression);
         final List<LiteralList> atomicSets =
                 rep.getResult(new AtomicSetAnalysis()).orElseThrow();
         assertEquals(5, atomicSets.size());

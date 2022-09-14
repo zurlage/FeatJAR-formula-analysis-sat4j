@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.analysis.sat4j.AllConfigurationGenerator;
-import de.featjar.formula.structure.Formula;
+import de.featjar.formula.structure.Expression;
 import de.featjar.formula.tmp.Formulas;
 import de.featjar.formula.structure.assignment.Assignment;
 import de.featjar.formula.tmp.TermMap;
@@ -44,24 +44,24 @@ public class TseitinTransformTest {
         testTransform(FormulaCreator.getFormula02());
     }
 
-    private void testTransform(final Formula formulaOrg) {
-        final Formula formulaClone = Trees.clone(formulaOrg);
-        final TermMap map = formulaOrg.getTermMap().orElseThrow();
+    private void testTransform(final Expression expressionOrg) {
+        final Expression expressionClone = Trees.clone(expressionOrg);
+        final TermMap map = expressionOrg.getTermMap().orElseThrow();
         final TermMap mapClone = map.clone();
 
-        final ModelRepresentation rep = new ModelRepresentation(formulaOrg);
+        final ModelRepresentation rep = new ModelRepresentation(expressionOrg);
         // TODO Fix tseitin transformer
         //		CNF cnf = rep.get(CNFProvider.fromTseitinFormula());
 
         FormulaCreator.testAllAssignments(map, assignment -> {
             final Boolean orgEval =
-                    (Boolean) Formulas.evaluate(formulaOrg, assignment).orElseThrow();
+                    (Boolean) Formulas.evaluate(expressionOrg, assignment).orElseThrow();
             final Boolean tseitinEval = evaluate(rep, assignment);
             Assertions.assertEquals(orgEval, tseitinEval, assignment.toString());
         });
-        assertTrue(Trees.equals(formulaOrg, formulaClone));
+        assertTrue(Trees.equals(expressionOrg, expressionClone));
         assertEquals(mapClone, map);
-        assertEquals(mapClone, formulaOrg.getTermMap().orElseThrow());
+        assertEquals(mapClone, expressionOrg.getTermMap().orElseThrow());
     }
 
     private Boolean evaluate(ModelRepresentation rep, final Assignment assignment) {

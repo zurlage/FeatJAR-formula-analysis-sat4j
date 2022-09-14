@@ -20,10 +20,10 @@
  */
 package de.featjar.assignment;
 
-import de.featjar.formula.structure.Formula;
+import de.featjar.formula.structure.Expression;
 import de.featjar.formula.structure.assignment.Assignment;
 import de.featjar.formula.structure.assignment.VariableAssignment;
-import de.featjar.formula.structure.formula.literal.Literal;
+import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.tmp.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
 import de.featjar.formula.structure.formula.connective.Implies;
@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 public class FormulaCreator {
 
-    public static Formula getFormula01() {
+    public static Expression getFormula01() {
         final TermMap map = new TermMap();
         final Literal p = map.createLiteral("p");
         final Literal q = map.createLiteral("q");
@@ -42,7 +42,7 @@ public class FormulaCreator {
         return new Implies(new And(new Or(p, q), r), s.invert());
     }
 
-    public static Formula getFormula02() {
+    public static Expression getFormula02() {
         final TermMap map = new TermMap();
         final Literal p = map.createLiteral("p");
         final Literal q = map.createLiteral("q");
