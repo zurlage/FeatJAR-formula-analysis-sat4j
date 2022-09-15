@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.ClauseLengthComparatorDsc;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.tmp.TermMap;
+import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
 import java.util.ArrayList;

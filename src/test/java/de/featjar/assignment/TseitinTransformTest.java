@@ -27,7 +27,7 @@ import de.featjar.analysis.sat4j.AllConfigurationGenerator;
 import de.featjar.formula.structure.Expression;
 import de.featjar.formula.tmp.Formulas;
 import de.featjar.formula.structure.assignment.Assignment;
-import de.featjar.formula.tmp.TermMap;
+import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.tree.Trees;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
