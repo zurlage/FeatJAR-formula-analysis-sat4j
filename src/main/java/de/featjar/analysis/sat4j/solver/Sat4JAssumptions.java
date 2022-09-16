@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.solver;
 
-import de.featjar.formula.structure.assignment.Assignment;
+import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
@@ -147,7 +147,7 @@ public class Sat4JAssumptions implements Assignment {
     }
 
     @Override
-    public void unsetAll() {
+    public void clear() {
         assumptions.clear();
     }
 
@@ -172,7 +172,7 @@ public class Sat4JAssumptions implements Assignment {
     }
 
     @Override
-    public List<Pair<Integer, Object>> getAll() {
+    public List<Pair<Integer, Object>> get() {
         final List<Pair<Integer, Object>> map = new ArrayList<>();
         for (int i = 0; i < assumptions.size(); i++) {
             final int l = assumptions.unsafeGet(i);

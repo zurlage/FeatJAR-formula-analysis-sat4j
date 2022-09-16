@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import de.featjar.analysis.sat4j.AllConfigurationGenerator;
 import de.featjar.formula.structure.Expression;
 import de.featjar.formula.tmp.Formulas;
-import de.featjar.formula.structure.assignment.Assignment;
+import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.tree.Trees;
 import org.junit.jupiter.api.Assertions;
@@ -66,7 +66,7 @@ public class TseitinTransformTest {
 
     private Boolean evaluate(ModelRepresentation rep, final Assignment assignment) {
         final AllConfigurationGenerator analysis = new AllConfigurationGenerator();
-        analysis.getAssumptions().setAll(assignment.getAll());
+        analysis.getAssumptions().set(assignment.get());
         analysis.setLimit(2);
         final int numSolutions =
                 rep.getResult(analysis).orElseThrow().getSolutions().size();

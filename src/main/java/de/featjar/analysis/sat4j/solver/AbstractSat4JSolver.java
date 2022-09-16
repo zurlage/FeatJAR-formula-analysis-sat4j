@@ -200,7 +200,7 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
     }
 
     private int[] getAssumptionArray() {
-        final List<Pair<Integer, Object>> all = assumptions.getAll();
+        final List<Pair<Integer, Object>> all = assumptions.get();
         final int[] literals = new int[all.size()];
         int index = 0;
         for (final Pair<Integer, Object> entry : all) {
