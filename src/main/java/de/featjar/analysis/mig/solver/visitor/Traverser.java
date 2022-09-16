@@ -36,7 +36,6 @@ import org.sat4j.specs.IteratorInt;
 public class Traverser extends ATraverser {
 
     private static class CancelException extends Exception {
-        private static final long serialVersionUID = 4872529212110156314L;
     }
 
     public Traverser(ModalImplicationGraph modalImplicationGraph) {

@@ -33,7 +33,6 @@ import org.sat4j.specs.ISolver;
  */
 public class FixedOrderHeap extends VarOrderHeap {
 
-    private static final long serialVersionUID = 1L;
     private int[] order;
 
     public FixedOrderHeap(IPhaseSelectionStrategy strategy, int[] order) {

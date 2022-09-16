@@ -29,7 +29,6 @@ public class ReverseFixedLiteralSelectionStrategy extends FixedLiteralSelectionS
         super(model);
     }
 
-    private static final long serialVersionUID = -1563968211094190882L;
 
     @Override
     protected void reset(int nlength) {

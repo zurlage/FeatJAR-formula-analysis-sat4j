@@ -30,7 +30,6 @@ import org.sat4j.specs.ISolver;
  */
 public class FixedOrderHeap2 extends FixedOrderHeap {
 
-    private static final long serialVersionUID = 1L;
 
     private final UniformRandomSelectionStrategy selectionStrategy;
 

@@ -35,7 +35,6 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
  */
 public class UniformRandomSelectionStrategy implements IPhaseSelectionStrategy {
 
-    private static final long serialVersionUID = 1L;
 
     private final LiteralDistribution dist;
 

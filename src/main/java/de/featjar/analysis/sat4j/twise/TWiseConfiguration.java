@@ -37,7 +37,6 @@ import org.sat4j.core.VecInt;
  */
 public class TWiseConfiguration extends LiteralList {
 
-    private static final long serialVersionUID = -4775410644924706701L;
 
     public static final byte SELECTION_IMPOSSIBLE = 1;
     public static final byte SELECTION_SELECTED = 2;

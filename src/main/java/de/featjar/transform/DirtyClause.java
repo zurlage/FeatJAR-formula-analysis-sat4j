@@ -30,7 +30,6 @@ import java.util.HashSet;
  */
 public class DirtyClause extends LiteralList {
 
-    private static final long serialVersionUID = 521679259725560031L;
 
     private int relevance;
 

@@ -33,7 +33,6 @@ import java.util.TreeSet;
  */
 public class PresenceCondition extends ClauseList {
 
-    private static final long serialVersionUID = -292364320078721008L;
 
     private final transient TreeSet<Integer> groups = new TreeSet<>();
 

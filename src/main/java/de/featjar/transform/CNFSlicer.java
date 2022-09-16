@@ -24,7 +24,6 @@ import de.featjar.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.ClauseLengthComparatorDsc;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
@@ -46,7 +45,7 @@ import java.util.stream.Collectors;
  */
 public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
-    protected static final Comparator<LiteralList> lengthComparator = new ClauseLengthComparatorDsc();
+    protected static final Comparator<LiteralList> lengthComparator = new LiteralList.DescendingLengthComparator();
 
     protected CNF orgCNF;
     protected CNF cnfCopy;

@@ -33,7 +33,6 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
  */
 public class RandomSelectionStrategy implements IPhaseSelectionStrategy {
 
-    private static final long serialVersionUID = 1L;
 
     public final Random RAND = new Random(123456789);
 

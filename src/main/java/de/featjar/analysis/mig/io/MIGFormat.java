@@ -30,8 +30,6 @@ import de.featjar.base.io.format.Format;
  */
 public class MIGFormat implements Format<ModalImplicationGraph> {
 
-    public static final String ID = "format.mig." + MIGFormat.class.getSimpleName();
-
     @Override
     public boolean supportsParse() {
         return true;
@@ -40,11 +38,6 @@ public class MIGFormat implements Format<ModalImplicationGraph> {
     @Override
     public boolean supportsSerialize() {
         return true;
-    }
-
-    @Override
-    public String getIdentifier() {
-        return ID;
     }
 
     @Override
