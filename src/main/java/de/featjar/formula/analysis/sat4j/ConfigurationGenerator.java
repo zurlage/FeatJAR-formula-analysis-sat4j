@@ -18,32 +18,32 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Expression;
-import de.featjar.base.io.IO;
+import de.featjar.formula.clauses.solutions.SolutionList;
+import de.featjar.base.data.Store;
+import de.featjar.base.task.Monitor;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import org.junit.jupiter.api.Test;
+/**
+ * Interface for configuration generators. Can be used as a {@link Supplier} or
+ * to get a {@link Stream} or a {@link SolutionList} of configurations.
+ *
+ * @author Sebastian Krieter
+ */
+public interface ConfigurationGenerator
+        extends Supplier<LiteralList>, Spliterator<LiteralList>, de.featjar.base.data.Computation {
 
-public class CNFTransformTest {
+    void init(Store rep, Monitor monitor);
 
-    @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Expression expression =
-                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
+    int getLimit();
 
-        final ModelRepresentation rep = new ModelRepresentation(expression);
-        final List<LiteralList> atomicSets =
-                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
-        assertEquals(5, atomicSets.size());
-    }
+    void setLimit(int limit);
+
+    boolean isAllowDuplicates();
+
+    void setAllowDuplicates(boolean allowDuplicates);
 }

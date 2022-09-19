@@ -18,32 +18,26 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Expression;
-import de.featjar.base.io.IO;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import org.junit.jupiter.api.Test;
+/**
+ * Base class for an analysis that works on a list of variables.
+ *
+ * @param <T> the type of the analysis result.
+ *
+ * @author Sebastian Krieter
+ */
+public abstract class AVariableAnalysis<T> extends Sat4JAnalysis<T> {
 
-public class CNFTransformTest {
+    protected LiteralList variables;
 
-    @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Expression expression =
-                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
+    public LiteralList getVariables() {
+        return variables;
+    }
 
-        final ModelRepresentation rep = new ModelRepresentation(expression);
-        final List<LiteralList> atomicSets =
-                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
-        assertEquals(5, atomicSets.size());
+    public void setVariables(LiteralList variables) {
+        this.variables = variables;
     }
 }

@@ -18,32 +18,24 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Expression;
-import de.featjar.base.io.IO;
+import de.featjar.base.data.Pair;
+import java.util.Comparator;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import org.junit.jupiter.api.Test;
+/**
+ * Compares two candidates for covering, consisting of a partial configuration
+ * and a literal set. Considers number of literals in the partial configuration
+ * and in the literal set.
+ *
+ * @author Sebastian Krieter
+ */
+class CandidateLengthComparator implements Comparator<Pair<LiteralList, TWiseConfiguration>> {
 
-public class CNFTransformTest {
-
-    @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Expression expression =
-                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
-
-        final ModelRepresentation rep = new ModelRepresentation(expression);
-        final List<LiteralList> atomicSets =
-                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
-        assertEquals(5, atomicSets.size());
+    @Override
+    public int compare(Pair<LiteralList, TWiseConfiguration> o1, Pair<LiteralList, TWiseConfiguration> o2) {
+        final int diff = o2.getValue().countLiterals - o1.getValue().countLiterals;
+        return diff != 0 ? diff : o2.getKey().size() - o1.getKey().size();
     }
 }

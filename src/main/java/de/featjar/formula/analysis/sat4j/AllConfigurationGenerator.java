@@ -18,32 +18,34 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
+import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Expression;
-import de.featjar.base.io.IO;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import org.junit.jupiter.api.Test;
+/**
+ * Generates all configurations for a given propositional formula.
+ *
+ * @author Sebastian Krieter
+ */
+public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
+    private boolean satisfiable = true;
 
-public class CNFTransformTest {
-
-    @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Expression expression =
-                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
-
-        final ModelRepresentation rep = new ModelRepresentation(expression);
-        final List<LiteralList> atomicSets =
-                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
-        assertEquals(5, atomicSets.size());
+    @Override
+    public LiteralList get() {
+        if (!satisfiable) {
+            return null;
+        }
+        final LiteralList solution = solver.findSolution();
+        if (solution == null) {
+            satisfiable = false;
+            return null;
+        }
+        try {
+            solver.getFormula().push(solution.negate());
+        } catch (final RuntimeContradictionException e) {
+            satisfiable = false;
+        }
+        return solution;
     }
 }

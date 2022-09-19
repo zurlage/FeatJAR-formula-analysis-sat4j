@@ -18,32 +18,49 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
+import de.featjar.formula.clauses.ClauseList;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Expression;
-import de.featjar.base.io.IO;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import org.junit.jupiter.api.Test;
+/**
+ * Represents a presence condition as an expression.
+ *
+ * @author Sebastian Krieter
+ */
+public class PresenceCondition extends ClauseList {
 
-public class CNFTransformTest {
 
-    @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Expression expression =
-                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
+    private final transient TreeSet<Integer> groups = new TreeSet<>();
 
-        final ModelRepresentation rep = new ModelRepresentation(expression);
-        final List<LiteralList> atomicSets =
-                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
-        assertEquals(5, atomicSets.size());
+    public PresenceCondition() {
+    }
+
+    public PresenceCondition(ClauseList otherClauseList) {
+        super(otherClauseList);
+    }
+
+    public PresenceCondition(Collection<? extends LiteralList> c) {
+        super(c);
+    }
+
+    public PresenceCondition(int size) {
+        super(size);
+    }
+
+    public void addGroup(int group) {
+        groups.add(group);
+    }
+
+    public Set<Integer> getGroups() {
+        return groups;
+    }
+
+    @Override
+    public String toString() {
+        return "Expression [" + super.toString() + "]";
     }
 }
