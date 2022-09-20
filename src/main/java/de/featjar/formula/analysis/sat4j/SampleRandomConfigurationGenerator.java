@@ -83,7 +83,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
             final int varX = fixedFeatures[i];
             if (varX != 0) {
                 solver.getAssumptions().push(-varX);
-                final SATSolver.SatResult hasSolution = solver.hasSolution();
+                final SATSolver.SATResult hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);

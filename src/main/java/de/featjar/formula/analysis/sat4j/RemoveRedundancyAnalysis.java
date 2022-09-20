@@ -98,7 +98,7 @@ public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>>
                 for (int j = startIndex; j < endIndex; j++) {
                     final LiteralList clause = clauseList.get(j);
 
-                    final SATSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
+                    final SATSolver.SATResult hasSolution = solver.hasSolution(clause.negate());
                     switch (hasSolution) {
                         case FALSE:
                             break;

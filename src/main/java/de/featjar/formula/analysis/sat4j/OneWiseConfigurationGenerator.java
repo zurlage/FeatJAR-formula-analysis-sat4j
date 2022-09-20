@@ -86,7 +86,7 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
                 throw new RuntimeException("Unknown " + CoverStrategy.class.getName() + ": " + coverStrategy);
         }
 
-        if (solver.hasSolution() == SATSolver.SatResult.TRUE) {
+        if (solver.hasSolution() == SATSolver.SATResult.TRUE) {
             variablesToCover = new VecInt();
 
             if (variables != null) {

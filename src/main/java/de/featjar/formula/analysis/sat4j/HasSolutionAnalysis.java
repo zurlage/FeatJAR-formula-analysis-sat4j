@@ -35,7 +35,7 @@ public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
 
     @Override
     public Boolean analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
-        final SATSolver.SatResult hasSolution = solver.hasSolution();
+        final SATSolver.SATResult hasSolution = solver.hasSolution();
         switch (hasSolution) {
             case FALSE:
                 return false;

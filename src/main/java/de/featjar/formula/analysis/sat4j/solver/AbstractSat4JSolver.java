@@ -91,12 +91,12 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
     }
 
     @Override
-    public Sat4JFormula getDynamicFormula() {
+    public Sat4JFormula getSolverFormula() {
         return formula;
     }
 
     @Override
-    public TermMap getVariables() {
+    public TermMap getVariableMap() {
         return formula.getVariableMap();
     }
 
@@ -128,13 +128,13 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
      * solver and the given variable assignment.
      *
      * @param assignment The temporarily variable assignment for this call.
-     * @return A {@link SatResult}.
+     * @return A {@link SATResult}.
      *
      * @see #hasSolution()
      * @see #hasSolution(int...)
      * @see #getInternalSolution()
      */
-    public SatResult hasSolution(LiteralList assignment) {
+    public SATResult hasSolution(LiteralList assignment) {
         return hasSolution(assignment.getLiterals());
     }
 
@@ -192,7 +192,7 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
 
     @Override
     public LiteralList findSolution() {
-        return hasSolution() == SatResult.TRUE ? getSolution() : null;
+        return hasSolution() == SATResult.TRUE ? getSolution() : null;
     }
 
     public List<LiteralList> getSolutionHistory() {
@@ -214,17 +214,17 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
      * Checks whether there is a satisfying solution considering the clauses of the
      * solver.
      *
-     * @return A {@link SatResult}.
+     * @return A {@link SATResult}.
      *
      * @see #hasSolution(LiteralList)
      * @see #hasSolution(int...)
      * @see #getInternalSolution()
      */
     @Override
-    public SatResult hasSolution() {
+    public SATResult hasSolution() {
         if (contradiction) {
             lastModel = null;
-            return SatResult.FALSE;
+            return SATResult.FALSE;
         }
 
         final int[] assumptionArray = getAssumptionArray();
@@ -232,7 +232,7 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
             for (final LiteralList solution : solutionHistory) {
                 if (solution.containsAllLiterals(assumptionArray)) {
                     lastModel = solution.getLiterals();
-                    return SatResult.TRUE;
+                    return SATResult.TRUE;
                 }
             }
         }
@@ -241,14 +241,14 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
             if (solver.isSatisfiable(new VecInt(assumptionArray), globalTimeout)) {
                 lastModel = solver.model();
                 addSolution();
-                return SatResult.TRUE;
+                return SATResult.TRUE;
             } else {
                 lastModel = null;
-                return SatResult.FALSE;
+                return SATResult.FALSE;
             }
         } catch (final TimeoutException e) {
             lastModel = null;
-            return SatResult.TIMEOUT;
+            return SATResult.TIMEOUT;
         }
     }
 
@@ -259,22 +259,22 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
      * assignment variable of the solver.
      *
      * @param assignment The temporarily variable assignment for this call.
-     * @return A {@link SatResult}.
+     * @return A {@link SATResult}.
      *
      * @see #hasSolution(LiteralList)
      * @see #hasSolution()
      * @see #getInternalSolution()
      */
-    public SatResult hasSolution(int... assignment) {
+    public SATResult hasSolution(int... assignment) {
         if (contradiction) {
-            return SatResult.FALSE;
+            return SATResult.FALSE;
         }
 
         if (solutionHistory != null) {
             for (final LiteralList solution : solutionHistory) {
                 if (solution.containsAllLiterals(assignment)) {
                     lastModel = solution.getLiterals();
-                    return SatResult.TRUE;
+                    return SATResult.TRUE;
                 }
             }
         }
@@ -287,14 +287,14 @@ public abstract class AbstractSat4JSolver<T extends ISolver> implements Solution
             if (solver.isSatisfiable(new VecInt(unitClauses), globalTimeout)) {
                 lastModel = solver.model();
                 addSolution();
-                return SatResult.TRUE;
+                return SATResult.TRUE;
             } else {
                 lastModel = null;
-                return SatResult.FALSE;
+                return SATResult.FALSE;
             }
         } catch (final TimeoutException e) {
             lastModel = null;
-            return SatResult.TIMEOUT;
+            return SATResult.TIMEOUT;
         }
     }
 

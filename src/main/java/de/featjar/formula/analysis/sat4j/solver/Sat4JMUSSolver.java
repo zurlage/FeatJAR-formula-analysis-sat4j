@@ -69,12 +69,12 @@ public class Sat4JMUSSolver extends AbstractSat4JSolver<Xplain<ISolver>> impleme
 
     @Override
     public List<IConstr> getMinimalUnsatisfiableSubset() throws IllegalStateException {
-        if (hasSolution() == SatResult.TRUE) {
+        if (hasSolution() == SATResult.TRUE) {
             throw new IllegalStateException("Problem is satisfiable");
         }
         try {
             return IntStream.of(solver.minimalExplanation()) //
-                    .mapToObj(getFormula().getConstraints()::get) //
+                    .mapToObj(getFormula().get()::get) //
                     .collect(Collectors.toList());
         } catch (final TimeoutException e) {
             throw new IllegalStateException(e);

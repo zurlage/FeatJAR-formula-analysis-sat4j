@@ -84,7 +84,7 @@ public class ContradictionAnalysis extends AClauseAnalysis<List<LiteralList>> {
                 continue;
             }
 
-            final SATSolver.SatResult hasSolution = solver.hasSolution();
+            final SATSolver.SATResult hasSolution = solver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     resultList.set(i, clauseList.get(startIndex));

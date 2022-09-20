@@ -83,7 +83,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
             final int varX = fixedFeatures[i];
             if (varX != 0) {
                 solver.getAssumptions().push(-varX);
-                final SATSolver.SatResult hasSolution = solver.hasSolution();
+                final SATSolver.SATResult hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);
@@ -248,7 +248,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
     }
 
     protected final boolean isRedundant(Sat4JSolver solver, LiteralList curClause) {
-        return solver.hasSolution(curClause.negate()) == SATSolver.SatResult.FALSE;
+        return solver.hasSolution(curClause.negate()) == SATSolver.SATResult.FALSE;
     }
 
     protected void bfsStrong(Monitor monitor) {

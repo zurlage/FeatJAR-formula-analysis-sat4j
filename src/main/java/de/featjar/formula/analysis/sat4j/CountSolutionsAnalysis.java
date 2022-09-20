@@ -38,8 +38,8 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
     public Long analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         solver.setGlobalTimeout(true);
         long solutionCount = 0;
-        SATSolver.SatResult hasSolution = solver.hasSolution();
-        while (hasSolution == SATSolver.SatResult.TRUE) {
+        SATSolver.SATResult hasSolution = solver.hasSolution();
+        while (hasSolution == SATSolver.SATResult.TRUE) {
             solutionCount++;
             final int[] solution = solver.getInternalSolution();
             try {
@@ -49,6 +49,6 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
             }
             hasSolution = solver.hasSolution();
         }
-        return hasSolution == SATSolver.SatResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
+        return hasSolution == SATSolver.SATResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
     }
 }

@@ -104,7 +104,7 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
         init(monitor);
         monitor.setTotalSteps(maxSampleSize);
         return new SolutionList(
-                solver.getVariables(),
+                solver.getVariableMap(),
                 StreamSupport.stream(this, false) //
                         .limit(maxSampleSize) //
                         .peek(c -> monitor.addStep()) //

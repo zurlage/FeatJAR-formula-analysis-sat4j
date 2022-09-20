@@ -81,7 +81,7 @@ public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
             boolean completelyRedundant = true;
             for (int j = startIndex; j < endIndex; j++) {
                 final LiteralList clause = clauseList.get(j);
-                final SATSolver.SatResult hasSolution = solver.hasSolution(clause.negate());
+                final SATSolver.SATResult hasSolution = solver.hasSolution(clause.negate());
                 switch (hasSolution) {
                     case FALSE:
                         break;

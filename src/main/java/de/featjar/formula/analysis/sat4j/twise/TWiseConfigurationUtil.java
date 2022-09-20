@@ -326,7 +326,7 @@ public class TWiseConfigurationUtil {
             final int orgAssignmentLength = solver.getAssumptions().size();
             try {
                 solver.getAssumptions().pushAll(literals.getLiterals());
-                final SATSolver.SatResult hasSolution = solver.hasSolution();
+                final SATSolver.SATResult hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case TRUE:
                         final int[] solution = solver.getInternalSolution();
@@ -459,7 +459,7 @@ public class TWiseConfigurationUtil {
                     }
                 }
                 if (orgAssignmentSize < localSolver.getAssumptions().size()) {
-                    if (localSolver.hasSolution() == SATSolver.SatResult.TRUE) {
+                    if (localSolver.hasSolution() == SATSolver.SATResult.TRUE) {
                         final int[] solution = localSolver.getInternalSolution();
                         addSolverSolution(Arrays.copyOf(solution, solution.length));
                         localSolver.shuffleOrder(random);

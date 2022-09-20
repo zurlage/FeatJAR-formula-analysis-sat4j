@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.solver.AbstractDynamicFormula;
+import de.featjar.formula.analysis.solver.SolverFormula;
 import de.featjar.formula.analysis.solver.RuntimeContradictionException;
 import de.featjar.formula.clauses.FormulaToCNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -38,7 +38,7 @@ import org.sat4j.specs.IConstr;
  *
  * @author Sebastian Krieter
  */
-public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
+public class Sat4JFormula extends SolverFormula<IConstr> {
 
     private final AbstractSat4JSolver<?> sat4jSolver;
 
@@ -78,7 +78,7 @@ public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
             sat4jSolver.solutionHistory.clear();
             sat4jSolver.lastModel = null;
         }
-        constraints.addAll(constrs);
+        this.solverFormulas.addAll(constrs);
         return constrs;
     }
 
@@ -89,7 +89,7 @@ public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
             }
             final IConstr constr = sat4jSolver.solver.addClause(
                     new VecInt(Arrays.copyOfRange(clause.getLiterals(), 0, clause.size())));
-            constraints.add(constr);
+            solverFormulas.add(constr);
             if (sat4jSolver.solutionHistory != null) {
                 sat4jSolver.solutionHistory.clear();
                 sat4jSolver.lastModel = null;
@@ -108,20 +108,20 @@ public class Sat4JFormula extends AbstractDynamicFormula<IConstr> {
     }
 
     @Override
-    public void remove(IConstr constr) {
-        if (constr != null) {
-            sat4jSolver.solver.removeConstr(constr);
-            super.remove(constr);
+    public void remove(IConstr clause) {
+        if (clause != null) {
+            sat4jSolver.solver.removeConstr(clause);
+            super.remove(clause);
         }
     }
 
     @Override
     public void pop(int count) {
-        if (count > constraints.size()) {
-            count = constraints.size();
+        if (count > solverFormulas.size()) {
+            count = solverFormulas.size();
         }
         for (int i = 0; i < count; i++) {
-            final IConstr lastConstraint = removeConstraint(constraints.size() - 1);
+            final IConstr lastConstraint = remove(solverFormulas.size() - 1);
             if (lastConstraint != null) {
                 sat4jSolver.solver.removeSubsumedConstr(lastConstraint);
             }

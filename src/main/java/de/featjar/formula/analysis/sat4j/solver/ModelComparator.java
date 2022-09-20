@@ -34,7 +34,7 @@ public abstract class ModelComparator {
     public static boolean compare(CNF cnf1, final CNF cnf2) throws TimeoutException {
         final Sat4JSolver solver = new Sat4JSolver(cnf1);
         for (final LiteralList clause : cnf2.getClauses()) {
-            final SATSolver.SatResult satResult = solver.hasSolution(clause.negate());
+            final SATSolver.SATResult satResult = solver.hasSolution(clause.negate());
             switch (satResult) {
                 case FALSE:
                     break;

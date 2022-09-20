@@ -41,14 +41,14 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
     @Override
     public LiteralList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
         if (variables == null) {
-            variables = LiteralList.getVariables(solver.getVariables());
+            variables = LiteralList.getVariables(solver.getVariableMap());
         }
         monitor.setTotalSteps(variables.getLiterals().length);
 
         final VecInt resultList = new VecInt();
         variableLoop:
         for (final int variable : variables.getLiterals()) {
-            final Sat4JSolver modSolver = new Sat4JSolver(solver.getVariables());
+            final Sat4JSolver modSolver = new Sat4JSolver(solver.getVariableMap());
             final List<LiteralList> clauses = solver.getCnf().getClauses();
             for (final LiteralList clause : clauses) {
                 final LiteralList newClause = clause.removeVariables(variable);
@@ -65,7 +65,7 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
                 }
             }
 
-            final SATSolver.SatResult hasSolution = modSolver.hasSolution();
+            final SATSolver.SATResult hasSolution = modSolver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     break;

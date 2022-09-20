@@ -72,7 +72,7 @@ public class IndependentRedundancyAnalysis extends AClauseAnalysis<List<LiteralL
 
         final List<LiteralList> solutionList = solver.rememberSolutionHistory(AbstractSat4JSolver.MAX_SOLUTION_BUFFER);
 
-        if (solver.hasSolution() == SATSolver.SatResult.TRUE) {
+        if (solver.hasSolution() == SATSolver.SATResult.TRUE) {
             solver.setSelectionStrategy(SStrategy.random(getRandom()));
 
             int endIndex = 0;
@@ -91,7 +91,7 @@ public class IndependentRedundancyAnalysis extends AClauseAnalysis<List<LiteralL
                         }
                     }
 
-                    final SATSolver.SatResult hasSolution = solver.hasSolution(complement);
+                    final SATSolver.SATResult hasSolution = solver.hasSolution(complement);
                     switch (hasSolution) {
                         case FALSE:
                             resultList.set(i, clause);

@@ -83,7 +83,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
                 continue;
             }
 
-            final SATSolver.SatResult hasSolution = solver.hasSolution();
+            final SATSolver.SATResult hasSolution = solver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     resultList.set(i, clauseList.get(startIndex));

@@ -369,7 +369,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         } catch (final RuntimeContradictionException e) {
             return false;
         }
-        return newSolver.hasSolution() == SATSolver.SatResult.TRUE;
+        return newSolver.hasSolution() == SATSolver.SATResult.TRUE;
     }
 
     protected void release() {
