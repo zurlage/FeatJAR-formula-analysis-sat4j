@@ -21,8 +21,8 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.formula.analysis.solver.SolverFormula;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
-import de.featjar.formula.clauses.FormulaToCNF;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
+import de.featjar.formula.clauses.ToCNF;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.Expression;
 import de.featjar.formula.structure.map.TermMap;
@@ -53,8 +53,8 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
     }
 
     @Override
-    public List<IConstr> push(Expression expression) throws RuntimeContradictionException {
-        return push(FormulaToCNF.convert(expression, termMap).getClauses());
+    public List<IConstr> push(Expression expression) throws SolverContradictionException {
+        return push(ToCNF.convert(expression, termMap).getClauses());
     }
 
     public List<IConstr> push(List<? extends LiteralList> clauses) {
@@ -71,7 +71,7 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
                 for (final IConstr constr : constrs) {
                     sat4jSolver.solver.removeConstr(constr);
                 }
-                throw new RuntimeContradictionException(e);
+                throw new SolverContradictionException(e);
             }
         }
         if (sat4jSolver.solutionHistory != null) {
@@ -82,7 +82,7 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
         return constrs;
     }
 
-    public IConstr push(LiteralList clause) throws RuntimeContradictionException {
+    public IConstr push(LiteralList clause) throws SolverContradictionException {
         try {
             if ((clause.size() == 1) && (clause.getLiterals()[0] == 0)) {
                 throw new ContradictionException();
@@ -96,7 +96,7 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
             }
             return constr;
         } catch (final ContradictionException e) {
-            throw new RuntimeContradictionException(e);
+            throw new SolverContradictionException(e);
         }
     }
 

@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -77,7 +77,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
 
             try {
                 solver.getFormula().push(subList);
-            } catch (final RuntimeContradictionException e) {
+            } catch (final SolverContradictionException e) {
                 resultList.set(i, clauseList.get(startIndex));
                 monitor.addStep();
                 continue;

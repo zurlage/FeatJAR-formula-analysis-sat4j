@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.mig.solver.Vertex.Status;
 import de.featjar.formula.analysis.mig.solver.visitor.Traverser;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
@@ -105,7 +105,7 @@ public class ModalImplicationGraph {
         final int[] literals = clause.getLiterals();
         switch (clause.size()) {
             case 0:
-                throw new RuntimeContradictionException();
+                throw new SolverContradictionException();
             case 1: {
                 final int literal = literals[0];
                 if (literal > 0) {
@@ -115,7 +115,7 @@ public class ModalImplicationGraph {
                     getVertex(literal).setStatus(Status.Dead);
                     getVertex(-literal).setStatus(Status.Core);
                 } else {
-                    throw new RuntimeContradictionException();
+                    throw new SolverContradictionException();
                 }
                 break;
             }

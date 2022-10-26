@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.Clauses;
 import de.featjar.formula.clauses.LiteralList;
@@ -66,7 +66,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         monitor.addStep();
 
         if (!satCheck(cnf)) {
-            throw new RuntimeContradictionException("CNF is not satisfiable!");
+            throw new SolverContradictionException("CNF is not satisfiable!");
         }
         monitor.addStep();
         core(cnf, monitor);

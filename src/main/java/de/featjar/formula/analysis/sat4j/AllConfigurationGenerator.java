@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.LiteralList;
 
 /**
@@ -43,7 +43,7 @@ public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
         }
         try {
             solver.getFormula().push(solution.negate());
-        } catch (final RuntimeContradictionException e) {
+        } catch (final SolverContradictionException e) {
             satisfiable = false;
         }
         return solution;

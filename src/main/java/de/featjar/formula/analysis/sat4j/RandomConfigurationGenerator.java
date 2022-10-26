@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.Random;
@@ -59,7 +59,7 @@ public abstract class RandomConfigurationGenerator extends AbstractConfiguration
         if (!allowDuplicates) {
             try {
                 forbidSolution(solution.negate());
-            } catch (final RuntimeContradictionException e) {
+            } catch (final SolverContradictionException e) {
                 satisfiable = false;
             }
         }

@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.mig.solver;
 
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.base.task.Monitor;
 
@@ -39,7 +39,7 @@ public class RegularMIGBuilder extends MIGBuilder {
         monitor.addStep();
 
         if (!satCheck(cnf)) {
-            throw new RuntimeContradictionException("CNF is not satisfiable!");
+            throw new SolverContradictionException("CNF is not satisfiable!");
         }
         monitor.addStep();
         findCoreFeatures(monitor.createChildMonitor(10));

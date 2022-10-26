@@ -21,7 +21,7 @@
 package de.featjar.formula.transform;
 
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -366,7 +366,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         try {
             newSolver = new Sat4JSolver(cnfCopy);
             // newSolver.addClauses(cleanClauseList);
-        } catch (final RuntimeContradictionException e) {
+        } catch (final SolverContradictionException e) {
             return false;
         }
         return newSolver.hasSolution() == SATSolver.SATResult.TRUE;

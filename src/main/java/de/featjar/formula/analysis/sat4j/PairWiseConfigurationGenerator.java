@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.solver.AbstractSat4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
@@ -301,7 +301,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
 
         try {
             solver.getFormula().push(solution.negate());
-        } catch (final RuntimeContradictionException e) {
+        } catch (final SolverContradictionException e) {
             return true;
         }
 

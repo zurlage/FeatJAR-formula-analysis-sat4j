@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;
@@ -128,7 +128,7 @@ public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
                             break;
                     }
                     solver.getFormula().pop();
-                } catch (final RuntimeContradictionException e) {
+                } catch (final SolverContradictionException e) {
                     foundVariables(model, vars);
                 }
                 break;

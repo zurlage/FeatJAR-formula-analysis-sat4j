@@ -23,8 +23,8 @@ package de.featjar.formula.analysis.mig;
 import de.featjar.formula.analysis.Analysis;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.Sat4JMIGSolver;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
-import de.featjar.formula.analysis.solver.RuntimeTimeoutException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
+import de.featjar.formula.analysis.solver.SolverTimeoutException;
 import de.featjar.base.task.Monitor;
 
 import java.util.Random;
@@ -66,7 +66,7 @@ public abstract class Sat4JMIGAnalysis<T> extends Analysis<T, Sat4JMIGSolver, Mo
     }
 
     @Override
-    protected Sat4JMIGSolver createSolver(ModalImplicationGraph input) throws RuntimeContradictionException {
+    protected Sat4JMIGSolver createSolver(ModalImplicationGraph input) throws SolverContradictionException {
         return new Sat4JMIGSolver(input);
     }
 
@@ -77,10 +77,10 @@ public abstract class Sat4JMIGAnalysis<T> extends Analysis<T, Sat4JMIGSolver, Mo
         timeoutOccurred = false;
     }
 
-    protected final void reportTimeout() throws RuntimeTimeoutException {
+    protected final void reportTimeout() throws SolverTimeoutException {
         timeoutOccurred = true;
         if (throwTimeoutException) {
-            throw new RuntimeTimeoutException();
+            throw new SolverTimeoutException();
         }
     }
 

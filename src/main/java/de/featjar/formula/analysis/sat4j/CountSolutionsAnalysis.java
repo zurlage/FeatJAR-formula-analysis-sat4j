@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
-import de.featjar.formula.analysis.solver.RuntimeContradictionException;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -44,7 +44,7 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
             final int[] solution = solver.getInternalSolution();
             try {
                 solver.getFormula().push(new LiteralList(solution, LiteralList.Order.INDEX, false).negate());
-            } catch (final RuntimeContradictionException e) {
+            } catch (final SolverContradictionException e) {
                 break;
             }
             hasSolution = solver.hasSolution();
