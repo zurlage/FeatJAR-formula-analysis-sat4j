@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.data.Store;
@@ -100,7 +100,7 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
     protected void init(Monitor monitor) {}
 
     @Override
-    public final SolutionList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public final SolutionList analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         init(monitor);
         monitor.setTotalSteps(maxSampleSize);
         return new SolutionList(

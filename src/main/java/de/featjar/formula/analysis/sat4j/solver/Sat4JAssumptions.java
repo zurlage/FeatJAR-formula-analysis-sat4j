@@ -30,7 +30,7 @@ import java.util.Optional;
 import org.sat4j.core.VecInt;
 
 /**
- * Assumptions for a {@link Sat4JSolver}.
+ * Assumptions for a {@link Sat4JSolutionSolver}.
  *
  * @author Sebastian Krieter
  */

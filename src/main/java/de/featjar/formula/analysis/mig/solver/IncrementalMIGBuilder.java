@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.Clauses;
@@ -229,7 +229,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
             switch (changes) {
                 case ADDED: {
                     if (add) {
-                        final Sat4JSolver redundancySolver = new Sat4JSolver(new CNF(variables));
+                        final Sat4JSolutionSolver redundancySolver = new Sat4JSolutionSolver(new CNF(variables));
                         final int[] affectedVariables = addedClauses.stream()
                                 .flatMapToInt(c -> IntStream.of(c.getLiterals()))
                                 .map(Math::abs)
@@ -261,7 +261,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                     break;
                 }
                 case REMOVED: {
-                    final Sat4JSolver redundancySolver = new Sat4JSolver(new CNF(variables));
+                    final Sat4JSolutionSolver redundancySolver = new Sat4JSolutionSolver(new CNF(variables));
                     cnfStream = cnfStream
                             .sorted(lengthComparator)
                             .distinct()
@@ -280,7 +280,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                 }
                 case REPLACED: {
                     if (add) {
-                        final Sat4JSolver redundancySolver = new Sat4JSolver(new CNF(variables));
+                        final Sat4JSolutionSolver redundancySolver = new Sat4JSolutionSolver(new CNF(variables));
                         final int[] affectedVariables = addedClauses.stream()
                                 .flatMapToInt(c -> IntStream.of(c.getLiterals()))
                                 .map(Math::abs)
@@ -304,7 +304,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                 })
                                 .peek(redundancySolver.getFormula()::push);
                     } else {
-                        final Sat4JSolver redundancySolver = new Sat4JSolver(new CNF(variables));
+                        final Sat4JSolutionSolver redundancySolver = new Sat4JSolutionSolver(new CNF(variables));
                         cnfStream = cnfStream
                                 .sorted(lengthComparator)
                                 .distinct()

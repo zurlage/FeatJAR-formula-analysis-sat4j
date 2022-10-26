@@ -27,7 +27,7 @@ import de.featjar.formula.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.FastRandomConfigurationGenerator;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.ClauseList;
@@ -82,7 +82,7 @@ public class TWiseConfigurationUtil {
     private InvalidClausesList invalidClausesList = InvalidClausesList.None;
 
     protected final CNF cnf;
-    protected final Sat4JSolver localSolver;
+    protected final Sat4JSolutionSolver localSolver;
     protected final boolean hasSolver;
 
     protected ModalImplicationGraph modalImplicationGraph;
@@ -94,7 +94,7 @@ public class TWiseConfigurationUtil {
     private TWiseConfigurationGenerator.Deduce createConfigurationDeduce = TWiseConfigurationGenerator.Deduce.DP;
     private TWiseConfigurationGenerator.Deduce extendConfigurationDeduce = TWiseConfigurationGenerator.Deduce.NONE;
 
-    public TWiseConfigurationUtil(CNF cnf, Sat4JSolver localSolver) {
+    public TWiseConfigurationUtil(CNF cnf, Sat4JSolutionSolver localSolver) {
         this.cnf = cnf;
         this.localSolver = localSolver;
         hasSolver = localSolver != null;
@@ -173,7 +173,7 @@ public class TWiseConfigurationUtil {
     }
 
     public LiteralList computeDeadCoreFeatures() {
-        final Sat4JSolver solver = new Sat4JSolver(cnf);
+        final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnf);
         final int[] firstSolution = solver.findSolution().getLiterals();
         if (firstSolution != null) {
             final int[] coreDeadArray = new int[firstSolution.length];
@@ -217,7 +217,7 @@ public class TWiseConfigurationUtil {
         return cnf;
     }
 
-    public Sat4JSolver getSolver() {
+    public Sat4JSolutionSolver getSolver() {
         return localSolver;
     }
 
@@ -321,12 +321,12 @@ public class TWiseConfigurationUtil {
                 }
             }
 
-            final Sat4JSolver solver = getSolver();
+            final Sat4JSolutionSolver solver = getSolver();
             //			solver.setSelectionStrategy(SStrategy.random(getRandom()));
             final int orgAssignmentLength = solver.getAssumptions().size();
             try {
                 solver.getAssumptions().pushAll(literals.getLiterals());
-                final SATSolver.SATResult hasSolution = solver.hasSolution();
+                final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case TRUE:
                         final int[] solution = solver.getInternalSolution();
@@ -448,7 +448,7 @@ public class TWiseConfigurationUtil {
 
     private boolean isSelectionPossibleSat(final LiteralList literals, final TWiseConfiguration configuration) {
         if (hasSolver) {
-            final Sat4JSolver localSolver = getSolver();
+            final Sat4JSolutionSolver localSolver = getSolver();
             //			localSolver.setSelectionStrategy(SStrategy.random());
             final int orgAssignmentSize = configuration.setUpSolver(localSolver);
             try {
@@ -459,7 +459,7 @@ public class TWiseConfigurationUtil {
                     }
                 }
                 if (orgAssignmentSize < localSolver.getAssumptions().size()) {
-                    if (localSolver.hasSolution() == SATSolver.SATResult.TRUE) {
+                    if (localSolver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
                         final int[] solution = localSolver.getInternalSolution();
                         addSolverSolution(Arrays.copyOf(solution, solution.length));
                         localSolver.shuffleOrder(random);

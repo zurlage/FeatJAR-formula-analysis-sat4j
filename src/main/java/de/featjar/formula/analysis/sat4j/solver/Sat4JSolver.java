@@ -20,137 +20,317 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat4j.solver.SStrategy.FixedStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SStrategy.InverseFixedStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SStrategy.MIGRandomStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SStrategy.UniformRandomStrategy;
-import de.featjar.formula.analysis.sat4j.solver.strategy.FixedLiteralSelectionStrategy;
-import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap;
-import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap2;
-import de.featjar.formula.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
-import de.featjar.formula.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
+import de.featjar.base.data.Result;
+import de.featjar.formula.analysis.solver.SolutionSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.map.TermMap;
+import de.featjar.formula.clauses.VariableMap;
+import de.featjar.base.data.Pair;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
-import org.sat4j.minisat.SolverFactory;
-import org.sat4j.minisat.core.IOrder;
-import org.sat4j.minisat.core.Solver;
-import org.sat4j.minisat.orders.NegativeLiteralSelectionStrategy;
-import org.sat4j.minisat.orders.PositiveLiteralSelectionStrategy;
-import org.sat4j.minisat.orders.RSATPhaseSelectionStrategy;
-import org.sat4j.minisat.orders.VarOrderHeap;
+import org.sat4j.core.VecInt;
+import org.sat4j.specs.ISolver;
+import org.sat4j.specs.IVecInt;
+import org.sat4j.specs.TimeoutException;
 
 /**
- * Sat solver using Sat4J.
+ * Base class for solvers using Sat4J.
  *
  * @author Sebastian Krieter
  */
-public class Sat4JSolver extends AbstractSat4JSolver<Solver<?>> {
+public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<LiteralList> {
+    public static final int MAX_SOLUTION_BUFFER = 1000;
+    protected CNF satInstance;
+    protected final T solver;
+    protected final Sat4JAssumptions assumptions;
+    protected final Sat4JFormula formula;
 
-    protected final int[] order;
-    protected SStrategy strategy;
+    // TODO extract solution history in separate class
+    protected LinkedList<LiteralList> solutionHistory = null;
+    protected int solutionHistoryLimit = -1;
+    protected int[] lastModel = null;
+    protected boolean globalTimeout = false;
+    private boolean contradiction = false;
+
+    public Sat4JSolver(VariableMap variableMap) {
+        satInstance = null;
+        solver = createSolver();
+        configureSolver();
+        formula = new Sat4JFormula(this);
+        initSolver(Collections.emptyList());
+
+        assumptions = new Sat4JAssumptions(variableMap);
+    }
 
     public Sat4JSolver(CNF cnf) {
-        super(cnf);
-        strategy = SStrategy.original();
-        order = new int[cnf.getVariableMap().getVariableCount()];
-        setOrderFix();
+        satInstance = cnf;
+        solver = createSolver();
+        configureSolver();
+        formula = new Sat4JFormula(this, cnf.getVariableMap());
+        initSolver(cnf.getClauses());
+
+        assumptions = new Sat4JAssumptions(cnf.getVariableMap());
     }
 
-    public Sat4JSolver(TermMap termMap) {
-        super(termMap);
-        strategy = SStrategy.original();
-        order = new int[termMap.getVariableCount()];
-        setOrderFix();
+    /**
+     * @return The {@link CNF sat instance} given to the solver.
+     */
+    public CNF getCnf() {
+        return satInstance;
     }
 
     @Override
-    protected Solver<?> createSolver() {
-        return (Solver<?>) SolverFactory.newDefault();
+    public Sat4JAssumptions getAssumptions() {
+        return assumptions;
     }
 
     @Override
+    public Sat4JFormula getSolverFormula() {
+        return formula;
+    }
+
+    @Override
+    public TermMap getVariableMap() {
+        return formula.getVariableMap();
+    }
+
+    /**
+     * Returns a copy of the last solution found by satisfiability solver. Can only
+     * be called after a successful call of {@link #hasSolution()} or
+     * {@link #hasSolution(int...)}.
+     *
+     * @return A {@link LiteralList} representing the satisfying assignment.
+     *
+     * @see #hasSolution()
+     * @see #hasSolution(int...)
+     */
+    @Override
+    public LiteralList getSolution() {
+        return new LiteralList(getLastModelCopy(), LiteralList.Order.INDEX, false);
+    }
+
+    public int[] getInternalSolution() {
+        return lastModel;
+    }
+
+    private int[] getLastModelCopy() {
+        return Arrays.copyOf(lastModel, lastModel.length);
+    }
+
+    /**
+     * Checks whether there is a satisfying solution considering the clauses of the
+     * solver and the given variable assignment.
+     *
+     * @param assignment The temporarily variable assignment for this call.
+     * @return A {@link Result<Boolean>}.
+     *
+     * @see #hasSolution()
+     * @see #hasSolution(int...)
+     * @see #getInternalSolution()
+     */
+    public Result<Boolean> hasSolution(LiteralList assignment) {
+        return hasSolution(assignment.getLiterals());
+    }
+
+    /**
+     * Completely resets the solver, removing all its assignments, variables, and
+     * clauses.
+     */
+    @Override
+    public void reset() {
+        solver.reset();
+        if (solutionHistory != null) {
+            solutionHistory.clear();
+            lastModel = null;
+        }
+    }
+
+    /**
+     * Creates the Sat4J solver instance.
+     *
+     * @return Sat4J solver
+     */
+    protected abstract T createSolver();
+
+    /**
+     * Add clauses to the solver. Initializes the order instance.
+     */
     protected void initSolver(List<LiteralList> clauses) {
-        super.initSolver(clauses);
-        solver.getOrder().init();
-    }
-
-    public int[] getOrder() {
-        return order;
-    }
-
-    public SStrategy getSelectionStrategy() {
-        return strategy;
-    }
-
-    public void setOrder(int[] order) {
-        assert order.length <= this.order.length;
-        System.arraycopy(order, 0, this.order, 0, order.length);
-    }
-
-    public void setOrderFix() {
-        for (int i = 0; i < order.length; i++) {
-            order[i] = i + 1;
+        final int size = formula.getVariableMap().getVariableCount();
+        //		final List<LiteralList> clauses = satInstance.getClauses();
+        try {
+            if (!clauses.isEmpty()) {
+                solver.setExpectedNumberOfClauses(clauses.size() + 1);
+                formula.push(clauses);
+            }
+            if (size > 0) {
+                final VecInt pseudoClause = new VecInt(size + 1);
+                for (int i = 1; i <= size; i++) {
+                    pseudoClause.push(i);
+                }
+                pseudoClause.push(-1);
+                solver.addClause(pseudoClause);
+            }
+        } catch (final Exception e) {
+            contradiction = true;
         }
     }
 
-    public void shuffleOrder() {
-        shuffleOrder(new Random());
+    public void setTimeout(int timeout) {
+        solver.setTimeoutMs(timeout);
     }
 
-    public void shuffleOrder(Random rnd) {
-        for (int i = order.length - 1; i >= 0; i--) {
-            final int index = rnd.nextInt(i + 1);
-            final int a = order[index];
-            order[index] = order[i];
-            order[i] = a;
+    public Sat4JFormula getFormula() {
+        return formula;
+    }
+
+    @Override
+    public LiteralList findSolution() {
+        return hasSolution() == Result<Boolean>.TRUE ? getSolution() : null;
+    }
+
+    public List<LiteralList> getSolutionHistory() {
+        return solutionHistory != null ? Collections.unmodifiableList(solutionHistory) : Collections.emptyList();
+    }
+
+    private int[] getAssumptionArray() {
+        final List<Pair<Integer, Object>> all = assumptions.get();
+        final int[] literals = new int[all.size()];
+        int index = 0;
+        for (final Pair<Integer, Object> entry : all) {
+            final int variable = entry.getKey();
+            literals[index++] = (entry.getValue() == Boolean.TRUE) ? variable : -variable;
+        }
+        return literals;
+    }
+
+    /**
+     * Checks whether there is a satisfying solution considering the clauses of the
+     * solver.
+     *
+     * @return A {@link Result<Boolean>}.
+     *
+     * @see #hasSolution(LiteralList)
+     * @see #hasSolution(int...)
+     * @see #getInternalSolution()
+     */
+    @Override
+    public Result<Boolean> hasSolution() {
+        if (contradiction) {
+            lastModel = null;
+            return Result<Boolean>.FALSE;
+        }
+
+        final int[] assumptionArray = getAssumptionArray();
+        if (solutionHistory != null) {
+            for (final LiteralList solution : solutionHistory) {
+                if (solution.containsAllLiterals(assumptionArray)) {
+                    lastModel = solution.getLiterals();
+                    return Result<Boolean>.TRUE;
+                }
+            }
+        }
+
+        try {
+            if (solver.isSatisfiable(new VecInt(assumptionArray), globalTimeout)) {
+                lastModel = solver.model();
+                addSolution();
+                return Result<Boolean>.TRUE;
+            } else {
+                lastModel = null;
+                return Result<Boolean>.FALSE;
+            }
+        } catch (final TimeoutException e) {
+            lastModel = null;
+            return Result<Boolean>.TIMEOUT;
         }
     }
 
-    private void setSelectionStrategy(IOrder strategy) {
-        solver.setOrder(strategy);
-        solver.getOrder().init();
+    /**
+     * Checks whether there is a satisfying solution considering the clauses of the
+     * solver and the given variable assignment.<br>
+     * Does only consider the given {@code assignment} and <b>not</b> the global
+     * assignment variable of the solver.
+     *
+     * @param assignment The temporarily variable assignment for this call.
+     * @return A {@link Result<Boolean>}.
+     *
+     * @see #hasSolution(LiteralList)
+     * @see #hasSolution()
+     * @see #getInternalSolution()
+     */
+    public Result<Boolean> hasSolution(int... assignment) {
+        if (contradiction) {
+            return Result<Boolean>.FALSE;
+        }
+
+        if (solutionHistory != null) {
+            for (final LiteralList solution : solutionHistory) {
+                if (solution.containsAllLiterals(assignment)) {
+                    lastModel = solution.getLiterals();
+                    return Result<Boolean>.TRUE;
+                }
+            }
+        }
+
+        final int[] unitClauses = new int[assignment.length];
+        System.arraycopy(assignment, 0, unitClauses, 0, unitClauses.length);
+
+        try {
+            // TODO why is this necessary?
+            if (solver.isSatisfiable(new VecInt(unitClauses), globalTimeout)) {
+                lastModel = solver.model();
+                addSolution();
+                return Result<Boolean>.TRUE;
+            } else {
+                lastModel = null;
+                return Result<Boolean>.FALSE;
+            }
+        } catch (final TimeoutException e) {
+            lastModel = null;
+            return Result<Boolean>.TIMEOUT;
+        }
     }
 
-    public void setSelectionStrategy(SStrategy strategy) {
-        this.strategy = strategy;
-        switch (strategy.strategy()) {
-            case FastRandom:
-                setSelectionStrategy(new FixedOrderHeap(new RandomSelectionStrategy(), order));
-                break;
-            case Fixed:
-                setSelectionStrategy(
-                        new FixedOrderHeap( //
-                                new FixedLiteralSelectionStrategy(((FixedStrategy) strategy).getModel()), //
-                                order));
-                break;
-            case InverseFixed:
-                setSelectionStrategy(
-                        new FixedOrderHeap( //
-                                new FixedLiteralSelectionStrategy(((InverseFixedStrategy) strategy).getModel()), //
-                                order));
-                break;
-            case MIGRandom:
-                setSelectionStrategy(new FixedOrderHeap2(
-                        new UniformRandomSelectionStrategy(((MIGRandomStrategy) strategy).getDist()), order));
-                break;
-            case Negative:
-                setSelectionStrategy(new FixedOrderHeap(new NegativeLiteralSelectionStrategy(), order));
-                break;
-            case Original:
-                setSelectionStrategy(new VarOrderHeap(new RSATPhaseSelectionStrategy()));
-                break;
-            case Positive:
-                setSelectionStrategy(new FixedOrderHeap(new PositiveLiteralSelectionStrategy(), order));
-                break;
-            case UniformRandom:
-                setSelectionStrategy(new FixedOrderHeap2(
-                        new UniformRandomSelectionStrategy(((UniformRandomStrategy) strategy).getDist()), order));
-                break;
-            default:
-                throw new IllegalStateException(String.valueOf(strategy.strategy()));
+    private void addSolution() {
+        if (solutionHistory != null) {
+            solutionHistory.addFirst(getSolution());
+            if (solutionHistory.size() > solutionHistoryLimit) {
+                solutionHistory.removeLast();
+            }
         }
+    }
+
+    public int[] getContradictoryAssignment() {
+        final IVecInt unsatExplanation = solver.unsatExplanation();
+        return Arrays.copyOf(unsatExplanation.toArray(), unsatExplanation.size());
+    }
+
+    public List<LiteralList> rememberSolutionHistory(int numberOfSolutions) {
+        if (numberOfSolutions > 0) {
+            solutionHistory = new LinkedList<>();
+            solutionHistoryLimit = numberOfSolutions;
+        } else {
+            solutionHistory = null;
+            solutionHistoryLimit = -1;
+        }
+        return getSolutionHistory();
+    }
+
+    public boolean isGlobalTimeout() {
+        return globalTimeout;
+    }
+
+    public void setGlobalTimeout(boolean globalTimeout) {
+        this.globalTimeout = globalTimeout;
+    }
+
+    protected void configureSolver() {
+        solver.setTimeoutMs(1_000_000);
+        solver.setDBSimplificationAllowed(true);
+        solver.setKeepSolverHot(true);
+        solver.setVerbose(false);
     }
 }

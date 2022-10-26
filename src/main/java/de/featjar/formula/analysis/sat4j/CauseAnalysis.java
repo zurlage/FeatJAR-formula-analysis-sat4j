@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
@@ -88,7 +88,7 @@ public class CauseAnalysis extends AClauseAnalysis<List<CauseAnalysis.Anomalies>
     }
 
     @Override
-    public List<Anomalies> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public List<Anomalies> analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             return Collections.emptyList();
         }

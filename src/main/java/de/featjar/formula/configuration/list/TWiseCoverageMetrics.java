@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.configuration.list;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.formula.analysis.sat4j.twise.PresenceConditionManager;
 import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationGenerator;
@@ -100,7 +100,7 @@ public class TWiseCoverageMetrics {
 
     public void init() {
         if (!cnf.getClauses().isEmpty()) {
-            util = new TWiseConfigurationUtil(cnf, new Sat4JSolver(cnf));
+            util = new TWiseConfigurationUtil(cnf, new Sat4JSolutionSolver(cnf));
         } else {
             util = new TWiseConfigurationUtil(cnf, null);
         }

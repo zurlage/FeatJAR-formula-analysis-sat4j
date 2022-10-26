@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
@@ -36,7 +36,7 @@ import org.sat4j.specs.IteratorInt;
  */
 public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
 
-    private Sat4JSolver solver;
+    private Sat4JSolutionSolver solver;
 
     public CoreDeadAnalysis() {
     }
@@ -46,13 +46,13 @@ public class CoreDeadAnalysis extends AVariableAnalysis<LiteralList> {
     }
 
     @Override
-    public LiteralList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public LiteralList analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         this.solver = solver;
         return analyze1(monitor);
     }
 
     // currently unused (divide & conquer)
-    public LiteralList analyze2(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public LiteralList analyze2(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         final int initialAssignmentLength = solver.getAssumptions().size();
         solver.setSelectionStrategy(SStrategy.positive());
         int[] model1 = solver.findSolution().getLiterals();

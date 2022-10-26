@@ -24,7 +24,7 @@ import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.MIGBuilder;
 import de.featjar.formula.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.mig.solver.Vertex;
-import de.featjar.formula.analysis.sat4j.solver.AbstractSat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.clauses.LiteralList;
@@ -374,7 +374,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
     @Override
     protected void init(Monitor monitor) {
         numVariables = solver.getCnf().getVariableMap().getVariableCount();
-        solver.rememberSolutionHistory(Math.min(numVariables, AbstractSat4JSolver.MAX_SOLUTION_BUFFER));
+        solver.rememberSolutionHistory(Math.min(numVariables, Sat4JSolver.MAX_SOLUTION_BUFFER));
 
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(true);

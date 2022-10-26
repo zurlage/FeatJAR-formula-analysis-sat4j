@@ -46,13 +46,13 @@ import org.sat4j.tools.xplain.Xplain;
  * Note: The usage of a solver to solve expression and to find minimal
  * unsatisfiable subset should be divided into two task because the native
  * solver for the MUS extractor are substantially slower in solving
- * satisfiability requests. If for solving the usage of the {@link Sat4JSolver}
+ * satisfiability requests. If for solving the usage of the {@link Sat4JSolutionSolver}
  * is recommended.
  *
  * @author Joshua Sprey
  * @author Sebastian Krieter
  */
-public class Sat4JMUSSolver extends AbstractSat4JSolver<Xplain<ISolver>> implements MUSSolver<IConstr> {
+public class Sat4JMUSSolver extends Sat4JSolver<Xplain<ISolver>> implements MUSSolver<IConstr> {
 
     public Sat4JMUSSolver(ModelRepresentation modelRepresentation) {
         this(modelRepresentation.getCache().get(CNFComputation.fromFormula()).get());
@@ -69,7 +69,7 @@ public class Sat4JMUSSolver extends AbstractSat4JSolver<Xplain<ISolver>> impleme
 
     @Override
     public List<IConstr> getMinimalUnsatisfiableSubset() throws IllegalStateException {
-        if (hasSolution() == SATResult.TRUE) {
+        if (hasSolution() == Result<Boolean>.TRUE) {
             throw new IllegalStateException("Problem is satisfiable");
         }
         try {

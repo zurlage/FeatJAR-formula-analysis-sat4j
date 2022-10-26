@@ -22,25 +22,23 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
 import de.featjar.formula.analysis.Analysis;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.assignment.VariableAssignment;
 import de.featjar.formula.clauses.CNF;
 
-import java.util.Random;
-
 /**
- * Base class for analyses using a {@link Sat4JSolver}.
+ * Base class for analyses using a {@link Sat4JSolutionSolver}.
  *
  * @param <T> the type of the analysis result.
  *
  * @author Sebastian Krieter
  */
-public abstract class Sat4JAnalysis<T> extends Analysis<T, Sat4JSolver, CNF> {
+public abstract class Sat4JAnalysis<T> extends Analysis<T, Sat4JSolutionSolver, CNF> {
     protected Sat4JAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation, Sat4JSolver::new);
+        super(inputComputation, Sat4JSolutionSolver::new);
     }
 
     protected Sat4JAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, Sat4JSolver::new, assumptions, timeoutInMs, randomSeed);
+        super(inputComputation, Sat4JSolutionSolver::new, assumptions, timeoutInMs, randomSeed);
     }
 }

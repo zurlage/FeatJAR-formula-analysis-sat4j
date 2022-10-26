@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.LiteralList;
@@ -39,7 +39,7 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
     // analysis first?)
 
     @Override
-    public LiteralList analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public LiteralList analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         if (variables == null) {
             variables = LiteralList.getVariables(solver.getVariableMap());
         }
@@ -48,7 +48,7 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
         final VecInt resultList = new VecInt();
         variableLoop:
         for (final int variable : variables.getLiterals()) {
-            final Sat4JSolver modSolver = new Sat4JSolver(solver.getVariableMap());
+            final Sat4JSolutionSolver modSolver = new Sat4JSolutionSolver(solver.getVariableMap());
             final List<LiteralList> clauses = solver.getCnf().getClauses();
             for (final LiteralList clause : clauses) {
                 final LiteralList newClause = clause.removeVariables(variable);
@@ -65,7 +65,7 @@ public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // t
                 }
             }
 
-            final SATSolver.SATResult hasSolution = modSolver.hasSolution();
+            final SATSolver.Result<Boolean> hasSolution = modSolver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     break;

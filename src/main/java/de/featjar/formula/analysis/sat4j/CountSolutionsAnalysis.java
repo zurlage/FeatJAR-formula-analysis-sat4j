@@ -20,12 +20,14 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.base.data.Computation;
+import de.featjar.base.data.FutureResult;
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.assignment.VariableAssignment;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.base.task.Monitor;
 
 /**
  * Attempts to count the number of possible solutions of a given {@link CNF}.
@@ -34,21 +36,31 @@ import de.featjar.base.task.Monitor;
  */
 public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
 
+    protected CountSolutionsAnalysis(Computation<CNF> inputComputation) {
+        super(inputComputation);
+    }
+
+    protected CountSolutionsAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+    }
+
     @Override
-    public Long analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
-        solver.setGlobalTimeout(true);
-        long solutionCount = 0;
-        SATSolver.SATResult hasSolution = solver.hasSolution();
-        while (hasSolution == SATSolver.SATResult.TRUE) {
-            solutionCount++;
-            final int[] solution = solver.getInternalSolution();
-            try {
-                solver.getFormula().push(new LiteralList(solution, LiteralList.Order.INDEX, false).negate());
-            } catch (final SolverContradictionException e) {
-                break;
+    public FutureResult<Long> compute() {
+        return initializeSolver().thenCompute(((solver, monitor) -> {
+            solver.setGlobalTimeout(true);
+            long solutionCount = 0;
+            Result<Boolean> hasSolution = solver.hasSolution();
+            while (hasSolution.equals(Result.of(true))) {
+                solutionCount++;
+                final int[] solution = solver.getInternalSolution();
+                try {
+                    solver.getFormula().push(new LiteralList(solution, LiteralList.Order.INDEX, false).negate());
+                } catch (final SolverContradictionException e) {
+                    break;
+                }
+                hasSolution = solver.hasSolution();
             }
-            hasSolution = solver.hasSolution();
-        }
-        return hasSolution == SATSolver.SATResult.TIMEOUT ? -(solutionCount + 1) : solutionCount;
+            return hasSolution.isEmpty() ? -(solutionCount + 1) : solutionCount;
+        }));
     }
 }

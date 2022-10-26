@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SampleDistribution;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.clauses.solutions.SolutionList;
@@ -71,7 +71,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         dist.reset();
     }
 
-    private boolean findCoreFeatures(Sat4JSolver solver) {
+    private boolean findCoreFeatures(Sat4JSolutionSolver solver) {
         final int[] fixedFeatures = solver.findSolution().getLiterals();
         if (fixedFeatures == null) {
             return false;
@@ -83,7 +83,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
             final int varX = fixedFeatures[i];
             if (varX != 0) {
                 solver.getAssumptions().push(-varX);
-                final SATSolver.SATResult hasSolution = solver.hasSolution();
+                final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);

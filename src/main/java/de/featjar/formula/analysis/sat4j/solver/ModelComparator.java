@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -32,19 +33,15 @@ public abstract class ModelComparator {
     }
 
     public static boolean compare(CNF cnf1, final CNF cnf2) throws TimeoutException {
-        final Sat4JSolver solver = new Sat4JSolver(cnf1);
+        final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnf1);
         for (final LiteralList clause : cnf2.getClauses()) {
-            final SATSolver.SATResult satResult = solver.hasSolution(clause.negate());
-            switch (satResult) {
-                case FALSE:
-                    break;
-                case TIMEOUT:
-                    throw new TimeoutException();
-                case TRUE:
-                    return false;
-                default:
-                    assert false;
-            }
+            final Result<Boolean> hasSolution = solver.hasSolution(clause.negate());
+            if (hasSolution.isEmpty())
+                throw new TimeoutException();
+            if (hasSolution.equals(Result.of(true)))
+                return false;
+            else
+                break;
         }
         return true;
     }

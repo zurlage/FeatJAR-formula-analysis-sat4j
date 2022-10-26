@@ -20,14 +20,14 @@
  */
 package de.featjar.formula.analysis.mig.solver;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 
 /**
  * Sat solver using Sat4J and MIGs.
  *
  * @author Sebastian Krieter
  */
-public class Sat4JMIGSolver extends Sat4JSolver {
+public class Sat4JMIGSolver extends Sat4JSolutionSolver {
     public ModalImplicationGraph modalImplicationGraph;
 
     public Sat4JMIGSolver(ModalImplicationGraph modalImplicationGraph) {

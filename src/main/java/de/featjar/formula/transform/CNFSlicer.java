@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
@@ -63,7 +63,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     protected int[] helper;
     protected DirtyFeature[] map;
     protected MinimumClauseHeuristic heuristic;
-    private Sat4JSolver newSolver;
+    private Sat4JSolutionSolver newSolver;
 
     private boolean first = false;
 
@@ -275,7 +275,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         newDirtyListDelIndex = 0;
     }
 
-    protected final boolean isRedundant(Sat4JSolver solver, LiteralList curClause) {
+    protected final boolean isRedundant(Sat4JSolutionSolver solver, LiteralList curClause) {
         switch (solver.hasSolution(curClause.negate())) {
             case FALSE:
                 return true;
@@ -292,7 +292,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         if (nextFeature.getClauseCount() > 0) {
             addCleanClauses();
 
-            final Sat4JSolver solver = new Sat4JSolver(cnfCopy);
+            final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnfCopy);
             solver.getFormula().push(cleanClauseList);
             solver.getFormula().push(dirtyClauseList.subList(0, dirtyListPosIndex));
 
@@ -335,7 +335,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
             addCleanClauses();
 
-            final Sat4JSolver solver = new Sat4JSolver(cnfCopy);
+            final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnfCopy);
             solver.getFormula().push(cleanClauseList);
 
             // SAT Relevant
@@ -364,12 +364,12 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         heuristic = new MinimumClauseHeuristic(map, numberOfDirtyFeatures);
         first = true;
         try {
-            newSolver = new Sat4JSolver(cnfCopy);
+            newSolver = new Sat4JSolutionSolver(cnfCopy);
             // newSolver.addClauses(cleanClauseList);
         } catch (final SolverContradictionException e) {
             return false;
         }
-        return newSolver.hasSolution() == SATSolver.SATResult.TRUE;
+        return newSolver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
     }
 
     protected void release() {

@@ -25,7 +25,7 @@ import java.util.Random;
 
 public interface SStrategy {
 
-    public enum Strategy {
+    enum Strategy {
         Original,
         Negative,
         Positive,

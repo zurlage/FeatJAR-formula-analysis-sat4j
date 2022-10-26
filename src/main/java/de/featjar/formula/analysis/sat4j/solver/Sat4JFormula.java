@@ -20,41 +20,40 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.solver.SolverFormula;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.clauses.ToCNF;
+import de.featjar.formula.analysis.solver.SolverFormula;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.Expression;
-import de.featjar.formula.structure.map.TermMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import de.featjar.formula.clauses.ToCNF;
+import de.featjar.formula.structure.formula.Formula;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.IConstr;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * Modifiable formula for a {@link Sat4JSolver}.
+ * Modifiable formula for a {@link Sat4JSolutionSolver}.
  *
  * @author Sebastian Krieter
  */
 public class Sat4JFormula extends SolverFormula<IConstr> {
 
-    private final AbstractSat4JSolver<?> sat4jSolver;
+    private final Sat4JSolver<?> sat4jSolver;
 
-    public Sat4JFormula(AbstractSat4JSolver<?> solver, TermMap termMap) {
-        super(termMap);
+    public Sat4JFormula(Sat4JSolver<?> solver) {
         sat4jSolver = solver;
     }
 
-    protected Sat4JFormula(AbstractSat4JSolver<?> solver, Sat4JFormula oldFormula) {
+    protected Sat4JFormula(Sat4JSolver<?> solver, Sat4JFormula oldFormula) {
         super(oldFormula);
         sat4jSolver = solver;
     }
 
     @Override
-    public List<IConstr> push(Expression expression) throws SolverContradictionException {
-        return push(ToCNF.convert(expression, termMap).getClauses());
+    public List<IConstr> push(Formula formula) throws SolverContradictionException {
+        return push(ToCNF.convert(formula).get().getClauses());
     }
 
     public List<IConstr> push(List<? extends LiteralList> clauses) {

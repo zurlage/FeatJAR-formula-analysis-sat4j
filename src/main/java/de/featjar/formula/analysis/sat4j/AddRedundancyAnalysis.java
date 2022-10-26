@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -55,7 +55,7 @@ public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public List<LiteralList> analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             return Collections.emptyList();
         }
@@ -81,7 +81,7 @@ public class AddRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
             boolean completelyRedundant = true;
             for (int j = startIndex; j < endIndex; j++) {
                 final LiteralList clause = clauseList.get(j);
-                final SATSolver.SATResult hasSolution = solver.hasSolution(clause.negate());
+                final SATSolver.Result<Boolean> hasSolution = solver.hasSolution(clause.negate());
                 switch (hasSolution) {
                     case FALSE:
                         break;

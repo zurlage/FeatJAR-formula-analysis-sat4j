@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
@@ -53,7 +53,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolver solver, Monitor monitor) throws Exception {
+    public List<LiteralList> analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         if (clauseList == null) {
             clauseList = solver.getCnf().getClauses();
         }
@@ -83,7 +83,7 @@ public class IndependentContradictionAnalysis extends AClauseAnalysis<List<Liter
                 continue;
             }
 
-            final SATSolver.SATResult hasSolution = solver.hasSolution();
+            final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
             switch (hasSolution) {
                 case FALSE:
                     resultList.set(i, clauseList.get(startIndex));

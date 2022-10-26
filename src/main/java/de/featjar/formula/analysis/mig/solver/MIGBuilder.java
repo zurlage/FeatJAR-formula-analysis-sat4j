@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.mig.solver.Vertex.Status;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
@@ -56,7 +56,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
     protected boolean checkRedundancy = true;
     protected boolean detectStrong = true;
 
-    protected Sat4JSolver solver;
+    protected Sat4JSolutionSolver solver;
     protected List<LiteralList> cleanedClausesList;
     protected int[] fixedFeatures;
 
@@ -67,7 +67,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
     }
 
     protected boolean satCheck(CNF cnf) {
-        solver = new Sat4JSolver(cnf);
+        solver = new Sat4JSolutionSolver(cnf);
         solver.rememberSolutionHistory(1000);
         fixedFeatures = solver.findSolution().getLiterals();
         return fixedFeatures != null;
@@ -83,7 +83,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
             final int varX = fixedFeatures[i];
             if (varX != 0) {
                 solver.getAssumptions().push(-varX);
-                final SATSolver.SATResult hasSolution = solver.hasSolution();
+                final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
                         solver.getAssumptions().replaceLast(varX);
@@ -109,7 +109,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         monitor.setTotalSteps(cleanedClausesList.size());
         Stream<LiteralList> stream = cleanedClausesList.stream();
         if (checkRedundancy) {
-            final Sat4JSolver newSolver = new Sat4JSolver(new CNF(cnf.getVariableMap()));
+            final Sat4JSolutionSolver newSolver = new Sat4JSolutionSolver(new CNF(cnf.getVariableMap()));
             stream = stream.sorted(lengthComparator)
                     .distinct()
                     .peek(c -> monitor.addStep())
@@ -247,8 +247,8 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         return new LiteralList(literalArray, LiteralList.Order.NATURAL);
     }
 
-    protected final boolean isRedundant(Sat4JSolver solver, LiteralList curClause) {
-        return solver.hasSolution(curClause.negate()) == SATSolver.SATResult.FALSE;
+    protected final boolean isRedundant(Sat4JSolutionSolver solver, LiteralList curClause) {
+        return solver.hasSolution(curClause.negate()) == SATSolver.Result<Boolean>.FALSE;
     }
 
     protected void bfsStrong(Monitor monitor) {

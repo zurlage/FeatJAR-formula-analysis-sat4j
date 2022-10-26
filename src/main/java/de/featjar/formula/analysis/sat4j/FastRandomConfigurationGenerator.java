@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 
 /**
  * Generates random configurations for a given propositional formula.
@@ -33,14 +33,14 @@ public class FastRandomConfigurationGenerator extends RandomConfigurationGenerat
     private SStrategy originalSelectionStrategy;
 
     @Override
-    protected void prepareSolver(Sat4JSolver solver) {
+    protected void prepareSolver(Sat4JSolutionSolver solver) {
         super.prepareSolver(solver);
         originalSelectionStrategy = solver.getSelectionStrategy();
         solver.setSelectionStrategy(SStrategy.random(getRandom()));
     }
 
     @Override
-    protected void resetSolver(Sat4JSolver solver) {
+    protected void resetSolver(Sat4JSolutionSolver solver) {
         super.resetSolver(solver);
         solver.setSelectionStrategy(originalSelectionStrategy);
         originalSelectionStrategy = null;

@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator.ConfigurationScore;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.ClauseList;
@@ -46,7 +46,7 @@ public class TWiseConfigurationTester {
 
     public TWiseConfigurationTester(CNF cnf) {
         if (!cnf.getClauses().isEmpty()) {
-            util = new TWiseConfigurationUtil(cnf, new Sat4JSolver(cnf));
+            util = new TWiseConfigurationUtil(cnf, new Sat4JSolutionSolver(cnf));
         } else {
             util = new TWiseConfigurationUtil(cnf, null);
         }

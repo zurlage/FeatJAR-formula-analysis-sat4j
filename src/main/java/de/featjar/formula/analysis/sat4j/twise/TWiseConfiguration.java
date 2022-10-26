@@ -24,7 +24,7 @@ import de.featjar.formula.analysis.mig.solver.visitor.DefaultVisitor;
 import de.featjar.formula.analysis.mig.solver.visitor.Traverser;
 import de.featjar.formula.analysis.mig.solver.visitor.Visitor;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
@@ -71,7 +71,7 @@ public class TWiseConfiguration extends LiteralList {
         @Override
         public final VisitResult visitWeak(final int curLiteral) {
             if (unknownValues == null) {
-                final Sat4JSolver solver = util.getSolver();
+                final Sat4JSolutionSolver solver = util.getSolver();
                 setUpSolver(solver);
                 solver.setSelectionStrategy(SStrategy.original());
                 switch (solver.hasSolution()) {
@@ -112,7 +112,7 @@ public class TWiseConfiguration extends LiteralList {
         private final boolean sat(final int[] unknownValues, final int curLiteral) {
             final int i = Math.abs(curLiteral) - 1;
             if (unknownValues[i] == curLiteral) {
-                final Sat4JSolver solver = util.getSolver();
+                final Sat4JSolutionSolver solver = util.getSolver();
                 solver.getAssumptions().push(-curLiteral);
                 switch (solver.hasSolution()) {
                     case FALSE:
@@ -251,7 +251,7 @@ public class TWiseConfiguration extends LiteralList {
     }
 
     public void propagation() {
-        final Sat4JSolver solver = util.getSolver();
+        final Sat4JSolutionSolver solver = util.getSolver();
         final int orgAssignmentSize;
         if (traverser != null) {
             final DPVisitor visitor = new DPVisitor();
@@ -332,10 +332,10 @@ public class TWiseConfiguration extends LiteralList {
         if (!isComplete()) {
             if (util.hasSolver()) {
                 if (solverSolutionIndex.isEmpty()) {
-                    final Sat4JSolver solver = util.getSolver();
+                    final Sat4JSolutionSolver solver = util.getSolver();
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
-                        if (solver.hasSolution() == SATSolver.SATResult.TRUE) {
+                        if (solver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
                             System.arraycopy(solver.getInternalSolution(), 0, literals, 0, literals.length);
                         }
                     } finally {
@@ -368,11 +368,11 @@ public class TWiseConfiguration extends LiteralList {
             final int[] s;
             if (util.hasSolver()) {
                 if (solverSolutionIndex.isEmpty()) {
-                    final Sat4JSolver solver = util.getSolver();
+                    final Sat4JSolutionSolver solver = util.getSolver();
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
-                        final SATSolver.SATResult satResult = solver.hasSolution();
-                        switch (satResult) {
+                        final SATSolver.Result<Boolean> Result<Boolean> = solver.hasSolution();
+                        switch (Result<Boolean>) {
                             case FALSE:
                                 throw new RuntimeException("Solution Invalid!");
                             case TIMEOUT:
@@ -381,7 +381,7 @@ public class TWiseConfiguration extends LiteralList {
                                 s = solver.getInternalSolution();
                                 break;
                             default:
-                                throw new RuntimeException(satResult.toString());
+                                throw new RuntimeException(Result<Boolean>.toString());
                         }
                     } finally {
                         solver.getAssumptions().clear(orgAssignmentSize);
@@ -405,7 +405,7 @@ public class TWiseConfiguration extends LiteralList {
     }
 
     public void generateRandomSolutions(int count) {
-        final Sat4JSolver solver = util.getSolver();
+        final Sat4JSolutionSolver solver = util.getSolver();
         solver.setSelectionStrategy(SStrategy.random(util.getRandom()));
         final int orgAssignmentSize = setUpSolver(solver);
         try {
@@ -421,19 +421,19 @@ public class TWiseConfiguration extends LiteralList {
     }
 
     public boolean isValid() {
-        final Sat4JSolver solver = util.getSolver();
+        final Sat4JSolutionSolver solver = util.getSolver();
         final SStrategy selectionStrategy = solver.getSelectionStrategy();
         final int orgAssignmentSize = setUpSolver(solver);
         solver.setSelectionStrategy(SStrategy.original());
         try {
-            return solver.hasSolution() == SATSolver.SATResult.TRUE;
+            return solver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
         } finally {
             solver.getAssumptions().clear(orgAssignmentSize);
             solver.setSelectionStrategy(selectionStrategy);
         }
     }
 
-    public int setUpSolver(final Sat4JSolver solver) {
+    public int setUpSolver(final Sat4JSolutionSolver solver) {
         final int orgAssignmentSize = solver.getAssumptions().size();
         if (isComplete()) {
             for (int i = 0; i < literals.length; i++) {
