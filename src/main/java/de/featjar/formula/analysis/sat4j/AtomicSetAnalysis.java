@@ -59,13 +59,13 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<LiteralList>> { // tod
             // for all variables not in this.variables, set done[...] to 2
 
             solver.setSelectionStrategy(SStrategy.positive());
-            final int[] model1 = solver.findSolution().getLiterals();
+            final int[] model1 = solver.findSolution().get().getLiterals();
             final List<LiteralList> solutions = solver.rememberSolutionHistory(1000);
 
             if (model1 != null) {
                 // initial atomic set consists of core and dead features
                 solver.setSelectionStrategy(SStrategy.negative());
-                final int[] model2 = solver.findSolution().getLiterals();
+                final int[] model2 = solver.findSolution().get().getLiterals();
                 solver.setSelectionStrategy(SStrategy.positive());
 
                 final byte[] done = new byte[model1.length];

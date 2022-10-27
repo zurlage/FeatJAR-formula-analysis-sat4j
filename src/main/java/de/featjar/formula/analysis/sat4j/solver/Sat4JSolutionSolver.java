@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.FixedStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.InverseFixedStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SStrategy.MIGRandomStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.UniformRandomStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedLiteralSelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap;
@@ -31,7 +30,6 @@ import de.featjar.formula.analysis.sat4j.solver.strategy.RandomSelectionStrategy
 import de.featjar.formula.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.structure.map.TermMap;
 import java.util.List;
 import java.util.Random;
 import org.sat4j.minisat.SolverFactory;
@@ -59,12 +57,12 @@ public class Sat4JSolutionSolver extends Sat4JSolver<Solver<?>> {
         setOrderFix();
     }
 
-    public Sat4JSolutionSolver(TermMap termMap) {
-        super(termMap);
-        strategy = SStrategy.original();
-        order = new int[termMap.getVariableCount()];
-        setOrderFix();
-    }
+//    public Sat4JSolutionSolver(TermMap termMap) {
+//        super(termMap);
+//        strategy = SStrategy.original();
+//        order = new int[termMap.getVariableCount()];
+//        setOrderFix();
+//    }
 
     @Override
     protected Solver<?> createSolver() {
@@ -132,10 +130,10 @@ public class Sat4JSolutionSolver extends Sat4JSolver<Solver<?>> {
                                 new FixedLiteralSelectionStrategy(((InverseFixedStrategy) strategy).getModel()), //
                                 order));
                 break;
-            case MIGRandom:
-                setSelectionStrategy(new FixedOrderHeap2(
-                        new UniformRandomSelectionStrategy(((MIGRandomStrategy) strategy).getDist()), order));
-                break;
+//            case MIGRandom:
+//                setSelectionStrategy(new FixedOrderHeap2(
+//                        new UniformRandomSelectionStrategy(((MIGRandomStrategy) strategy).getDist()), order));
+//                break;
             case Negative:
                 setSelectionStrategy(new FixedOrderHeap(new NegativeLiteralSelectionStrategy(), order));
                 break;

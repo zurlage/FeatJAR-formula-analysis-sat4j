@@ -40,15 +40,15 @@ import java.util.List;
  */
 public class Sat4JFormula extends SolverFormula<IConstr> {
 
-    private final Sat4JSolver<?> sat4jSolver;
+    private final Sat4JSolver<?> solver;
 
     public Sat4JFormula(Sat4JSolver<?> solver) {
-        sat4jSolver = solver;
+        this.solver = solver;
     }
 
     protected Sat4JFormula(Sat4JSolver<?> solver, Sat4JFormula oldFormula) {
         super(oldFormula);
-        sat4jSolver = solver;
+        this.solver = solver;
     }
 
     @Override
@@ -64,18 +64,18 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
                     throw new ContradictionException();
                 }
                 final IConstr constr =
-                        sat4jSolver.solver.addClause(new VecInt(Arrays.copyOf(clause.getLiterals(), clause.size())));
+                        solver.solver.addClause(new VecInt(Arrays.copyOf(clause.getLiterals(), clause.size())));
                 constrs.add(constr);
             } catch (final ContradictionException e) {
                 for (final IConstr constr : constrs) {
-                    sat4jSolver.solver.removeConstr(constr);
+                    solver.solver.removeConstr(constr);
                 }
                 throw new SolverContradictionException(e);
             }
         }
-        if (sat4jSolver.solutionHistory != null) {
-            sat4jSolver.solutionHistory.clear();
-            sat4jSolver.lastModel = null;
+        if (solver.solutionHistory != null) {
+            solver.solutionHistory.clear();
+            solver.lastModel = null;
         }
         this.solverFormulas.addAll(constrs);
         return constrs;
@@ -86,12 +86,12 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
             if ((clause.size() == 1) && (clause.getLiterals()[0] == 0)) {
                 throw new ContradictionException();
             }
-            final IConstr constr = sat4jSolver.solver.addClause(
+            final IConstr constr = solver.solver.addClause(
                     new VecInt(Arrays.copyOfRange(clause.getLiterals(), 0, clause.size())));
             solverFormulas.add(constr);
-            if (sat4jSolver.solutionHistory != null) {
-                sat4jSolver.solutionHistory.clear();
-                sat4jSolver.lastModel = null;
+            if (solver.solutionHistory != null) {
+                solver.solutionHistory.clear();
+                solver.lastModel = null;
             }
             return constr;
         } catch (final ContradictionException e) {
@@ -102,14 +102,14 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
     @Override
     public IConstr pop() {
         final IConstr lastConstraint = super.pop();
-        sat4jSolver.solver.removeConstr(lastConstraint);
+        solver.solver.removeConstr(lastConstraint);
         return lastConstraint;
     }
 
     @Override
     public void remove(IConstr clause) {
         if (clause != null) {
-            sat4jSolver.solver.removeConstr(clause);
+            solver.solver.removeConstr(clause);
             super.remove(clause);
         }
     }
@@ -122,9 +122,9 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
         for (int i = 0; i < count; i++) {
             final IConstr lastConstraint = remove(solverFormulas.size() - 1);
             if (lastConstraint != null) {
-                sat4jSolver.solver.removeSubsumedConstr(lastConstraint);
+                solver.solver.removeSubsumedConstr(lastConstraint);
             }
         }
-        sat4jSolver.solver.clearLearntClauses();
+        solver.solver.clearLearntClauses();
     }
 }

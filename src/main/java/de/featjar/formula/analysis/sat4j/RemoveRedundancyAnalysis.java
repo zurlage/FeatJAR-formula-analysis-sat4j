@@ -20,11 +20,13 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.base.data.Computation;
+import de.featjar.base.data.FutureResult;
+import de.featjar.base.data.Result;
+import de.featjar.formula.assignment.VariableAssignment;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.base.task.Monitor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +35,7 @@ import org.sat4j.specs.IConstr;
 
 /**
  * Finds redundant clauses with respect to a given {@link CNF}. This analysis
- * works by adding every clause group (see {@link AClauseAnalysis}) to the given
+ * works by adding every clause group (see {@link ClauseAnalysis}) to the given
  * {@link CNF} at the beginning an then removing and re-adding each clause group
  * individually. If a clause group is redundant with respect to the current
  * formula, it is marked as redundant and removed completely from the
@@ -48,79 +50,77 @@ import org.sat4j.specs.IConstr;
  * @see AddRedundancyAnalysis
  * @see IndependentRedundancyAnalysis
  */
-public class RemoveRedundancyAnalysis extends AClauseAnalysis<List<LiteralList>> {
-
-    public RemoveRedundancyAnalysis() {
+public class RemoveRedundancyAnalysis extends ClauseAnalysis<List<LiteralList>> {
+    protected RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+        super(inputComputation, clauseList);
     }
 
-    public RemoveRedundancyAnalysis(List<LiteralList> clauseList) {
-        this.clauseList = clauseList;
+    protected RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override
-    public List<LiteralList> analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
-        if (clauseList == null) {
-            return Collections.emptyList();
-        }
-        if (clauseGroupSize == null) {
-            clauseGroupSize = new int[clauseList.size()];
-            Arrays.fill(clauseGroupSize, 1);
-        }
-        monitor.setTotalSteps(clauseGroupSize.length + 1);
+    public FutureResult<List<LiteralList>> compute() {
+        return initializeSolver().thenCompute(((solver, monitor) -> {
+            if (clauseList == null) {
+                return Collections.emptyList();
+            }
+            if (clauseGroupSize == null) {
+                clauseGroupSize = new int[clauseList.size()];
+                Arrays.fill(clauseGroupSize, 1);
+            }
+            monitor.setTotalSteps(clauseGroupSize.length + 1);
 
-        final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
-        for (int i = 0; i < clauseList.size(); i++) {
-            resultList.add(null);
-        }
-
-        final List<IConstr> constrs = new ArrayList<>(clauseList.size());
-        for (final LiteralList clause : clauseList) {
-            constrs.add(solver.getFormula().push(clause));
-        }
-
-        monitor.addStep();
-
-        int endIndex = 0;
-        for (int i = 0; i < clauseGroupSize.length; i++) {
-            final int startIndex = endIndex;
-            endIndex += clauseGroupSize[i];
-            boolean completelyRedundant = true;
-            boolean removedAtLeastOne = false;
-            for (int j = startIndex; j < endIndex; j++) {
-                final IConstr cm = constrs.get(j);
-                if (cm != null) {
-                    removedAtLeastOne = true;
-                    solver.getFormula().remove(cm);
-                }
+            final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+            for (int i = 0; i < clauseList.size(); i++) {
+                resultList.add(null);
             }
 
-            if (removedAtLeastOne) {
-                for (int j = startIndex; j < endIndex; j++) {
-                    final LiteralList clause = clauseList.get(j);
+            final List<IConstr> constrs = new ArrayList<>(clauseList.size());
+            for (final LiteralList clause : clauseList) {
+                constrs.add(solver.getSolverFormula().push(clause));
+            }
 
-                    final SATSolver.Result<Boolean> hasSolution = solver.hasSolution(clause.negate());
-                    switch (hasSolution) {
-                        case FALSE:
-                            break;
-                        case TIMEOUT:
-                            reportTimeout();
-                            break;
-                        case TRUE:
-                            solver.getFormula().push(clause);
-                            completelyRedundant = false;
-                            break;
-                        default:
-                            throw new AssertionError(hasSolution);
+            monitor.addStep();
+
+            int endIndex = 0;
+            for (int i = 0; i < clauseGroupSize.length; i++) {
+                final int startIndex = endIndex;
+                endIndex += clauseGroupSize[i];
+                boolean completelyRedundant = true;
+                boolean removedAtLeastOne = false;
+                for (int j = startIndex; j < endIndex; j++) {
+                    final IConstr cm = constrs.get(j);
+                    if (cm != null) {
+                        removedAtLeastOne = true;
+                        solver.getSolverFormula().remove(cm);
                     }
                 }
+
+                if (removedAtLeastOne) {
+                    for (int j = startIndex; j < endIndex; j++) {
+                        final LiteralList clause = clauseList.get(j);
+
+                        final Result<Boolean> hasSolution = solver.hasSolution(clause.negate());
+                        if (Result.of(false).equals(hasSolution)) {
+                        } else if (Result.empty().equals(hasSolution)) {
+                            //reportTimeout();
+                        } else if (Result.of(true).equals(hasSolution)) {
+                            solver.getSolverFormula().push(clause);
+                            completelyRedundant = false;
+                        } else {
+                            throw new AssertionError(hasSolution);
+                        }
+                    }
+                }
+
+                if (completelyRedundant) {
+                    resultList.set(i, clauseList.get(startIndex));
+                }
+                monitor.addStep();
             }
 
-            if (completelyRedundant) {
-                resultList.set(i, clauseList.get(startIndex));
-            }
-            monitor.addStep();
-        }
-
-        return resultList;
+            return resultList;
+        }));
     }
 }

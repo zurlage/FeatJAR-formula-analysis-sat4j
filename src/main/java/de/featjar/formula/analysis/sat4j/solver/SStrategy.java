@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.mig.solver.MIGDistribution;
 import java.util.Random;
 
 public interface SStrategy {
@@ -127,22 +126,22 @@ public interface SStrategy {
         }
     }
 
-    class MIGRandomStrategy implements SStrategy {
-        private final MIGDistribution dist;
-
-        public MIGRandomStrategy(MIGDistribution dist) {
-            this.dist = dist;
-        }
-
-        @Override
-        public Strategy strategy() {
-            return Strategy.MIGRandom;
-        }
-
-        public MIGDistribution getDist() {
-            return dist;
-        }
-    }
+//    class MIGRandomStrategy implements SStrategy {
+//        private final MIGDistribution dist;
+//
+//        public MIGRandomStrategy(MIGDistribution dist) {
+//            this.dist = dist;
+//        }
+//
+//        @Override
+//        public Strategy strategy() {
+//            return Strategy.MIGRandom;
+//        }
+//
+//        public MIGDistribution getDist() {
+//            return dist;
+//        }
+//    }
 
     static OriginalStrategy original() {
         return new OriginalStrategy();
@@ -176,7 +175,7 @@ public interface SStrategy {
         return new UniformRandomStrategy(dist);
     }
 
-    static MIGRandomStrategy mig(MIGDistribution dist) {
-        return new MIGRandomStrategy(dist);
-    }
+//    static MIGRandomStrategy mig(MIGDistribution dist) {
+//        return new MIGRandomStrategy(dist);
+//    }
 }

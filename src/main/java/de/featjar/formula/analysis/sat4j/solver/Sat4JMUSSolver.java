@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.MUSSolver;
 import de.featjar.formula.clauses.CNF;
 
@@ -53,11 +54,6 @@ import org.sat4j.tools.xplain.Xplain;
  * @author Sebastian Krieter
  */
 public class Sat4JMUSSolver extends Sat4JSolver<Xplain<ISolver>> implements MUSSolver<IConstr> {
-
-    public Sat4JMUSSolver(ModelRepresentation modelRepresentation) {
-        this(modelRepresentation.getCache().get(CNFComputation.fromFormula()).get());
-    }
-
     public Sat4JMUSSolver(CNF cnf) {
         super(cnf);
     }
@@ -68,21 +64,21 @@ public class Sat4JMUSSolver extends Sat4JSolver<Xplain<ISolver>> implements MUSS
     }
 
     @Override
-    public List<IConstr> getMinimalUnsatisfiableSubset() throws IllegalStateException {
-        if (hasSolution() == Result<Boolean>.TRUE) {
-            throw new IllegalStateException("Problem is satisfiable");
+    public Result<List<IConstr>> getMinimalUnsatisfiableSubset() throws IllegalStateException {
+        if (hasSolution().equals(Result.of(true))) {
+            return Result.empty(new IllegalStateException("Problem is satisfiable"));
         }
         try {
-            return IntStream.of(solver.minimalExplanation()) //
-                    .mapToObj(getFormula().get()::get) //
-                    .collect(Collectors.toList());
+            return Result.of(IntStream.of(solver.minimalExplanation()) //
+                    .mapToObj(getSolverFormula().get()::get) //
+                    .collect(Collectors.toList()));
         } catch (final TimeoutException e) {
             throw new IllegalStateException(e);
         }
     }
 
     @Override
-    public List<List<IConstr>> getAllMinimalUnsatisfiableSubsets() throws IllegalStateException {
-        return Collections.singletonList(getMinimalUnsatisfiableSubset());
+    public Result<List<List<IConstr>>> getAllMinimalUnsatisfiableSubsets() throws IllegalStateException {
+        return Result.of(Collections.singletonList(getMinimalUnsatisfiableSubset().get()));
     }
 }

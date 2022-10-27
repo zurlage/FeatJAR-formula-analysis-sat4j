@@ -21,7 +21,6 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.formula.assignment.Assignment;
-import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,20 +33,15 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class Sat4JAssumptions implements Assignment {
+public class Sat4JAssignment implements Assignment<Integer> {
 
-    protected final VecInt assumptions;
-    protected final TermMap variables;
+    protected final VecInt assumptions = new VecInt();
 
     public VecInt getAssumptions() {
         return assumptions;
     }
 
-    public Sat4JAssumptions(TermMap variables) {
-        this.variables = variables;
-        assumptions = new VecInt(variables.getVariableCount());
-    }
-
+    @Override
     public void clear() {
         assumptions.clear();
     }
@@ -115,7 +109,7 @@ public class Sat4JAssumptions implements Assignment {
     }
 
     @Override
-    public void set(int index, Object assignment) {
+    public void set(Integer index, Object assignment) {
         if (assignment instanceof Boolean) {
             for (int i = 0; i < assumptions.size(); i++) {
                 final int l = assumptions.unsafeGet(i);
@@ -128,15 +122,15 @@ public class Sat4JAssumptions implements Assignment {
         }
     }
 
-    public void set(String name, Object assignment) {
-        final int index = variables.getVariableIndex(name).orElse(-1);
-        if (index > 0) {
-            set(index, assignment);
-        }
-    }
+//    public void set(String name, Object assignment) {
+//        final int index = variables.getVariableIndex(name).orElse(-1);
+//        if (index > 0) {
+//            set(index, assignment);
+//        }
+//    }
 
     @Override
-    public void unset(int index) {
+    public void remove(Integer index) {
         for (int i = 0; i < assumptions.size(); i++) {
             final int l = assumptions.unsafeGet(i);
             if (Math.abs(l) == index) {
@@ -147,12 +141,7 @@ public class Sat4JAssumptions implements Assignment {
     }
 
     @Override
-    public void clear() {
-        assumptions.clear();
-    }
-
-    @Override
-    public Optional<Object> get(int index) {
+    public Optional<Object> get(Integer index) {
         for (int i = 0; i < assumptions.size(); i++) {
             final int l = assumptions.unsafeGet(i);
             if (Math.abs(l) == index) {
@@ -162,14 +151,10 @@ public class Sat4JAssumptions implements Assignment {
         return Optional.empty();
     }
 
-    public Optional<Object> get(String name) {
-        final int index = variables.getVariableIndex(name).orElse(-1);
-        return index > 0 ? get(index) : Optional.empty();
-    }
-
-    public TermMap getVariables() {
-        return variables;
-    }
+//    public Optional<Object> get(String name) {
+//        final int index = variables.getVariableIndex(name).orElse(-1);
+//        return index > 0 ? get(index) : Optional.empty();
+//    }
 
     @Override
     public List<Pair<Integer, Object>> get() {

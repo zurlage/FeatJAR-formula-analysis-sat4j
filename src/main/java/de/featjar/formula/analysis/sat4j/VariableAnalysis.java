@@ -18,49 +18,38 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j.twise;
+package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.formula.clauses.ClauseList;
+import de.featjar.base.data.Computation;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
- * Represents a presence condition as an expression.
+ * Base class for an analysis that works on a list of variables.
+ *
+ * @param <T> the type of the analysis result.
  *
  * @author Sebastian Krieter
  */
-public class PresenceCondition extends ClauseList {
+public abstract class VariableAnalysis<T> extends Sat4JAnalysis<T> {
 
+    protected LiteralList variables;
 
-    private final transient TreeSet<Integer> groups = new TreeSet<>();
-
-    public PresenceCondition() {
+    protected VariableAnalysis(Computation<CNF> inputComputation, LiteralList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
+        super(inputComputation);
+        this.variables = variables;
     }
 
-    public PresenceCondition(ClauseList otherClauseList) {
-        super(otherClauseList);
+    protected VariableAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 
-    public PresenceCondition(Collection<? extends LiteralList> c) {
-        super(c);
+    public LiteralList getVariables() {
+        return variables;
     }
 
-    public PresenceCondition(int size) {
-        super(size);
-    }
-
-    public void addGroup(int group) {
-        groups.add(group);
-    }
-
-    public Set<Integer> getGroups() {
-        return groups;
-    }
-
-    @Override
-    public String toString() {
-        return "Expression [" + super.toString() + "]";
+    public void setVariables(LiteralList variables) {
+        this.variables = variables;
     }
 }

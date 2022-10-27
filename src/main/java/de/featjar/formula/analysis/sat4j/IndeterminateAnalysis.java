@@ -20,11 +20,15 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
+import de.featjar.base.data.Computation;
+import de.featjar.base.data.FutureResult;
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
-import de.featjar.base.task.Monitor;
+
 import java.util.Arrays;
 import java.util.List;
 import org.sat4j.core.VecInt;
@@ -34,52 +38,58 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class IndeterminateAnalysis extends AVariableAnalysis<LiteralList> { // todo: variable-analysis does not work
+public class IndeterminateAnalysis extends VariableAnalysis<LiteralList> { // todo: variable-analysis does not work
     // reliably (false positives) (use old
     // analysis first?)
 
-    @Override
-    public LiteralList analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
-        if (variables == null) {
-            variables = LiteralList.getVariables(solver.getVariableMap());
-        }
-        monitor.setTotalSteps(variables.getLiterals().length);
+    protected IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables) {
+        super(inputComputation, variables);
+    }
 
-        final VecInt resultList = new VecInt();
-        variableLoop:
-        for (final int variable : variables.getLiterals()) {
-            final Sat4JSolutionSolver modSolver = new Sat4JSolutionSolver(solver.getVariableMap());
-            final List<LiteralList> clauses = solver.getCnf().getClauses();
-            for (final LiteralList clause : clauses) {
-                final LiteralList newClause = clause.removeVariables(variable);
-                if (newClause != null) {
-                    try {
-                        modSolver.getFormula().push(newClause);
-                    } catch (final SolverContradictionException e) {
+    protected IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, variables, assumptions, timeoutInMs, randomSeed);
+    }
+
+    @Override
+    public FutureResult<LiteralList> compute() {
+        return initializeSolver().thenCompute(((solver, monitor) -> {
+            if (variables == null) {
+                variables = LiteralList.getVariables(solver.getCNF().getVariableMap());
+            }
+            monitor.setTotalSteps(variables.getLiterals().length);
+
+            final VecInt resultList = new VecInt();
+            variableLoop:
+            for (final int variable : variables.getLiterals()) {
+                final Sat4JSolutionSolver modSolver = new Sat4JSolutionSolver(solver.getCNF()); // todo: before, this was passed the variable map?
+                final List<LiteralList> clauses = solver.getCNF().getClauses();
+                for (final LiteralList clause : clauses) {
+                    final LiteralList newClause = clause.removeVariables(variable);
+                    if (newClause != null) {
+                        try {
+                            modSolver.getSolverFormula().push(newClause);
+                        } catch (final SolverContradictionException e) {
+                            monitor.addStep();
+                            continue variableLoop;
+                        }
+                    } else {
                         monitor.addStep();
                         continue variableLoop;
                     }
-                } else {
-                    monitor.addStep();
-                    continue variableLoop;
                 }
-            }
 
-            final SATSolver.Result<Boolean> hasSolution = modSolver.hasSolution();
-            switch (hasSolution) {
-                case FALSE:
-                    break;
-                case TIMEOUT:
-                    reportTimeout();
-                    break;
-                case TRUE:
+                final Result<Boolean> hasSolution = modSolver.hasSolution();
+                if (Result.of(false).equals(hasSolution)) {
+                } else if (Result.empty().equals(hasSolution)) {
+                    //reportTimeout();
+                } else if (Result.of(true).equals(hasSolution)) {
                     resultList.push(variable);
-                    break;
-                default:
+                } else {
                     throw new AssertionError(hasSolution);
+                }
+                monitor.addStep();
             }
-            monitor.addStep();
-        }
-        return new LiteralList(Arrays.copyOf(resultList.toArray(), resultList.size()));
+            return new LiteralList(Arrays.copyOf(resultList.toArray(), resultList.size()));
+        }));
     }
 }

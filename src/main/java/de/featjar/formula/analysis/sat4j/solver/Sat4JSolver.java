@@ -22,6 +22,8 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.SolutionSolver;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
+import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.clauses.VariableMap;
@@ -42,9 +44,9 @@ import org.sat4j.specs.TimeoutException;
  */
 public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<LiteralList> {
     public static final int MAX_SOLUTION_BUFFER = 1000;
-    protected CNF satInstance;
+    protected CNF cnf;
     protected final T solver;
-    protected final Sat4JAssumptions assumptions;
+    protected Sat4JAssignment assumptions = new Sat4JAssignment();
     protected final Sat4JFormula formula;
 
     // TODO extract solution history in separate class
@@ -53,47 +55,44 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
     protected int[] lastModel = null;
     protected boolean globalTimeout = false;
     private boolean contradiction = false;
+    private long timeout;
 
-    public Sat4JSolver(VariableMap variableMap) {
-        satInstance = null;
+//    public Sat4JSolver() {
+//        cnf = null;
+//        solver = createSolver();
+//        configureSolver();
+//        formula = new Sat4JFormula(this);
+//        initSolver(Collections.emptyList());
+//    }
+
+    public Sat4JSolver(CNF cnf) {
+        this.cnf = cnf;
         solver = createSolver();
         configureSolver();
         formula = new Sat4JFormula(this);
-        initSolver(Collections.emptyList());
-
-        assumptions = new Sat4JAssumptions(variableMap);
-    }
-
-    public Sat4JSolver(CNF cnf) {
-        satInstance = cnf;
-        solver = createSolver();
-        configureSolver();
-        formula = new Sat4JFormula(this, cnf.getVariableMap());
         initSolver(cnf.getClauses());
-
-        assumptions = new Sat4JAssumptions(cnf.getVariableMap());
     }
 
     /**
      * @return The {@link CNF sat instance} given to the solver.
      */
-    public CNF getCnf() {
-        return satInstance;
+    public CNF getCNF() {
+        return cnf;
     }
 
     @Override
-    public Sat4JAssumptions getAssumptions() {
+    public Sat4JAssignment getAssumptions() {
         return assumptions;
+    }
+
+    @Override
+    public void setAssumptions(Assignment<?> assumptions) throws SolverContradictionException  {
+        this.assumptions = (Sat4JAssignment) assumptions;
     }
 
     @Override
     public Sat4JFormula getSolverFormula() {
         return formula;
-    }
-
-    @Override
-    public TermMap getVariableMap() {
-        return formula.getVariableMap();
     }
 
     /**
@@ -107,8 +106,8 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      * @see #hasSolution(int...)
      */
     @Override
-    public LiteralList getSolution() {
-        return new LiteralList(getLastModelCopy(), LiteralList.Order.INDEX, false);
+    public Result<LiteralList> getSolution() {
+        return lastModel == null ? Result.empty() : Result.of(new LiteralList(getLastModelCopy(), LiteralList.Order.INDEX, false));
     }
 
     public int[] getInternalSolution() {
@@ -158,7 +157,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      * Add clauses to the solver. Initializes the order instance.
      */
     protected void initSolver(List<LiteralList> clauses) {
-        final int size = formula.getVariableMap().getVariableCount();
+        final int size = cnf.getVariableMap().getVariableCount(); // todo: before, this was formula.getvariablemap - may cause an issue with pushing to the assumption stack?
         //		final List<LiteralList> clauses = satInstance.getClauses();
         try {
             if (!clauses.isEmpty()) {
@@ -178,17 +177,19 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
         }
     }
 
-    public void setTimeout(int timeout) {
+    @Override
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
         solver.setTimeoutMs(timeout);
     }
 
-    public Sat4JFormula getFormula() {
-        return formula;
-    }
-
     @Override
-    public LiteralList findSolution() {
-        return hasSolution() == Result<Boolean>.TRUE ? getSolution() : null;
+    public Result<LiteralList> findSolution() {
+        return hasSolution().equals(Result.of(true)) ? getSolution() : null;
     }
 
     public List<LiteralList> getSolutionHistory() {
@@ -220,7 +221,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
     public Result<Boolean> hasSolution() {
         if (contradiction) {
             lastModel = null;
-            return Result<Boolean>.FALSE;
+            return Result.of(false);
         }
 
         final int[] assumptionArray = getAssumptionArray();
@@ -228,7 +229,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
             for (final LiteralList solution : solutionHistory) {
                 if (solution.containsAllLiterals(assumptionArray)) {
                     lastModel = solution.getLiterals();
-                    return Result<Boolean>.TRUE;
+                    return Result.of(true);
                 }
             }
         }
@@ -237,14 +238,14 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
             if (solver.isSatisfiable(new VecInt(assumptionArray), globalTimeout)) {
                 lastModel = solver.model();
                 addSolution();
-                return Result<Boolean>.TRUE;
+                return Result.of(true);
             } else {
                 lastModel = null;
-                return Result<Boolean>.FALSE;
+                return Result.of(false);
             }
         } catch (final TimeoutException e) {
             lastModel = null;
-            return Result<Boolean>.TIMEOUT;
+            return Result.empty();
         }
     }
 
@@ -263,14 +264,14 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      */
     public Result<Boolean> hasSolution(int... assignment) {
         if (contradiction) {
-            return Result<Boolean>.FALSE;
+            return Result.of(false);
         }
 
         if (solutionHistory != null) {
             for (final LiteralList solution : solutionHistory) {
                 if (solution.containsAllLiterals(assignment)) {
                     lastModel = solution.getLiterals();
-                    return Result<Boolean>.TRUE;
+                    return Result.of(true);
                 }
             }
         }
@@ -283,20 +284,20 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
             if (solver.isSatisfiable(new VecInt(unitClauses), globalTimeout)) {
                 lastModel = solver.model();
                 addSolution();
-                return Result<Boolean>.TRUE;
+                return Result.of(true);
             } else {
                 lastModel = null;
-                return Result<Boolean>.FALSE;
+                return Result.of(false);
             }
         } catch (final TimeoutException e) {
             lastModel = null;
-            return Result<Boolean>.TIMEOUT;
+            return Result.empty();
         }
     }
 
     private void addSolution() {
         if (solutionHistory != null) {
-            solutionHistory.addFirst(getSolution());
+            solutionHistory.addFirst(getSolution().get());
             if (solutionHistory.size() > solutionHistoryLimit) {
                 solutionHistory.removeLast();
             }

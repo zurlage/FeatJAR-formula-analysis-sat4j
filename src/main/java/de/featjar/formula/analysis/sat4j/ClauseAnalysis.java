@@ -20,6 +20,9 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
+import de.featjar.base.data.Computation;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
 import de.featjar.formula.clauses.LiteralList;
 import java.util.List;
 
@@ -32,10 +35,20 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public abstract class AClauseAnalysis<T> extends Sat4JAnalysis<T> {
+public abstract class ClauseAnalysis<T> extends Sat4JAnalysis<T> {
 
     protected List<LiteralList> clauseList;
     protected int[] clauseGroupSize;
+
+    protected ClauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+        super(inputComputation);
+        this.clauseList = clauseList;
+    }
+
+    protected ClauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+        this.clauseList = clauseList;
+    }
 
     public List<LiteralList> getClauseList() {
         return clauseList;
