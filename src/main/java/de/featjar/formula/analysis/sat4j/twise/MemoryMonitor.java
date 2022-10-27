@@ -18,30 +18,24 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+public class MemoryMonitor implements UpdateFunction {
 
-/**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
- *
- * @author Sebastian Krieter
- */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
-
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
-    }
+    public long maxUsedMemory = 0;
+    public long maxAllocatedMemory = 0;
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    public boolean update() {
+        final long allocatedMemory = Runtime.getRuntime().totalMemory();
+        final long freeMemory = Runtime.getRuntime().freeMemory();
+        final long usedMemory = allocatedMemory - freeMemory;
+        if (allocatedMemory > maxAllocatedMemory) {
+            maxAllocatedMemory = allocatedMemory;
+        }
+        if (usedMemory > maxUsedMemory) {
+            maxUsedMemory = usedMemory;
+        }
+        return true;
     }
 }

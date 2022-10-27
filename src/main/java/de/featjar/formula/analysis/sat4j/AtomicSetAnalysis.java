@@ -40,11 +40,11 @@ import java.util.concurrent.TimeoutException;
  * @author Sebastian Krieter
  */
 public class AtomicSetAnalysis extends Sat4JAnalysis<List<LiteralList>> { // todo: AVariableAnalysis
-    protected AtomicSetAnalysis(Computation<CNF> inputComputation) {
+    public AtomicSetAnalysis(Computation<CNF> inputComputation) {
         super(inputComputation);
     }
 
-    protected AtomicSetAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public AtomicSetAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 

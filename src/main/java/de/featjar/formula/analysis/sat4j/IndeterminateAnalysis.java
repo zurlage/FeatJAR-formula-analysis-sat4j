@@ -42,11 +42,11 @@ public class IndeterminateAnalysis extends VariableAnalysis<LiteralList> { // to
     // reliably (false positives) (use old
     // analysis first?)
 
-    protected IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables) {
+    public IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables) {
         super(inputComputation, variables);
     }
 
-    protected IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, variables, assumptions, timeoutInMs, randomSeed);
     }
 

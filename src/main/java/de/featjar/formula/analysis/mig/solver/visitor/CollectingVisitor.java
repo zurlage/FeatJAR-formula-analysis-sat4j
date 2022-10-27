@@ -18,30 +18,27 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.mig.solver.visitor;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import org.sat4j.core.VecInt;
 
-/**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
- *
- * @author Sebastian Krieter
- */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
+public class CollectingVisitor implements Visitor<VecInt[]> {
+    final VecInt[] literalList = new VecInt[] {new VecInt(), new VecInt()};
 
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+    @Override
+    public VisitResult visitStrong(int curLiteral) {
+        literalList[0].push(curLiteral);
+        return VisitResult.Continue;
     }
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    public VisitResult visitWeak(int curLiteral) {
+        literalList[1].push(curLiteral);
+        return VisitResult.Continue;
+    }
+
+    @Override
+    public VecInt[] getResult() {
+        return literalList;
     }
 }

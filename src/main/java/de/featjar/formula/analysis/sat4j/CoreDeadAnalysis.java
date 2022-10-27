@@ -40,11 +40,11 @@ import org.sat4j.specs.IteratorInt;
  * @author Sebastian Krieter
  */
 public class CoreDeadAnalysis extends VariableAnalysis<LiteralList> {
-    protected CoreDeadAnalysis(Computation<CNF> inputComputation, LiteralList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
+    public CoreDeadAnalysis(Computation<CNF> inputComputation, LiteralList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
         super(inputComputation, variables);
     }
 
-    protected CoreDeadAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public CoreDeadAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, variables, assumptions, timeoutInMs, randomSeed);
     }
     

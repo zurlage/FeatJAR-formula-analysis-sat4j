@@ -18,30 +18,31 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.analysis.sat4j.solver.SStrategy;
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * Generates random configurations for a given propositional formula.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
+public class FastRandomConfigurationGenerator extends RandomConfigurationGenerator {
 
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+    private SStrategy originalSelectionStrategy;
+
+    @Override
+    protected void prepareSolver(Sat4JSolutionSolver solver) {
+        super.prepareSolver(solver);
+        originalSelectionStrategy = solver.getSelectionStrategy();
+        solver.setSelectionStrategy(SStrategy.random(random));
     }
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    protected void resetSolver(Sat4JSolutionSolver solver) {
+        super.resetSolver(solver);
+        solver.setSelectionStrategy(originalSelectionStrategy);
+        originalSelectionStrategy = null;
     }
 }

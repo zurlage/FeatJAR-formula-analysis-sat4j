@@ -18,30 +18,19 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import java.util.Comparator;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * Compares two solutions regarding their number of contained literals.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
-
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
-    }
+class TWiseConfigurationLengthComparator implements Comparator<TWiseConfiguration> {
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    public int compare(TWiseConfiguration arg0, TWiseConfiguration arg1) {
+        return arg1.countLiterals - arg0.countLiterals;
     }
 }

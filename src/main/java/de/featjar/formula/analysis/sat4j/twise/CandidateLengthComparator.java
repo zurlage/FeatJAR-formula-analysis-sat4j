@@ -18,30 +18,24 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.base.data.Pair;
+import java.util.Comparator;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * Compares two candidates for covering, consisting of a partial configuration
+ * and a literal set. Considers number of literals in the partial configuration
+ * and in the literal set.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
-
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
-    }
+class CandidateLengthComparator implements Comparator<Pair<LiteralList, TWiseConfiguration>> {
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    public int compare(Pair<LiteralList, TWiseConfiguration> o1, Pair<LiteralList, TWiseConfiguration> o2) {
+        final int diff = o2.getValue().countLiterals - o1.getValue().countLiterals;
+        return diff != 0 ? diff : o2.getKey().size() - o1.getKey().size();
     }
 }

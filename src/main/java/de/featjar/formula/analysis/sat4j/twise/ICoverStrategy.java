@@ -18,30 +18,23 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseList;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * A strategy for covering a given {@link ClauseList expressions} within a list
+ * of {@link TWiseConfiguration solutions}.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
+interface ICoverStrategy {
+
+    enum CombinationStatus {
+        NOT_COVERED,
+        COVERED,
+        INVALID,
     }
 
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
-    }
-
-    @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
-    }
+    CombinationStatus cover(final ClauseList nextCondition);
 }

@@ -53,7 +53,7 @@ public class AddRedundancyAnalysis extends ClauseAnalysis<List<LiteralList>> {
         super(inputComputation, clauseList);
     }
 
-    protected AddRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public AddRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 

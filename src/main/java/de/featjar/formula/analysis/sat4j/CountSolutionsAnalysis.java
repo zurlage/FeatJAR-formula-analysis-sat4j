@@ -35,11 +35,11 @@ import de.featjar.formula.clauses.LiteralList;
  */
 public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
 
-    protected CountSolutionsAnalysis(Computation<CNF> inputComputation) {
+    public CountSolutionsAnalysis(Computation<CNF> inputComputation) {
         super(inputComputation);
     }
 
-    protected CountSolutionsAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public CountSolutionsAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 

@@ -13,3 +13,21 @@ license {
         url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j'
     }
 }
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main'
+            exclude '**/twise/**'
+            exclude '**/configuration/**'
+            exclude '**/mig/**'
+            exclude '**/transform/**'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test'
+            exclude '**/assignment/**'
+        }
+    }
+}

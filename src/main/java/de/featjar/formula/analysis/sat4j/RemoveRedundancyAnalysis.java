@@ -51,11 +51,11 @@ import org.sat4j.specs.IConstr;
  * @see IndependentRedundancyAnalysis
  */
 public class RemoveRedundancyAnalysis extends ClauseAnalysis<List<LiteralList>> {
-    protected RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+    public RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
         super(inputComputation, clauseList);
     }
 
-    protected RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 

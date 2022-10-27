@@ -47,11 +47,11 @@ import java.util.List;
  */
 public class IndependentContradictionAnalysis extends ClauseAnalysis<List<LiteralList>> {
 
-    protected IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+    public IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
         super(inputComputation, clauseList);
     }
 
-    protected IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 

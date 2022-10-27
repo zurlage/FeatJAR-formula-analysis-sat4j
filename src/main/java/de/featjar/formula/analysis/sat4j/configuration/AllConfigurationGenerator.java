@@ -18,30 +18,34 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.analysis.solver.SolverContradictionException;
+import de.featjar.formula.clauses.LiteralList;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * Generates all configurations for a given propositional formula.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
-
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
-    }
+public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
+    private boolean satisfiable = true;
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    public LiteralList get() {
+        if (!satisfiable) {
+            return null;
+        }
+        final LiteralList solution = solver.findSolution();
+        if (solution == null) {
+            satisfiable = false;
+            return null;
+        }
+        try {
+            solver.getFormula().push(solution.negate());
+        } catch (final SolverContradictionException e) {
+            satisfiable = false;
+        }
+        return solution;
     }
 }

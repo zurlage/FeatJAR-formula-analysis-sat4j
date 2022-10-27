@@ -35,11 +35,11 @@ import java.util.*;
  * @author Sebastian Krieter
  */
 public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>> {
-    protected CauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+    public CauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
         super(inputComputation, clauseList);
     }
 
-    protected CauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public CauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 

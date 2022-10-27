@@ -48,11 +48,11 @@ import java.util.List;
  * @see IndependentContradictionAnalysis
  */
 public class ContradictionAnalysis extends ClauseAnalysis<List<LiteralList>> {
-    protected ContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+    public ContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
         super(inputComputation, clauseList);
     }
 
-    protected ContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public ContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 

@@ -18,30 +18,49 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * Represents a presence condition as an expression.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
+public class PresenceCondition extends ClauseList {
+
+
+    private final transient TreeSet<Integer> groups = new TreeSet<>();
+
+    public PresenceCondition() {
     }
 
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+    public PresenceCondition(ClauseList otherClauseList) {
+        super(otherClauseList);
+    }
+
+    public PresenceCondition(Collection<? extends LiteralList> c) {
+        super(c);
+    }
+
+    public PresenceCondition(int size) {
+        super(size);
+    }
+
+    public void addGroup(int group) {
+        groups.add(group);
+    }
+
+    public Set<Integer> getGroups() {
+        return groups;
     }
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+    public String toString() {
+        return "Expression [" + super.toString() + "]";
     }
 }

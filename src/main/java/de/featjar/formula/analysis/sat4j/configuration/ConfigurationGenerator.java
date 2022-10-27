@@ -18,30 +18,32 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
+import de.featjar.base.data.Store;
+import de.featjar.base.task.Monitor;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
- * Determines whether a given {@link CNF} is satisfiable and returns the found
- * solution.
+ * Interface for configuration generators. Can be used as a {@link Supplier} or
+ * to get a {@link Stream} or a {@link SolutionList} of configurations.
  *
  * @author Sebastian Krieter
  */
-public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
-    public HasSolutionAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
+public interface ConfigurationGenerator
+        extends Supplier<LiteralList>, Spliterator<LiteralList>, de.featjar.base.data.Computation {
 
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
-    }
+    void init(Store rep, Monitor monitor);
 
-    @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
-    }
+    int getLimit();
+
+    void setLimit(int limit);
+
+    boolean isAllowDuplicates();
+
+    void setAllowDuplicates(boolean allowDuplicates);
 }

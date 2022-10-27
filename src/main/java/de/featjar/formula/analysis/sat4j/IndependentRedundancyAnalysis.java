@@ -50,11 +50,11 @@ import java.util.List;
  */
 public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<LiteralList>> {
 
-    protected IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+    public IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
         super(inputComputation, clauseList);
     }
 
-    protected IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 
