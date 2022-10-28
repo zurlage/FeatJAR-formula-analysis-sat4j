@@ -42,6 +42,9 @@ public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
 
     @Override
     public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult(((solver, monitor) -> solver.hasSolution()));
+        return initializeSolver().thenComputeResult(((solver, monitor) -> {
+            // todo: log output
+            return solver.hasSolution();
+        }));
     }
 }
