@@ -184,7 +184,10 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
 
     public void setTimeout(long timeout) {
         this.timeout = timeout;
-        solver.setTimeoutMs(timeout);
+        if (timeout > 0)
+            solver.setTimeoutMs(timeout);
+        else
+            ;// todo: explicitly unset timeout?
     }
 
     @Override
