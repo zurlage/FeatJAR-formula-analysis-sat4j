@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.clauses.solutions.SolutionList;
-import de.featjar.base.data.Store;
+import de.featjar.base.data.Cache;
 import de.featjar.base.task.Monitor;
 import java.util.Spliterator;
 import java.util.function.Supplier;
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 public interface ConfigurationGenerator
         extends Supplier<LiteralList>, Spliterator<LiteralList>, de.featjar.base.data.Computation {
 
-    void init(Store rep, Monitor monitor);
+    void init(Cache rep, Monitor monitor);
 
     int getLimit();
 
