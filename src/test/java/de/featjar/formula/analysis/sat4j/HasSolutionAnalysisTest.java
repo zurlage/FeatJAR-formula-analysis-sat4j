@@ -13,14 +13,14 @@ public class HasSolutionAnalysisTest {
     @Test
     void hasSolution() {
         assertTrue(Computation.of((Formula) and(literal("x"), not(literal("y"))))
-                .then(ToCNF.analysis)
+                .then(ToCNF::new)
                 .then(c -> new HasSolutionAnalysis(c, new VariableAssignment(), 1000, 1000)) // todo: timeout 0 is not interpreted correctly
-                .computeResult()
+                .getResult()
                 .get());
         assertFalse(Computation.of(and(literal("x"), not(literal("x"))))
                 .then(ToCNF.class)
                 .then(c -> new HasSolutionAnalysis(c, new VariableAssignment(), 1000, 1000))
-                .computeResult()
+                .getResult()
                 .get());
     }
 }

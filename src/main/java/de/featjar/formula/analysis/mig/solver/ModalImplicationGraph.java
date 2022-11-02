@@ -86,7 +86,7 @@ public class ModalImplicationGraph {
     }
 
     public List<Vertex> getVertices() {
-        return Collections.unmodifiableList(adjList);
+        return adjList;
     }
 
     public ArrayList<LiteralList> getDetectedStrong() {

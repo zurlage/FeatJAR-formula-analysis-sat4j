@@ -196,7 +196,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
     }
 
     public List<LiteralList> getSolutionHistory() {
-        return solutionHistory != null ? Collections.unmodifiableList(solutionHistory) : Collections.emptyList();
+        return solutionHistory != null ? solutionHistory : Collections.emptyList();
     }
 
     private int[] getAssumptionArray() {
