@@ -18,7 +18,7 @@ public class HasSolutionAnalysisTest {
                 .getResult()
                 .get());
         assertFalse(Computation.of(and(literal("x"), not(literal("x"))))
-                .then(ToCNF.class)
+                .then(ToCNF::new)
                 .then(c -> new HasSolutionAnalysis(c, new VariableAssignment(), 1000, 1000))
                 .getResult()
                 .get());
