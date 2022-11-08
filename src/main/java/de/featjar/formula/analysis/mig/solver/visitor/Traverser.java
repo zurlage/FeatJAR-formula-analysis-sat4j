@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.mig.solver.visitor;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.Vertex;
 import de.featjar.formula.analysis.mig.solver.visitor.Visitor.VisitResult;
-import de.featjar.formula.clauses.LiteralList;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,15 +52,15 @@ public class Traverser extends ATraverser {
     }
 
     private void traverseAll(int... curLiterals) throws CancelException {
-        final HashMap<LiteralList, VecInt> openClauseMap = new HashMap<>();
+        final HashMap<SortedIntegerList, VecInt> openClauseMap = new HashMap<>();
         Arrays.fill(dfsMark, false);
 
         traverseStrong(openClauseMap, curLiterals);
         mainLoop:
         while (true) {
-            for (final Iterator<Entry<LiteralList, VecInt>> openClauseIterator =
-                            openClauseMap.entrySet().iterator();
-                    openClauseIterator.hasNext(); ) {
+            for (final Iterator<Entry<SortedIntegerList, VecInt>> openClauseIterator =
+                 openClauseMap.entrySet().iterator();
+                 openClauseIterator.hasNext(); ) {
                 final VecInt openClause = openClauseIterator.next().getValue();
                 if (openClause != null) {
                     for (final IteratorInt literalIterator = openClause.iterator(); literalIterator.hasNext(); ) {
@@ -106,7 +106,7 @@ public class Traverser extends ATraverser {
         }
     }
 
-    private void traverseStrong(final HashMap<LiteralList, VecInt> complexClauseMap, int... curLiterals)
+    private void traverseStrong(final HashMap<SortedIntegerList, VecInt> complexClauseMap, int... curLiterals)
             throws CancelException {
         boolean changed = false;
         for (final int curLiteral : curLiterals) {
@@ -117,12 +117,12 @@ public class Traverser extends ATraverser {
         }
     }
 
-    private boolean processComplexClauses(final HashMap<LiteralList, VecInt> complexClauseMap) throws CancelException {
+    private boolean processComplexClauses(final HashMap<SortedIntegerList, VecInt> complexClauseMap) throws CancelException {
         boolean changedInLoop, changed = false;
         do {
             changedInLoop = false;
             final List<VecInt> unitClauses = new LinkedList<>();
-            for (final Entry<LiteralList, VecInt> entry : complexClauseMap.entrySet()) {
+            for (final Entry<SortedIntegerList, VecInt> entry : complexClauseMap.entrySet()) {
                 final VecInt v = entry.getValue();
                 if (v != null) {
                     for (int j = v.size() - 1; j >= 0; j--) {
@@ -153,7 +153,7 @@ public class Traverser extends ATraverser {
         return changed;
     }
 
-    private boolean attemptStrongSelect(final int curLiteral, final HashMap<LiteralList, VecInt> complexClauseMap)
+    private boolean attemptStrongSelect(final int curLiteral, final HashMap<SortedIntegerList, VecInt> complexClauseMap)
             throws CancelException {
         final int modelIndex = getIndex(curLiteral);
         final int currentVariableSelection = currentConfiguration[modelIndex];
@@ -207,12 +207,12 @@ public class Traverser extends ATraverser {
         return Math.abs(literal) - 1;
     }
 
-    private int addComplexClauses(final HashMap<LiteralList, VecInt> complexClauseMap, final Vertex vertex) {
+    private int addComplexClauses(final HashMap<SortedIntegerList, VecInt> complexClauseMap, final Vertex vertex) {
         int added = 0;
-        final List<LiteralList> complexClauses = vertex.getComplexClauses();
-        for (final LiteralList clause : complexClauses) {
-            if (!complexClauseMap.containsKey(clause)) {
-                complexClauseMap.put(clause, new VecInt(Arrays.copyOf(clause.getLiterals(), clause.size())));
+        final List<SortedIntegerList> complexSortedIntegerLists = vertex.getComplexClauses();
+        for (final SortedIntegerList sortedIntegerList : complexSortedIntegerLists) {
+            if (!complexClauseMap.containsKey(sortedIntegerList)) {
+                complexClauseMap.put(sortedIntegerList, new VecInt(Arrays.copyOf(sortedIntegerList.getIntegers(), sortedIntegerList.size())));
                 added++;
             }
         }

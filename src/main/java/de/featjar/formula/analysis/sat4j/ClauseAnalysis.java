@@ -21,9 +21,9 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.analysis.Assignment;
+import de.featjar.formula.analysis.sat.clause.CNF;
+
 import java.util.List;
 
 /**
@@ -37,25 +37,25 @@ import java.util.List;
  */
 public abstract class ClauseAnalysis<T> extends Sat4JAnalysis<T> {
 
-    protected List<LiteralList> clauseList;
+    protected List<SortedIntegerList> literalListIndexList;
     protected int[] clauseGroupSize;
 
-    protected ClauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+    protected ClauseAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
         super(inputComputation);
-        this.clauseList = clauseList;
+        this.literalListIndexList = literalListIndexList;
     }
 
-    protected ClauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    protected ClauseAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
-        this.clauseList = clauseList;
+        this.literalListIndexList = literalListIndexList;
     }
 
-    public List<LiteralList> getClauseList() {
-        return clauseList;
+    public List<SortedIntegerList> getClauseList() {
+        return literalListIndexList;
     }
 
-    public void setClauseList(List<LiteralList> clauseList) {
-        this.clauseList = clauseList;
+    public void setClauseList(List<SortedIntegerList> literalListIndexList) {
+        this.literalListIndexList = literalListIndexList;
     }
 
     public int[] getClauseGroups() {

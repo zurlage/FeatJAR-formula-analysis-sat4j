@@ -28,8 +28,8 @@ import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap2;
 import de.featjar.formula.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.analysis.sat.clause.CNF;
+
 import java.util.List;
 import java.util.Random;
 import org.sat4j.minisat.SolverFactory;
@@ -70,8 +70,8 @@ public class Sat4JSolutionSolver extends Sat4JSolver<Solver<?>> {
     }
 
     @Override
-    protected void initSolver(List<LiteralList> clauses) {
-        super.initSolver(clauses);
+    protected void initSolver(List<SortedIntegerList> sortedIntegerLists) {
+        super.initSolver(sortedIntegerLists);
         solver.getOrder().init();
     }
 

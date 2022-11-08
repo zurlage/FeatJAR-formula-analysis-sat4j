@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.mig.solver.visitor.Visitor;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
-import de.featjar.formula.clauses.LiteralList;
+
 import java.util.Arrays;
 import org.sat4j.core.VecInt;
 
@@ -35,7 +35,7 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class TWiseConfiguration extends LiteralList {
+public class TWiseConfiguration extends SortedIntegerList {
 
 
     public static final byte SELECTION_IMPOSSIBLE = 1;
@@ -62,7 +62,7 @@ public class TWiseConfiguration extends LiteralList {
         public VisitResult visitStrong(int curLiteral) {
             addLiteral(curLiteral);
             if (unknownValues != null) {
-                util.getSolver().getAssumptions().push(curLiteral);
+                util.getSolver().getAssumptionList().push(curLiteral);
                 unknownValues[Math.abs(curLiteral) - 1] = 0;
             }
             return VisitResult.Continue;
@@ -93,9 +93,9 @@ public class TWiseConfiguration extends LiteralList {
                     final int[] model2 = solver.getInternalSolution();
                     util.addSolverSolution(Arrays.copyOf(model2, model2.length));
 
-                    LiteralList.resetConflicts(unknownValues, model2);
+                    SortedIntegerList.resetConflicts(unknownValues, model2);
 
-                    final int[] literals = TWiseConfiguration.this.literals;
+                    final int[] literals = TWiseConfiguration.this.integers;
                     for (int k = 0; k < literals.length; k++) {
                         final int var = literals[k];
                         if ((var != 0) && (unknownValues[k] != 0)) {
@@ -113,21 +113,21 @@ public class TWiseConfiguration extends LiteralList {
             final int i = Math.abs(curLiteral) - 1;
             if (unknownValues[i] == curLiteral) {
                 final Sat4JSolutionSolver solver = util.getSolver();
-                solver.getAssumptions().push(-curLiteral);
+                solver.getAssumptionList().push(-curLiteral);
                 switch (solver.hasSolution()) {
                     case FALSE:
-                        solver.getAssumptions().replaceLast(curLiteral);
+                        solver.getAssumptionList().replaceLast(curLiteral);
                         unknownValues[i] = 0;
                         return true;
                     case TIMEOUT:
-                        solver.getAssumptions().pop();
+                        solver.getAssumptionList().pop();
                         unknownValues[i] = 0;
                         break;
                     case TRUE:
-                        solver.getAssumptions().pop();
+                        solver.getAssumptionList().pop();
                         final int[] solution2 = solver.getInternalSolution();
                         util.addSolverSolution(Arrays.copyOf(solution2, solution2.length));
-                        LiteralList.resetConflicts(unknownValues, solution2);
+                        SortedIntegerList.resetConflicts(unknownValues, solution2);
                         solver.shuffleOrder(util.random);
                         break;
                 }
@@ -141,16 +141,16 @@ public class TWiseConfiguration extends LiteralList {
         countLiterals = 0;
         this.util = util;
         if (util.hasSolver()) {
-            for (final int var : util.getDeadCoreFeatures().getLiterals()) {
-                literals[Math.abs(var) - 1] = var;
+            for (final int var : util.getDeadCoreFeatures().getIntegers()) {
+                integers[Math.abs(var) - 1] = var;
                 countLiterals++;
             }
-            numberOfVariableLiterals = literals.length - countLiterals;
+            numberOfVariableLiterals = integers.length - countLiterals;
             solutionLiterals = new VecInt(numberOfVariableLiterals);
             countLiterals = 0;
             if (util.hasMig()) {
                 traverser = new Traverser(util.getMig());
-                traverser.setModel(literals);
+                traverser.setModel(integers);
                 visitor = new DefaultVisitor() {
                     @Override
                     public VisitResult visitStrong(int curLiteral) {
@@ -165,7 +165,7 @@ public class TWiseConfiguration extends LiteralList {
         } else {
             traverser = null;
             visitor = null;
-            numberOfVariableLiterals = literals.length - countLiterals;
+            numberOfVariableLiterals = integers.length - countLiterals;
             solutionLiterals = new VecInt(numberOfVariableLiterals);
         }
     }
@@ -186,7 +186,7 @@ public class TWiseConfiguration extends LiteralList {
             }
             if (util.hasMig()) {
                 traverser = new Traverser(util.getMig());
-                traverser.setModel(literals);
+                traverser.setModel(integers);
 
                 visitor = new DefaultVisitor() {
 
@@ -216,7 +216,7 @@ public class TWiseConfiguration extends LiteralList {
         final int k = Math.abs(curLiteral) - 1;
 
         for (int i = 0; i < solverSolutionIndex.size(); i++) {
-            if (util.getSolverSolution(solverSolutionIndex.get(i)).getLiterals()[k] == -curLiteral) {
+            if (util.getSolverSolution(solverSolutionIndex.get(i)).getIntegers()[k] == -curLiteral) {
                 solverSolutionIndex.delete(i--);
             }
         }
@@ -225,11 +225,11 @@ public class TWiseConfiguration extends LiteralList {
     public void setLiteral(int literal) {
         if (traverser != null) {
             traverser.setVisitor(visitor);
-            traverser.traverseStrong(literals);
+            traverser.traverseStrong(integers);
         } else {
             final int i = Math.abs(literal) - 1;
-            if (literals[i] == 0) {
-                literals[i] = literal;
+            if (integers[i] == 0) {
+                integers[i] = literal;
                 newLiteral(literal);
             }
         }
@@ -242,8 +242,8 @@ public class TWiseConfiguration extends LiteralList {
         } else {
             for (final int literal : literals) {
                 final int i = Math.abs(literal) - 1;
-                if (this.literals[i] == 0) {
-                    this.literals[i] = literal;
+                if (this.integers[i] == 0) {
+                    this.integers[i] = literal;
                     newLiteral(literal);
                 }
             }
@@ -258,12 +258,12 @@ public class TWiseConfiguration extends LiteralList {
 
             final int[] literals = Arrays.copyOf(solutionLiterals.toArray(), solutionLiterals.size());
             for (int i = 0, length = literals.length; i < length; i++) {
-                this.literals[Math.abs(literals[i]) - 1] = 0;
+                this.integers[Math.abs(literals[i]) - 1] = 0;
             }
             solutionLiterals.clear();
             countLiterals = 0;
 
-            orgAssignmentSize = solver.getAssumptions().size();
+            orgAssignmentSize = solver.getAssumptionList().size();
             traverser.setVisitor(visitor);
             traverser.traverse(literals);
         } else {
@@ -278,8 +278,8 @@ public class TWiseConfiguration extends LiteralList {
                 final int[] secondSolution = util.getSolver().getInternalSolution();
                 util.addSolverSolution(Arrays.copyOf(secondSolution, secondSolution.length));
 
-                LiteralList.resetConflicts(firstSolution, secondSolution);
-                for (final int literal : literals) {
+                SortedIntegerList.resetConflicts(firstSolution, secondSolution);
+                for (final int literal : integers) {
                     if (literal != 0) {
                         firstSolution[Math.abs(literal) - 1] = 0;
                     }
@@ -288,20 +288,20 @@ public class TWiseConfiguration extends LiteralList {
                 for (int i = 0; i < firstSolution.length; i++) {
                     final int varX = firstSolution[i];
                     if (varX != 0) {
-                        solver.getAssumptions().push(-varX);
+                        solver.getAssumptionList().push(-varX);
                         switch (solver.hasSolution()) {
                             case FALSE:
-                                solver.getAssumptions().replaceLast(varX);
+                                solver.getAssumptionList().replaceLast(varX);
                                 setLiteral(varX);
                                 break;
                             case TIMEOUT:
-                                solver.getAssumptions().pop();
+                                solver.getAssumptionList().pop();
                                 break;
                             case TRUE:
-                                solver.getAssumptions().pop();
+                                solver.getAssumptionList().pop();
                                 final int[] solution = solver.getInternalSolution();
                                 util.addSolverSolution(Arrays.copyOf(solution, solution.length));
-                                LiteralList.resetConflicts(firstSolution, solution);
+                                SortedIntegerList.resetConflicts(firstSolution, solution);
                                 solver.shuffleOrder(util.random);
                                 break;
                         }
@@ -309,7 +309,7 @@ public class TWiseConfiguration extends LiteralList {
                 }
             }
         }
-        solver.getAssumptions().clear(orgAssignmentSize);
+        solver.getAssumptionList().clear(orgAssignmentSize);
         solver.setSelectionStrategy(SStrategy.random(util.random));
     }
 
@@ -336,24 +336,24 @@ public class TWiseConfiguration extends LiteralList {
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
                         if (solver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
-                            System.arraycopy(solver.getInternalSolution(), 0, literals, 0, literals.length);
+                            System.arraycopy(solver.getInternalSolution(), 0, integers, 0, integers.length);
                         }
                     } finally {
-                        solver.getAssumptions().clear(orgAssignmentSize);
+                        solver.getAssumptionList().clear(orgAssignmentSize);
                     }
                 } else {
                     System.arraycopy(
-                            util.getSolverSolution(solverSolutionIndex.last()).getLiterals(),
+                            util.getSolverSolution(solverSolutionIndex.last()).getIntegers(),
                             0,
-                            literals,
+                            integers,
                             0,
-                            literals.length);
+                            integers.length);
                     solverSolutionIndex.clear();
                 }
             } else {
-                for (int i = 0; i < literals.length; i++) {
-                    if (literals[i] == 0) {
-                        literals[i] = -(i + 1);
+                for (int i = 0; i < integers.length; i++) {
+                    if (integers[i] == 0) {
+                        integers[i] = -(i + 1);
                     }
                 }
             }
@@ -361,9 +361,9 @@ public class TWiseConfiguration extends LiteralList {
         }
     }
 
-    public LiteralList getCompleteSolution() {
+    public SortedIntegerList getCompleteSolution() {
         if (isComplete()) {
-            return new LiteralList(this);
+            return new SortedIntegerList(this);
         } else {
             final int[] s;
             if (util.hasSolver()) {
@@ -384,23 +384,23 @@ public class TWiseConfiguration extends LiteralList {
                                 throw new RuntimeException(Result<Boolean>.toString());
                         }
                     } finally {
-                        solver.getAssumptions().clear(orgAssignmentSize);
+                        solver.getAssumptionList().clear(orgAssignmentSize);
                     }
                 } else {
-                    s = util.getSolverSolution(solverSolutionIndex.last()).getLiterals();
+                    s = util.getSolverSolution(solverSolutionIndex.last()).getIntegers();
                     if (s == null) {
                         throw new RuntimeException();
                     }
                 }
             } else {
-                s = Arrays.copyOf(literals, literals.length);
+                s = Arrays.copyOf(integers, integers.length);
                 for (int i = 0; i < s.length; i++) {
                     if (s[i] == 0) {
                         s[i] = -(i + 1);
                     }
                 }
             }
-            return (s == null) ? null : new LiteralList(Arrays.copyOf(s, s.length), Order.INDEX, false);
+            return (s == null) ? null : new SortedIntegerList(Arrays.copyOf(s, s.length), Order.INDEX, false);
         }
     }
 
@@ -416,7 +416,7 @@ public class TWiseConfiguration extends LiteralList {
                 solver.shuffleOrder(util.random);
             }
         } finally {
-            solver.getAssumptions().clear(orgAssignmentSize);
+            solver.getAssumptionList().clear(orgAssignmentSize);
         }
     }
 
@@ -428,21 +428,21 @@ public class TWiseConfiguration extends LiteralList {
         try {
             return solver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
         } finally {
-            solver.getAssumptions().clear(orgAssignmentSize);
+            solver.getAssumptionList().clear(orgAssignmentSize);
             solver.setSelectionStrategy(selectionStrategy);
         }
     }
 
     public int setUpSolver(final Sat4JSolutionSolver solver) {
-        final int orgAssignmentSize = solver.getAssumptions().size();
+        final int orgAssignmentSize = solver.getAssumptionList().size();
         if (isComplete()) {
-            for (int i = 0; i < literals.length; i++) {
-                solver.getAssumptions().push(literals[i]);
+            for (int i = 0; i < integers.length; i++) {
+                solver.getAssumptionList().push(integers[i]);
             }
         } else {
             final int[] array = solutionLiterals.toArray();
             for (int i = 0, length = solutionLiterals.size(); i < length; i++) {
-                solver.getAssumptions().push(array[i]);
+                solver.getAssumptionList().push(array[i]);
             }
         }
         return orgAssignmentSize;
@@ -456,17 +456,17 @@ public class TWiseConfiguration extends LiteralList {
         if (util.hasSolver() && (solutionLiterals != null)) {
             solverSolutionIndex.clear();
             final int[] array = solutionLiterals.toArray();
-            final LiteralList[] solverSolutions = util.getSolverSolutions();
+            final SortedIntegerList[] solverSolutions = util.getSolverSolutions();
             solutionLoop:
             for (int i = 0; i < solverSolutions.length; i++) {
-                final LiteralList solverSolution = solverSolutions[i];
+                final SortedIntegerList solverSolution = solverSolutions[i];
                 if (solverSolution == null) {
                     break;
                 }
-                final int[] solverSolutionLiterals = solverSolution.getLiterals();
+                final int[] solverSolutionLiterals = solverSolution.getIntegers();
                 for (int j = 0, length = solutionLiterals.size(); j < length; j++) {
                     final int k = Math.abs(array[j]) - 1;
-                    if (solverSolutionLiterals[k] == -literals[k]) {
+                    if (solverSolutionLiterals[k] == -integers[k]) {
                         continue solutionLoop;
                     }
                 }
@@ -486,7 +486,7 @@ public class TWiseConfiguration extends LiteralList {
             final int[] array = solutionLiterals.toArray();
             for (int i = 0, length = solutionLiterals.size(); i < length; i++) {
                 final int k = Math.abs(array[i]) - 1;
-                if (solverSolution[k] == -literals[k]) {
+                if (solverSolution[k] == -integers[k]) {
                     return;
                 }
             }
@@ -500,7 +500,7 @@ public class TWiseConfiguration extends LiteralList {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(literals);
+        return Arrays.hashCode(integers);
     }
 
     @Override

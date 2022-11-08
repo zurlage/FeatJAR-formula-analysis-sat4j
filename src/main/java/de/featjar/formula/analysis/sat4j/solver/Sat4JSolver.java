@@ -23,10 +23,8 @@ package de.featjar.formula.analysis.sat4j.solver;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.SolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.assignment.Assignment;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.clauses.VariableMap;
+import de.featjar.formula.analysis.solver.Assumable;
+import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.base.data.Pair;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,15 +40,15 @@ import org.sat4j.specs.TimeoutException;
  *
  * @author Sebastian Krieter
  */
-public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<LiteralList> {
+public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<SortedIntegerList> {
     public static final int MAX_SOLUTION_BUFFER = 1000;
     protected CNF cnf;
     protected final T solver;
-    protected Sat4JAssignment assumptions = new Sat4JAssignment();
+    protected Sat4JAssumable assumptions = new Sat4JAssumable();
     protected final Sat4JFormula formula;
 
     // TODO extract solution history in separate class
-    protected LinkedList<LiteralList> solutionHistory = null;
+    protected LinkedList<SortedIntegerList> solutionHistory = null;
     protected int solutionHistoryLimit = -1;
     protected int[] lastModel = null;
     protected boolean globalTimeout = false;
@@ -70,7 +68,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
         solver = createSolver();
         configureSolver();
         formula = new Sat4JFormula(this);
-        initSolver(cnf.getClauses());
+        initSolver(cnf.getClauseList());
     }
 
     /**
@@ -81,13 +79,13 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
     }
 
     @Override
-    public Sat4JAssignment getAssumptions() {
+    public Sat4JAssumable getAssumptionList() {
         return assumptions;
     }
 
     @Override
-    public void setAssumptions(Assignment<?> assumptions) throws SolverContradictionException  {
-        this.assumptions = (Sat4JAssignment) assumptions;
+    public void setAssumptions(Assumable<?> assumptions) throws SolverContradictionException  {
+        this.assumptions = (Sat4JAssumable) assumptions;
     }
 
     @Override
@@ -100,14 +98,14 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      * be called after a successful call of {@link #hasSolution()} or
      * {@link #hasSolution(int...)}.
      *
-     * @return A {@link LiteralList} representing the satisfying assignment.
+     * @return A {@link SortedIntegerList} representing the satisfying assignment.
      *
      * @see #hasSolution()
      * @see #hasSolution(int...)
      */
     @Override
-    public Result<LiteralList> getSolution() {
-        return lastModel == null ? Result.empty() : Result.of(new LiteralList(getLastModelCopy(), LiteralList.Order.INDEX, false));
+    public Result<SortedIntegerList> getSolution() {
+        return lastModel == null ? Result.empty() : Result.of(new SortedIntegerList(getLastModelCopy(), SortedIntegerList.Order.INDEX, false));
     }
 
     public int[] getInternalSolution() {
@@ -129,8 +127,8 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      * @see #hasSolution(int...)
      * @see #getInternalSolution()
      */
-    public Result<Boolean> hasSolution(LiteralList assignment) {
-        return hasSolution(assignment.getLiterals());
+    public Result<Boolean> hasSolution(SortedIntegerList assignment) {
+        return hasSolution(assignment.getIntegers());
     }
 
     /**
@@ -156,13 +154,13 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
     /**
      * Add clauses to the solver. Initializes the order instance.
      */
-    protected void initSolver(List<LiteralList> clauses) {
+    protected void initSolver(List<SortedIntegerList> sortedIntegerLists) {
         final int size = cnf.getVariableMap().getVariableCount(); // todo: before, this was formula.getvariablemap - may cause an issue with pushing to the assumption stack?
         //		final List<LiteralList> clauses = satInstance.getClauses();
         try {
-            if (!clauses.isEmpty()) {
-                solver.setExpectedNumberOfClauses(clauses.size() + 1);
-                formula.push(clauses);
+            if (!sortedIntegerLists.isEmpty()) {
+                solver.setExpectedNumberOfClauses(sortedIntegerLists.size() + 1);
+                formula.push(sortedIntegerLists);
             }
             if (size > 0) {
                 final VecInt pseudoClause = new VecInt(size + 1);
@@ -191,11 +189,11 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
     }
 
     @Override
-    public Result<LiteralList> findSolution() {
+    public Result<SortedIntegerList> findSolution() {
         return hasSolution().equals(Result.of(true)) ? getSolution() : null;
     }
 
-    public List<LiteralList> getSolutionHistory() {
+    public List<SortedIntegerList> getSolutionHistory() {
         return solutionHistory != null ? solutionHistory : Collections.emptyList();
     }
 
@@ -216,7 +214,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      *
      * @return A {@link Result<Boolean>}.
      *
-     * @see #hasSolution(LiteralList)
+     * @see #hasSolution(SortedIntegerList)
      * @see #hasSolution(int...)
      * @see #getInternalSolution()
      */
@@ -229,9 +227,9 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
 
         final int[] assumptionArray = getAssumptionArray();
         if (solutionHistory != null) {
-            for (final LiteralList solution : solutionHistory) {
-                if (solution.containsAllLiterals(assumptionArray)) {
-                    lastModel = solution.getLiterals();
+            for (final SortedIntegerList solution : solutionHistory) {
+                if (solution.containsAll(assumptionArray)) {
+                    lastModel = solution.getIntegers();
                     return Result.of(true);
                 }
             }
@@ -261,7 +259,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
      * @param assignment The temporarily variable assignment for this call.
      * @return A {@link Result<Boolean>}.
      *
-     * @see #hasSolution(LiteralList)
+     * @see #hasSolution(SortedIntegerList)
      * @see #hasSolution()
      * @see #getInternalSolution()
      */
@@ -271,9 +269,9 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
         }
 
         if (solutionHistory != null) {
-            for (final LiteralList solution : solutionHistory) {
-                if (solution.containsAllLiterals(assignment)) {
-                    lastModel = solution.getLiterals();
+            for (final SortedIntegerList solution : solutionHistory) {
+                if (solution.containsAll(assignment)) {
+                    lastModel = solution.getIntegers();
                     return Result.of(true);
                 }
             }
@@ -312,7 +310,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<L
         return Arrays.copyOf(unsatExplanation.toArray(), unsatExplanation.size());
     }
 
-    public List<LiteralList> rememberSolutionHistory(int numberOfSolutions) {
+    public List<SortedIntegerList> rememberSolutionHistory(int numberOfSolutions) {
         if (numberOfSolutions > 0) {
             solutionHistory = new LinkedList<>();
             solutionHistoryLimit = numberOfSolutions;

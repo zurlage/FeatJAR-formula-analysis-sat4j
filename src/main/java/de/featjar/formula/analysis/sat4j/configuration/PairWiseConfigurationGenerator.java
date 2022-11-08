@@ -27,7 +27,6 @@ import de.featjar.formula.analysis.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;
@@ -264,11 +263,11 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
         return combinationOrder;
     }
 
-    private boolean handleNewConfig(LiteralList solution, final boolean[] featuresUsedOrg) {
+    private boolean handleNewConfig(SortedIntegerList solution, final boolean[] featuresUsedOrg) {
         if (solution == null) {
             return true;
         }
-        addCombinationsFromModel(solution.getLiterals());
+        addCombinationsFromModel(solution.getIntegers());
         final int totalCount = count();
 
         for (int i = 0; i < featureIndexArray.length; i++) {
@@ -416,7 +415,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
     }
 
     @Override
-    public LiteralList get() {
+    public SortedIntegerList get() {
         switch (mode) {
             case 0: {
                 return findFirstSolution(SStrategy.positive());
@@ -482,7 +481,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
                     }
                 }
 
-                final LiteralList solution = solver.findSolution();
+                final SortedIntegerList solution = solver.findSolution();
                 if (handleNewConfig(solution, featuresUsedOrg)) {
                     mode = -1;
                 } else {
@@ -496,9 +495,9 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
         }
     }
 
-    private LiteralList findFirstSolution(final SStrategy strategy) {
+    private SortedIntegerList findFirstSolution(final SStrategy strategy) {
         solver.setSelectionStrategy(strategy);
-        final LiteralList allYesSolution = solver.findSolution();
+        final SortedIntegerList allYesSolution = solver.findSolution();
         if (handleNewConfig(allYesSolution, featuresUsedOrg)) {
             mode = -1;
         } else {

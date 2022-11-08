@@ -25,9 +25,8 @@ import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.analysis.Assignment;
+import de.featjar.formula.analysis.sat.clause.CNF;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,36 +37,36 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class IndeterminateAnalysis extends VariableAnalysis<LiteralList> { // todo: variable-analysis does not work
+public class IndeterminateAnalysis extends VariableAnalysis<SortedIntegerList> { // todo: variable-analysis does not work
     // reliably (false positives) (use old
     // analysis first?)
 
-    public IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables) {
+    public IndeterminateAnalysis(Computation<CNF> inputComputation, SortedIntegerList variables) {
         super(inputComputation, variables);
     }
 
-    public IndeterminateAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+    public IndeterminateAnalysis(Computation<CNF> inputComputation, SortedIntegerList variables, Assignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, variables, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override
-    public FutureResult<LiteralList> compute() {
+    public FutureResult<SortedIntegerList> compute() {
         return initializeSolver().thenCompute(((solver, monitor) -> {
             if (variables == null) {
-                variables = LiteralList.getVariables(solver.getCNF().getVariableMap());
+                variables = SortedIntegerList.getAbsoluteValuesOfIntegers(solver.getCNF().getVariableMap());
             }
-            monitor.setTotalSteps(variables.getLiterals().length);
+            monitor.setTotalSteps(variables.getIntegers().length);
 
             final VecInt resultList = new VecInt();
             variableLoop:
-            for (final int variable : variables.getLiterals()) {
+            for (final int variable : variables.getIntegers()) {
                 final Sat4JSolutionSolver modSolver = new Sat4JSolutionSolver(solver.getCNF()); // todo: before, this was passed the variable map?
-                final List<LiteralList> clauses = solver.getCNF().getClauses();
-                for (final LiteralList clause : clauses) {
-                    final LiteralList newClause = clause.removeVariables(variable);
-                    if (newClause != null) {
+                final List<SortedIntegerList> sortedIntegerLists = solver.getCNF().getClauseList();
+                for (final SortedIntegerList sortedIntegerList : sortedIntegerLists) {
+                    final SortedIntegerList newSortedIntegerList = sortedIntegerList.removeVariables(variable);
+                    if (newSortedIntegerList != null) {
                         try {
-                            modSolver.getSolverFormula().push(newClause);
+                            modSolver.getSolverFormula().push(newSortedIntegerList);
                         } catch (final SolverContradictionException e) {
                             monitor.addStep();
                             continue variableLoop;
@@ -89,7 +88,7 @@ public class IndeterminateAnalysis extends VariableAnalysis<LiteralList> { // to
                 }
                 monitor.addStep();
             }
-            return new LiteralList(Arrays.copyOf(resultList.toArray(), resultList.size()));
+            return new SortedIntegerList(Arrays.copyOf(resultList.toArray(), resultList.size()));
         }));
     }
 }
