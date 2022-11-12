@@ -20,6 +20,8 @@
  */
 package de.featjar.formula.transform;
 
+import de.featjar.base.data.IntegerList;
+import de.featjar.formula.analysis.sat.LiteralList;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
@@ -44,7 +46,7 @@ import java.util.stream.Collectors;
  */
 public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
-    protected static final Comparator<SortedIntegerList> lengthComparator = new SortedIntegerList.DescendingLengthComparator();
+    protected static final Comparator<IntegerList<?>> lengthComparator = new IntegerList.DescendingLengthComparator();
 
     protected CNF orgCNF;
     protected CNF cnfCopy;
@@ -295,7 +297,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             solver.getFormula().push(cleanLiteralListIndexList);
             solver.getFormula().push(dirtyClauseList.subList(0, dirtyListPosIndex));
 
-            Collections.sort(newDirtyClauseList.subList(0, newDirtyListDelIndex), lengthComparator);
+            newDirtyClauseList.subList(0, newDirtyListDelIndex).sort(lengthComparator);
             for (int i = newDirtyListDelIndex - 1; i >= 0; --i) {
                 final DirtyClause curClause = newDirtyClauseList.get(i);
                 if (isRedundant(solver, curClause)) {
@@ -310,7 +312,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     }
 
     protected void addCleanClauses() {
-        Collections.sort(newCleanClauseList, lengthComparator);
+        newCleanClauseList.sort(lengthComparator);
 
         for (int i = newCleanClauseList.size() - 1; i >= 0; --i) {
             final DirtyClause clause = newCleanClauseList.get(i);
