@@ -20,8 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.clause.Clause;
-import de.featjar.formula.analysis.sat.clause.ClauseList;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SolverFormula;
 import de.featjar.formula.analysis.sat.clause.ToCNF;
@@ -57,9 +55,9 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
         return push(ToCNF.convert(formula).get().getClauseList());
     }
 
-    public List<IConstr> push(ClauseList clauses) {
+    public List<IConstr> push(List<? extends SortedIntegerList> clauses) {
         final ArrayList<IConstr> constrs = new ArrayList<>();
-        for (final Clause sortedIntegerList : clauses.getAll()) {
+        for (final SortedIntegerList sortedIntegerList : clauses) {
             try {
                 if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
                     throw new ContradictionException();
@@ -82,7 +80,7 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
         return constrs;
     }
 
-    public IConstr push(Clause sortedIntegerList) throws SolverContradictionException {
+    public IConstr push(SortedIntegerList sortedIntegerList) throws SolverContradictionException {
         try {
             if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
                 throw new ContradictionException();

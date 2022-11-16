@@ -20,8 +20,6 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.formula.analysis.sat.LiteralList;
-
 import java.util.HashSet;
 
 /**
@@ -29,7 +27,7 @@ import java.util.HashSet;
  *
  * @author Sebastian Krieter
  */
-public class DirtyClause extends LiteralList {
+public class DirtyClause extends SortedIntegerList {
 
 
     private int relevance;

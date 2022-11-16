@@ -20,8 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.clause.Clause;
-import de.featjar.formula.analysis.sat.clause.ClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.FixedStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.InverseFixedStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.UniformRandomStrategy;
@@ -72,7 +70,7 @@ public class Sat4JSolutionSolver extends Sat4JSolver<Solver<?>> {
     }
 
     @Override
-    protected void initSolver(ClauseList sortedIntegerLists) {
+    protected void initSolver(List<SortedIntegerList> sortedIntegerLists) {
         super.initSolver(sortedIntegerLists);
         solver.getOrder().init();
     }
