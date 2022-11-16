@@ -28,6 +28,7 @@ import de.featjar.formula.analysis.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.configuration.FastRandomConfigurationGenerator;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.formula.analysis.sat.LiteralMatrix;
 import de.featjar.formula.analysis.sat.solution.SolutionList;

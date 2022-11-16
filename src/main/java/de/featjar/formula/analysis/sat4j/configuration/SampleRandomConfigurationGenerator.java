@@ -23,6 +23,7 @@ package de.featjar.formula.analysis.sat4j.configuration;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SampleDistribution;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.analysis.sat.solution.SolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;

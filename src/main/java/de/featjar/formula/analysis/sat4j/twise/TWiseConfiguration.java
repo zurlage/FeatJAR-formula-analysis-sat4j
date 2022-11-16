@@ -25,6 +25,7 @@ import de.featjar.formula.analysis.mig.solver.visitor.Traverser;
 import de.featjar.formula.analysis.mig.solver.visitor.Visitor;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.analysis.solver.SATSolver;
 
 import java.util.Arrays;
 import org.sat4j.core.VecInt;

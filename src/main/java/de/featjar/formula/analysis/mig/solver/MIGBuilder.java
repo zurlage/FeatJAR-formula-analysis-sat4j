@@ -23,6 +23,7 @@ package de.featjar.formula.analysis.mig.solver;
 import de.featjar.formula.analysis.mig.solver.Vertex.Status;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
