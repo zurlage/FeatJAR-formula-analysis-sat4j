@@ -22,8 +22,8 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.clause.Clause;
-import de.featjar.formula.analysis.sat.solution.Solution;
+import de.featjar.formula.analysis.sat.clause.SATClause;
+import de.featjar.formula.analysis.sat.solution.SATSolution;
 import org.sat4j.specs.TimeoutException;
 
 public abstract class ModelComparator {
@@ -34,8 +34,8 @@ public abstract class ModelComparator {
 
     public static boolean compare(CNF cnf1, final CNF cnf2) throws TimeoutException {
         final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnf1);
-        for (final Clause sortedIntegerList : cnf2.getClauseList().getAll()) {
-            final Result<Boolean> hasSolution = solver.hasSolution(new Solution(sortedIntegerList.negate().getIntegers())); // TODO: add .toSolution and friends
+        for (final SATClause sortedIntegerList : cnf2.getClauseList().getAll()) {
+            final Result<Boolean> hasSolution = solver.hasSolution(new SATSolution(sortedIntegerList.negate().getIntegers())); // TODO: add .toSolution and friends
             if (hasSolution.isEmpty())
                 throw new TimeoutException();
             if (hasSolution.equals(Result.of(true)))

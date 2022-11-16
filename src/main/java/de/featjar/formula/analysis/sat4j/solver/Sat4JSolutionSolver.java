@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.clause.Clause;
 import de.featjar.formula.analysis.sat.clause.ClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.FixedStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.InverseFixedStrategy;
@@ -32,7 +31,6 @@ import de.featjar.formula.analysis.sat4j.solver.strategy.RandomSelectionStrategy
 import de.featjar.formula.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.formula.analysis.sat.clause.CNF;
 
-import java.util.List;
 import java.util.Random;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.minisat.core.IOrder;

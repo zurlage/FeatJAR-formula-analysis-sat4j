@@ -21,7 +21,6 @@
 package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.solver.SATSolver;
 import de.featjar.base.task.Monitor;
 import org.sat4j.core.VecInt;
 

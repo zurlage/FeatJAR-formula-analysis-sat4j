@@ -21,7 +21,6 @@
 package de.featjar.assignment;
 
 import de.featjar.formula.analysis.solver.Assumable;
-import de.featjar.formula.analysis.Assignment;
 import de.featjar.formula.structure.Expression;
 import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.structure.map.TermMap;
