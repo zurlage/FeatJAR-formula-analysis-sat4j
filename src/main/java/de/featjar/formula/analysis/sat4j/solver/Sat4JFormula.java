@@ -22,7 +22,8 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SolverFormula;
-import de.featjar.formula.analysis.sat.clause.ToCNF;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.ToCNF;
 import de.featjar.formula.structure.formula.Formula;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
@@ -52,18 +53,18 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
 
     @Override
     public List<IConstr> push(Formula formula) throws SolverContradictionException {
-        return push(ToCNF.convert(formula).get().getClauseList());
+        return push(ToCNF.convert(formula).get().getClauses());
     }
 
-    public List<IConstr> push(List<? extends SortedIntegerList> clauses) {
+    public List<IConstr> push(List<? extends LiteralList> clauses) {
         final ArrayList<IConstr> constrs = new ArrayList<>();
-        for (final SortedIntegerList sortedIntegerList : clauses) {
+        for (final LiteralList clause : clauses) {
             try {
-                if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
+                if ((clause.size() == 1) && (clause.getLiterals()[0] == 0)) {
                     throw new ContradictionException();
                 }
                 final IConstr constr =
-                        solver.solver.addClause(new VecInt(Arrays.copyOf(sortedIntegerList.getIntegers(), sortedIntegerList.size())));
+                        solver.solver.addClause(new VecInt(Arrays.copyOf(clause.getLiterals(), clause.size())));
                 constrs.add(constr);
             } catch (final ContradictionException e) {
                 for (final IConstr constr : constrs) {
@@ -80,13 +81,13 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
         return constrs;
     }
 
-    public IConstr push(SortedIntegerList sortedIntegerList) throws SolverContradictionException {
+    public IConstr push(LiteralList clause) throws SolverContradictionException {
         try {
-            if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
+            if ((clause.size() == 1) && (clause.getLiterals()[0] == 0)) {
                 throw new ContradictionException();
             }
             final IConstr constr = solver.solver.addClause(
-                    new VecInt(Arrays.copyOfRange(sortedIntegerList.getIntegers(), 0, sortedIntegerList.size())));
+                    new VecInt(Arrays.copyOfRange(clause.getLiterals(), 0, clause.size())));
             solverFormulas.add(constr);
             if (solver.solutionHistory != null) {
                 solver.solutionHistory.clear();

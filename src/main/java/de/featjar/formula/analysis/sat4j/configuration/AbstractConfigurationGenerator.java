@@ -22,7 +22,8 @@ package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.analysis.sat4j.Sat4JAnalysis;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.data.Cache;
 import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
@@ -74,10 +75,10 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
     }
 
     @Override
-    public boolean tryAdvance(Consumer<? super SortedIntegerList> consumer) {
-        final SortedIntegerList sortedIntegerList = get();
-        if (sortedIntegerList != null) {
-            consumer.accept(sortedIntegerList);
+    public boolean tryAdvance(Consumer<? super LiteralList> consumer) {
+        final LiteralList literalList = get();
+        if (literalList != null) {
+            consumer.accept(literalList);
             return true;
         } else {
             return false;
@@ -85,7 +86,7 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
     }
 
     @Override
-    public Spliterator<SortedIntegerList> trySplit() {
+    public Spliterator<LiteralList> trySplit() {
         return null;
     }
 

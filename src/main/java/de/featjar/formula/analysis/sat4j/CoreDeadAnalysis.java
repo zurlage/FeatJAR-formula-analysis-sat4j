@@ -26,8 +26,9 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;
 import org.sat4j.core.VecInt;
@@ -38,34 +39,34 @@ import org.sat4j.specs.IteratorInt;
  *
  * @author Sebastian Krieter
  */
-public class CoreDeadAnalysis extends VariableAnalysis<SortedIntegerList> {
-    public CoreDeadAnalysis(Computation<CNF> inputComputation, SortedIntegerList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
+public class CoreDeadAnalysis extends VariableAnalysis<LiteralList> {
+    public CoreDeadAnalysis(Computation<CNF> inputComputation, LiteralList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
         super(inputComputation, variables);
     }
 
-    public CoreDeadAnalysis(Computation<CNF> inputComputation, SortedIntegerList variables, Assignment assumptions, long timeoutInMs, long randomSeed) {
+    public CoreDeadAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, variables, assumptions, timeoutInMs, randomSeed);
     }
     
     @Override
-    public FutureResult<SortedIntegerList> compute() {
+    public FutureResult<LiteralList> compute() {
         return initializeSolver().thenCompute((this::analyze1));
     }
 
     // currently unused (divide & conquer)
-    public SortedIntegerList analyze2(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
-        final int initialAssignmentLength = solver.getAssumptionList().size();
+    public LiteralList analyze2(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
+        final int initialAssignmentLength = solver.getAssumptions().size();
         solver.setSelectionStrategy(SStrategy.positive());
-        int[] model1 = solver.findSolution().get().getIntegers();
+        int[] model1 = solver.findSolution().get().getLiterals();
 
         if (model1 != null) {
             solver.setSelectionStrategy(SStrategy.negative());
-            final int[] model2 = solver.findSolution().get().getIntegers();
+            final int[] model2 = solver.findSolution().get().getLiterals();
 
             if (variables != null) {
                 final int[] model3 = new int[model1.length];
-                for (int i = 0; i < variables.getIntegers().length; i++) {
-                    final int index = variables.getIntegers()[i] - 1;
+                for (int i = 0; i < variables.getLiterals().length; i++) {
+                    final int index = variables.getLiterals()[i] - 1;
                     if (index >= 0) {
                         model3[index] = model1[index];
                     }
@@ -74,17 +75,17 @@ public class CoreDeadAnalysis extends VariableAnalysis<SortedIntegerList> {
             }
 
             for (int i = 0; i < initialAssignmentLength; i++) {
-                model1[Math.abs(solver.getAssumptionList().peek(i)) - 1] = 0;
+                model1[Math.abs(solver.getAssumptions().peek(i)) - 1] = 0;
             }
 
-            SortedIntegerList.resetConflicts(model1, model2);
+            LiteralList.resetConflicts(model1, model2);
             solver.setSelectionStrategy(SStrategy.inverse(model1));
 
             vars = new VecInt(model1.length);
             split(solver, model1, 0, model1.length);
         }
-        return new SortedIntegerList(solver.getAssumptionList()
-                .asArray(initialAssignmentLength, solver.getAssumptionList().size()));
+        return new LiteralList(solver.getAssumptions()
+                .asArray(initialAssignmentLength, solver.getAssumptions().size()));
     }
 
     VecInt vars;
@@ -109,14 +110,14 @@ public class CoreDeadAnalysis extends VariableAnalysis<SortedIntegerList> {
                 break;
             default:
                 try {
-                    solver.getSolverFormula().push(new SortedIntegerList(Arrays.copyOf(vars.toArray(), vars.size())));
+                    solver.getSolverFormula().push(new LiteralList(Arrays.copyOf(vars.toArray(), vars.size())));
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (Result.of(false).equals(hasSolution)) {
                         foundVariables(solver, model, vars);
                     } else if (Result.empty().equals(hasSolution)) {
                         //reportTimeout();
                     } else if (Result.of(true).equals(hasSolution)) {
-                        SortedIntegerList.resetConflicts(model, solver.getInternalSolution());
+                        LiteralList.resetConflicts(model, solver.getInternalSolution());
                         solver.shuffleOrder(random);
 
                         final int halfLength = (end - start) / 2;
@@ -135,17 +136,17 @@ public class CoreDeadAnalysis extends VariableAnalysis<SortedIntegerList> {
 
     private void test(Sat4JSolutionSolver solver, int[] model, int i) {
         final int var = vars.get(i);
-        solver.getAssumptionList().push(var);
+        solver.getAssumptions().push(var);
         Result<Boolean> hasSolution = solver.hasSolution();
         if (Result.of(false).equals(hasSolution)) {
-            solver.getAssumptionList().replaceLast(-var);
+            solver.getAssumptions().replaceLast(-var);
             model[Math.abs(var) - 1] = 0;
         } else if (Result.empty().equals(hasSolution)) {
-            solver.getAssumptionList().pop();
+            solver.getAssumptions().pop();
             //reportTimeout();
         } else if (Result.of(true).equals(hasSolution)) {
-            solver.getAssumptionList().pop();
-            SortedIntegerList.resetConflicts(model, solver.getInternalSolution());
+            solver.getAssumptions().pop();
+            LiteralList.resetConflicts(model, solver.getInternalSolution());
             solver.shuffleOrder(random);
         }
     }
@@ -153,24 +154,24 @@ public class CoreDeadAnalysis extends VariableAnalysis<SortedIntegerList> {
     private void foundVariables(Sat4JSolutionSolver solver, int[] model, VecInt vars) {
         for (final IteratorInt iterator = vars.iterator(); iterator.hasNext(); ) {
             final int var = iterator.next();
-            solver.getAssumptionList().push(-var);
+            solver.getAssumptions().push(-var);
             model[Math.abs(var) - 1] = 0;
         }
     }
 
-    public SortedIntegerList analyze1(Sat4JSolutionSolver solver, Monitor monitor) {
-        final int initialAssignmentLength = solver.getAssumptionList().size();
+    public LiteralList analyze1(Sat4JSolutionSolver solver, Monitor monitor) {
+        final int initialAssignmentLength = solver.getAssumptions().size();
         solver.setSelectionStrategy(SStrategy.positive());
-        int[] model1 = solver.findSolution().get().getIntegers();
+        int[] model1 = solver.findSolution().get().getLiterals();
 
         if (model1 != null) {
             solver.setSelectionStrategy(SStrategy.inverse(model1));
-            final int[] model2 = solver.findSolution().get().getIntegers();
+            final int[] model2 = solver.findSolution().get().getLiterals();
 
             if (variables != null) {
                 final int[] model3 = new int[model1.length];
-                for (int i = 0; i < variables.getIntegers().length; i++) {
-                    final int index = variables.getIntegers()[i] - 1;
+                for (int i = 0; i < variables.getLiterals().length; i++) {
+                    final int index = variables.getLiterals()[i] - 1;
                     if (index >= 0) {
                         model3[index] = model1[index];
                     }
@@ -179,31 +180,31 @@ public class CoreDeadAnalysis extends VariableAnalysis<SortedIntegerList> {
             }
 
             for (int i = 0; i < initialAssignmentLength; i++) {
-                model1[Math.abs(solver.getAssumptionList().peek(i)) - 1] = 0;
+                model1[Math.abs(solver.getAssumptions().peek(i)) - 1] = 0;
             }
 
-            SortedIntegerList.resetConflicts(model1, model2);
+            LiteralList.resetConflicts(model1, model2);
 
             for (int i = 0; i < model1.length; i++) {
                 final int varX = model1[i];
                 if (varX != 0) {
-                    solver.getAssumptionList().push(-varX);
+                    solver.getAssumptions().push(-varX);
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (Result.of(false).equals(hasSolution)) {
-                        solver.getAssumptionList().replaceLast(varX);
+                        solver.getAssumptions().replaceLast(varX);
                     } else if (Result.empty().equals(hasSolution)) {
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
                         //reportTimeout();
                     } else if (Result.of(true).equals(hasSolution)) {
-                        solver.getAssumptionList().pop();
-                        SortedIntegerList.resetConflicts(model1, solver.getInternalSolution());
+                        solver.getAssumptions().pop();
+                        LiteralList.resetConflicts(model1, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                     }
                 }
             }
         }
 
-        return new SortedIntegerList(solver.getAssumptionList()
-                .asArray(initialAssignmentLength, solver.getAssumptionList().size()));
+        return new LiteralList(solver.getAssumptions()
+                .asArray(initialAssignmentLength, solver.getAssumptions().size()));
     }
 }

@@ -22,6 +22,7 @@ package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import org.sat4j.core.VecInt;
 
@@ -100,7 +101,7 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
     }
 
     @Override
-    public SortedIntegerList get() {
+    public LiteralList get() {
         if ((variablesToCover != null) && !variablesToCover.isEmpty()) {
             boolean firstVar = true;
             int[] lastSolution = null;
@@ -157,8 +158,8 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
                         break;
                 }
             }
-            final SortedIntegerList result =
-                    lastSolution == null ? null : new SortedIntegerList(lastSolution, SortedIntegerList.Order.INDEX, false);
+            final LiteralList result =
+                    lastSolution == null ? null : new LiteralList(lastSolution, LiteralList.Order.INDEX, false);
             solver.getAssumptions().clear(initialAssignmentLength);
             while (!variablesToCover.isEmpty()) {
                 final int var = variablesToCover.last();

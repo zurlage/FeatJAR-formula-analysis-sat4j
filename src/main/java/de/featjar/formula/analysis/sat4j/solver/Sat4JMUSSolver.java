@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.MUSSolver;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.clauses.CNF;
 
 import java.util.Collections;
 import java.util.List;

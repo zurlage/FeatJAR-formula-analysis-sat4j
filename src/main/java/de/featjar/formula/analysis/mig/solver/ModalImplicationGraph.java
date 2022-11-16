@@ -23,9 +23,10 @@ package de.featjar.formula.analysis.mig.solver;
 import de.featjar.formula.analysis.mig.solver.Vertex.Status;
 import de.featjar.formula.analysis.mig.solver.visitor.Traverser;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.sat.clause.CNF;
-
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,7 +50,7 @@ public class ModalImplicationGraph {
         return getVertexIndex(vertex.getVar());
     }
 
-    private final ArrayList<SortedIntegerList> detectedStrong = new ArrayList<>();
+    private final ArrayList<LiteralList> detectedStrong = new ArrayList<>();
 
     private final List<Vertex> adjList;
     private final CNF cnf;
@@ -88,7 +89,7 @@ public class ModalImplicationGraph {
         return adjList;
     }
 
-    public ArrayList<SortedIntegerList> getDetectedStrong() {
+    public ArrayList<LiteralList> getDetectedStrong() {
         return detectedStrong;
     }
 
@@ -100,9 +101,9 @@ public class ModalImplicationGraph {
         return cnf;
     }
 
-    public void addClause(SortedIntegerList sortedIntegerList) {
-        final int[] literals = sortedIntegerList.getIntegers();
-        switch (sortedIntegerList.size()) {
+    public void addClause(LiteralList clause) {
+        final int[] literals = clause.getLiterals();
+        switch (clause.size()) {
             case 0:
                 throw new SolverContradictionException();
             case 1: {
@@ -125,7 +126,7 @@ public class ModalImplicationGraph {
             }
             default: {
                 for (final int literal : literals) {
-                    getVertex(-literal).addWeaklyConnected(sortedIntegerList);
+                    getVertex(-literal).addWeaklyConnected(clause);
                 }
                 break;
             }

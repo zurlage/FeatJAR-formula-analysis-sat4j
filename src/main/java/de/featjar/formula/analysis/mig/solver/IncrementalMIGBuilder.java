@@ -23,8 +23,9 @@ package de.featjar.formula.analysis.mig.solver;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.clause.CNFs;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.Clauses;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import java.util.Collection;
@@ -49,7 +50,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     private boolean add = false;
 
     private Changes changes;
-    private HashSet<SortedIntegerList> addedSortedIntegerLists;
+    private HashSet<LiteralList> addedClauses;
     private TermMap variables;
 
     public IncrementalMIGBuilder(ModalImplicationGraph oldModalImplicationGraph) {
@@ -82,15 +83,15 @@ public class IncrementalMIGBuilder extends MIGBuilder {
 
                 bfsStrong(monitor.createChildMonitor(10));
 
-                final SortedIntegerList affectedVariables = new SortedIntegerList(
-                        addedSortedIntegerLists.stream() //
+                final LiteralList affectedVariables = new LiteralList(
+                        addedClauses.stream() //
                                 .map(c ->
                                         c.adapt(variables, cnf.getVariableMap()).get()) //
-                                .flatMapToInt(c -> IntStream.of(c.getIntegers())) //
+                                .flatMapToInt(c -> IntStream.of(c.getLiterals())) //
                                 .map(Math::abs) //
                                 .distinct() //
                                 .toArray(), //
-                        SortedIntegerList.Order.NATURAL);
+                        LiteralList.Order.NATURAL);
                 bfsWeak(affectedVariables, monitor.createChildMonitor(1000));
             }
             modalImplicationGraph.setStrongStatus(ModalImplicationGraph.BuildStatus.Incremental);
@@ -98,7 +99,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
             modalImplicationGraph.setStrongStatus(ModalImplicationGraph.BuildStatus.None);
         }
 
-        add(cnf, checkRedundancy, addedSortedIntegerLists);
+        add(cnf, checkRedundancy, addedClauses);
 
         bfsStrong(monitor);
         monitor.addStep();
@@ -113,26 +114,26 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         allVariables.addAll(cnf1.getVariableMap().getVariableNames());
         final TermMap variables = new TermMap(allVariables);
 
-        final HashSet<SortedIntegerList> adaptedNewSortedIntegerLists = cnf1.getClauseList().stream()
+        final HashSet<LiteralList> adaptedNewClauses = cnf1.getClauses().stream()
                 .map(c -> c.adapt(cnf1.getVariableMap(), variables).get()) //
-                .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL))
+                .peek(c -> c.setOrder(LiteralList.Order.NATURAL))
                 .collect(Collectors.toCollection(HashSet::new));
 
-        final HashSet<SortedIntegerList> adaptedOldSortedIntegerLists = cnf2.getClauseList().stream() //
+        final HashSet<LiteralList> adaptedOldClauses = cnf2.getClauses().stream() //
                 .map(c -> c.adapt(cnf2.getVariableMap(), variables).get()) //
-                .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL)) //
+                .peek(c -> c.setOrder(LiteralList.Order.NATURAL)) //
                 .collect(Collectors.toCollection(HashSet::new));
 
-        final HashSet<SortedIntegerList> addedSortedIntegerLists = adaptedNewSortedIntegerLists.stream() //
-                .filter(c -> !adaptedOldSortedIntegerLists.contains(c)) //
+        final HashSet<LiteralList> addedClauses = adaptedNewClauses.stream() //
+                .filter(c -> !adaptedOldClauses.contains(c)) //
                 .collect(Collectors.toCollection(HashSet::new));
-        final HashSet<SortedIntegerList> removedSortedIntegerLists = adaptedOldSortedIntegerLists.stream() //
-                .filter(c -> !adaptedNewSortedIntegerLists.contains(c)) //
+        final HashSet<LiteralList> removedClauses = adaptedOldClauses.stream() //
+                .filter(c -> !adaptedNewClauses.contains(c)) //
                 .collect(Collectors.toCollection(HashSet::new));
 
-        final HashSet<SortedIntegerList> allSortedIntegerLists = new HashSet<>(adaptedNewSortedIntegerLists);
-        allSortedIntegerLists.addAll(adaptedOldSortedIntegerLists);
-        return (addedSortedIntegerLists.size() + removedSortedIntegerLists.size()) / (double) allSortedIntegerLists.size();
+        final HashSet<LiteralList> allClauses = new HashSet<>(adaptedNewClauses);
+        allClauses.addAll(adaptedOldClauses);
+        return (addedClauses.size() + removedClauses.size()) / (double) allClauses.size();
     }
 
     private void collect(CNF cnf) {
@@ -143,29 +144,29 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         allVariables.addAll(cnf.getVariableMap().getVariableNames());
         variables = new TermMap(allVariables);
 
-        final HashSet<SortedIntegerList> adaptedNewSortedIntegerLists = cnf.getClauseList().stream()
+        final HashSet<LiteralList> adaptedNewClauses = cnf.getClauses().stream()
                 .map(c -> c.adapt(cnf.getVariableMap(), variables).get()) //
-                .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL))
+                .peek(c -> c.setOrder(LiteralList.Order.NATURAL))
                 .collect(Collectors.toCollection(HashSet::new));
 
-        final HashSet<SortedIntegerList> adaptedOldSortedIntegerLists = oldCnf.getClauseList().stream() //
+        final HashSet<LiteralList> adaptedOldClauses = oldCnf.getClauses().stream() //
                 .map(c -> c.adapt(oldCnf.getVariableMap(), variables).get()) //
-                .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL)) //
+                .peek(c -> c.setOrder(LiteralList.Order.NATURAL)) //
                 .collect(Collectors.toCollection(HashSet::new));
 
-        addedSortedIntegerLists = adaptedNewSortedIntegerLists.stream() //
-                .filter(c -> !adaptedOldSortedIntegerLists.contains(c)) //
+        addedClauses = adaptedNewClauses.stream() //
+                .filter(c -> !adaptedOldClauses.contains(c)) //
                 .collect(Collectors.toCollection(HashSet::new));
-        final HashSet<SortedIntegerList> removedSortedIntegerLists = adaptedOldSortedIntegerLists.stream() //
-                .filter(c -> !adaptedNewSortedIntegerLists.contains(c)) //
+        final HashSet<LiteralList> removedClauses = adaptedOldClauses.stream() //
+                .filter(c -> !adaptedNewClauses.contains(c)) //
                 .collect(Collectors.toCollection(HashSet::new));
 
-        changes = addedSortedIntegerLists.isEmpty()
-                ? removedSortedIntegerLists.isEmpty() ? Changes.UNCHANGED : Changes.REMOVED
-                : removedSortedIntegerLists.isEmpty() ? Changes.ADDED : Changes.REPLACED;
+        changes = addedClauses.isEmpty()
+                ? removedClauses.isEmpty() ? Changes.UNCHANGED : Changes.REMOVED
+                : removedClauses.isEmpty() ? Changes.ADDED : Changes.REPLACED;
 
-        final HashSet<SortedIntegerList> allSortedIntegerLists = new HashSet<>(adaptedNewSortedIntegerLists);
-        allSortedIntegerLists.addAll(adaptedOldSortedIntegerLists);
+        final HashSet<LiteralList> allClauses = new HashSet<>(adaptedNewClauses);
+        allClauses.addAll(adaptedOldClauses);
         //		changeRatio = (addedClauses.size() + removedClauses.size()) / (double) allClauses.size();
     }
 
@@ -173,7 +174,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         final int[] coreDead = oldModalImplicationGraph.getVertices().stream() //
                 .filter(Vertex::isCore) //
                 .mapToInt(Vertex::getVar) //
-                .map(l -> CNFs.adapt(l, oldModalImplicationGraph.getCnf().getVariableMap(), cnf.getVariableMap())) //
+                .map(l -> Clauses.adapt(l, oldModalImplicationGraph.getCnf().getVariableMap(), cnf.getVariableMap())) //
                 .filter(l -> l != 0) //
                 .peek(l -> {
                     modalImplicationGraph.getVertex(l).setStatus(Vertex.Status.Core);
@@ -183,7 +184,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         switch (changes) {
             case ADDED:
                 for (final int literal : coreDead) {
-                    solver.getAssumptionList().push(literal);
+                    solver.getAssumptions().push(literal);
                     fixedFeatures[Math.abs(literal) - 1] = 0;
                 }
                 findCoreFeatures(monitor);
@@ -205,32 +206,32 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         }
     }
 
-    private long add(CNF cnf, boolean checkRedundancy, Collection<SortedIntegerList> addedSortedIntegerLists) {
-        Stream<SortedIntegerList> cnfStream = cleanedClausesList.stream();
+    private long add(CNF cnf, boolean checkRedundancy, Collection<LiteralList> addedClauses) {
+        Stream<LiteralList> cnfStream = cleanedClausesList.stream();
         if (checkRedundancy) {
-            final Set<SortedIntegerList> oldMigSortedIntegerLists = oldModalImplicationGraph.getVertices().stream()
+            final Set<LiteralList> oldMigClauses = oldModalImplicationGraph.getVertices().stream()
                     .flatMap(v -> v.getComplexClauses().stream())
                     .collect(Collectors.toCollection(HashSet::new));
-            final HashSet<SortedIntegerList> redundantSortedIntegerLists = oldModalImplicationGraph.getCnf().getClauseList().stream()
+            final HashSet<LiteralList> redundantClauses = oldModalImplicationGraph.getCnf().getClauses().stream()
                     .map(c -> cleanClause(c, oldModalImplicationGraph)) //
                     .filter(Objects::nonNull) //
                     .filter(c -> c.size() > 2) //
-                    .filter(c -> !oldMigSortedIntegerLists.contains(c)) //
+                    .filter(c -> !oldMigClauses.contains(c)) //
                     .map(c ->
                             c.adapt(oldModalImplicationGraph.getCnf().getVariableMap(), variables).get()) //
-                    .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL)) //
+                    .peek(c -> c.setOrder(LiteralList.Order.NATURAL)) //
                     .collect(Collectors.toCollection(HashSet::new));
 
             cnfStream = cnfStream //
                     .map(c -> c.adapt(cnf.getVariableMap(), variables).get()) //
-                    .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL));
+                    .peek(c -> c.setOrder(LiteralList.Order.NATURAL));
 
             switch (changes) {
                 case ADDED: {
                     if (add) {
                         final Sat4JSolutionSolver redundancySolver = new Sat4JSolutionSolver(new CNF(variables));
-                        final int[] affectedVariables = addedSortedIntegerLists.stream()
-                                .flatMapToInt(c -> IntStream.of(c.getIntegers()))
+                        final int[] affectedVariables = addedClauses.stream()
+                                .flatMapToInt(c -> IntStream.of(c.getLiterals()))
                                 .map(Math::abs)
                                 .distinct()
                                 .toArray();
@@ -241,10 +242,10 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                     if (c.size() < 3) {
                                         return true;
                                     }
-                                    if (redundantSortedIntegerLists.contains(c)) {
+                                    if (redundantClauses.contains(c)) {
                                         return false;
                                     }
-                                    if (add && c.containsAny(affectedVariables)) {
+                                    if (add && c.containsAnyVariable(affectedVariables)) {
                                         return !isRedundant(redundancySolver, c);
                                     }
                                     return true;
@@ -254,7 +255,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                         cnfStream = cnfStream
                                 .sorted(lengthComparator)
                                 .distinct()
-                                .filter(c -> (c.size() < 3) || !redundantSortedIntegerLists.contains(c));
+                                .filter(c -> (c.size() < 3) || !redundantClauses.contains(c));
                     }
                     modalImplicationGraph.setRedundancyStatus(ModalImplicationGraph.BuildStatus.Incremental);
                     break;
@@ -268,7 +269,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                 if (c.size() < 3) {
                                     return true;
                                 }
-                                if (redundantSortedIntegerLists.contains(c)) {
+                                if (redundantClauses.contains(c)) {
                                     return !isRedundant(redundancySolver, c);
                                 }
                                 return true;
@@ -280,8 +281,8 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                 case REPLACED: {
                     if (add) {
                         final Sat4JSolutionSolver redundancySolver = new Sat4JSolutionSolver(new CNF(variables));
-                        final int[] affectedVariables = addedSortedIntegerLists.stream()
-                                .flatMapToInt(c -> IntStream.of(c.getIntegers()))
+                        final int[] affectedVariables = addedClauses.stream()
+                                .flatMapToInt(c -> IntStream.of(c.getLiterals()))
                                 .map(Math::abs)
                                 .distinct()
                                 .toArray();
@@ -292,10 +293,10 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                     if (c.size() < 3) {
                                         return true;
                                     }
-                                    if (redundantSortedIntegerLists.contains(c)) {
+                                    if (redundantClauses.contains(c)) {
                                         return !isRedundant(redundancySolver, c);
                                     } else {
-                                        if (c.containsAny(affectedVariables)) {
+                                        if (c.containsAnyVariable(affectedVariables)) {
                                             return !isRedundant(redundancySolver, c);
                                         }
                                         return true;
@@ -308,7 +309,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                                 .sorted(lengthComparator)
                                 .distinct()
                                 .filter(c -> (c.size() < 3)
-                                        || !redundantSortedIntegerLists.contains(c)
+                                        || !redundantClauses.contains(c)
                                         || !isRedundant(redundancySolver, c))
                                 .peek(redundancySolver.getFormula()::push);
                     }
@@ -316,7 +317,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                     break;
                 }
                 case UNCHANGED: {
-                    cnfStream = cnfStream.distinct().filter(c -> (c.size() < 3) || !redundantSortedIntegerLists.contains(c));
+                    cnfStream = cnfStream.distinct().filter(c -> (c.size() < 3) || !redundantClauses.contains(c));
                     modalImplicationGraph.setRedundancyStatus(modalImplicationGraph.getRedundancyStatus());
                     break;
                 }
@@ -325,7 +326,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
             }
             cnfStream = cnfStream
                     .map(c -> c.adapt(variables, cnf.getVariableMap()).get())
-                    .peek(c -> c.setOrder(SortedIntegerList.Order.NATURAL));
+                    .peek(c -> c.setOrder(LiteralList.Order.NATURAL));
         } else {
             cnfStream = cnfStream.distinct();
             modalImplicationGraph.setRedundancyStatus(ModalImplicationGraph.BuildStatus.None);
@@ -338,47 +339,47 @@ public class IncrementalMIGBuilder extends MIGBuilder {
             case REMOVED:
             case REPLACED:
                 loop:
-                for (final SortedIntegerList strongEdge : oldModalImplicationGraph.getDetectedStrong()) {
-                    final SortedIntegerList adaptSortedIntegerList = strongEdge
+                for (final LiteralList strongEdge : oldModalImplicationGraph.getDetectedStrong()) {
+                    final LiteralList adaptClause = strongEdge
                             .adapt(
                                     oldModalImplicationGraph.getCnf().getVariableMap(),
                                     modalImplicationGraph.getCnf().getVariableMap())
                             .get();
-                    if (adaptSortedIntegerList != null) {
-                        final int[] literals = adaptSortedIntegerList.getIntegers();
+                    if (adaptClause != null) {
+                        final int[] literals = adaptClause.getLiterals();
                         final int l1 = -literals[0];
                         final int l2 = -literals[1];
-                        for (final SortedIntegerList solution : solver.getSolutionHistory()) {
-                            if (solution.containsAll(l1, l2)) {
+                        for (final LiteralList solution : solver.getSolutionHistory()) {
+                            if (solution.containsAllLiterals(l1, l2)) {
                                 continue loop;
                             }
                         }
-                        solver.getAssumptionList().push(l1);
-                        solver.getAssumptionList().push(l2);
+                        solver.getAssumptions().push(l1);
+                        solver.getAssumptions().push(l2);
                         switch (solver.hasSolution()) {
                             case FALSE:
-                                cleanedClausesList.add(adaptSortedIntegerList);
-                                modalImplicationGraph.getDetectedStrong().add(adaptSortedIntegerList);
+                                cleanedClausesList.add(adaptClause);
+                                modalImplicationGraph.getDetectedStrong().add(adaptClause);
                             case TIMEOUT:
                             case TRUE:
                                 break;
                         }
-                        solver.getAssumptionList().pop();
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
+                        solver.getAssumptions().pop();
                     }
                 }
                 break;
             case ADDED:
             case UNCHANGED:
-                for (final SortedIntegerList strongEdge : oldModalImplicationGraph.getDetectedStrong()) {
-                    final SortedIntegerList adaptSortedIntegerList = strongEdge
+                for (final LiteralList strongEdge : oldModalImplicationGraph.getDetectedStrong()) {
+                    final LiteralList adaptClause = strongEdge
                             .adapt(
                                     oldModalImplicationGraph.getCnf().getVariableMap(),
                                     modalImplicationGraph.getCnf().getVariableMap())
                             .get();
-                    if (adaptSortedIntegerList != null) {
-                        cleanedClausesList.add(adaptSortedIntegerList);
-                        modalImplicationGraph.getDetectedStrong().add(adaptSortedIntegerList);
+                    if (adaptClause != null) {
+                        cleanedClausesList.add(adaptClause);
+                        modalImplicationGraph.getDetectedStrong().add(adaptClause);
                     }
                 }
                 break;
@@ -395,24 +396,24 @@ public class IncrementalMIGBuilder extends MIGBuilder {
                 modalImplicationGraph.getVertex(-literal).setStatus(Vertex.Status.Normal);
                 modalImplicationGraph.getVertex(literal).setStatus(Vertex.Status.Normal);
             } else {
-                solver.getAssumptionList().push(-varX);
+                solver.getAssumptions().push(-varX);
                 switch (solver.hasSolution()) {
                     case FALSE:
-                        solver.getAssumptionList().replaceLast(varX);
+                        solver.getAssumptions().replaceLast(varX);
                         modalImplicationGraph.getVertex(varX).setStatus(Vertex.Status.Core);
                         modalImplicationGraph.getVertex(-varX).setStatus(Vertex.Status.Dead);
                         break;
                     case TIMEOUT:
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
                         fixedFeatures[Math.abs(literal) - 1] = 0;
                         modalImplicationGraph.getVertex(-varX).setStatus(Vertex.Status.Normal);
                         modalImplicationGraph.getVertex(varX).setStatus(Vertex.Status.Normal);
                         break;
                     case TRUE:
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
                         modalImplicationGraph.getVertex(-varX).setStatus(Vertex.Status.Normal);
                         modalImplicationGraph.getVertex(varX).setStatus(Vertex.Status.Normal);
-                        SortedIntegerList.resetConflicts(fixedFeatures, solver.getInternalSolution());
+                        LiteralList.resetConflicts(fixedFeatures, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                         break;
                 }

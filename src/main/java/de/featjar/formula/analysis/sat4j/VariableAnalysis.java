@@ -21,8 +21,9 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 
 /**
  * Base class for an analysis that works on a list of variables.
@@ -33,22 +34,22 @@ import de.featjar.formula.analysis.sat.clause.CNF;
  */
 public abstract class VariableAnalysis<T> extends Sat4JAnalysis<T> {
 
-    protected SortedIntegerList variables;
+    protected LiteralList variables;
 
-    protected VariableAnalysis(Computation<CNF> inputComputation, SortedIntegerList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
+    protected VariableAnalysis(Computation<CNF> inputComputation, LiteralList variables) { // todo: pass names, not LiteralList, or even VariableAssignment
         super(inputComputation);
         this.variables = variables;
     }
 
-    protected VariableAnalysis(Computation<CNF> inputComputation, SortedIntegerList variables, Assignment assumptions, long timeoutInMs, long randomSeed) {
+    protected VariableAnalysis(Computation<CNF> inputComputation, LiteralList variables, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 
-    public SortedIntegerList getVariables() {
+    public LiteralList getVariables() {
         return variables;
     }
 
-    public void setVariables(SortedIntegerList variables) {
+    public void setVariables(LiteralList variables) {
         this.variables = variables;
     }
 }

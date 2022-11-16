@@ -22,8 +22,8 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
 
 /**
  * Determines whether a given {@link CNF} is satisfiable and returns the found
@@ -36,7 +36,7 @@ public class HasSolutionAnalysis extends Sat4JAnalysis<Boolean> {
         super(inputComputation);
     }
 
-    public HasSolutionAnalysis(Computation<CNF> inputComputation, Assignment assumptions, long timeoutInMs, long randomSeed) {
+    public HasSolutionAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 

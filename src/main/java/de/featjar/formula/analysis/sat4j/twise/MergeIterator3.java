@@ -20,23 +20,23 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.clauses.ClauseList;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Combines multiple {@link ICombinationSupplier supplies} of {@link LiteralMatrix}
+ * Combines multiple {@link ICombinationSupplier supplies} of {@link ClauseList}
  * and returns results from each supplier by turns.
  *
  * @author Sebastian Krieter
  */
-public class MergeIterator3 implements ICombinationSupplier<LiteralMatrix> {
+public class MergeIterator3 implements ICombinationSupplier<ClauseList> {
 
     private final List<List<PresenceCondition>> expressionSets;
     private final ICombinationSupplier<int[]>[] suppliers;
     private final long numberOfCombinations;
 
-    private final List<LiteralMatrix> buffer = new ArrayList<>();
+    private final List<ClauseList> buffer = new ArrayList<>();
     private final TWiseCombiner combiner;
     private final PresenceCondition[] nextCombination;
 
@@ -63,7 +63,7 @@ public class MergeIterator3 implements ICombinationSupplier<LiteralMatrix> {
     }
 
     @Override
-    public LiteralMatrix get() {
+    public ClauseList get() {
         if (buffer.isEmpty()) {
             for (int i = 0; i <= maxIteratorIndex; i++) {
                 final ICombinationSupplier<int[]> supplier = suppliers[i];
@@ -74,7 +74,7 @@ public class MergeIterator3 implements ICombinationSupplier<LiteralMatrix> {
                         for (int j = 0; j < js.length; j++) {
                             nextCombination[j] = expressionSet.get(js[j]);
                         }
-                        final LiteralMatrix combinedCondition = new LiteralMatrix();
+                        final ClauseList combinedCondition = new ClauseList();
                         combiner.combineConditions(nextCombination, combinedCondition);
                         buffer.add(combinedCondition);
                     } else {
@@ -86,7 +86,7 @@ public class MergeIterator3 implements ICombinationSupplier<LiteralMatrix> {
                 return null;
             }
         }
-        final LiteralMatrix remove = buffer.get(bufferIndex++);
+        final ClauseList remove = buffer.get(bufferIndex++);
         if (bufferIndex == buffer.size()) {
             buffer.clear();
             bufferIndex = 0;

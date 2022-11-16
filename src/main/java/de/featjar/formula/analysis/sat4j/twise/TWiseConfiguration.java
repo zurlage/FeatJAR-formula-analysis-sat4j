@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.mig.solver.visitor.Visitor;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
-
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Arrays;
 import org.sat4j.core.VecInt;
 
@@ -35,7 +35,7 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class TWiseConfiguration extends SortedIntegerList {
+public class TWiseConfiguration extends LiteralList {
 
 
     public static final byte SELECTION_IMPOSSIBLE = 1;
@@ -62,7 +62,7 @@ public class TWiseConfiguration extends SortedIntegerList {
         public VisitResult visitStrong(int curLiteral) {
             addLiteral(curLiteral);
             if (unknownValues != null) {
-                util.getSolver().getAssumptionList().push(curLiteral);
+                util.getSolver().getAssumptions().push(curLiteral);
                 unknownValues[Math.abs(curLiteral) - 1] = 0;
             }
             return VisitResult.Continue;
@@ -93,9 +93,9 @@ public class TWiseConfiguration extends SortedIntegerList {
                     final int[] model2 = solver.getInternalSolution();
                     util.addSolverSolution(Arrays.copyOf(model2, model2.length));
 
-                    SortedIntegerList.resetConflicts(unknownValues, model2);
+                    LiteralList.resetConflicts(unknownValues, model2);
 
-                    final int[] literals = TWiseConfiguration.this.integers;
+                    final int[] literals = TWiseConfiguration.this.literals;
                     for (int k = 0; k < literals.length; k++) {
                         final int var = literals[k];
                         if ((var != 0) && (unknownValues[k] != 0)) {
@@ -113,21 +113,21 @@ public class TWiseConfiguration extends SortedIntegerList {
             final int i = Math.abs(curLiteral) - 1;
             if (unknownValues[i] == curLiteral) {
                 final Sat4JSolutionSolver solver = util.getSolver();
-                solver.getAssumptionList().push(-curLiteral);
+                solver.getAssumptions().push(-curLiteral);
                 switch (solver.hasSolution()) {
                     case FALSE:
-                        solver.getAssumptionList().replaceLast(curLiteral);
+                        solver.getAssumptions().replaceLast(curLiteral);
                         unknownValues[i] = 0;
                         return true;
                     case TIMEOUT:
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
                         unknownValues[i] = 0;
                         break;
                     case TRUE:
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
                         final int[] solution2 = solver.getInternalSolution();
                         util.addSolverSolution(Arrays.copyOf(solution2, solution2.length));
-                        SortedIntegerList.resetConflicts(unknownValues, solution2);
+                        LiteralList.resetConflicts(unknownValues, solution2);
                         solver.shuffleOrder(util.random);
                         break;
                 }
@@ -141,16 +141,16 @@ public class TWiseConfiguration extends SortedIntegerList {
         countLiterals = 0;
         this.util = util;
         if (util.hasSolver()) {
-            for (final int var : util.getDeadCoreFeatures().getIntegers()) {
-                integers[Math.abs(var) - 1] = var;
+            for (final int var : util.getDeadCoreFeatures().getLiterals()) {
+                literals[Math.abs(var) - 1] = var;
                 countLiterals++;
             }
-            numberOfVariableLiterals = integers.length - countLiterals;
+            numberOfVariableLiterals = literals.length - countLiterals;
             solutionLiterals = new VecInt(numberOfVariableLiterals);
             countLiterals = 0;
             if (util.hasMig()) {
                 traverser = new Traverser(util.getMig());
-                traverser.setModel(integers);
+                traverser.setModel(literals);
                 visitor = new DefaultVisitor() {
                     @Override
                     public VisitResult visitStrong(int curLiteral) {
@@ -165,7 +165,7 @@ public class TWiseConfiguration extends SortedIntegerList {
         } else {
             traverser = null;
             visitor = null;
-            numberOfVariableLiterals = integers.length - countLiterals;
+            numberOfVariableLiterals = literals.length - countLiterals;
             solutionLiterals = new VecInt(numberOfVariableLiterals);
         }
     }
@@ -186,7 +186,7 @@ public class TWiseConfiguration extends SortedIntegerList {
             }
             if (util.hasMig()) {
                 traverser = new Traverser(util.getMig());
-                traverser.setModel(integers);
+                traverser.setModel(literals);
 
                 visitor = new DefaultVisitor() {
 
@@ -216,7 +216,7 @@ public class TWiseConfiguration extends SortedIntegerList {
         final int k = Math.abs(curLiteral) - 1;
 
         for (int i = 0; i < solverSolutionIndex.size(); i++) {
-            if (util.getSolverSolution(solverSolutionIndex.get(i)).getIntegers()[k] == -curLiteral) {
+            if (util.getSolverSolution(solverSolutionIndex.get(i)).getLiterals()[k] == -curLiteral) {
                 solverSolutionIndex.delete(i--);
             }
         }
@@ -225,11 +225,11 @@ public class TWiseConfiguration extends SortedIntegerList {
     public void setLiteral(int literal) {
         if (traverser != null) {
             traverser.setVisitor(visitor);
-            traverser.traverseStrong(integers);
+            traverser.traverseStrong(literals);
         } else {
             final int i = Math.abs(literal) - 1;
-            if (integers[i] == 0) {
-                integers[i] = literal;
+            if (literals[i] == 0) {
+                literals[i] = literal;
                 newLiteral(literal);
             }
         }
@@ -242,8 +242,8 @@ public class TWiseConfiguration extends SortedIntegerList {
         } else {
             for (final int literal : literals) {
                 final int i = Math.abs(literal) - 1;
-                if (this.integers[i] == 0) {
-                    this.integers[i] = literal;
+                if (this.literals[i] == 0) {
+                    this.literals[i] = literal;
                     newLiteral(literal);
                 }
             }
@@ -258,12 +258,12 @@ public class TWiseConfiguration extends SortedIntegerList {
 
             final int[] literals = Arrays.copyOf(solutionLiterals.toArray(), solutionLiterals.size());
             for (int i = 0, length = literals.length; i < length; i++) {
-                this.integers[Math.abs(literals[i]) - 1] = 0;
+                this.literals[Math.abs(literals[i]) - 1] = 0;
             }
             solutionLiterals.clear();
             countLiterals = 0;
 
-            orgAssignmentSize = solver.getAssumptionList().size();
+            orgAssignmentSize = solver.getAssumptions().size();
             traverser.setVisitor(visitor);
             traverser.traverse(literals);
         } else {
@@ -278,8 +278,8 @@ public class TWiseConfiguration extends SortedIntegerList {
                 final int[] secondSolution = util.getSolver().getInternalSolution();
                 util.addSolverSolution(Arrays.copyOf(secondSolution, secondSolution.length));
 
-                SortedIntegerList.resetConflicts(firstSolution, secondSolution);
-                for (final int literal : integers) {
+                LiteralList.resetConflicts(firstSolution, secondSolution);
+                for (final int literal : literals) {
                     if (literal != 0) {
                         firstSolution[Math.abs(literal) - 1] = 0;
                     }
@@ -288,20 +288,20 @@ public class TWiseConfiguration extends SortedIntegerList {
                 for (int i = 0; i < firstSolution.length; i++) {
                     final int varX = firstSolution[i];
                     if (varX != 0) {
-                        solver.getAssumptionList().push(-varX);
+                        solver.getAssumptions().push(-varX);
                         switch (solver.hasSolution()) {
                             case FALSE:
-                                solver.getAssumptionList().replaceLast(varX);
+                                solver.getAssumptions().replaceLast(varX);
                                 setLiteral(varX);
                                 break;
                             case TIMEOUT:
-                                solver.getAssumptionList().pop();
+                                solver.getAssumptions().pop();
                                 break;
                             case TRUE:
-                                solver.getAssumptionList().pop();
+                                solver.getAssumptions().pop();
                                 final int[] solution = solver.getInternalSolution();
                                 util.addSolverSolution(Arrays.copyOf(solution, solution.length));
-                                SortedIntegerList.resetConflicts(firstSolution, solution);
+                                LiteralList.resetConflicts(firstSolution, solution);
                                 solver.shuffleOrder(util.random);
                                 break;
                         }
@@ -309,7 +309,7 @@ public class TWiseConfiguration extends SortedIntegerList {
                 }
             }
         }
-        solver.getAssumptionList().clear(orgAssignmentSize);
+        solver.getAssumptions().clear(orgAssignmentSize);
         solver.setSelectionStrategy(SStrategy.random(util.random));
     }
 
@@ -336,24 +336,24 @@ public class TWiseConfiguration extends SortedIntegerList {
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
                         if (solver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
-                            System.arraycopy(solver.getInternalSolution(), 0, integers, 0, integers.length);
+                            System.arraycopy(solver.getInternalSolution(), 0, literals, 0, literals.length);
                         }
                     } finally {
-                        solver.getAssumptionList().clear(orgAssignmentSize);
+                        solver.getAssumptions().clear(orgAssignmentSize);
                     }
                 } else {
                     System.arraycopy(
-                            util.getSolverSolution(solverSolutionIndex.last()).getIntegers(),
+                            util.getSolverSolution(solverSolutionIndex.last()).getLiterals(),
                             0,
-                            integers,
+                            literals,
                             0,
-                            integers.length);
+                            literals.length);
                     solverSolutionIndex.clear();
                 }
             } else {
-                for (int i = 0; i < integers.length; i++) {
-                    if (integers[i] == 0) {
-                        integers[i] = -(i + 1);
+                for (int i = 0; i < literals.length; i++) {
+                    if (literals[i] == 0) {
+                        literals[i] = -(i + 1);
                     }
                 }
             }
@@ -361,9 +361,9 @@ public class TWiseConfiguration extends SortedIntegerList {
         }
     }
 
-    public SortedIntegerList getCompleteSolution() {
+    public LiteralList getCompleteSolution() {
         if (isComplete()) {
-            return new SortedIntegerList(this);
+            return new LiteralList(this);
         } else {
             final int[] s;
             if (util.hasSolver()) {
@@ -384,23 +384,23 @@ public class TWiseConfiguration extends SortedIntegerList {
                                 throw new RuntimeException(Result<Boolean>.toString());
                         }
                     } finally {
-                        solver.getAssumptionList().clear(orgAssignmentSize);
+                        solver.getAssumptions().clear(orgAssignmentSize);
                     }
                 } else {
-                    s = util.getSolverSolution(solverSolutionIndex.last()).getIntegers();
+                    s = util.getSolverSolution(solverSolutionIndex.last()).getLiterals();
                     if (s == null) {
                         throw new RuntimeException();
                     }
                 }
             } else {
-                s = Arrays.copyOf(integers, integers.length);
+                s = Arrays.copyOf(literals, literals.length);
                 for (int i = 0; i < s.length; i++) {
                     if (s[i] == 0) {
                         s[i] = -(i + 1);
                     }
                 }
             }
-            return (s == null) ? null : new SortedIntegerList(Arrays.copyOf(s, s.length), Order.INDEX, false);
+            return (s == null) ? null : new LiteralList(Arrays.copyOf(s, s.length), Order.INDEX, false);
         }
     }
 
@@ -416,7 +416,7 @@ public class TWiseConfiguration extends SortedIntegerList {
                 solver.shuffleOrder(util.random);
             }
         } finally {
-            solver.getAssumptionList().clear(orgAssignmentSize);
+            solver.getAssumptions().clear(orgAssignmentSize);
         }
     }
 
@@ -428,21 +428,21 @@ public class TWiseConfiguration extends SortedIntegerList {
         try {
             return solver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
         } finally {
-            solver.getAssumptionList().clear(orgAssignmentSize);
+            solver.getAssumptions().clear(orgAssignmentSize);
             solver.setSelectionStrategy(selectionStrategy);
         }
     }
 
     public int setUpSolver(final Sat4JSolutionSolver solver) {
-        final int orgAssignmentSize = solver.getAssumptionList().size();
+        final int orgAssignmentSize = solver.getAssumptions().size();
         if (isComplete()) {
-            for (int i = 0; i < integers.length; i++) {
-                solver.getAssumptionList().push(integers[i]);
+            for (int i = 0; i < literals.length; i++) {
+                solver.getAssumptions().push(literals[i]);
             }
         } else {
             final int[] array = solutionLiterals.toArray();
             for (int i = 0, length = solutionLiterals.size(); i < length; i++) {
-                solver.getAssumptionList().push(array[i]);
+                solver.getAssumptions().push(array[i]);
             }
         }
         return orgAssignmentSize;
@@ -456,17 +456,17 @@ public class TWiseConfiguration extends SortedIntegerList {
         if (util.hasSolver() && (solutionLiterals != null)) {
             solverSolutionIndex.clear();
             final int[] array = solutionLiterals.toArray();
-            final SortedIntegerList[] solverSolutions = util.getSolverSolutions();
+            final LiteralList[] solverSolutions = util.getSolverSolutions();
             solutionLoop:
             for (int i = 0; i < solverSolutions.length; i++) {
-                final SortedIntegerList solverSolution = solverSolutions[i];
+                final LiteralList solverSolution = solverSolutions[i];
                 if (solverSolution == null) {
                     break;
                 }
-                final int[] solverSolutionLiterals = solverSolution.getIntegers();
+                final int[] solverSolutionLiterals = solverSolution.getLiterals();
                 for (int j = 0, length = solutionLiterals.size(); j < length; j++) {
                     final int k = Math.abs(array[j]) - 1;
-                    if (solverSolutionLiterals[k] == -integers[k]) {
+                    if (solverSolutionLiterals[k] == -literals[k]) {
                         continue solutionLoop;
                     }
                 }
@@ -486,7 +486,7 @@ public class TWiseConfiguration extends SortedIntegerList {
             final int[] array = solutionLiterals.toArray();
             for (int i = 0, length = solutionLiterals.size(); i < length; i++) {
                 final int k = Math.abs(array[i]) - 1;
-                if (solverSolution[k] == -integers[k]) {
+                if (solverSolution[k] == -literals[k]) {
                     return;
                 }
             }
@@ -500,7 +500,7 @@ public class TWiseConfiguration extends SortedIntegerList {
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(integers);
+        return Arrays.hashCode(literals);
     }
 
     @Override

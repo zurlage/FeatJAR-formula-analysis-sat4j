@@ -20,7 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.log.Log;
@@ -34,7 +35,7 @@ import java.util.List;
  */
 public class EnumeratingRandomConfigurationGenerator extends RandomConfigurationGenerator {
 
-    private List<SortedIntegerList> allConfigurations;
+    private List<LiteralList> allConfigurations;
 
     @Override
     protected void init(Monitor monitor) {
@@ -48,7 +49,7 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
     }
 
     @Override
-    public SortedIntegerList get() {
+    public LiteralList get() {
         if (allConfigurations.isEmpty()) {
             return null;
         }

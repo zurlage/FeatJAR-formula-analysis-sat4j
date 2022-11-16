@@ -25,9 +25,12 @@ import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
-
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.analysis.solver.SATSolver;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,35 +48,35 @@ import java.util.List;
  *
  * @see RemoveRedundancyAnalysis
  */
-public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<SortedIntegerList>> {
+public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<LiteralList>> {
 
-    public IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputation, literalListIndexList);
+    public IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+        super(inputComputation, clauseList);
     }
 
-    public IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
+    public IndependentRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override
-    public FutureResult<List<SortedIntegerList>> compute() {
+    public FutureResult<List<LiteralList>> compute() {
         return initializeSolver().thenCompute((solver, monitor) -> {
-            if (literalListIndexList == null) {
+            if (clauseList == null) {
                 return Collections.emptyList();
             }
             if (clauseGroupSize == null) {
-                clauseGroupSize = new int[literalListIndexList.size()];
+                clauseGroupSize = new int[clauseList.size()];
                 Arrays.fill(clauseGroupSize, 1);
             }
-            monitor.setTotalSteps(literalListIndexList.size() + 1);
+            monitor.setTotalSteps(clauseList.size() + 1);
 
-            final List<SortedIntegerList> resultList = new ArrayList<>(clauseGroupSize.length);
-            for (int i = 0; i < literalListIndexList.size(); i++) {
+            final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+            for (int i = 0; i < clauseList.size(); i++) {
                 resultList.add(null);
             }
             monitor.addStep();
 
-            final List<SortedIntegerList> solutionList = solver.rememberSolutionHistory(Sat4JSolver.MAX_SOLUTION_BUFFER);
+            final List<LiteralList> solutionList = solver.rememberSolutionHistory(Sat4JSolver.MAX_SOLUTION_BUFFER);
 
             if (solver.hasSolution().equals(Result.of(true))) {
                 solver.setSelectionStrategy(SStrategy.random(random));
@@ -85,10 +88,10 @@ public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<SortedInt
                     endIndex += clauseGroupSize[i];
                     clauseLoop:
                     for (int j = startIndex; j < endIndex; j++) {
-                        final SortedIntegerList sortedIntegerList = literalListIndexList.get(j);
-                        final SortedIntegerList complement = sortedIntegerList.negate();
+                        final LiteralList clause = clauseList.get(j);
+                        final LiteralList complement = clause.negate();
 
-                        for (final SortedIntegerList solution : solutionList) {
+                        for (final LiteralList solution : solutionList) {
                             if (solution.containsAll(complement)) {
                                 continue clauseLoop;
                             }
@@ -96,7 +99,7 @@ public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<SortedInt
 
                         final Result<Boolean> hasSolution = solver.hasSolution(complement);
                         if (hasSolution.equals(Result.of(false))) {
-                            resultList.set(i, sortedIntegerList);
+                            resultList.set(i, clause);
                             continue groupLoop;
                         } else if (hasSolution.equals(Result.empty())) {
                             //reportTimeout();

@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.formula.analysis.sat4j.configuration.AllConfigurationGenerator;
-import de.featjar.formula.analysis.solver.Assumable;
 import de.featjar.formula.structure.Expression;
 import de.featjar.formula.tmp.Formulas;
+import de.featjar.formula.assignment.Assignment;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.tree.Trees;
 import org.junit.jupiter.api.Assertions;
@@ -64,9 +64,9 @@ public class TseitinTransformTest {
         assertEquals(mapClone, expressionOrg.getTermMap().orElseThrow());
     }
 
-    private Boolean evaluate(ModelRepresentation rep, final Assumable assumable) {
+    private Boolean evaluate(ModelRepresentation rep, final Assignment assignment) {
         final AllConfigurationGenerator analysis = new AllConfigurationGenerator();
-        analysis.getAssumptions().set(assumable.get());
+        analysis.getAssumptions().set(assignment.get());
         analysis.setLimit(2);
         final int numSolutions =
                 rep.getResult(analysis).orElseThrow().getSolutions().size();

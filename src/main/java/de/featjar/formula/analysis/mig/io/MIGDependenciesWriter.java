@@ -22,6 +22,7 @@ package de.featjar.formula.analysis.mig.io;
 
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.Vertex;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.map.TermMap;
 import java.util.List;
 
@@ -58,8 +59,8 @@ public class MIGDependenciesWriter {
                             sb.append("\n");
                         }
                     }
-                    for (final SortedIntegerList sortedIntegerList : vertex.getComplexClauses()) {
-                        for (final int otherVar : sortedIntegerList.getIntegers()) {
+                    for (final LiteralList clause : vertex.getComplexClauses()) {
+                        for (final int otherVar : clause.getLiterals()) {
                             if ((otherVar > 0) && (var != otherVar)) {
                                 sb.append(name);
                                 sb.append(" MAYBE ");

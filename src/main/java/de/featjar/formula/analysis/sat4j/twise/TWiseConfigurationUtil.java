@@ -29,9 +29,10 @@ import de.featjar.formula.analysis.sat4j.configuration.FastRandomConfigurationGe
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
-import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.LiteralMatrix;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.data.Pair;
 import de.featjar.base.io.IO;
 import de.featjar.base.task.Executor;
@@ -66,18 +67,18 @@ public class TWiseConfigurationUtil {
 
     public static final int GLOBAL_SOLUTION_LIMIT = 100_000;
 
-    static final Comparator<Pair<SortedIntegerList, TWiseConfiguration>> candidateLengthComparator =
+    static final Comparator<Pair<LiteralList, TWiseConfiguration>> candidateLengthComparator =
             new CandidateLengthComparator();
 
-    protected final SortedIntegerList[] solverSolutions = new SortedIntegerList[GLOBAL_SOLUTION_LIMIT];
-    protected final HashSet<SortedIntegerList> solutionSet = new HashSet<>();
+    protected final LiteralList[] solverSolutions = new LiteralList[GLOBAL_SOLUTION_LIMIT];
+    protected final HashSet<LiteralList> solutionSet = new HashSet<>();
     protected Random random = new Random(42);
 
-    protected List<SortedIntegerList> randomSample;
+    protected List<LiteralList> randomSample;
 
     private final List<TWiseConfiguration> incompleteSolutionList = new LinkedList<>();
     private final List<TWiseConfiguration> completeSolutionList = new ArrayList<>();
-    private final HashSet<SortedIntegerList> invalidSortedIntegerLists = new HashSet<>();
+    private final HashSet<LiteralList> invalidClauses = new HashSet<>();
     private InvalidClausesList invalidClausesList = InvalidClausesList.None;
 
     protected final CNF cnf;
@@ -85,8 +86,8 @@ public class TWiseConfigurationUtil {
     protected final boolean hasSolver;
 
     protected ModalImplicationGraph modalImplicationGraph;
-    protected SortedIntegerList[] strongHull;
-    protected SortedIntegerList coreDead;
+    protected LiteralList[] strongHull;
+    protected LiteralList coreDead;
 
     protected int maxSampleSize = Integer.MAX_VALUE;
 
@@ -110,8 +111,8 @@ public class TWiseConfigurationUtil {
                 .map(SolutionList::getSolutions) //
                 .orElse(Log::problems);
 
-        for (final SortedIntegerList solution : randomSample) {
-            addSolverSolution(solution.getIntegers());
+        for (final LiteralList solution : randomSample) {
+            addSolverSolution(solution.getLiterals());
         }
     }
 
@@ -133,15 +134,15 @@ public class TWiseConfigurationUtil {
     }
 
     private void setupMIG() {
-        strongHull = new SortedIntegerList[modalImplicationGraph.getVertices().size()];
+        strongHull = new LiteralList[modalImplicationGraph.getVertices().size()];
 
         for (final Vertex vertex : modalImplicationGraph.getVertices()) {
-            strongHull[ModalImplicationGraph.getVertexIndex(vertex)] = new SortedIntegerList(
+            strongHull[ModalImplicationGraph.getVertexIndex(vertex)] = new LiteralList(
                     vertex.getStrongEdges().stream().mapToInt(Vertex::getVar).toArray());
         }
     }
 
-    public SortedIntegerList getDeadCoreFeatures() {
+    public LiteralList getDeadCoreFeatures() {
         if (coreDead == null) {
             if (hasMig()) {
                 computeDeadCoreFeaturesMig();
@@ -152,9 +153,9 @@ public class TWiseConfigurationUtil {
         return coreDead;
     }
 
-    public SortedIntegerList computeDeadCoreFeaturesMig() {
+    public LiteralList computeDeadCoreFeaturesMig() {
         if (hasSolver()) {
-            coreDead = new SortedIntegerList();
+            coreDead = new LiteralList();
         } else {
             final int[] coreDeadArray = new int[cnf.getVariableMap().getVariableCount()];
             int index = 0;
@@ -163,15 +164,15 @@ public class TWiseConfigurationUtil {
                     coreDeadArray[index++] = vertex.getVar();
                 }
             }
-            coreDead = new SortedIntegerList(Arrays.copyOf(coreDeadArray, index));
+            coreDead = new LiteralList(Arrays.copyOf(coreDeadArray, index));
             if (!coreDead.isEmpty()) {
-                localSolver.getAssumptionList().pushAll(coreDead.getIntegers());
+                localSolver.getAssumptions().pushAll(coreDead.getLiterals());
             }
         }
         return coreDead;
     }
 
-    public SortedIntegerList computeDeadCoreFeatures() {
+    public LiteralList computeDeadCoreFeatures() {
         final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnf);
         final int[] firstSolution = solver.findSolution().getLiterals();
         if (firstSolution != null) {
@@ -179,35 +180,35 @@ public class TWiseConfigurationUtil {
             int coreDeadIndex = 0;
             solver.setSelectionStrategy(SStrategy.inverse(firstSolution));
             solver.hasSolution();
-            SortedIntegerList.resetConflicts(firstSolution, solver.getInternalSolution());
+            LiteralList.resetConflicts(firstSolution, solver.getInternalSolution());
 
             // find core/dead features
             for (int i = 0; i < firstSolution.length; i++) {
                 final int varX = firstSolution[i];
                 if (varX != 0) {
-                    solver.getAssumptionList().push(-varX);
+                    solver.getAssumptions().push(-varX);
                     switch (solver.hasSolution()) {
                         case FALSE:
-                            solver.getAssumptionList().replaceLast(varX);
+                            solver.getAssumptions().replaceLast(varX);
                             coreDeadArray[coreDeadIndex++] = varX;
                             break;
                         case TIMEOUT:
-                            solver.getAssumptionList().pop();
+                            solver.getAssumptions().pop();
                             break;
                         case TRUE:
-                            solver.getAssumptionList().pop();
-                            SortedIntegerList.resetConflicts(firstSolution, solver.getInternalSolution());
+                            solver.getAssumptions().pop();
+                            LiteralList.resetConflicts(firstSolution, solver.getInternalSolution());
                             solver.shuffleOrder(random);
                             break;
                     }
                 }
             }
-            coreDead = new SortedIntegerList(Arrays.copyOf(coreDeadArray, coreDeadIndex));
+            coreDead = new LiteralList(Arrays.copyOf(coreDeadArray, coreDeadIndex));
             if (!coreDead.isEmpty()) {
-                localSolver.getAssumptionList().pushAll(coreDead.getIntegers());
+                localSolver.getAssumptions().pushAll(coreDead.getLiterals());
             }
         } else {
-            coreDead = new SortedIntegerList();
+            coreDead = new LiteralList();
         }
         return coreDead;
     }
@@ -239,11 +240,11 @@ public class TWiseConfigurationUtil {
     protected int solverSolutionEndIndex = -1;
 
     public void addSolverSolution(int[] literals) {
-        final SortedIntegerList solution = new SortedIntegerList(literals, SortedIntegerList.Order.INDEX, false);
+        final LiteralList solution = new LiteralList(literals, LiteralList.Order.INDEX, false);
         if (solutionSet.add(solution)) {
             solverSolutionEndIndex++;
             solverSolutionEndIndex %= GLOBAL_SOLUTION_LIMIT;
-            final SortedIntegerList oldSolution = solverSolutions[solverSolutionEndIndex];
+            final LiteralList oldSolution = solverSolutions[solverSolutionEndIndex];
             if (oldSolution != null) {
                 solutionSet.remove(oldSolution);
             }
@@ -255,44 +256,44 @@ public class TWiseConfigurationUtil {
         }
     }
 
-    public SortedIntegerList getSolverSolution(int index) {
+    public LiteralList getSolverSolution(int index) {
         return solverSolutions[index];
     }
 
-    public SortedIntegerList[] getSolverSolutions() {
+    public LiteralList[] getSolverSolutions() {
         return solverSolutions;
     }
 
-    public boolean isCombinationValid(SortedIntegerList literals) {
+    public boolean isCombinationValid(LiteralList literals) {
         return !isCombinationInvalidMIG(literals) && isCombinationValidSAT(literals);
     }
 
-    public boolean isCombinationValid(LiteralMatrix clauses) {
+    public boolean isCombinationValid(ClauseList clauses) {
         if (hasSolver()) {
             if (invalidClausesList == InvalidClausesList.Use) {
-                for (final SortedIntegerList literalSet : clauses) {
-                    if (invalidSortedIntegerLists.contains(literalSet)) {
+                for (final LiteralList literalSet : clauses) {
+                    if (invalidClauses.contains(literalSet)) {
                         return false;
                     }
                 }
                 return !clauses.isEmpty();
             }
             if (hasMig()) {
-                for (final SortedIntegerList literalSet : clauses) {
+                for (final LiteralList literalSet : clauses) {
                     if (isCombinationInvalidMIG(literalSet)) {
                         if (invalidClausesList == InvalidClausesList.Create) {
-                            invalidSortedIntegerLists.add(literalSet);
+                            invalidClauses.add(literalSet);
                         }
                         return false;
                     }
                 }
             }
-            for (final SortedIntegerList literalSet : clauses) {
+            for (final LiteralList literalSet : clauses) {
                 if (isCombinationValidSAT(literalSet)) {
                     return true;
                 } else {
                     if (invalidClausesList == InvalidClausesList.Create) {
-                        invalidSortedIntegerLists.add(literalSet);
+                        invalidClauses.add(literalSet);
                     }
                 }
             }
@@ -301,10 +302,10 @@ public class TWiseConfigurationUtil {
         return !clauses.isEmpty();
     }
 
-    public boolean isCombinationInvalidMIG(SortedIntegerList literals) {
+    public boolean isCombinationInvalidMIG(LiteralList literals) {
         if (hasMig()) {
-            for (final int literal : literals.getIntegers()) {
-                if (strongHull[ModalImplicationGraph.getVertexIndex(literal)].conflictsWith(literals)) {
+            for (final int literal : literals.getLiterals()) {
+                if (strongHull[ModalImplicationGraph.getVertexIndex(literal)].hasConflicts(literals)) {
                     return true;
                 }
             }
@@ -312,19 +313,19 @@ public class TWiseConfigurationUtil {
         return false;
     }
 
-    public boolean isCombinationValidSAT(SortedIntegerList literals) {
+    public boolean isCombinationValidSAT(LiteralList literals) {
         if (hasSolver()) {
-            for (final SortedIntegerList s : randomSample) {
-                if (!s.conflictsWith(literals)) {
+            for (final LiteralList s : randomSample) {
+                if (!s.hasConflicts(literals)) {
                     return true;
                 }
             }
 
             final Sat4JSolutionSolver solver = getSolver();
             //			solver.setSelectionStrategy(SStrategy.random(random));
-            final int orgAssignmentLength = solver.getAssumptionList().size();
+            final int orgAssignmentLength = solver.getAssumptions().size();
             try {
-                solver.getAssumptionList().pushAll(literals.getIntegers());
+                solver.getAssumptions().pushAll(literals.getLiterals());
                 final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case TRUE:
@@ -339,19 +340,19 @@ public class TWiseConfigurationUtil {
                         break;
                 }
             } finally {
-                solver.getAssumptionList().clear(orgAssignmentLength);
+                solver.getAssumptions().clear(orgAssignmentLength);
             }
         }
         return true;
     }
 
     public boolean removeInvalidClauses(
-            LiteralMatrix nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        final LinkedList<SortedIntegerList> invalidSortedIntegerLists = new LinkedList<>();
-        for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
-            final SortedIntegerList literals = conditionIterator.next();
+            ClauseList nextCondition, List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        final LinkedList<LiteralList> invalidClauses = new LinkedList<>();
+        for (final Iterator<LiteralList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
+            final LiteralList literals = conditionIterator.next();
             if (!isCombinationValid(literals)) {
-                invalidSortedIntegerLists.add(literals);
+                invalidClauses.add(literals);
                 conditionIterator.remove();
             }
         }
@@ -359,18 +360,18 @@ public class TWiseConfigurationUtil {
             candidatesList.clear();
             return true;
         } else {
-            removeInvalidCandidates(candidatesList, invalidSortedIntegerLists);
+            removeInvalidCandidates(candidatesList, invalidClauses);
             return false;
         }
     }
 
     public boolean removeInvalidClausesSat(
-            LiteralMatrix nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        final LinkedList<SortedIntegerList> invalidSortedIntegerLists = new LinkedList<>();
-        for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
-            final SortedIntegerList literals = conditionIterator.next();
+            ClauseList nextCondition, List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        final LinkedList<LiteralList> invalidClauses = new LinkedList<>();
+        for (final Iterator<LiteralList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
+            final LiteralList literals = conditionIterator.next();
             if (!isCombinationValidSAT(literals)) {
-                invalidSortedIntegerLists.add(literals);
+                invalidClauses.add(literals);
                 conditionIterator.remove();
             }
         }
@@ -378,18 +379,18 @@ public class TWiseConfigurationUtil {
             candidatesList.clear();
             return true;
         } else {
-            removeInvalidCandidates(candidatesList, invalidSortedIntegerLists);
+            removeInvalidCandidates(candidatesList, invalidClauses);
             return false;
         }
     }
 
     public boolean removeInvalidClausesLight(
-            LiteralMatrix nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        final LinkedList<SortedIntegerList> invalidSortedIntegerLists = new LinkedList<>();
-        for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
-            final SortedIntegerList literals = conditionIterator.next();
+            ClauseList nextCondition, List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        final LinkedList<LiteralList> invalidClauses = new LinkedList<>();
+        for (final Iterator<LiteralList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
+            final LiteralList literals = conditionIterator.next();
             if (isCombinationInvalidMIG(literals)) {
-                invalidSortedIntegerLists.add(literals);
+                invalidClauses.add(literals);
                 conditionIterator.remove();
             }
         }
@@ -397,17 +398,17 @@ public class TWiseConfigurationUtil {
             candidatesList.clear();
             return true;
         } else {
-            removeInvalidCandidates(candidatesList, invalidSortedIntegerLists);
+            removeInvalidCandidates(candidatesList, invalidClauses);
             return false;
         }
     }
 
     private void removeInvalidCandidates(
-            List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList, final LinkedList<SortedIntegerList> invalidSortedIntegerLists) {
-        for (final SortedIntegerList literals : invalidSortedIntegerLists) {
-            for (final Iterator<Pair<SortedIntegerList, TWiseConfiguration>> candidateIterator = candidatesList.iterator();
-                 candidateIterator.hasNext(); ) {
-                final Pair<SortedIntegerList, TWiseConfiguration> pair = candidateIterator.next();
+            List<Pair<LiteralList, TWiseConfiguration>> candidatesList, final LinkedList<LiteralList> invalidClauses) {
+        for (final LiteralList literals : invalidClauses) {
+            for (final Iterator<Pair<LiteralList, TWiseConfiguration>> candidateIterator = candidatesList.iterator();
+                    candidateIterator.hasNext(); ) {
+                final Pair<LiteralList, TWiseConfiguration> pair = candidateIterator.next();
                 if (pair.getKey().equals(literals)) {
                     candidateIterator.remove();
                 }
@@ -415,9 +416,9 @@ public class TWiseConfigurationUtil {
         }
     }
 
-    public boolean removeInvalidClausesLight(LiteralMatrix nextCondition) {
-        for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
-            final SortedIntegerList literals = conditionIterator.next();
+    public boolean removeInvalidClausesLight(ClauseList nextCondition) {
+        for (final Iterator<LiteralList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
+            final LiteralList literals = conditionIterator.next();
             if (isCombinationInvalidMIG(literals)) {
                 conditionIterator.remove();
             }
@@ -425,39 +426,39 @@ public class TWiseConfigurationUtil {
         return nextCondition.isEmpty();
     }
 
-    private boolean isSelectionPossibleSol(Pair<SortedIntegerList, TWiseConfiguration> candidate) {
+    private boolean isSelectionPossibleSol(Pair<LiteralList, TWiseConfiguration> candidate) {
         final VecInt solverSolutionIndex = candidate.getValue().getSolverSolutionIndex();
         for (int i = 0; i < solverSolutionIndex.size(); i++) {
-            if (!getSolverSolution(solverSolutionIndex.get(i)).conflictsWith(candidate.getKey())) {
+            if (!getSolverSolution(solverSolutionIndex.get(i)).hasConflicts(candidate.getKey())) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isSelectionPossibleSol(SortedIntegerList literals, TWiseConfiguration configuration) {
+    private boolean isSelectionPossibleSol(LiteralList literals, TWiseConfiguration configuration) {
         final VecInt solverSolutionIndex = configuration.getSolverSolutionIndex();
         for (int i = 0; i < solverSolutionIndex.size(); i++) {
-            if (!getSolverSolution(solverSolutionIndex.get(i)).conflictsWith(literals)) {
+            if (!getSolverSolution(solverSolutionIndex.get(i)).hasConflicts(literals)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isSelectionPossibleSat(final SortedIntegerList literals, final TWiseConfiguration configuration) {
+    private boolean isSelectionPossibleSat(final LiteralList literals, final TWiseConfiguration configuration) {
         if (hasSolver) {
             final Sat4JSolutionSolver localSolver = getSolver();
             //			localSolver.setSelectionStrategy(SStrategy.random());
             final int orgAssignmentSize = configuration.setUpSolver(localSolver);
             try {
-                final int[] configurationLiterals = configuration.getIntegers();
-                for (final int literal : literals.getIntegers()) {
+                final int[] configurationLiterals = configuration.getLiterals();
+                for (final int literal : literals.getLiterals()) {
                     if (configurationLiterals[Math.abs(literal) - 1] == 0) {
-                        localSolver.getAssumptionList().push(literal);
+                        localSolver.getAssumptions().push(literal);
                     }
                 }
-                if (orgAssignmentSize < localSolver.getAssumptionList().size()) {
+                if (orgAssignmentSize < localSolver.getAssumptions().size()) {
                     if (localSolver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
                         final int[] solution = localSolver.getInternalSolution();
                         addSolverSolution(Arrays.copyOf(solution, solution.length));
@@ -467,15 +468,15 @@ public class TWiseConfigurationUtil {
                     }
                 }
             } finally {
-                localSolver.getAssumptionList().clear(orgAssignmentSize);
+                localSolver.getAssumptions().clear(orgAssignmentSize);
             }
         }
         return true;
     }
 
-    public static boolean isCovered(LiteralMatrix condition, Iterable<? extends SortedIntegerList> solutionList) {
-        for (final SortedIntegerList configuration : solutionList) {
-            for (final SortedIntegerList literals : condition) {
+    public static boolean isCovered(ClauseList condition, Iterable<? extends LiteralList> solutionList) {
+        for (final LiteralList configuration : solutionList) {
+            for (final LiteralList literals : condition) {
                 if (configuration.containsAll(literals)) {
                     return true;
                 }
@@ -488,20 +489,20 @@ public class TWiseConfigurationUtil {
         return Stream.concat(getCompleteSolutionList().parallelStream(), getIncompleteSolutionList().parallelStream());
     }
 
-    public boolean isCoveredPara(LiteralMatrix condition) {
+    public boolean isCoveredPara(ClauseList condition) {
         final Optional<TWiseConfiguration> coveringSolution = condition.stream() //
                 .flatMap(literals -> getConfigurationStream() //
-                        .filter(configuration -> configuration.containsAllLiteralIntegers(literals))) //
+                        .filter(configuration -> configuration.containsAll(literals))) //
                 .findAny();
         return coveringSolution.isPresent();
     }
 
-    public boolean isCovered(LiteralMatrix condition) {
+    public boolean isCovered(ClauseList condition) {
         return isCovered(condition, completeSolutionList) || isCovered(condition, incompleteSolutionList);
     }
 
     public boolean select(
-            TWiseConfiguration solution, TWiseConfigurationGenerator.Deduce deduce, SortedIntegerList literals) {
+            TWiseConfiguration solution, TWiseConfigurationGenerator.Deduce deduce, LiteralList literals) {
         selectLiterals(solution, deduce, literals);
 
         if (solution.isComplete()) {
@@ -521,8 +522,8 @@ public class TWiseConfigurationUtil {
     }
 
     private void selectLiterals(
-            TWiseConfiguration solution, TWiseConfigurationGenerator.Deduce deduce, SortedIntegerList literals) {
-        solution.setLiteral(literals.getIntegers());
+            TWiseConfiguration solution, TWiseConfigurationGenerator.Deduce deduce, LiteralList literals) {
+        solution.setLiteral(literals.getLiterals());
         if (hasSolver()) {
             switch (deduce) {
                 case AC:
@@ -537,15 +538,15 @@ public class TWiseConfigurationUtil {
         }
     }
 
-    public boolean isCandidate(final SortedIntegerList literals, TWiseConfiguration solution) {
-        return !solution.conflictsWith(literals);
+    public boolean isCandidate(final LiteralList literals, TWiseConfiguration solution) {
+        return !solution.hasConflicts(literals);
     }
 
-    public boolean isCandidate(final Pair<SortedIntegerList, TWiseConfiguration> pair) {
-        return !pair.getValue().conflictsWith(pair.getKey());
+    public boolean isCandidate(final Pair<LiteralList, TWiseConfiguration> pair) {
+        return !pair.getValue().hasConflicts(pair.getKey());
     }
 
-    public void addCandidates(final SortedIntegerList literals, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+    public void addCandidates(final LiteralList literals, List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
         for (final TWiseConfiguration configuration : getIncompleteSolutionList()) {
             if (isCandidate(literals, configuration)) {
                 candidatesList.add(new Pair<>(literals, configuration));
@@ -554,7 +555,7 @@ public class TWiseConfigurationUtil {
     }
 
     public void initCandidatesListPara(
-            LiteralMatrix nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ClauseList nextCondition, List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
         candidatesList.clear();
         nextCondition.stream() //
                 .flatMap(literals -> getIncompleteSolutionList().parallelStream() //
@@ -565,9 +566,9 @@ public class TWiseConfigurationUtil {
     }
 
     public void initCandidatesList(
-            LiteralMatrix nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ClauseList nextCondition, List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
         candidatesList.clear();
-        for (final SortedIntegerList literals : nextCondition) {
+        for (final LiteralList literals : nextCondition) {
             for (final TWiseConfiguration configuration : getIncompleteSolutionList()) {
                 if (isCandidate(literals, configuration)) {
                     candidatesList.add(new Pair<>(literals, configuration));
@@ -577,8 +578,8 @@ public class TWiseConfigurationUtil {
         Collections.sort(candidatesList, candidateLengthComparator);
     }
 
-    protected boolean coverSol(List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        for (final Pair<SortedIntegerList, TWiseConfiguration> pair : candidatesList) {
+    protected boolean coverSol(List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        for (final Pair<LiteralList, TWiseConfiguration> pair : candidatesList) {
             if (isSelectionPossibleSol(pair.getKey(), pair.getValue())) {
                 assert pair.getValue().isValid();
                 select(pair.getValue(), extendConfigurationDeduce, pair.getKey());
@@ -588,8 +589,8 @@ public class TWiseConfigurationUtil {
         return false;
     }
 
-    protected boolean coverSat(List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        for (final Pair<SortedIntegerList, TWiseConfiguration> pair : candidatesList) {
+    protected boolean coverSat(List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        for (final Pair<LiteralList, TWiseConfiguration> pair : candidatesList) {
             if (isSelectionPossibleSat(pair.getKey(), pair.getValue())) {
                 select(pair.getValue(), extendConfigurationDeduce, pair.getKey());
                 assert pair.getValue().isValid();
@@ -599,21 +600,21 @@ public class TWiseConfigurationUtil {
         return false;
     }
 
-    protected boolean coverNoSat(List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        for (final Pair<SortedIntegerList, TWiseConfiguration> pair : candidatesList) {
+    protected boolean coverNoSat(List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        for (final Pair<LiteralList, TWiseConfiguration> pair : candidatesList) {
             select(pair.getValue(), extendConfigurationDeduce, pair.getKey());
             return true;
         }
         return false;
     }
 
-    protected boolean coverSolPara(List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
-        final Optional<Pair<SortedIntegerList, TWiseConfiguration>> candidate = candidatesList.parallelStream() //
+    protected boolean coverSolPara(List<Pair<LiteralList, TWiseConfiguration>> candidatesList) {
+        final Optional<Pair<LiteralList, TWiseConfiguration>> candidate = candidatesList.parallelStream() //
                 .filter(this::isSelectionPossibleSol) //
                 .findFirst();
 
         if (candidate.isPresent()) {
-            final Pair<SortedIntegerList, TWiseConfiguration> pair = candidate.get();
+            final Pair<LiteralList, TWiseConfiguration> pair = candidate.get();
             select(pair.getValue(), extendConfigurationDeduce, pair.getKey());
             assert pair.getValue().isValid();
             return true;
@@ -622,7 +623,7 @@ public class TWiseConfigurationUtil {
         }
     }
 
-    public void newConfiguration(final SortedIntegerList literals) {
+    public void newConfiguration(final LiteralList literals) {
         if (completeSolutionList.size() < maxSampleSize) {
             final TWiseConfiguration configuration = new TWiseConfiguration(this);
             selectLiterals(configuration, createConfigurationDeduce, literals);

@@ -24,7 +24,8 @@ import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SampleDistribution;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.clauses.solutions.SolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.log.Log;
@@ -38,7 +39,7 @@ import java.util.List;
 public class SampleRandomConfigurationGenerator extends RandomConfigurationGenerator {
 
     private int sampleSize = 100;
-    private List<SortedIntegerList> sample;
+    private List<LiteralList> sample;
     private SampleDistribution dist;
 
     @Override
@@ -81,18 +82,18 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         for (int i = 0; i < fixedFeatures.length; i++) {
             final int varX = fixedFeatures[i];
             if (varX != 0) {
-                solver.getAssumptionList().push(-varX);
+                solver.getAssumptions().push(-varX);
                 final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
-                        solver.getAssumptionList().replaceLast(varX);
+                        solver.getAssumptions().replaceLast(varX);
                         break;
                     case TIMEOUT:
-                        solver.getAssumptionList().pop();
+                        solver.getAssumptions().pop();
                         break;
                     case TRUE:
-                        solver.getAssumptionList().pop();
-                        SortedIntegerList.resetConflicts(fixedFeatures, solver.getInternalSolution());
+                        solver.getAssumptions().pop();
+                        LiteralList.resetConflicts(fixedFeatures, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                         break;
                 }

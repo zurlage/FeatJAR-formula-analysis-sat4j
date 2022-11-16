@@ -23,7 +23,8 @@ package de.featjar.formula.transform;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SATSolver;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
  */
 public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
-    protected static final Comparator<SortedIntegerList> lengthComparator = new SortedIntegerList.DescendingLengthComparator();
+    protected static final Comparator<LiteralList> lengthComparator = new LiteralList.DescendingLengthComparator();
 
     protected CNF orgCNF;
     protected CNF cnfCopy;
@@ -52,11 +53,11 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     protected final List<DirtyClause> newDirtyClauseList = new ArrayList<>();
     protected final List<DirtyClause> newCleanClauseList = new ArrayList<>();
     protected final List<DirtyClause> dirtyClauseList = new ArrayList<>();
-    protected final ArrayList<SortedIntegerList> cleanLiteralListIndexList = new ArrayList<>();
+    protected final ArrayList<LiteralList> cleanClauseList = new ArrayList<>();
     protected final Set<DirtyClause> dirtyClauseSet = new HashSet<>();
     protected final Set<DirtyClause> cleanClauseSet = new HashSet<>();
 
-    protected final SortedIntegerList dirtyVariables;
+    protected final LiteralList dirtyVariables;
     private int numberOfDirtyFeatures = 0;
 
     protected int[] helper;
@@ -72,12 +73,12 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     protected int dirtyListNegIndex = 0;
     protected int newDirtyListDelIndex = 0;
 
-    public CNFSlicer(SortedIntegerList dirtyVariables) {
+    public CNFSlicer(LiteralList dirtyVariables) {
         this.dirtyVariables = dirtyVariables;
     }
 
     public CNFSlicer(Collection<String> dirtyVariableNames, TermMap termMap) {
-        dirtyVariables = SortedIntegerList.getAbsoluteValuesOfIntegers(termMap, dirtyVariableNames);
+        dirtyVariables = LiteralList.getVariables(termMap, dirtyVariableNames);
     }
 
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
@@ -89,7 +90,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
         map = new DirtyFeature[orgCNF.getVariableMap().getVariableCount() + 1];
         numberOfDirtyFeatures = 0;
-        for (final int curFeature : dirtyVariables.getIntegers()) {
+        for (final int curFeature : dirtyVariables.getLiterals()) {
             map[curFeature] = new DirtyFeature(curFeature);
             numberOfDirtyFeatures++;
         }
@@ -99,7 +100,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         createClauseLists();
 
         if (!prepareHeuristics()) {
-            return new CNF(orgCNF.getClauseList(), orgCNF.getVariableMap());
+            return new CNF(orgCNF.getVariableMap(), orgCNF.getClauses());
         }
 
         monitor.setTotalSteps(heuristic.size());
@@ -140,17 +141,17 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
         release();
         final HashSet<String> names = new HashSet<>(orgCNF.getVariableMap().getVariableNames());
-        for (final int literal : dirtyVariables.getIntegers()) {
+        for (final int literal : dirtyVariables.getLiterals()) {
             names.remove(
                     orgCNF.getVariableMap().getVariableName(Math.abs(literal)).get());
         }
         final TermMap slicedTermMap = new TermMap(names);
-        final List<SortedIntegerList> slicedLiteralListIndexList = cleanLiteralListIndexList.stream()
+        final List<LiteralList> slicedClauseList = cleanClauseList.stream()
                 .map(clause ->
                         clause.adapt(orgCNF.getVariableMap(), slicedTermMap).get())
                 .collect(Collectors.toList());
 
-        return new CNF(slicedTermMap, slicedLiteralListIndexList);
+        return new CNF(slicedTermMap, slicedClauseList);
     }
 
     private void addNewClause(final DirtyClause curClause) {
@@ -175,13 +176,13 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     }
 
     private void createClauseLists() {
-        for (final SortedIntegerList sortedIntegerList : orgCNF.getClauseList()) {
-            addNewClause(new DirtyClause(sortedIntegerList.getIntegers()));
+        for (final LiteralList clause : orgCNF.getClauses()) {
+            addNewClause(new DirtyClause(clause.getLiterals()));
         }
 
-        cleanLiteralListIndexList.ensureCapacity(cleanLiteralListIndexList.size() + newCleanClauseList.size());
+        cleanClauseList.ensureCapacity(cleanClauseList.size() + newCleanClauseList.size());
         for (final DirtyClause dirtyClause : newCleanClauseList) {
-            cleanLiteralListIndexList.add(new SortedIntegerList(dirtyClause));
+            cleanClauseList.add(new LiteralList(dirtyClause));
         }
         dirtyClauseList.addAll(newDirtyClauseList);
         newDirtyClauseList.clear();
@@ -222,9 +223,9 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     private void resolution(DirtyFeature nextFeature) {
         final int curFeatureID = nextFeature.getId();
         for (int i = dirtyListPosIndex; i < dirtyListNegIndex; i++) {
-            final int[] posOrChildren = dirtyClauseList.get(i).getIntegers();
+            final int[] posOrChildren = dirtyClauseList.get(i).getLiterals();
             for (int j = dirtyListNegIndex; j < dirtyClauseList.size(); j++) {
-                final int[] negOrChildren = dirtyClauseList.get(j).getIntegers();
+                final int[] negOrChildren = dirtyClauseList.get(j).getLiterals();
                 final int[] newChildren = new int[posOrChildren.length + negOrChildren.length];
 
                 System.arraycopy(posOrChildren, 0, newChildren, 0, posOrChildren.length);
@@ -239,8 +240,8 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     private void partitionDirtyList(DirtyFeature nextFeature) {
         final int curFeatureID = nextFeature.getId();
         for (int i = 0; i < dirtyListNegIndex; i++) {
-            final SortedIntegerList sortedIntegerList = dirtyClauseList.get(i);
-            for (final int literal : sortedIntegerList.getIntegers()) {
+            final LiteralList clause = dirtyClauseList.get(i);
+            for (final int literal : clause.getLiterals()) {
                 if (literal == -curFeatureID) {
                     Collections.swap(dirtyClauseList, i--, --dirtyListNegIndex);
                     break;
@@ -249,8 +250,8 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         }
         dirtyListPosIndex = dirtyListNegIndex;
         for (int i = 0; i < dirtyListPosIndex; i++) {
-            final SortedIntegerList sortedIntegerList = dirtyClauseList.get(i);
-            for (final int literal : sortedIntegerList.getIntegers()) {
+            final LiteralList clause = dirtyClauseList.get(i);
+            for (final int literal : clause.getLiterals()) {
                 if (literal == curFeatureID) {
                     Collections.swap(dirtyClauseList, i--, --dirtyListPosIndex);
                     break;
@@ -274,8 +275,8 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         newDirtyListDelIndex = 0;
     }
 
-    protected final boolean isRedundant(Sat4JSolutionSolver solver, SortedIntegerList curSortedIntegerList) {
-        switch (solver.hasSolution(curSortedIntegerList.negate())) {
+    protected final boolean isRedundant(Sat4JSolutionSolver solver, LiteralList curClause) {
+        switch (solver.hasSolution(curClause.negate())) {
             case FALSE:
                 return true;
             case TIMEOUT:
@@ -292,7 +293,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             addCleanClauses();
 
             final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnfCopy);
-            solver.getFormula().push(cleanLiteralListIndexList);
+            solver.getFormula().push(cleanClauseList);
             solver.getFormula().push(dirtyClauseList.subList(0, dirtyListPosIndex));
 
             Collections.sort(newDirtyClauseList.subList(0, newDirtyListDelIndex), lengthComparator);
@@ -321,7 +322,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             } else {
                 cnr++;
                 newSolver.getFormula().push(clause);
-                cleanLiteralListIndexList.add(new SortedIntegerList(clause));
+                cleanClauseList.add(new LiteralList(clause));
             }
         }
         newCleanClauseList.clear();
@@ -335,7 +336,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
             addCleanClauses();
 
             final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnfCopy);
-            solver.getFormula().push(cleanLiteralListIndexList);
+            solver.getFormula().push(cleanClauseList);
 
             // SAT Relevant
             for (int i = dirtyListPosIndex - 1; i >= 0; --i) {

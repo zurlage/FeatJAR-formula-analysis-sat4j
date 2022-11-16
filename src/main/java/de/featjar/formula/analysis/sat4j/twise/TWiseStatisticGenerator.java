@@ -20,7 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class TWiseStatisticGenerator {
     }
 
     public List<CoverageStatistic> getCoverage(
-            List<List<? extends SortedIntegerList>> samples,
+            List<List<? extends LiteralList>> samples,
             List<List<PresenceCondition>> groupedPresenceConditions,
             int t,
             ConfigurationScore configurationScoreType,
@@ -65,28 +66,28 @@ public class TWiseStatisticGenerator {
 
         final TWiseCombiner combiner =
                 new TWiseCombiner(util.getCnf().getVariableMap().getVariableCount());
-        final LiteralMatrix combinedCondition = new LiteralMatrix();
+        final ClauseList combinedCondition = new ClauseList();
         final PresenceCondition[] clauseListArray = new PresenceCondition[t];
-        final ArrayList<ArrayList<List<Pair<Integer, SortedIntegerList>>>> configurationSubLists =
+        final ArrayList<ArrayList<List<Pair<Integer, LiteralList>>>> configurationSubLists =
                 new ArrayList<>(sampleListSize);
 
         final List<CoverageStatistic> statisticList = new ArrayList<>(sampleListSize);
-        for (final List<? extends SortedIntegerList> sample : samples) {
+        for (final List<? extends LiteralList> sample : samples) {
             final CoverageStatistic statistic = new CoverageStatistic();
             if (configurationScoreType != ConfigurationScore.NONE) {
                 statistic.initScores(sample.size());
             }
             statisticList.add(statistic);
 
-            final ArrayList<List<Pair<Integer, SortedIntegerList>>> configurationSubList = new ArrayList<>(t);
+            final ArrayList<List<Pair<Integer, LiteralList>>> configurationSubList = new ArrayList<>(t);
             configurationSubLists.add(configurationSubList);
 
             for (int i = 0; i <= t; i++) {
-                configurationSubList.add(new ArrayList<Pair<Integer, SortedIntegerList>>());
+                configurationSubList.add(new ArrayList<Pair<Integer, LiteralList>>());
             }
-            final List<Pair<Integer, SortedIntegerList>> list = configurationSubList.get(0);
+            final List<Pair<Integer, LiteralList>> list = configurationSubList.get(0);
             int confIndex = 0;
-            for (final SortedIntegerList configuration : sample) {
+            for (final LiteralList configuration : sample) {
                 list.add(new Pair<>(confIndex++, configuration));
             }
         }
@@ -141,20 +142,20 @@ public class TWiseStatisticGenerator {
 
                 for (int sampleIndex = 0; sampleIndex < sampleListSize; sampleIndex++) {
                     final CoverageStatistic statistic = statisticList.get(sampleIndex);
-                    final ArrayList<List<Pair<Integer, SortedIntegerList>>> lists = configurationSubLists.get(sampleIndex);
-                    final List<Pair<Integer, SortedIntegerList>> curConfigurationList = lists.get(t2);
+                    final ArrayList<List<Pair<Integer, LiteralList>>> lists = configurationSubLists.get(sampleIndex);
+                    final List<Pair<Integer, LiteralList>> curConfigurationList = lists.get(t2);
 
                     {
                         int j = i;
                         for (; j < t2; j++) {
                             if (j > 0) {
-                                final List<Pair<Integer, SortedIntegerList>> prevList = lists.get(j - 1);
-                                final List<Pair<Integer, SortedIntegerList>> curList = lists.get(j);
+                                final List<Pair<Integer, LiteralList>> prevList = lists.get(j - 1);
+                                final List<Pair<Integer, LiteralList>> curList = lists.get(j);
                                 curList.clear();
                                 final PresenceCondition presenceCondition = expressions.get(c[j]);
                                 entryLoop:
-                                for (final Pair<Integer, SortedIntegerList> entry : prevList) {
-                                    for (final SortedIntegerList literals : presenceCondition) {
+                                for (final Pair<Integer, LiteralList> entry : prevList) {
+                                    for (final LiteralList literals : presenceCondition) {
                                         if (entry.getValue().containsAll(literals)) {
                                             curList.add(entry);
                                             continue entryLoop;
@@ -163,13 +164,13 @@ public class TWiseStatisticGenerator {
                                 }
                             }
                         }
-                        final List<Pair<Integer, SortedIntegerList>> prevList = lists.get(j - 1);
-                        final List<Pair<Integer, SortedIntegerList>> curList = lists.get(j);
+                        final List<Pair<Integer, LiteralList>> prevList = lists.get(j - 1);
+                        final List<Pair<Integer, LiteralList>> curList = lists.get(j);
                         curList.clear();
                         final PresenceCondition presenceCondition = expressions.get(c[j]);
                         entryLoop:
-                        for (final Pair<Integer, SortedIntegerList> entry : prevList) {
-                            for (final SortedIntegerList literals : presenceCondition) {
+                        for (final Pair<Integer, LiteralList> entry : prevList) {
+                            for (final LiteralList literals : presenceCondition) {
                                 if (entry.getValue().containsAll(literals)) {
                                     curList.add(entry);
                                     if ((configurationScoreType != ConfigurationScore.COMPLETE)
@@ -191,14 +192,14 @@ public class TWiseStatisticGenerator {
                                 break;
                             case SIMPLE: {
                                 final long value = count == 1 ? 1 : 0;
-                                for (final Pair<Integer, SortedIntegerList> entry : curConfigurationList) {
+                                for (final Pair<Integer, LiteralList> entry : curConfigurationList) {
                                     statistic.addToScore(entry.getKey(), value);
                                 }
                                 break;
                             }
                             case COMPLETE: {
                                 final double value = 1.0 / count;
-                                for (final Pair<Integer, SortedIntegerList> entry : curConfigurationList) {
+                                for (final Pair<Integer, LiteralList> entry : curConfigurationList) {
                                     statistic.addToScore(entry.getKey(), value);
                                 }
                                 break;
@@ -243,12 +244,12 @@ public class TWiseStatisticGenerator {
 
         if (configurationScoreType != ConfigurationScore.NONE) {
             for (int sampleIndex = 0; sampleIndex < sampleListSize; sampleIndex++) {
-                final List<? extends SortedIntegerList> sample = samples.get(sampleIndex);
+                final List<? extends LiteralList> sample = samples.get(sampleIndex);
                 final CoverageStatistic statistic = statisticList.get(sampleIndex);
                 int confIndex = 0;
-                for (final SortedIntegerList configuration : sample) {
+                for (final LiteralList configuration : sample) {
                     int selectionCount = 0;
-                    for (final int literal : configuration.getIntegers()) {
+                    for (final int literal : configuration.getLiterals()) {
                         if (literal == 0) {
                             selectionCount++;
                         }
@@ -262,16 +263,16 @@ public class TWiseStatisticGenerator {
         return statisticList;
     }
 
-    public List<ValidityStatistic> getValidity(List<List<? extends SortedIntegerList>> samples) {
+    public List<ValidityStatistic> getValidity(List<List<? extends LiteralList>> samples) {
         final List<ValidityStatistic> statisticList = new ArrayList<>(samples.size());
-        for (final List<? extends SortedIntegerList> sample : samples) {
+        for (final List<? extends LiteralList> sample : samples) {
             final ValidityStatistic statistic = new ValidityStatistic(sample.size());
 
             int configurationIndex = 0;
             configLoop:
-            for (final SortedIntegerList configuration : sample) {
-                for (final SortedIntegerList sortedIntegerList : util.getCnf().getClauseList()) {
-                    if (configuration.isDisjoint(sortedIntegerList)) {
+            for (final LiteralList configuration : sample) {
+                for (final LiteralList clause : util.getCnf().getClauses()) {
+                    if (!configuration.hasDuplicates(clause)) {
                         statistic.setConfigValidity(configurationIndex++, false);
                         continue configLoop;
                     }

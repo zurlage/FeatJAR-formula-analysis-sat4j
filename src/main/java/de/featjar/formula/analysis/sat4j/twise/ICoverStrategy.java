@@ -20,10 +20,10 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.clauses.ClauseList;
 
 /**
- * A strategy for covering a given {@link LiteralMatrix expressions} within a list
+ * A strategy for covering a given {@link ClauseList expressions} within a list
  * of {@link TWiseConfiguration solutions}.
  *
  * @author Sebastian Krieter
@@ -36,5 +36,5 @@ interface ICoverStrategy {
         INVALID,
     }
 
-    CombinationStatus cover(final LiteralMatrix nextCondition);
+    CombinationStatus cover(final ClauseList nextCondition);
 }

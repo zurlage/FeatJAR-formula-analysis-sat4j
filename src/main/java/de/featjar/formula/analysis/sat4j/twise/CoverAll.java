@@ -20,13 +20,14 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Covers a given {@link LiteralMatrix expressions} within a list of
+ * Covers a given {@link ClauseList expressions} within a list of
  * {@link TWiseConfiguration solutions}.
  *
  * @author Sebastian Krieter
@@ -39,10 +40,10 @@ class CoverAll implements ICoverStrategy {
         this.util = util;
     }
 
-    private final List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList = new ArrayList<>();
+    private final List<Pair<LiteralList, TWiseConfiguration>> candidatesList = new ArrayList<>();
 
     @Override
-    public CombinationStatus cover(LiteralMatrix nextCondition) {
+    public CombinationStatus cover(ClauseList nextCondition) {
         if (util.isCovered(nextCondition)) {
             return CombinationStatus.COVERED;
         }

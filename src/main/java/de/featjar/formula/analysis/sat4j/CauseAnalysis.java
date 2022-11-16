@@ -23,8 +23,9 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.Feat;
 import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 
 import java.util.*;
 
@@ -34,40 +35,40 @@ import java.util.*;
  * @author Sebastian Krieter
  */
 public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>> {
-    public CauseAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputation, literalListIndexList);
+    public CauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+        super(inputComputation, clauseList);
     }
 
-    public CauseAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
+    public CauseAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 
     public static class Anomalies {
 
-        protected SortedIntegerList deadVariables = new SortedIntegerList();
-        protected List<SortedIntegerList> redundantSortedIntegerLists = Collections.emptyList();
+        protected LiteralList deadVariables = new LiteralList();
+        protected List<LiteralList> redundantClauses = Collections.emptyList();
 
-        public SortedIntegerList getDeadVariables() {
+        public LiteralList getDeadVariables() {
             return deadVariables;
         }
 
-        public void setDeadVariables(SortedIntegerList variables) {
+        public void setDeadVariables(LiteralList variables) {
             if (variables == null) {
-                deadVariables = new SortedIntegerList();
+                deadVariables = new LiteralList();
             } else {
                 deadVariables = variables;
             }
         }
 
-        public List<SortedIntegerList> getRedundantClauses() {
-            return redundantSortedIntegerLists;
+        public List<LiteralList> getRedundantClauses() {
+            return redundantClauses;
         }
 
-        public void setRedundantClauses(List<SortedIntegerList> redundantSortedIntegerLists) {
-            if (redundantSortedIntegerLists == null) {
-                this.redundantSortedIntegerLists = Collections.emptyList();
+        public void setRedundantClauses(List<LiteralList> redundantClauses) {
+            if (redundantClauses == null) {
+                this.redundantClauses = Collections.emptyList();
             } else {
-                this.redundantSortedIntegerLists = redundantSortedIntegerLists;
+                this.redundantClauses = redundantClauses;
             }
         }
     }
@@ -94,36 +95,36 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
     @Override
     public FutureResult<List<Anomalies>> compute() {
         return initializeSolver().thenCompute((solver, monitor) -> {
-            if (literalListIndexList == null) {
+            if (clauseList == null) {
                 return Collections.emptyList();
             }
             if (clauseGroupSize == null) {
-                clauseGroupSize = new int[literalListIndexList.size()];
+                clauseGroupSize = new int[clauseList.size()];
                 Arrays.fill(clauseGroupSize, 1);
             }
             final List<Anomalies> resultList = new ArrayList<>(clauseGroupSize.length);
-            for (int i = 0; i < literalListIndexList.size(); i++) {
+            for (int i = 0; i < clauseList.size(); i++) {
                 resultList.add(null);
             }
             if (anomalies == null) {
                 return resultList;
             }
-            monitor.setTotalSteps(literalListIndexList.size() + 3);
+            monitor.setTotalSteps(clauseList.size() + 3);
 
-            SortedIntegerList remainingVariables = anomalies.deadVariables.getAbsoluteValuesOfIntegers();
-            final List<SortedIntegerList> remainingSortedIntegerLists = new ArrayList<>(anomalies.redundantSortedIntegerLists);
+            LiteralList remainingVariables = anomalies.deadVariables.getVariables();
+            final List<LiteralList> remainingClauses = new ArrayList<>(anomalies.redundantClauses);
             monitor.addStep();
 
-            if (!remainingSortedIntegerLists.isEmpty()) {
-                final List<SortedIntegerList> result =
+            if (!remainingClauses.isEmpty()) {
+                final List<LiteralList> result =
                         Computation.of(solver.getCNF())
-                                .then(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult()
+                                .then(IndependentRedundancyAnalysis.class, remainingClauses).getResult()
                         .orElse(p -> Feat.log().problems(p));
-                remainingSortedIntegerLists.removeIf(result::contains);
+                remainingClauses.removeIf(result::contains);
             }
             monitor.addStep();
 
-            if (remainingVariables.getIntegers().length > 0) {
+            if (remainingVariables.getLiterals().length > 0) {
                 remainingVariables = remainingVariables.removeAll(
                         Computation.of(solver.getCNF()).then(CoreDeadAnalysis.class, remainingVariables).getResult()
                                 .orElse(p -> Feat.log().problems(p)));
@@ -132,30 +133,30 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
             int endIndex = 0;
             for (int i = 0; i < clauseGroupSize.length; i++) {
-                if ((remainingVariables.getIntegers().length == 0) && remainingSortedIntegerLists.isEmpty()) {
+                if ((remainingVariables.getLiterals().length == 0) && remainingClauses.isEmpty()) {
                     break;
                 }
 
                 final int startIndex = endIndex;
                 endIndex += clauseGroupSize[i];
-                solver.getSolverFormula().push(literalListIndexList.subList(startIndex, endIndex));
+                solver.getSolverFormula().push(clauseList.subList(startIndex, endIndex));
                 if (relevantConstraint[i]) {
-                    if (remainingVariables.getIntegers().length > 0) {
-                        final SortedIntegerList deadVariables =
+                    if (remainingVariables.getLiterals().length > 0) {
+                        final LiteralList deadVariables =
                                 Computation.of(solver.getCNF()).then(CoreDeadAnalysis.class, remainingVariables).getResult().get();
-                        if (deadVariables.getIntegers().length != 0) {
+                        if (deadVariables.getLiterals().length != 0) {
                             getAnomalies(resultList, i).setDeadVariables(deadVariables);
                             remainingVariables = remainingVariables.removeAll(deadVariables);
                         }
                     }
 
-                    if (!remainingSortedIntegerLists.isEmpty()) {
-                        final List<SortedIntegerList> newLiteralListIndexList =
-                                Computation.of(solver.getCNF()).then(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult().get();
-                        newLiteralListIndexList.removeIf(Objects::isNull);
-                        if (!newLiteralListIndexList.isEmpty()) {
-                            getAnomalies(resultList, i).setRedundantClauses(newLiteralListIndexList);
-                            remainingSortedIntegerLists.removeAll(newLiteralListIndexList);
+                    if (!remainingClauses.isEmpty()) {
+                        final List<LiteralList> newClauseList =
+                                Computation.of(solver.getCNF()).then(IndependentRedundancyAnalysis.class, remainingClauses).getResult().get();
+                        newClauseList.removeIf(Objects::isNull);
+                        if (!newClauseList.isEmpty()) {
+                            getAnomalies(resultList, i).setRedundantClauses(newClauseList);
+                            remainingClauses.removeAll(newClauseList);
                         }
                     }
                 }

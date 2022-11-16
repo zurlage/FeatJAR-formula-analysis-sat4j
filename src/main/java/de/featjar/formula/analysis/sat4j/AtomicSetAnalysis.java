@@ -24,31 +24,34 @@ import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
-
+import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
+import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Finds atomic sets.
  *
  * @author Sebastian Krieter
  */
-public class AtomicSetAnalysis extends Sat4JAnalysis<List<SortedIntegerList>> { // todo: AVariableAnalysis
+public class AtomicSetAnalysis extends Sat4JAnalysis<List<LiteralList>> { // todo: AVariableAnalysis
     public AtomicSetAnalysis(Computation<CNF> inputComputation) {
         super(inputComputation);
     }
 
-    public AtomicSetAnalysis(Computation<CNF> inputComputation, Assignment assumptions, long timeoutInMs, long randomSeed) {
+    public AtomicSetAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override
-    public FutureResult<List<SortedIntegerList>> compute() {
+    public FutureResult<List<LiteralList>> compute() {
         return initializeSolver().thenCompute(((solver, monitor) -> {
-            final List<SortedIntegerList> result = new ArrayList<>();
+            final List<LiteralList> result = new ArrayList<>();
             //		if (variables == null) {
             //			variables = LiteralList.getVariables(solver.getVariables());
             //		}
@@ -56,40 +59,40 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<SortedIntegerList>> { 
             // for all variables not in this.variables, set done[...] to 2
 
             solver.setSelectionStrategy(SStrategy.positive());
-            final int[] model1 = solver.findSolution().get().getIntegers();
-            final List<SortedIntegerList> solutions = solver.rememberSolutionHistory(1000);
+            final int[] model1 = solver.findSolution().get().getLiterals();
+            final List<LiteralList> solutions = solver.rememberSolutionHistory(1000);
 
             if (model1 != null) {
                 // initial atomic set consists of core and dead features
                 solver.setSelectionStrategy(SStrategy.negative());
-                final int[] model2 = solver.findSolution().get().getIntegers();
+                final int[] model2 = solver.findSolution().get().getLiterals();
                 solver.setSelectionStrategy(SStrategy.positive());
 
                 final byte[] done = new byte[model1.length];
 
                 final int[] model1Copy = Arrays.copyOf(model1, model1.length);
 
-                SortedIntegerList.resetConflicts(model1Copy, model2);
+                LiteralList.resetConflicts(model1Copy, model2);
                 for (int i = 0; i < model1Copy.length; i++) {
                     final int varX = model1Copy[i];
                     if (varX != 0) {
-                        solver.getAssumptionList().push(-varX);
+                        solver.getAssumptions().push(-varX);
                         Result<Boolean> hasSolution = solver.hasSolution();
                         if (Result.of(false).equals(hasSolution)) {
                             done[i] = 2;
-                            solver.getAssumptionList().replaceLast(varX);
+                            solver.getAssumptions().replaceLast(varX);
                         } else if (Result.empty().equals(hasSolution)) {
-                            solver.getAssumptionList().pop();
+                            solver.getAssumptions().pop();
                             // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
                         } else if (Result.of(true).equals(hasSolution)) {
-                            solver.getAssumptionList().pop();
-                            SortedIntegerList.resetConflicts(model1Copy, solver.getInternalSolution());
+                            solver.getAssumptions().pop();
+                            LiteralList.resetConflicts(model1Copy, solver.getInternalSolution());
                             solver.shuffleOrder(random);
                         }
                     }
                 }
-                final int fixedSize = solver.getAssumptionList().size();
-                result.add(new SortedIntegerList(solver.getAssumptionList().asArray(0, fixedSize)));
+                final int fixedSize = solver.getAssumptions().size();
+                result.add(new LiteralList(solver.getAssumptions().asArray(0, fixedSize)));
 
                 solver.setSelectionStrategy(SStrategy.random(random));
 
@@ -100,21 +103,21 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<SortedIntegerList>> { 
                         int[] xModel0 = Arrays.copyOf(model1, model1.length);
 
                         final int mx0 = xModel0[i];
-                        solver.getAssumptionList().push(mx0);
+                        solver.getAssumptions().push(mx0);
 
                         inner:
                         for (int j = i + 1; j < xModel0.length; j++) {
                             final int my0 = xModel0[j];
                             if ((my0 != 0) && (done[j] == 0)) {
-                                for (final SortedIntegerList solution : solutions) {
-                                    final int mxI = solution.getIntegers()[i];
-                                    final int myI = solution.getIntegers()[j];
+                                for (final LiteralList solution : solutions) {
+                                    final int mxI = solution.getLiterals()[i];
+                                    final int myI = solution.getLiterals()[j];
                                     if ((mx0 == mxI) != (my0 == myI)) {
                                         continue inner;
                                     }
                                 }
 
-                                solver.getAssumptionList().push(-my0);
+                                solver.getAssumptions().push(-my0);
 
                                 Result<Boolean> hasSolution = solver.hasSolution();
                                 if (Result.of(false).equals(hasSolution)) {
@@ -122,15 +125,15 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<SortedIntegerList>> { 
                                 } else if (Result.empty().equals(hasSolution)) {
                                     // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
                                 } else if (Result.of(true).equals(hasSolution)) {
-                                    SortedIntegerList.resetConflicts(xModel0, solver.getInternalSolution());
+                                    LiteralList.resetConflicts(xModel0, solver.getInternalSolution());
                                     solver.shuffleOrder(random);
                                 }
-                                solver.getAssumptionList().pop();
+                                solver.getAssumptions().pop();
                             }
                         }
 
-                        solver.getAssumptionList().pop();
-                        solver.getAssumptionList().push(-mx0);
+                        solver.getAssumptions().pop();
+                        solver.getAssumptions().push(-mx0);
 
                         Result<Boolean> hasSolution = solver.hasSolution();
                         if (Result.of(false).equals(hasSolution)) {
@@ -147,21 +150,21 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<SortedIntegerList>> { 
                             if (done[j] == 1) {
                                 final int my0 = xModel0[j];
                                 if (my0 != 0) {
-                                    solver.getAssumptionList().push(-my0);
+                                    solver.getAssumptions().push(-my0);
 
                                     Result<Boolean> solution = solver.hasSolution();
                                     if (Result.of(false).equals(solution)) {
                                         done[j] = 2;
-                                        solver.getAssumptionList().replaceLast(my0);
+                                        solver.getAssumptions().replaceLast(my0);
                                     } else if (Result.empty().equals(solution)) {
                                         done[j] = 0;
-                                        solver.getAssumptionList().pop();
+                                        solver.getAssumptions().pop();
                                         // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
                                     } else if (Result.of(true).equals(solution)) {
                                         done[j] = 0;
-                                        SortedIntegerList.resetConflicts(xModel0, solver.getInternalSolution());
+                                        LiteralList.resetConflicts(xModel0, solver.getInternalSolution());
                                         solver.shuffleOrder(random);
-                                        solver.getAssumptionList().pop();
+                                        solver.getAssumptions().pop();
                                     }
                                 } else {
                                     done[j] = 0;
@@ -169,9 +172,9 @@ public class AtomicSetAnalysis extends Sat4JAnalysis<List<SortedIntegerList>> { 
                             }
                         }
 
-                        result.add(new SortedIntegerList(solver.getAssumptionList()
-                                .asArray(fixedSize, solver.getAssumptionList().size())));
-                        solver.getAssumptionList().clear(fixedSize);
+                        result.add(new LiteralList(solver.getAssumptions()
+                                .asArray(fixedSize, solver.getAssumptions().size())));
+                        solver.getAssumptions().clear(fixedSize);
                     }
                 }
             }

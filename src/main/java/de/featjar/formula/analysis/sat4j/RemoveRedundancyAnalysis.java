@@ -23,8 +23,9 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,35 +50,35 @@ import org.sat4j.specs.IConstr;
  * @see AddRedundancyAnalysis
  * @see IndependentRedundancyAnalysis
  */
-public class RemoveRedundancyAnalysis extends ClauseAnalysis<List<SortedIntegerList>> {
-    public RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputation, literalListIndexList);
+public class RemoveRedundancyAnalysis extends ClauseAnalysis<List<LiteralList>> {
+    public RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
+        super(inputComputation, clauseList);
     }
 
-    public RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
+    public RemoveRedundancyAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override
-    public FutureResult<List<SortedIntegerList>> compute() {
+    public FutureResult<List<LiteralList>> compute() {
         return initializeSolver().thenCompute(((solver, monitor) -> {
-            if (literalListIndexList == null) {
+            if (clauseList == null) {
                 return Collections.emptyList();
             }
             if (clauseGroupSize == null) {
-                clauseGroupSize = new int[literalListIndexList.size()];
+                clauseGroupSize = new int[clauseList.size()];
                 Arrays.fill(clauseGroupSize, 1);
             }
             monitor.setTotalSteps(clauseGroupSize.length + 1);
 
-            final List<SortedIntegerList> resultList = new ArrayList<>(clauseGroupSize.length);
-            for (int i = 0; i < literalListIndexList.size(); i++) {
+            final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
+            for (int i = 0; i < clauseList.size(); i++) {
                 resultList.add(null);
             }
 
-            final List<IConstr> constrs = new ArrayList<>(literalListIndexList.size());
-            for (final SortedIntegerList sortedIntegerList : literalListIndexList) {
-                constrs.add(solver.getSolverFormula().push(sortedIntegerList));
+            final List<IConstr> constrs = new ArrayList<>(clauseList.size());
+            for (final LiteralList clause : clauseList) {
+                constrs.add(solver.getSolverFormula().push(clause));
             }
 
             monitor.addStep();
@@ -98,14 +99,14 @@ public class RemoveRedundancyAnalysis extends ClauseAnalysis<List<SortedIntegerL
 
                 if (removedAtLeastOne) {
                     for (int j = startIndex; j < endIndex; j++) {
-                        final SortedIntegerList sortedIntegerList = literalListIndexList.get(j);
+                        final LiteralList clause = clauseList.get(j);
 
-                        final Result<Boolean> hasSolution = solver.hasSolution(sortedIntegerList.negate());
+                        final Result<Boolean> hasSolution = solver.hasSolution(clause.negate());
                         if (Result.of(false).equals(hasSolution)) {
                         } else if (Result.empty().equals(hasSolution)) {
                             //reportTimeout();
                         } else if (Result.of(true).equals(hasSolution)) {
-                            solver.getSolverFormula().push(sortedIntegerList);
+                            solver.getSolverFormula().push(clause);
                             completelyRedundant = false;
                         } else {
                             throw new AssertionError(hasSolution);
@@ -114,7 +115,7 @@ public class RemoveRedundancyAnalysis extends ClauseAnalysis<List<SortedIntegerL
                 }
 
                 if (completelyRedundant) {
-                    resultList.set(i, literalListIndexList.get(startIndex));
+                    resultList.set(i, clauseList.get(startIndex));
                 }
                 monitor.addStep();
             }

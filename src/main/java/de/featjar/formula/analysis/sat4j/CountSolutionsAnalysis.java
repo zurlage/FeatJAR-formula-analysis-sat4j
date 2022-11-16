@@ -24,8 +24,9 @@ import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.assignment.VariableAssignment;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 
 /**
  * Attempts to count the number of possible solutions of a given {@link CNF}.
@@ -38,7 +39,7 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
         super(inputComputation);
     }
 
-    public CountSolutionsAnalysis(Computation<CNF> inputComputation, Assignment assumptions, long timeoutInMs, long randomSeed) {
+    public CountSolutionsAnalysis(Computation<CNF> inputComputation, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
         super(inputComputation, assumptions, timeoutInMs, randomSeed);
     }
 
@@ -52,7 +53,7 @@ public class CountSolutionsAnalysis extends Sat4JAnalysis<Long> {
                 solutionCount++;
                 final int[] solution = solver.getInternalSolution();
                 try {
-                    solver.getSolverFormula().push(new SortedIntegerList(solution, SortedIntegerList.Order.INDEX, false).negate());
+                    solver.getSolverFormula().push(new LiteralList(solution, LiteralList.Order.INDEX, false).negate());
                 } catch (final SolverContradictionException e) {
                     break;
                 }

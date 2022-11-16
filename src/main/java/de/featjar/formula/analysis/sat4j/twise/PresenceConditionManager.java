@@ -20,8 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
-
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,8 +42,8 @@ public class PresenceConditionManager {
     private final List<List<PresenceCondition>> dictionary = new ArrayList<>();
     private final List<List<PresenceCondition>> groupedPresenceConditions = new ArrayList<>();
 
-    public PresenceConditionManager(TWiseConfigurationUtil util, List<List<LiteralMatrix>> expressions) {
-        final SortedIntegerList coreDeadFeature = util.getDeadCoreFeatures();
+    public PresenceConditionManager(TWiseConfigurationUtil util, List<List<ClauseList>> expressions) {
+        final LiteralList coreDeadFeature = util.getDeadCoreFeatures();
         final int numberOfVariables = util.getCnf().getVariableMap().getVariableCount();
 
         final HashMap<PresenceCondition, PresenceCondition> presenceConditionSet = new HashMap<>();
@@ -55,31 +55,31 @@ public class PresenceConditionManager {
         }
 
         int groupIndex = 0;
-        for (final List<LiteralMatrix> group : expressions) {
+        for (final List<ClauseList> group : expressions) {
             final List<PresenceCondition> newFormulaList = new ArrayList<>();
             expressionLoop:
-            for (final LiteralMatrix clauses : group) {
-                final List<SortedIntegerList> newSortedIntegerLists = new ArrayList<>();
-                for (final SortedIntegerList sortedIntegerList : clauses) {
+            for (final ClauseList clauses : group) {
+                final List<LiteralList> newClauses = new ArrayList<>();
+                for (final LiteralList clause : clauses) {
                     // If clause can be satisfied
-                    if ((sortedIntegerList.countConflicts(coreDeadFeature) == 0)) {
+                    if ((clause.countConflicts(coreDeadFeature) == 0)) {
                         // If clause is already satisfied
-                        if (coreDeadFeature.containsAll(sortedIntegerList)) {
+                        if (coreDeadFeature.containsAll(clause)) {
                             continue expressionLoop;
                         } else {
-                            newSortedIntegerLists.add(sortedIntegerList.clone());
+                            newClauses.add(clause.clone());
                         }
                     }
                 }
-                if (!newSortedIntegerLists.isEmpty()) {
-                    final PresenceCondition pc = new PresenceCondition(new LiteralMatrix(newSortedIntegerLists));
+                if (!newClauses.isEmpty()) {
+                    final PresenceCondition pc = new PresenceCondition(new ClauseList(newClauses));
                     PresenceCondition mappedPc = presenceConditionSet.get(pc);
                     if (mappedPc == null) {
                         mappedPc = pc;
                         presenceConditionSet.put(mappedPc, mappedPc);
 
-                        for (final SortedIntegerList literalSet : mappedPc) {
-                            for (final int literal : literalSet.getIntegers()) {
+                        for (final LiteralList literalSet : mappedPc) {
+                            for (final int literal : literalSet.getLiterals()) {
                                 final int dictionaryIndex = literal < 0 ? numberOfVariables - literal : literal;
                                 dictionary.get(dictionaryIndex).add(mappedPc);
                             }

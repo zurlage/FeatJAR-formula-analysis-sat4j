@@ -20,8 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
-
+import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +42,7 @@ public class TWiseCombiner {
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<LiteralMatrix>> convertLiterals(SortedIntegerList literalSet) {
+    public static List<List<ClauseList>> convertLiterals(LiteralList literalSet) {
         return convertGroupedLiterals(Arrays.asList(literalSet));
     }
 
@@ -53,15 +53,15 @@ public class TWiseCombiner {
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<LiteralMatrix>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
-        final List<List<LiteralMatrix>> groupedExpressions = new ArrayList<>(groupedLiterals.size());
-        for (final SortedIntegerList literalSet : groupedLiterals) {
-            final List<LiteralMatrix> arrayList = new ArrayList<>(literalSet.size());
+    public static List<List<ClauseList>> convertGroupedLiterals(List<LiteralList> groupedLiterals) {
+        final List<List<ClauseList>> groupedExpressions = new ArrayList<>(groupedLiterals.size());
+        for (final LiteralList literalSet : groupedLiterals) {
+            final List<ClauseList> arrayList = new ArrayList<>(literalSet.size());
             groupedExpressions.add(arrayList);
-            for (final Integer literal : literalSet.getIntegers()) {
-                final LiteralMatrix literalMatrix = new LiteralMatrix(1);
-                literalMatrix.add(new SortedIntegerList(literal));
-                arrayList.add(literalMatrix);
+            for (final Integer literal : literalSet.getLiterals()) {
+                final ClauseList clauseList = new ClauseList(1);
+                clauseList.add(new LiteralList(literal));
+                arrayList.add(clauseList);
             }
         }
         return groupedExpressions;
@@ -75,7 +75,7 @@ public class TWiseCombiner {
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<LiteralMatrix>> convertExpressions(List<LiteralMatrix> expressions) {
+    public static List<List<ClauseList>> convertExpressions(List<ClauseList> expressions) {
         return Arrays.asList(expressions);
     }
 
@@ -86,18 +86,18 @@ public class TWiseCombiner {
         features = new int[numberOfVariables + 1];
     }
 
-    public boolean combineConditions(LiteralMatrix[] conditionArray, LiteralMatrix combinedCondition) {
+    public boolean combineConditions(ClauseList[] conditionArray, ClauseList combinedCondition) {
         return combineConditions(conditionArray, 0, combinedCondition);
     }
 
-    private boolean combineConditions(LiteralMatrix[] conditionArray, int t, LiteralMatrix combinedCondition) {
+    private boolean combineConditions(ClauseList[] conditionArray, int t, ClauseList combinedCondition) {
         if (t == conditionArray.length) {
             final int[] combinedLiteralsArray = Arrays.copyOfRange(lits.toArray(), 0, lits.size());
-            combinedCondition.add(new SortedIntegerList(combinedLiteralsArray));
+            combinedCondition.add(new LiteralList(combinedLiteralsArray));
         } else {
             clauseLoop:
-            for (final SortedIntegerList sortedIntegerList : conditionArray[t]) {
-                final int[] literals = sortedIntegerList.getIntegers();
+            for (final LiteralList clause : conditionArray[t]) {
+                final int[] literals = clause.getLiterals();
                 for (int i = 0; i < literals.length; i++) {
                     final int literal = literals[i];
                     final int var = Math.abs(literal);
@@ -139,7 +139,7 @@ public class TWiseCombiner {
         return true;
     }
 
-    private boolean combineIteratively(PresenceCondition[] conditionArray, LiteralMatrix combinedCondition) {
+    private boolean combineIteratively(PresenceCondition[] conditionArray, ClauseList combinedCondition) {
         final int[] clauseIndex = new int[conditionArray.length];
         clauseIndex[0] = -1;
 
@@ -153,7 +153,7 @@ public class TWiseCombiner {
                 } else {
                     clauseIndex[i] = cindex + 1;
 
-                    final SortedIntegerList literalSet = getCombinationLiterals(clauseIndex, conditionArray);
+                    final LiteralList literalSet = getCombinationLiterals(clauseIndex, conditionArray);
                     if (literalSet != null) {
                         combinedCondition.add(literalSet);
                         continue loop;
@@ -164,10 +164,10 @@ public class TWiseCombiner {
         return true;
     }
 
-    private SortedIntegerList getCombinationLiterals(final int[] clauseIndex, final PresenceCondition[] clauseListArray) {
+    private LiteralList getCombinationLiterals(final int[] clauseIndex, final PresenceCondition[] clauseListArray) {
         final TreeSet<Integer> newLiteralSet = new TreeSet<>();
         for (int j = 0; j < clauseIndex.length; j++) {
-            for (final int literal : clauseListArray[j].get(clauseIndex[j]).getIntegers()) {
+            for (final int literal : clauseListArray[j].get(clauseIndex[j]).getLiterals()) {
                 if (newLiteralSet.contains(-literal)) {
                     return null;
                 } else {
@@ -181,18 +181,18 @@ public class TWiseCombiner {
         for (final Integer literal : newLiteralSet) {
             combinationLiterals[j++] = literal;
         }
-        final SortedIntegerList literalSet = new SortedIntegerList(combinationLiterals);
+        final LiteralList literalSet = new LiteralList(combinationLiterals);
         return literalSet;
     }
 
-    private boolean combineConditions3(PresenceCondition[] conditionArray, int t, LiteralMatrix combinedCondition) {
+    private boolean combineConditions3(PresenceCondition[] conditionArray, int t, ClauseList combinedCondition) {
         if (t == conditionArray.length) {
             final int[] combinedLiteralsArray = Arrays.copyOfRange(lits.toArray(), 0, lits.size());
-            combinedCondition.add(new SortedIntegerList(combinedLiteralsArray));
+            combinedCondition.add(new LiteralList(combinedLiteralsArray));
         } else {
             clauseLoop:
-            for (final SortedIntegerList sortedIntegerList : conditionArray[t]) {
-                final int[] literals = sortedIntegerList.getIntegers();
+            for (final LiteralList clause : conditionArray[t]) {
+                final int[] literals = clause.getLiterals();
                 for (int i = 0; i < literals.length; i++) {
                     final int literal = literals[i];
                     final int var = Math.abs(literal);
@@ -233,17 +233,17 @@ public class TWiseCombiner {
         return true;
     }
 
-    private boolean combineConditions2(PresenceCondition[] conditionArray, int t, LiteralMatrix combinedCondition) {
+    private boolean combineConditions2(PresenceCondition[] conditionArray, int t, ClauseList combinedCondition) {
         if (t == conditionArray.length) {
             if (combinedCondition.size() >= 1) {
                 return false;
             }
             final int[] combinedLiteralsArray = Arrays.copyOfRange(lits.toArray(), 0, lits.size());
-            combinedCondition.add(new SortedIntegerList(combinedLiteralsArray));
+            combinedCondition.add(new LiteralList(combinedLiteralsArray));
         } else {
             clauseLoop:
-            for (final SortedIntegerList sortedIntegerList : conditionArray[t]) {
-                final int[] literals = sortedIntegerList.getIntegers();
+            for (final LiteralList clause : conditionArray[t]) {
+                final int[] literals = clause.getLiterals();
                 for (int i = 0; i < literals.length; i++) {
                     final int literal = literals[i];
                     final int var = Math.abs(literal);

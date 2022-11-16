@@ -20,15 +20,16 @@
  */
 package de.featjar.formula.analysis.mig.solver;
 
+import de.featjar.formula.clauses.LiteralList;
 import java.util.Comparator;
 
 /**
- * Compares the dependencies of the {@link SortedIntegerList literals} using a
+ * Compares the dependencies of the {@link LiteralList literals} using a
  * {@link ModalImplicationGraph}.
  *
  * @author Sebastian Krieter
  */
-public class MIGComparator implements Comparator<SortedIntegerList> {
+public class MIGComparator implements Comparator<LiteralList> {
 
     private static class VertexInfo {
 
@@ -55,8 +56,8 @@ public class MIGComparator implements Comparator<SortedIntegerList> {
             for (final Vertex strongEdge : vertex.getStrongEdges()) {
                 vertexInfos[ModalImplicationGraph.getVertexIndex(strongEdge)].strongIn++;
             }
-            for (final SortedIntegerList sortedIntegerList : vertex.getComplexClauses()) {
-                for (final int literal : sortedIntegerList.getIntegers()) {
+            for (final LiteralList clause : vertex.getComplexClauses()) {
+                for (final int literal : clause.getLiterals()) {
                     if (literal != vertex.getVar()) {
                         vertexInfos[ModalImplicationGraph.getVertexIndex(literal)].weakIn++;
                     }
@@ -66,23 +67,23 @@ public class MIGComparator implements Comparator<SortedIntegerList> {
     }
 
     @Override
-    public int compare(SortedIntegerList o1, SortedIntegerList o2) {
+    public int compare(LiteralList o1, LiteralList o2) {
         final double f1 = computeValue(o1);
         final double f2 = computeValue(o2);
         return (int) Math.signum(f1 - f2);
     }
 
-    public String getValue(SortedIntegerList o1) {
-        final VertexInfo vi1 = vertexInfos[ModalImplicationGraph.getVertexIndex(o1.getIntegers()[0])];
+    public String getValue(LiteralList o1) {
+        final VertexInfo vi1 = vertexInfos[ModalImplicationGraph.getVertexIndex(o1.getLiterals()[0])];
         final double f1 = computeValue(o1);
         return o1 + " | " + vi1 + " -> " + f1;
     }
 
-    public double computeValue(SortedIntegerList... set) {
+    public double computeValue(LiteralList... set) {
         int vIn = 0;
         int vOut = 0;
-        for (final SortedIntegerList literalSet : set) {
-            for (final int literal : literalSet.getIntegers()) {
+        for (final LiteralList literalSet : set) {
+            for (final int literal : literalSet.getLiterals()) {
                 final VertexInfo info = vertexInfos[ModalImplicationGraph.getVertexIndex(literal)];
                 vIn += (info.strongIn) + info.weakIn;
                 vOut += (info.strongOut) + info.weakOut;
@@ -91,10 +92,10 @@ public class MIGComparator implements Comparator<SortedIntegerList> {
         return vIn - (vOut * vOut);
     }
 
-    public int getOut(SortedIntegerList... set) {
+    public int getOut(LiteralList... set) {
         int vOut = 0;
-        for (final SortedIntegerList literalSet : set) {
-            for (final int literal : literalSet.getIntegers()) {
+        for (final LiteralList literalSet : set) {
+            for (final int literal : literalSet.getLiterals()) {
                 final VertexInfo info = vertexInfos[ModalImplicationGraph.getVertexIndex(literal)];
                 vOut += info.strongOut + info.weakOut;
             }

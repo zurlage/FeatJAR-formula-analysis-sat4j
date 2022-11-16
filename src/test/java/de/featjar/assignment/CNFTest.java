@@ -35,7 +35,8 @@ import de.featjar.formula.analysis.sat4j.IndependentContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.IndependentRedundancyAnalysis;
 import de.featjar.formula.analysis.sat4j.IndeterminateAnalysis;
 import de.featjar.formula.analysis.sat4j.RemoveRedundancyAnalysis;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
@@ -84,7 +85,7 @@ public class CNFTest {
         executeAnalysis(rep, new ConditionallyCoreDeadAnalysisMIG());
 
         final CNF cnf = rep.get(CNFComputation.fromFormula());
-        final CNFSlicer slicer = new CNFSlicer(new SortedIntegerList(2));
+        final CNFSlicer slicer = new CNFSlicer(new LiteralList(2));
         final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Log::problems);
 
         cnf.adapt(slicedCNF.getVariableMap()).orElse(Log::problems);

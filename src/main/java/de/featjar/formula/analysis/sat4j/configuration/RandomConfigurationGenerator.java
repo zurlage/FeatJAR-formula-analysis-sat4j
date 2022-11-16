@@ -21,6 +21,7 @@
 package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.analysis.solver.SolverContradictionException;
+import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.task.Monitor;
 import java.util.Random;
 
@@ -44,13 +45,13 @@ public abstract class RandomConfigurationGenerator extends AbstractConfiguration
     }
 
     @Override
-    public SortedIntegerList get() {
+    public LiteralList get() {
         if (!satisfiable) {
             return null;
         }
         reset();
         solver.shuffleOrder(random);
-        final SortedIntegerList solution = solver.findSolution();
+        final LiteralList solution = solver.findSolution();
         if (solution == null) {
             satisfiable = false;
             return null;
@@ -65,7 +66,7 @@ public abstract class RandomConfigurationGenerator extends AbstractConfiguration
         return solution;
     }
 
-    protected void forbidSolution(final SortedIntegerList negate) {
+    protected void forbidSolution(final LiteralList negate) {
         solver.getFormula().push(negate);
     }
 
