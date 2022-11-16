@@ -35,7 +35,6 @@ import de.featjar.formula.analysis.sat4j.IndependentContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.IndependentRedundancyAnalysis;
 import de.featjar.formula.analysis.sat4j.IndeterminateAnalysis;
 import de.featjar.formula.analysis.sat4j.RemoveRedundancyAnalysis;
-import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.formula.structure.formula.connective.And;

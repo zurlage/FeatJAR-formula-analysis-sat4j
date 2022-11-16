@@ -26,7 +26,6 @@ import de.featjar.formula.analysis.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import java.util.Arrays;

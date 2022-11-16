@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.sat4j.configuration;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SampleDistribution;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.log.Log;
@@ -52,7 +52,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         gen.setRandom(random);
         gen.setLimit(sampleSize);
         sample = Executor.apply(gen::execute, solver.getCnf())
-                .map(SolutionList::getSolutions)
+                .map(BooleanSolutionList::getSolutions)
                 .orElse(Log::problems);
         if ((sample == null) || sample.isEmpty()) {
             satisfiable = false;

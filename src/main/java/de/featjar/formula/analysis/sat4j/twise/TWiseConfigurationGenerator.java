@@ -23,8 +23,7 @@ package de.featjar.formula.analysis.sat4j.twise;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.sat4j.configuration.AbstractConfigurationGenerator;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.IntervalThread;
 
@@ -65,7 +64,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<LiteralMatrix>> convertLiterals(SortedIntegerList literalSet) {
+    public static List<List<BooleanAssignmentList>> convertLiterals(SortedIntegerList literalSet) {
         return TWiseCombiner.convertGroupedLiterals(Arrays.asList(literalSet));
     }
 
@@ -76,7 +75,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<LiteralMatrix>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
+    public static List<List<BooleanAssignmentList>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
         return TWiseCombiner.convertGroupedLiterals(groupedLiterals);
     }
 
@@ -88,7 +87,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<LiteralMatrix>> convertExpressions(List<LiteralMatrix> expressions) {
+    public static List<List<BooleanAssignmentList>> convertExpressions(List<BooleanAssignmentList> expressions) {
         return TWiseCombiner.convertExpressions(expressions);
     }
 
@@ -112,7 +111,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     protected Random random = new Random(0);
 
     protected int t;
-    protected List<List<LiteralMatrix>> nodes;
+    protected List<List<BooleanAssignmentList>> nodes;
     protected PresenceConditionManager presenceConditionManager;
 
     protected long numberOfCombinations, count, coveredCount, invalidCount;
@@ -142,11 +141,11 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         this.t = t;
     }
 
-    public List<List<LiteralMatrix>> getNodes() {
+    public List<List<BooleanAssignmentList>> getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<List<LiteralMatrix>> nodes) {
+    public void setNodes(List<List<BooleanAssignmentList>> nodes) {
         this.nodes = nodes;
     }
 
@@ -267,7 +266,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
                 );
 
         // TODO Variation Point: Combination order
-        final ICombinationSupplier<LiteralMatrix> it;
+        final ICombinationSupplier<BooleanAssignmentList> it;
         presenceConditionManager.shuffleSort(random);
         final List<List<PresenceCondition>> groupedPresenceConditions =
                 presenceConditionManager.getGroupedPresenceConditions();
@@ -282,12 +281,12 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         coveredCount = 0;
         invalidCount = 0;
 
-        final List<LiteralMatrix> combinationListUncovered = new ArrayList<>();
+        final List<BooleanAssignmentList> combinationListUncovered = new ArrayList<>();
         count = coveredCount;
         phaseCount++;
         ICoverStrategy phase = phaseList.get(0);
         while (true) {
-            final LiteralMatrix combinedCondition = it.get();
+            final BooleanAssignmentList combinedCondition = it.get();
             if (combinedCondition == null) {
                 break;
             }
@@ -321,7 +320,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             phase = phaseList.get(j);
             count = coveredCount + invalidCount;
             for (int i = coveredIndex + 1; i < combinationListUncovered.size(); i++) {
-                final LiteralMatrix combination = combinationListUncovered.get(i);
+                final BooleanAssignmentList combination = combinationListUncovered.get(i);
                 final ICoverStrategy.CombinationStatus covered = phase.cover(combination);
                 switch (covered) {
                     case COVERED:

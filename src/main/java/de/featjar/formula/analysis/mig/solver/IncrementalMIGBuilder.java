@@ -22,9 +22,7 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.clause.CNFs;
+import de.featjar.formula.analysis.todo.Deprecated;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import java.util.Collection;
@@ -173,7 +171,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         final int[] coreDead = oldModalImplicationGraph.getVertices().stream() //
                 .filter(Vertex::isCore) //
                 .mapToInt(Vertex::getVar) //
-                .map(l -> CNFs.adapt(l, oldModalImplicationGraph.getCnf().getVariableMap(), cnf.getVariableMap())) //
+                .map(l -> Deprecated.adapt(l, oldModalImplicationGraph.getCnf().getVariableMap(), cnf.getVariableMap())) //
                 .filter(l -> l != 0) //
                 .peek(l -> {
                     modalImplicationGraph.getVertex(l).setStatus(Vertex.Status.Core);

@@ -21,8 +21,6 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
 
 import java.util.List;
 

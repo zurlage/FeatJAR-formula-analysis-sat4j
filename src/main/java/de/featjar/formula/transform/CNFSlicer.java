@@ -22,8 +22,6 @@ package de.featjar.formula.transform;
 
 import de.featjar.base.data.IntegerList;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;

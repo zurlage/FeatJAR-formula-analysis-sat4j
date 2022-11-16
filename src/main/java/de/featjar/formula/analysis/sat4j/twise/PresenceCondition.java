@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 
 import java.util.Collection;
 import java.util.Set;
@@ -31,7 +31,7 @@ import java.util.TreeSet;
  *
  * @author Sebastian Krieter
  */
-public class PresenceCondition extends LiteralMatrix {
+public class PresenceCondition extends BooleanAssignmentList {
 
 
     private final transient TreeSet<Integer> groups = new TreeSet<>();
@@ -39,8 +39,8 @@ public class PresenceCondition extends LiteralMatrix {
     public PresenceCondition() {
     }
 
-    public PresenceCondition(LiteralMatrix otherLiteralMatrix) {
-        super(otherLiteralMatrix);
+    public PresenceCondition(BooleanAssignmentList otherBooleanAssignmentList) {
+        super(otherBooleanAssignmentList);
     }
 
     public PresenceCondition(Collection<? extends SortedIntegerList> c) {

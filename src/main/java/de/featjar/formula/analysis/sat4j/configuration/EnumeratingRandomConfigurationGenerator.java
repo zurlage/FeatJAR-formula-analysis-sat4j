@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.log.Log;
@@ -40,7 +40,7 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
     protected void init(Monitor monitor) {
         final AllConfigurationGenerator gen = new AllConfigurationGenerator();
         allConfigurations = Executor.apply(gen::execute, solver.getCnf(), monitor)
-                .map(SolutionList::getSolutions)
+                .map(BooleanSolutionList::getSolutions)
                 .orElse(Collections::emptyList, Log::problems);
         if (!allowDuplicates) {
             Collections.shuffle(allConfigurations, random);

@@ -22,8 +22,6 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.mig.solver.Vertex.Status;
 import de.featjar.formula.analysis.mig.solver.visitor.Traverser;
-import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.sat.clause.CNF;
 
 import java.util.ArrayList;
 import java.util.List;

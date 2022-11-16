@@ -23,8 +23,6 @@ package de.featjar.formula.analysis.mig;
 import de.featjar.formula.analysis.Analysis;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.Sat4JMIGSolver;
-import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.solver.SolverTimeoutException;
 import de.featjar.base.task.Monitor;
 
 import java.util.Random;

@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.analysis.sat4j.Sat4JAnalysis;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.data.Cache;
 import de.featjar.base.task.Monitor;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Sebastian Krieter
  */
-public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<SolutionList>
+public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<BooleanSolutionList>
         implements ConfigurationGenerator {
 
     private int maxSampleSize = Integer.MAX_VALUE;
@@ -100,10 +100,10 @@ public abstract class AbstractConfigurationGenerator extends Sat4JAnalysis<Solut
     protected void init(Monitor monitor) {}
 
     @Override
-    public final SolutionList analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
+    public final BooleanSolutionList analyze(Sat4JSolutionSolver solver, Monitor monitor) throws Exception {
         init(monitor);
         monitor.setTotalSteps(maxSampleSize);
-        return new SolutionList(
+        return new BooleanSolutionList(
                 solver.getVariableMap(),
                 StreamSupport.stream(this, false) //
                         .limit(maxSampleSize) //

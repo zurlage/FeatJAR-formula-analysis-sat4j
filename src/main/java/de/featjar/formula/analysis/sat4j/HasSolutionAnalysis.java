@@ -22,8 +22,6 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
 
 /**
  * Determines whether a given {@link CNF} is satisfiable and returns the found

@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.base.data.Computation;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.data.Cache;
 import de.featjar.base.task.Monitor;
 import java.util.Spliterator;
@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 /**
  * Interface for configuration generators. Can be used as a {@link Supplier} or
- * to get a {@link Stream} or a {@link SolutionList} of configurations.
+ * to get a {@link Stream} or a {@link BooleanSolutionList} of configurations.
  *
  * @author Sebastian Krieter
  */

@@ -22,10 +22,9 @@ package de.featjar.formula.analysis.sat4j.twise;
 
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator.ConfigurationScore;
-import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.LiteralMatrix;
-import de.featjar.formula.analysis.sat.solution.combinations.CombinationIterator;
-import de.featjar.formula.analysis.sat.solution.combinations.LexicographicIterator;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.todo.combinations.CombinationIterator;
+import de.featjar.formula.analysis.todo.combinations.LexicographicIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,7 +55,7 @@ public class TWiseConfigurationTester {
         }
     }
 
-    public void setNodes(List<List<LiteralMatrix>> expressions) {
+    public void setNodes(List<List<BooleanAssignmentList>> expressions) {
         presenceConditionManager = new PresenceConditionManager(getUtil(), expressions);
     }
 
@@ -116,24 +115,24 @@ public class TWiseConfigurationTester {
     }
 
     public boolean hasUncoveredConditions() {
-        final List<LiteralMatrix> uncoveredConditions = getUncoveredConditions(true);
+        final List<BooleanAssignmentList> uncoveredConditions = getUncoveredConditions(true);
         return !uncoveredConditions.isEmpty();
     }
 
-    public LiteralMatrix getFirstUncoveredCondition() {
-        final List<LiteralMatrix> uncoveredConditions = getUncoveredConditions(true);
+    public BooleanAssignmentList getFirstUncoveredCondition() {
+        final List<BooleanAssignmentList> uncoveredConditions = getUncoveredConditions(true);
         return uncoveredConditions.isEmpty() ? null : uncoveredConditions.get(0);
     }
 
-    public List<LiteralMatrix> getUncoveredConditions() {
+    public List<BooleanAssignmentList> getUncoveredConditions() {
         return getUncoveredConditions(false);
     }
 
-    private List<LiteralMatrix> getUncoveredConditions(boolean cancelAfterFirst) {
-        final ArrayList<LiteralMatrix> uncoveredConditions = new ArrayList<>();
+    private List<BooleanAssignmentList> getUncoveredConditions(boolean cancelAfterFirst) {
+        final ArrayList<BooleanAssignmentList> uncoveredConditions = new ArrayList<>();
         final TWiseCombiner combiner =
                 new TWiseCombiner(getUtil().getCnf().getVariableMap().getVariableCount());
-        LiteralMatrix combinedCondition = new LiteralMatrix();
+        BooleanAssignmentList combinedCondition = new BooleanAssignmentList();
         final PresenceCondition[] clauseListArray = new PresenceCondition[t];
 
         groupLoop:
@@ -151,7 +150,7 @@ public class TWiseConfigurationTester {
                 if (!TWiseConfigurationUtil.isCovered(combinedCondition, sample)
                         && getUtil().isCombinationValid(combinedCondition)) {
                     uncoveredConditions.add(combinedCondition);
-                    combinedCondition = new LiteralMatrix();
+                    combinedCondition = new BooleanAssignmentList();
                     if (cancelAfterFirst) {
                         break groupLoop;
                     }

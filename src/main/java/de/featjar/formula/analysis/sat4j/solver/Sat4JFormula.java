@@ -20,11 +20,9 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.clause.SATClause;
-import de.featjar.formula.analysis.sat.clause.ClauseList;
-import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.analysis.solver.SolverFormula;
-import de.featjar.formula.analysis.sat.clause.ToCNF;
+import de.featjar.formula.analysis.bool.BooleanClause;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
+import de.featjar.formula.analysis.bool.ToLiteralClauseList;
 import de.featjar.formula.structure.formula.Formula;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
@@ -54,12 +52,12 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
 
     @Override
     public List<IConstr> push(Formula formula) throws SolverContradictionException {
-        return push(ToCNF.convert(formula).get().getClauseList());
+        return push(ToLiteralClauseList.convert(formula).get().getClauseList());
     }
 
-    public List<IConstr> push(ClauseList clauses) {
+    public List<IConstr> push(BooleanClauseList clauses) {
         final ArrayList<IConstr> constrs = new ArrayList<>();
-        for (final SATClause sortedIntegerList : clauses.getAll()) {
+        for (final BooleanClause sortedIntegerList : clauses.getAll()) {
             try {
                 if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
                     throw new ContradictionException();
@@ -74,15 +72,15 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
                 throw new SolverContradictionException(e);
             }
         }
-        if (solver.SATSolutionHistory != null) {
-            solver.SATSolutionHistory.clear();
+        if (solver.LiteralSolutionHistory != null) {
+            solver.LiteralSolutionHistory.clear();
             solver.lastModel = null;
         }
         this.solverFormulas.addAll(constrs);
         return constrs;
     }
 
-    public IConstr push(SATClause sortedIntegerList) throws SolverContradictionException {
+    public IConstr push(BooleanClause sortedIntegerList) throws SolverContradictionException {
         try {
             if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
                 throw new ContradictionException();
@@ -90,8 +88,8 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
             final IConstr constr = solver.solver.addClause(
                     new VecInt(Arrays.copyOfRange(sortedIntegerList.getIntegers(), 0, sortedIntegerList.size())));
             solverFormulas.add(constr);
-            if (solver.SATSolutionHistory != null) {
-                solver.SATSolutionHistory.clear();
+            if (solver.LiteralSolutionHistory != null) {
+                solver.LiteralSolutionHistory.clear();
                 solver.lastModel = null;
             }
             return constr;

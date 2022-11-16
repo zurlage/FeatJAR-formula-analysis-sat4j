@@ -20,8 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.formula.analysis.solver.SolverContradictionException;
-
 /**
  * Generates all configurations for a given propositional formula.
  *

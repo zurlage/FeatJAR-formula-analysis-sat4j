@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.clause.ClauseList;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.FixedStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.InverseFixedStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy.UniformRandomStrategy;
@@ -29,7 +29,6 @@ import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap2;
 import de.featjar.formula.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
-import de.featjar.formula.analysis.sat.clause.CNF;
 
 import java.util.Random;
 import org.sat4j.minisat.SolverFactory;
@@ -70,7 +69,7 @@ public class Sat4JSolutionSolver extends Sat4JSolver<Solver<?>> {
     }
 
     @Override
-    protected void initSolver(ClauseList sortedIntegerLists) {
+    protected void initSolver(BooleanClauseList sortedIntegerLists) {
         super.initSolver(sortedIntegerLists);
         solver.getOrder().init();
     }

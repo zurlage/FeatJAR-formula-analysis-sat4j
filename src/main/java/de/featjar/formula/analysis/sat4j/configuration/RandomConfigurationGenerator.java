@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.configuration;
 
-import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.base.task.Monitor;
 import java.util.Random;
 

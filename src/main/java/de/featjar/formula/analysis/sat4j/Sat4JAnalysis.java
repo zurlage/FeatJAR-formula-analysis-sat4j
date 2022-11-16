@@ -23,8 +23,6 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.data.Computation;
 import de.featjar.formula.analysis.Analysis;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.sat.clause.CNF;
 
 /**
  * Base class for analyses using a {@link Sat4JSolutionSolver}.

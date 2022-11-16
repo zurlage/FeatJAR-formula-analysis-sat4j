@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +42,7 @@ public class PresenceConditionManager {
     private final List<List<PresenceCondition>> dictionary = new ArrayList<>();
     private final List<List<PresenceCondition>> groupedPresenceConditions = new ArrayList<>();
 
-    public PresenceConditionManager(TWiseConfigurationUtil util, List<List<LiteralMatrix>> expressions) {
+    public PresenceConditionManager(TWiseConfigurationUtil util, List<List<BooleanAssignmentList>> expressions) {
         final SortedIntegerList coreDeadFeature = util.getDeadCoreFeatures();
         final int numberOfVariables = util.getCnf().getVariableMap().getVariableCount();
 
@@ -55,10 +55,10 @@ public class PresenceConditionManager {
         }
 
         int groupIndex = 0;
-        for (final List<LiteralMatrix> group : expressions) {
+        for (final List<BooleanAssignmentList> group : expressions) {
             final List<PresenceCondition> newFormulaList = new ArrayList<>();
             expressionLoop:
-            for (final LiteralMatrix clauses : group) {
+            for (final BooleanAssignmentList clauses : group) {
                 final List<SortedIntegerList> newSortedIntegerLists = new ArrayList<>();
                 for (final SortedIntegerList sortedIntegerList : clauses) {
                     // If clause can be satisfied
@@ -72,7 +72,7 @@ public class PresenceConditionManager {
                     }
                 }
                 if (!newSortedIntegerLists.isEmpty()) {
-                    final PresenceCondition pc = new PresenceCondition(new LiteralMatrix(newSortedIntegerLists));
+                    final PresenceCondition pc = new PresenceCondition(new BooleanAssignmentList(newSortedIntegerLists));
                     PresenceCondition mappedPc = presenceConditionSet.get(pc);
                     if (mappedPc == null) {
                         mappedPc = pc;
