@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.analysis.todo.combinations.BinomialCalculator;
+import de.featjar.formula.analysis.combinations.BinomialCalculator;
 import java.util.Random;
 
 /**

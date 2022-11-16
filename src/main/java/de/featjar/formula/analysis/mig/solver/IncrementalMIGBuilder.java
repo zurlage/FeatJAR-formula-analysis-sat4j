@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.todo.Deprecated;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import java.util.Collection;
