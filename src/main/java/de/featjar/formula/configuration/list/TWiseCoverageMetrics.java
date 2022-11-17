@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.configuration.list;
 
+import de.featjar.formula.analysis.sat.solution.DNF;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.formula.analysis.sat4j.twise.PresenceConditionManager;
@@ -52,7 +53,7 @@ public class TWiseCoverageMetrics {
         }
 
         @Override
-        public double get(SolutionList sample) {
+        public double get(DNF sample) {
             final TWiseStatisticGenerator tWiseStatisticGenerator = new TWiseStatisticGenerator(util);
             if (firstUse) {
                 firstUse = false;
@@ -62,7 +63,7 @@ public class TWiseCoverageMetrics {
 
             final CoverageStatistic statistic = tWiseStatisticGenerator
                     .getCoverage(
-                            Arrays.asList(sample.getSolutions()), //
+                            Arrays.asList(sample.getSolutionList()), //
                             presenceConditionManager.getGroupedPresenceConditions(), //
                             t, //
                             TWiseStatisticGenerator.ConfigurationScore.NONE, //
