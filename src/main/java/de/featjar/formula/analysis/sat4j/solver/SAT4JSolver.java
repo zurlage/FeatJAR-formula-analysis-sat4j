@@ -25,6 +25,7 @@ import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import org.sat4j.core.VecInt;
+import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
 
@@ -44,6 +45,8 @@ public abstract class SAT4JSolver {
     private Long timeout;
     protected boolean globalTimeout;
 
+    protected boolean trivialContradictionFound;
+
     public SAT4JSolver(BooleanClauseList clauseList) {
         internalSolver.setDBSimplificationAllowed(true);
         internalSolver.setKeepSolverHot(true);
@@ -55,8 +58,9 @@ public abstract class SAT4JSolver {
             if (!clauseList.isEmpty()) {
                 internalSolver.setExpectedNumberOfClauses(clauseList.size() + 1);
             }
-            // todo: what does this do?
             if (size > 0) {
+                // due to a bug in SAT4J, each variable must be mentioned at least once
+                // so, add a single pseudo-clause that is tautological and mentions every variable
                 final VecInt pseudoClause = new VecInt(size + 1);
                 for (int i = 1; i <= size; i++) {
                     pseudoClause.push(i);
@@ -64,8 +68,8 @@ public abstract class SAT4JSolver {
                 pseudoClause.push(-1);
                 internalSolver.addClause(pseudoClause);
             }
-        } catch (final Exception e) {
-            throw new RuntimeException(e); // todo: contradiction exception?
+        } catch (ContradictionException ignored) {
+            trivialContradictionFound = true;
         }
     }
 
@@ -107,11 +111,20 @@ public abstract class SAT4JSolver {
         this.globalTimeout = globalTimeout;
     }
 
+    public boolean isTrivialContradictionFound() {
+        return trivialContradictionFound;
+    }
+
     public Result<BooleanSolution> findSolution() {
         return hasSolution().equals(Result.of(true)) ? Result.ofOptional(solutionHistory.getLastSolution()) : Result.empty();
     }
 
     protected Result<Boolean> hasSolution(VecInt integers) {
+        if (trivialContradictionFound) {
+            solutionHistory.setLastSolution(null);
+            return Result.of(false);
+        }
+
         for (final BooleanSolution solution : solutionHistory) {
             if (solution.containsAll(integers.toArray())) {
                 solutionHistory.setLastSolution(solution);
