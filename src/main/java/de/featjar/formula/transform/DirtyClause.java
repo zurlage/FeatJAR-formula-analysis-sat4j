@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.formula.analysis.sat.LiteralList;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
 
 import java.util.HashSet;
 
@@ -29,7 +29,7 @@ import java.util.HashSet;
  *
  * @author Sebastian Krieter
  */
-public class DirtyClause extends LiteralList {
+public class DirtyClause extends BooleanAssignment {
 
 
     private int relevance;

@@ -23,19 +23,18 @@ package de.featjar.assignment;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import de.featjar.formula.analysis.Analysis;
-import de.featjar.formula.analysis.mig.ConditionallyCoreDeadAnalysisMIG;
-import de.featjar.formula.analysis.sat4j.AddRedundancyAnalysis;
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
-import de.featjar.formula.analysis.sat4j.CauseAnalysis;
-import de.featjar.formula.analysis.sat4j.ContradictionAnalysis;
+import de.featjar.formula.analysis.todo.mig.ConditionallyCoreDeadAnalysisMIG;
+import de.featjar.formula.analysis.sat4j.todo.AddRedundancyAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.AtomicSetAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.CauseAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.ContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.CoreDeadAnalysis;
-import de.featjar.formula.analysis.sat4j.CountSolutionsAnalysis;
-import de.featjar.formula.analysis.sat4j.HasSolutionAnalysis;
-import de.featjar.formula.analysis.sat4j.IndependentContradictionAnalysis;
-import de.featjar.formula.analysis.sat4j.IndependentRedundancyAnalysis;
-import de.featjar.formula.analysis.sat4j.IndeterminateAnalysis;
-import de.featjar.formula.analysis.sat4j.RemoveRedundancyAnalysis;
-import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.analysis.sat4j.SAT4JCountSolutionsAnalysis;
+import de.featjar.formula.analysis.sat4j.SAT4JHasSolutionAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.IndependentContradictionAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.IndependentRedundancyAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.IndeterminateAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.RemoveRedundancyAnalysis;
 import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
@@ -70,13 +69,13 @@ public class CNFTest {
 
         final ModelRepresentation rep = new ModelRepresentation(formula);
 
-        executeAnalysis(rep, new HasSolutionAnalysis());
+        executeAnalysis(rep, new SAT4JHasSolutionAnalysis());
         executeAnalysis(rep, new AddRedundancyAnalysis());
         executeAnalysis(rep, new AtomicSetAnalysis());
         executeAnalysis(rep, new CauseAnalysis());
         executeAnalysis(rep, new ContradictionAnalysis());
         executeAnalysis(rep, new CoreDeadAnalysis());
-        executeAnalysis(rep, new CountSolutionsAnalysis());
+        executeAnalysis(rep, new SAT4JCountSolutionsAnalysis());
         executeAnalysis(rep, new IndependentContradictionAnalysis());
         executeAnalysis(rep, new IndependentRedundancyAnalysis());
         executeAnalysis(rep, new IndeterminateAnalysis());

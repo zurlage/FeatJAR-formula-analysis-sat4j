@@ -20,19 +20,15 @@
  */
 package de.featjar.formula.configuration.list;
 
-import de.featjar.formula.analysis.sat.solution.DNF;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
-import de.featjar.formula.analysis.sat4j.twise.PresenceConditionManager;
-import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationGenerator;
-import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationUtil;
-import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationUtil.InvalidClausesList;
-import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator;
-import de.featjar.formula.analysis.sat.clause.CNF;
-import de.featjar.formula.analysis.sat.LiteralMatrix;
-import de.featjar.formula.analysis.sat.clause.CNFs;
-import de.featjar.formula.analysis.sat.solution.SolutionList;
-import de.featjar.formula.analysis.sat.solution.metrics.SampleMetric;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
+import de.featjar.formula.analysis.sat4j.todo.twise.CoverageStatistic;
+import de.featjar.formula.analysis.sat4j.todo.twise.PresenceConditionManager;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationGenerator;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationUtil;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationUtil.InvalidClausesList;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseStatisticGenerator;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.metrics.SampleMetric;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,19 +85,19 @@ public class TWiseCoverageMetrics {
     private PresenceConditionManager presenceConditionManager;
     private String name;
     private CNF cnf;
-    private List<List<LiteralMatrix>> expressions;
+    private List<List<BooleanAssignmentList>> expressions;
 
     public void setCNF(CNF cnf) {
         this.cnf = cnf;
     }
 
-    public void setExpressions(List<List<LiteralMatrix>> expressions) {
+    public void setExpressions(List<List<BooleanAssignmentList>> expressions) {
         this.expressions = expressions;
     }
 
     public void init() {
         if (!cnf.getClauseList().isEmpty()) {
-            util = new TWiseConfigurationUtil(cnf, new Sat4JSolutionSolver(cnf));
+            util = new TWiseConfigurationUtil(cnf, new SAT4JSolutionSolver(cnf));
         } else {
             util = new TWiseConfigurationUtil(cnf, null);
         }
@@ -111,7 +107,7 @@ public class TWiseCoverageMetrics {
             util.computeMIG(false, false);
         }
         if (expressions == null) {
-            expressions = TWiseConfigurationGenerator.convertLiterals(CNFs.getLiterals(cnf.getVariableMap()));
+            expressions = TWiseConfigurationGenerator.convertLiterals(Deprecated.getLiterals(cnf.getVariableMap()));
         }
         presenceConditionManager = new PresenceConditionManager(util, expressions);
     }
@@ -121,7 +117,7 @@ public class TWiseCoverageMetrics {
     }
 
     public static List<TWiseCoverageMetric> getTWiseCoverageMetrics(
-            CNF cnf, List<List<LiteralMatrix>> expressions, String name, int... tValues) {
+            CNF cnf, List<List<BooleanAssignmentList>> expressions, String name, int... tValues) {
         final TWiseCoverageMetrics metrics = new TWiseCoverageMetrics();
         metrics.setName(name);
         metrics.setExpressions(expressions);

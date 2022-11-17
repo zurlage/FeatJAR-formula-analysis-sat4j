@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.LiteralList;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,12 +35,12 @@ import java.util.List;
  */
 public class SampleDistribution extends LiteralDistribution {
 
-    private final ArrayList<LiteralList> samples = new ArrayList<>();
+    private final ArrayList<BooleanAssignment> samples = new ArrayList<>();
     private int startIndex;
 
     private final byte[] model;
 
-    public SampleDistribution(List<LiteralList> sample) {
+    public SampleDistribution(List<BooleanAssignment> sample) {
         samples.addAll(sample);
         startIndex = 0;
         model = new byte[sample.get(0).size()];
@@ -91,7 +91,7 @@ public class SampleDistribution extends LiteralDistribution {
 
     public int getPositiveCount(int index) {
         int sum = 0;
-        for (final LiteralList l : samples.subList(startIndex, samples.size())) {
+        for (final BooleanAssignment l : samples.subList(startIndex, samples.size())) {
             sum += (~l.getIntegers()[index]) >>> 31;
         }
         return sum;
