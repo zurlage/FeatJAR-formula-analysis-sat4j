@@ -22,7 +22,7 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import de.featjar.formula.analysis.sat4j.AtomicSetAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.AtomicSetAnalysis;
 import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.Expression;
 import de.featjar.base.io.IO;

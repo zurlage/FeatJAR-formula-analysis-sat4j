@@ -21,7 +21,7 @@
 package de.featjar.formula.transform;
 
 import de.featjar.base.data.IntegerList;
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
@@ -60,7 +60,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     protected int[] helper;
     protected DirtyFeature[] map;
     protected MinimumClauseHeuristic heuristic;
-    private Sat4JSolutionSolver newSolver;
+    private SAT4JSolutionSolver newSolver;
 
     private boolean first = false;
 
@@ -272,7 +272,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         newDirtyListDelIndex = 0;
     }
 
-    protected final boolean isRedundant(Sat4JSolutionSolver solver, SortedIntegerList curSortedIntegerList) {
+    protected final boolean isRedundant(SAT4JSolutionSolver solver, SortedIntegerList curSortedIntegerList) {
         switch (solver.hasSolution(curSortedIntegerList.negate())) {
             case FALSE:
                 return true;
@@ -289,7 +289,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         if (nextFeature.getClauseCount() > 0) {
             addCleanClauses();
 
-            final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnfCopy);
+            final SAT4JSolutionSolver solver = new SAT4JSolutionSolver(cnfCopy);
             solver.getFormula().push(cleanLiteralListIndexList);
             solver.getFormula().push(dirtyClauseList.subList(0, dirtyListPosIndex));
 
@@ -332,7 +332,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
 
             addCleanClauses();
 
-            final Sat4JSolutionSolver solver = new Sat4JSolutionSolver(cnfCopy);
+            final SAT4JSolutionSolver solver = new SAT4JSolutionSolver(cnfCopy);
             solver.getFormula().push(cleanLiteralListIndexList);
 
             // SAT Relevant
@@ -361,7 +361,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
         heuristic = new MinimumClauseHeuristic(map, numberOfDirtyFeatures);
         first = true;
         try {
-            newSolver = new Sat4JSolutionSolver(cnfCopy);
+            newSolver = new SAT4JSolutionSolver(cnfCopy);
             // newSolver.addClauses(cleanClauseList);
         } catch (final SolverContradictionException e) {
             return false;

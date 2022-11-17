@@ -23,7 +23,7 @@ package de.featjar.assignment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.featjar.formula.analysis.sat4j.configuration.AllConfigurationGenerator;
+import de.featjar.formula.analysis.sat4j.todo.configuration.AllConfigurationGenerator;
 import de.featjar.formula.analysis.solver.Assumable;
 import de.featjar.formula.structure.Expression;
 import de.featjar.formula.tmp.Formulas;

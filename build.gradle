@@ -20,7 +20,7 @@ sourceSets {
             srcDir 'src/main'
             exclude '**/twise/**'
             exclude '**/configuration/**'
-            exclude '**/mig/**'
+            exclude '**/todo/**'
             exclude '**/transform/**'
         }
     }

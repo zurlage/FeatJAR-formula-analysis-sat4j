@@ -20,13 +20,13 @@
  */
 package de.featjar.formula.configuration.list;
 
-import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
-import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
-import de.featjar.formula.analysis.sat4j.twise.PresenceConditionManager;
-import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationGenerator;
-import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationUtil;
-import de.featjar.formula.analysis.sat4j.twise.TWiseConfigurationUtil.InvalidClausesList;
-import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
+import de.featjar.formula.analysis.sat4j.todo.twise.CoverageStatistic;
+import de.featjar.formula.analysis.sat4j.todo.twise.PresenceConditionManager;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationGenerator;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationUtil;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationUtil.InvalidClausesList;
+import de.featjar.formula.analysis.sat4j.todo.twise.TWiseStatisticGenerator;
 import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.metrics.SampleMetric;
 import java.util.ArrayList;
@@ -97,7 +97,7 @@ public class TWiseCoverageMetrics {
 
     public void init() {
         if (!cnf.getClauseList().isEmpty()) {
-            util = new TWiseConfigurationUtil(cnf, new Sat4JSolutionSolver(cnf));
+            util = new TWiseConfigurationUtil(cnf, new SAT4JSolutionSolver(cnf));
         } else {
             util = new TWiseConfigurationUtil(cnf, null);
         }
