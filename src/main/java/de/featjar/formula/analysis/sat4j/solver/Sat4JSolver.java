@@ -24,9 +24,8 @@ import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.formula.analysis.sat.clause.ClauseList;
-import de.featjar.formula.analysis.sat.solution.Solution;
+import de.featjar.formula.analysis.sat.solution.SATSolution;
 import de.featjar.formula.analysis.solver.AssumptionList;
-import de.featjar.formula.analysis.solver.SolutionSolver;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.IVecInt;
@@ -39,7 +38,7 @@ import java.util.*;
  *
  * @author Sebastian Krieter
  */
-public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<Solution> {
+public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<SATSolution> {
     public static final int MAX_SOLUTION_BUFFER = 1000;
     protected CNF cnf;
     protected final T solver;
@@ -47,7 +46,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
     protected final Sat4JFormula formula;
 
     // TODO extract solution history in separate class
-    protected LinkedList<Solution> solutionHistory = null;
+    protected LinkedList<SATSolution> SATSolutionHistory = null;
     protected int solutionHistoryLimit = -1;
     protected int[] lastModel = null; // todo: (last) Solution?
     protected boolean globalTimeout = false;
@@ -103,8 +102,8 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
      * @see #hasSolution(int...)
      */
     @Override
-    public Result<Solution> getSolution() {
-        return lastModel == null ? Result.empty() : Result.of(new Solution(getLastModelCopy(), false));
+    public Result<SATSolution> getSolution() {
+        return lastModel == null ? Result.empty() : Result.of(new SATSolution(getLastModelCopy(), false));
     }
 
     public int[] getInternalSolution() {
@@ -126,7 +125,7 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
      * @see #hasSolution(int...)
      * @see #getInternalSolution()
      */
-    public Result<Boolean> hasSolution(Solution assignment) {
+    public Result<Boolean> hasSolution(SATSolution assignment) {
         return hasSolution(assignment.getIntegers());
     }
 
@@ -137,8 +136,8 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
     @Override
     public void reset() {
         solver.reset();
-        if (solutionHistory != null) {
-            solutionHistory.clear();
+        if (SATSolutionHistory != null) {
+            SATSolutionHistory.clear();
             lastModel = null;
         }
     }
@@ -188,12 +187,12 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
     }
 
     @Override
-    public Result<Solution> findSolution() {
+    public Result<SATSolution> findSolution() {
         return hasSolution().equals(Result.of(true)) ? getSolution() : null;
     }
 
-    public List<Solution> getSolutionHistory() {
-        return solutionHistory != null ? solutionHistory : Collections.emptyList();
+    public List<SATSolution> getSolutionHistory() {
+        return SATSolutionHistory != null ? SATSolutionHistory : Collections.emptyList();
     }
 
     private int[] getAssumptionArray() {
@@ -225,10 +224,10 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
         }
 
         final int[] assumptionArray = getAssumptionArray();
-        if (solutionHistory != null) {
-            for (final Solution solution : solutionHistory) {
-                if (solution.containsAll(assumptionArray)) {
-                    lastModel = solution.getIntegers();
+        if (SATSolutionHistory != null) {
+            for (final SATSolution SATSolution : SATSolutionHistory) {
+                if (SATSolution.containsAll(assumptionArray)) {
+                    lastModel = SATSolution.getIntegers();
                     return Result.of(true);
                 }
             }
@@ -267,10 +266,10 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
             return Result.of(false);
         }
 
-        if (solutionHistory != null) {
-            for (final Solution solution : solutionHistory) {
-                if (solution.containsAll(assignment)) {
-                    lastModel = solution.getIntegers();
+        if (SATSolutionHistory != null) {
+            for (final SATSolution SATSolution : SATSolutionHistory) {
+                if (SATSolution.containsAll(assignment)) {
+                    lastModel = SATSolution.getIntegers();
                     return Result.of(true);
                 }
             }
@@ -296,10 +295,10 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
     }
 
     private void addSolution() {
-        if (solutionHistory != null) {
-            solutionHistory.addFirst(getSolution().get());
-            if (solutionHistory.size() > solutionHistoryLimit) {
-                solutionHistory.removeLast();
+        if (SATSolutionHistory != null) {
+            SATSolutionHistory.addFirst(getSolution().get());
+            if (SATSolutionHistory.size() > solutionHistoryLimit) {
+                SATSolutionHistory.removeLast();
             }
         }
     }
@@ -309,12 +308,12 @@ public abstract class Sat4JSolver<T extends ISolver> implements SolutionSolver<S
         return Arrays.copyOf(unsatExplanation.toArray(), unsatExplanation.size());
     }
 
-    public List<Solution> rememberSolutionHistory(int numberOfSolutions) {
+    public List<SATSolution> rememberSolutionHistory(int numberOfSolutions) {
         if (numberOfSolutions > 0) {
-            solutionHistory = new LinkedList<>();
+            SATSolutionHistory = new LinkedList<>();
             solutionHistoryLimit = numberOfSolutions;
         } else {
-            solutionHistory = null;
+            SATSolutionHistory = null;
             solutionHistoryLimit = -1;
         }
         return getSolutionHistory();

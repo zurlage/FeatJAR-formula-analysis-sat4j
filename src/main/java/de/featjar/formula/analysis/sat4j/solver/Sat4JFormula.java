@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat.clause.Clause;
+import de.featjar.formula.analysis.sat.clause.SATClause;
 import de.featjar.formula.analysis.sat.clause.ClauseList;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
 import de.featjar.formula.analysis.solver.SolverFormula;
@@ -59,7 +59,7 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
 
     public List<IConstr> push(ClauseList clauses) {
         final ArrayList<IConstr> constrs = new ArrayList<>();
-        for (final Clause sortedIntegerList : clauses.getAll()) {
+        for (final SATClause sortedIntegerList : clauses.getAll()) {
             try {
                 if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
                     throw new ContradictionException();
@@ -74,15 +74,15 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
                 throw new SolverContradictionException(e);
             }
         }
-        if (solver.solutionHistory != null) {
-            solver.solutionHistory.clear();
+        if (solver.SATSolutionHistory != null) {
+            solver.SATSolutionHistory.clear();
             solver.lastModel = null;
         }
         this.solverFormulas.addAll(constrs);
         return constrs;
     }
 
-    public IConstr push(Clause sortedIntegerList) throws SolverContradictionException {
+    public IConstr push(SATClause sortedIntegerList) throws SolverContradictionException {
         try {
             if ((sortedIntegerList.size() == 1) && (sortedIntegerList.getIntegers()[0] == 0)) {
                 throw new ContradictionException();
@@ -90,8 +90,8 @@ public class Sat4JFormula extends SolverFormula<IConstr> {
             final IConstr constr = solver.solver.addClause(
                     new VecInt(Arrays.copyOfRange(sortedIntegerList.getIntegers(), 0, sortedIntegerList.size())));
             solverFormulas.add(constr);
-            if (solver.solutionHistory != null) {
-                solver.solutionHistory.clear();
+            if (solver.SATSolutionHistory != null) {
+                solver.SATSolutionHistory.clear();
                 solver.lastModel = null;
             }
             return constr;
