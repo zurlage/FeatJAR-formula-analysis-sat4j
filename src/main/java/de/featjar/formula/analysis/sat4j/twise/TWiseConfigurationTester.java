@@ -22,11 +22,10 @@ package de.featjar.formula.analysis.sat4j.twise;
 
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator.ConfigurationScore;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.ClauseList;
-import de.featjar.formula.clauses.LiteralList;
-import de.featjar.formula.clauses.solutions.combinations.CombinationIterator;
-import de.featjar.formula.clauses.solutions.combinations.LexicographicIterator;
+import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.analysis.sat.LiteralMatrix;
+import de.featjar.formula.analysis.sat.solution.combinations.CombinationIterator;
+import de.featjar.formula.analysis.sat.solution.combinations.LexicographicIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,24 +39,24 @@ public class TWiseConfigurationTester {
 
     private final TWiseConfigurationUtil util;
 
-    private List<LiteralList> sample;
+    private List<SortedIntegerList> sample;
     private PresenceConditionManager presenceConditionManager;
     private int t;
 
     public TWiseConfigurationTester(CNF cnf) {
-        if (!cnf.getClauses().isEmpty()) {
+        if (!cnf.getClauseList().isEmpty()) {
             util = new TWiseConfigurationUtil(cnf, new Sat4JSolutionSolver(cnf));
         } else {
             util = new TWiseConfigurationUtil(cnf, null);
         }
 
         getUtil().computeRandomSample(TWiseConfigurationGenerator.DEFAULT_RANDOM_SAMPLE_SIZE);
-        if (!cnf.getClauses().isEmpty()) {
+        if (!cnf.getClauseList().isEmpty()) {
             getUtil().computeMIG(false, false);
         }
     }
 
-    public void setNodes(List<List<ClauseList>> expressions) {
+    public void setNodes(List<List<LiteralMatrix>> expressions) {
         presenceConditionManager = new PresenceConditionManager(getUtil(), expressions);
     }
 
@@ -69,11 +68,11 @@ public class TWiseConfigurationTester {
         this.t = t;
     }
 
-    public void setSample(List<LiteralList> sample) {
+    public void setSample(List<SortedIntegerList> sample) {
         this.sample = sample;
     }
 
-    public List<LiteralList> getSample() {
+    public List<SortedIntegerList> getSample() {
         return sample;
     }
 
@@ -117,24 +116,24 @@ public class TWiseConfigurationTester {
     }
 
     public boolean hasUncoveredConditions() {
-        final List<ClauseList> uncoveredConditions = getUncoveredConditions(true);
+        final List<LiteralMatrix> uncoveredConditions = getUncoveredConditions(true);
         return !uncoveredConditions.isEmpty();
     }
 
-    public ClauseList getFirstUncoveredCondition() {
-        final List<ClauseList> uncoveredConditions = getUncoveredConditions(true);
+    public LiteralMatrix getFirstUncoveredCondition() {
+        final List<LiteralMatrix> uncoveredConditions = getUncoveredConditions(true);
         return uncoveredConditions.isEmpty() ? null : uncoveredConditions.get(0);
     }
 
-    public List<ClauseList> getUncoveredConditions() {
+    public List<LiteralMatrix> getUncoveredConditions() {
         return getUncoveredConditions(false);
     }
 
-    private List<ClauseList> getUncoveredConditions(boolean cancelAfterFirst) {
-        final ArrayList<ClauseList> uncoveredConditions = new ArrayList<>();
+    private List<LiteralMatrix> getUncoveredConditions(boolean cancelAfterFirst) {
+        final ArrayList<LiteralMatrix> uncoveredConditions = new ArrayList<>();
         final TWiseCombiner combiner =
                 new TWiseCombiner(getUtil().getCnf().getVariableMap().getVariableCount());
-        ClauseList combinedCondition = new ClauseList();
+        LiteralMatrix combinedCondition = new LiteralMatrix();
         final PresenceCondition[] clauseListArray = new PresenceCondition[t];
 
         groupLoop:
@@ -152,7 +151,7 @@ public class TWiseConfigurationTester {
                 if (!TWiseConfigurationUtil.isCovered(combinedCondition, sample)
                         && getUtil().isCombinationValid(combinedCondition)) {
                     uncoveredConditions.add(combinedCondition);
-                    combinedCondition = new ClauseList();
+                    combinedCondition = new LiteralMatrix();
                     if (cancelAfterFirst) {
                         break groupLoop;
                     }
@@ -163,25 +162,25 @@ public class TWiseConfigurationTester {
     }
 
     public boolean hasInvalidSolutions() {
-        final List<LiteralList> invalidSolutions = getInvalidSolutions(true);
+        final List<SortedIntegerList> invalidSolutions = getInvalidSolutions(true);
         return !invalidSolutions.isEmpty();
     }
 
-    public LiteralList getFirstInvalidSolution() {
-        final List<LiteralList> invalidSolutions = getInvalidSolutions(true);
+    public SortedIntegerList getFirstInvalidSolution() {
+        final List<SortedIntegerList> invalidSolutions = getInvalidSolutions(true);
         return invalidSolutions.isEmpty() ? null : invalidSolutions.get(0);
     }
 
-    public List<LiteralList> getInvalidSolutions() {
+    public List<SortedIntegerList> getInvalidSolutions() {
         return getInvalidSolutions(false);
     }
 
-    private List<LiteralList> getInvalidSolutions(boolean cancelAfterFirst) {
-        final ArrayList<LiteralList> invalidSolutions = new ArrayList<>();
+    private List<SortedIntegerList> getInvalidSolutions(boolean cancelAfterFirst) {
+        final ArrayList<SortedIntegerList> invalidSolutions = new ArrayList<>();
         configLoop:
-        for (final LiteralList solution : sample) {
-            for (final LiteralList clause : getUtil().getCnf().getClauses()) {
-                if (!solution.hasDuplicates(clause)) {
+        for (final SortedIntegerList solution : sample) {
+            for (final SortedIntegerList sortedIntegerList : getUtil().getCnf().getClauseList()) {
+                if (solution.isDisjoint(sortedIntegerList)) {
                     invalidSolutions.add(solution);
                     if (cancelAfterFirst) {
                         break configLoop;

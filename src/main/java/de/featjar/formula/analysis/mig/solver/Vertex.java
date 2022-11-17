@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.mig.solver;
 
-import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,7 +37,7 @@ public class Vertex implements Comparable<Vertex> {
 
     private Status status = Status.Normal;
 
-    ArrayList<LiteralList> complexClauses = new ArrayList<>();
+    ArrayList<SortedIntegerList> complexSortedIntegerLists = new ArrayList<>();
     ArrayList<Vertex> stronglyConnectedVertices = new ArrayList<>();
 
     public Vertex(int literal) {
@@ -49,8 +48,8 @@ public class Vertex implements Comparable<Vertex> {
         return literal;
     }
 
-    public List<LiteralList> getComplexClauses() {
-        return complexClauses;
+    public List<SortedIntegerList> getComplexClauses() {
+        return complexSortedIntegerLists;
     }
 
     public List<Vertex> getStrongEdges() {
@@ -61,8 +60,8 @@ public class Vertex implements Comparable<Vertex> {
         stronglyConnectedVertices.add(vertex);
     }
 
-    public void addWeaklyConnected(LiteralList clause) {
-        complexClauses.add(clause);
+    public void addWeaklyConnected(SortedIntegerList sortedIntegerList) {
+        complexSortedIntegerLists.add(sortedIntegerList);
     }
 
     public Status getStatus() {
@@ -112,10 +111,10 @@ public class Vertex implements Comparable<Vertex> {
     }
 
     public void finish() {
-        complexClauses = new ArrayList<>(new HashSet<>(complexClauses));
+        complexSortedIntegerLists = new ArrayList<>(new HashSet<>(complexSortedIntegerLists));
         stronglyConnectedVertices = new ArrayList<>(new HashSet<>(stronglyConnectedVertices));
         stronglyConnectedVertices.remove(this);
-        Collections.sort(complexClauses);
+        Collections.sort(complexSortedIntegerLists);
         Collections.sort(stronglyConnectedVertices);
         //		complexClauses.trimToSize();
         //		stronglyConnectedVertices.trimToSize();

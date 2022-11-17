@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.formula.clauses.LiteralList;
 import java.util.HashSet;
 
 /**
@@ -28,7 +27,7 @@ import java.util.HashSet;
  *
  * @author Sebastian Krieter
  */
-public class DirtyClause extends LiteralList {
+public class DirtyClause extends SortedIntegerList {
 
 
     private int relevance;
@@ -121,7 +120,7 @@ public class DirtyClause extends LiteralList {
     }
 
     boolean computeRelevance(DirtyFeature[] map) {
-        for (final int literal : literals) {
+        for (final int literal : integers) {
             final DirtyFeature df = map[Math.abs(literal)];
             if (df != null) {
                 relevance++;
@@ -132,13 +131,13 @@ public class DirtyClause extends LiteralList {
                 }
             }
         }
-        return ((relevance > 0) && (relevance < literals.length));
+        return ((relevance > 0) && (relevance < integers.length));
     }
 
     public boolean delete(DirtyFeature[] map) {
-        if (literals.length > 1) {
-            final boolean mixed = ((relevance > 0) && (relevance < literals.length));
-            for (final int literal : literals) {
+        if (integers.length > 1) {
+            final boolean mixed = ((relevance > 0) && (relevance < integers.length));
+            for (final int literal : integers) {
                 final DirtyFeature df = map[Math.abs(literal)];
                 if (df != null) {
                     if (literal > 0) {
@@ -153,7 +152,7 @@ public class DirtyClause extends LiteralList {
             }
             return mixed;
         } else {
-            for (final int literal : literals) {
+            for (final int literal : integers) {
                 final DirtyFeature df = map[Math.abs(literal)];
                 if (df != null) {
                     if (literal > 0) {

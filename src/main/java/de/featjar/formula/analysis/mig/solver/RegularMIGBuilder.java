@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.clauses.CNF;
+import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.base.task.Monitor;
 
 /**

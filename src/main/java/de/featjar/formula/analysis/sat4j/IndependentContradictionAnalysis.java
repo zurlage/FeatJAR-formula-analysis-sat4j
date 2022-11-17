@@ -24,9 +24,8 @@ import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.assignment.VariableAssignment;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.analysis.Assignment;
+import de.featjar.formula.analysis.sat.clause.CNF;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,30 +44,30 @@ import java.util.List;
  *
  * @see ContradictionAnalysis
  */
-public class IndependentContradictionAnalysis extends ClauseAnalysis<List<LiteralList>> {
+public class IndependentContradictionAnalysis extends ClauseAnalysis<List<SortedIntegerList>> {
 
-    public IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList) {
-        super(inputComputation, clauseList);
+    public IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
+        super(inputComputation, literalListIndexList);
     }
 
-    public IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<LiteralList> clauseList, VariableAssignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, clauseList, assumptions, timeoutInMs, randomSeed);
+    public IndependentContradictionAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override
-    public FutureResult<List<LiteralList>> compute() {
+    public FutureResult<List<SortedIntegerList>> compute() {
         return initializeSolver().thenCompute((solver, monitor) -> {
-            if (clauseList == null) {
-                clauseList = solver.getCNF().getClauses();
+            if (literalListIndexList == null) {
+                literalListIndexList = solver.getCNF().getClauseList();
             }
             if (clauseGroupSize == null) {
-                clauseGroupSize = new int[clauseList.size()];
+                clauseGroupSize = new int[literalListIndexList.size()];
                 Arrays.fill(clauseGroupSize, 1);
             }
-            monitor.setTotalSteps(clauseList.size() + 1);
+            monitor.setTotalSteps(literalListIndexList.size() + 1);
 
-            final List<LiteralList> resultList = new ArrayList<>(clauseGroupSize.length);
-            for (int i = 0; i < clauseList.size(); i++) {
+            final List<SortedIntegerList> resultList = new ArrayList<>(clauseGroupSize.length);
+            for (int i = 0; i < literalListIndexList.size(); i++) {
                 resultList.add(null);
             }
             monitor.addStep();
@@ -77,19 +76,19 @@ public class IndependentContradictionAnalysis extends ClauseAnalysis<List<Litera
             for (int i = 0; i < clauseGroupSize.length; i++) {
                 final int startIndex = endIndex;
                 endIndex += clauseGroupSize[i];
-                final List<LiteralList> subList = clauseList.subList(startIndex, endIndex);
+                final List<SortedIntegerList> subList = literalListIndexList.subList(startIndex, endIndex);
 
                 try {
                     solver.getSolverFormula().push(subList);
                 } catch (final SolverContradictionException e) {
-                    resultList.set(i, clauseList.get(startIndex));
+                    resultList.set(i, literalListIndexList.get(startIndex));
                     monitor.addStep();
                     continue;
                 }
 
                 final Result<Boolean> hasSolution = solver.hasSolution();
                 if (Result.of(false).equals(hasSolution)) {
-                    resultList.set(i, clauseList.get(startIndex));
+                    resultList.set(i, literalListIndexList.get(startIndex));
                 } else if (Result.empty().equals(hasSolution)) {
                     //reportTimeout();
                 } else if (Result.of(true).equals(hasSolution)) {

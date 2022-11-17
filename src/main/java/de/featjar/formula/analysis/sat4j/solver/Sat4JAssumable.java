@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.assignment.Assignment;
+import de.featjar.formula.analysis.solver.Assumable;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class Sat4JAssignment implements Assignment<Integer> {
+public class Sat4JAssumable implements Assumable<Integer> {
 
     protected final VecInt assumptions = new VecInt();
 

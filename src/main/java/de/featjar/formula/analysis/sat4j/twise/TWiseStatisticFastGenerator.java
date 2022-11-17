@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,18 +33,18 @@ import java.util.List;
 public class TWiseStatisticFastGenerator {
 
     public CoverageStatistic getCoverage(
-            List<? extends LiteralList> sample, List<List<PresenceCondition>> groupedPresenceConditions, int t) {
+            List<? extends SortedIntegerList> sample, List<List<PresenceCondition>> groupedPresenceConditions, int t) {
         final CoverageStatistic statistic = new CoverageStatistic();
         statistic.initScores(sample.size());
 
-        final ArrayList<List<Pair<Integer, LiteralList>>> lists = new ArrayList<>(t);
+        final ArrayList<List<Pair<Integer, SortedIntegerList>>> lists = new ArrayList<>(t);
         {
             for (int i = 0; i < t; i++) {
-                lists.add(new ArrayList<Pair<Integer, LiteralList>>(sample.size()));
+                lists.add(new ArrayList<Pair<Integer, SortedIntegerList>>(sample.size()));
             }
-            final List<Pair<Integer, LiteralList>> list = lists.get(0);
+            final List<Pair<Integer, SortedIntegerList>> list = lists.get(0);
             int confIndex = 0;
-            for (final LiteralList configuration : sample) {
+            for (final SortedIntegerList configuration : sample) {
                 list.add(new Pair<>(confIndex++, configuration));
             }
         }
@@ -94,13 +93,13 @@ public class TWiseStatisticFastGenerator {
 
                 for (int j = i; j < t; j++) {
                     if (j > 0) {
-                        final List<Pair<Integer, LiteralList>> prevList = lists.get(j - 1);
-                        final List<Pair<Integer, LiteralList>> curList = lists.get(j);
+                        final List<Pair<Integer, SortedIntegerList>> prevList = lists.get(j - 1);
+                        final List<Pair<Integer, SortedIntegerList>> curList = lists.get(j);
                         curList.clear();
                         final PresenceCondition presenceCondition = expressions.get(c[j]);
                         entryLoop:
-                        for (final Pair<Integer, LiteralList> entry : prevList) {
-                            for (final LiteralList literals : presenceCondition) {
+                        for (final Pair<Integer, SortedIntegerList> entry : prevList) {
+                            for (final SortedIntegerList literals : presenceCondition) {
                                 if (entry.getValue().containsAll(literals)) {
                                     curList.add(entry);
                                     continue entryLoop;
@@ -110,11 +109,11 @@ public class TWiseStatisticFastGenerator {
                     }
                 }
 
-                Pair<Integer, LiteralList> curEntry = null;
+                Pair<Integer, SortedIntegerList> curEntry = null;
                 final PresenceCondition presenceCondition = expressions.get(c[t]);
                 entryLoop:
-                for (final Pair<Integer, LiteralList> entry : lists.get(t - 1)) {
-                    for (final LiteralList literals : presenceCondition) {
+                for (final Pair<Integer, SortedIntegerList> entry : lists.get(t - 1)) {
+                    for (final SortedIntegerList literals : presenceCondition) {
                         if (entry.getValue().containsAll(literals)) {
                             if (curEntry == null) {
                                 statistic.incNumberOfCoveredConditions();
@@ -135,9 +134,9 @@ public class TWiseStatisticFastGenerator {
             }
         }
         int confIndex = 0;
-        for (final LiteralList configuration : sample) {
+        for (final SortedIntegerList configuration : sample) {
             int count = 0;
-            for (final int literal : configuration.getLiterals()) {
+            for (final int literal : configuration.getIntegers()) {
                 if (literal == 0) {
                     count++;
                 }

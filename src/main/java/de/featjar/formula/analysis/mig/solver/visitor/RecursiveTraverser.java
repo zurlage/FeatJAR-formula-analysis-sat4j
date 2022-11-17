@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.mig.solver.visitor;
 
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.Vertex;
-import de.featjar.formula.clauses.LiteralList;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,12 +69,12 @@ public class RecursiveTraverser extends ATraverser {
         }
 
         // Weak Edges
-        final List<LiteralList> complexClauses = vertex.getComplexClauses();
+        final List<SortedIntegerList> complexSortedIntegerLists = vertex.getComplexClauses();
         final VecInt v = new VecInt();
         outerLoop:
-        for (final LiteralList clause : complexClauses) {
+        for (final SortedIntegerList sortedIntegerList : complexSortedIntegerLists) {
             v.clear();
-            final int[] literals = clause.getLiterals();
+            final int[] literals = sortedIntegerList.getIntegers();
             for (int j = 0; j < literals.length; j++) {
                 final int literal = literals[j];
                 if (literal == -curLiteral) {
@@ -135,14 +135,14 @@ public class RecursiveTraverser extends ATraverser {
                 }
             }
 
-            final List<LiteralList> complexClauses = vertex.getComplexClauses();
+            final List<SortedIntegerList> complexSortedIntegerLists = vertex.getComplexClauses();
 
             // Weak Edges
             final VecInt v = new VecInt();
             outerLoop:
-            for (final LiteralList clause : complexClauses) {
+            for (final SortedIntegerList sortedIntegerList : complexSortedIntegerLists) {
                 v.clear();
-                final int[] literals = clause.getLiterals();
+                final int[] literals = sortedIntegerList.getIntegers();
                 for (int j = 0; j < literals.length; j++) {
                     final int literal = literals[j];
                     if (literal == -curLiteral) {

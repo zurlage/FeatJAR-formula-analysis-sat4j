@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.LiteralDistribution;
-import de.featjar.formula.clauses.LiteralList;
+
 import java.util.Arrays;
 
 /**
@@ -93,13 +93,13 @@ public class MIGDistribution extends LiteralDistribution {
                         }
                     }
                 }
-                for (final LiteralList weak : vertex.getComplexClauses()) {
-                    for (final int l : weak.getLiterals()) {
+                for (final SortedIntegerList weak : vertex.getComplexClauses()) {
+                    for (final int l : weak.getIntegers()) {
                         if (Math.abs(l) == var) {
                             if (l > 0) {
-                                weakInPositive += 1.0 / (weak.getLiterals().length - 1);
+                                weakInPositive += 1.0 / (weak.getIntegers().length - 1);
                             } else {
-                                weakInNegative += 1.0 / (weak.getLiterals().length - 1);
+                                weakInNegative += 1.0 / (weak.getIntegers().length - 1);
                             }
                         }
                     }

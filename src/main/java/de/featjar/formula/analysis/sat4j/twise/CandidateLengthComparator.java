@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.clauses.LiteralList;
 import de.featjar.base.data.Pair;
 import java.util.Comparator;
 
@@ -31,10 +30,10 @@ import java.util.Comparator;
  *
  * @author Sebastian Krieter
  */
-class CandidateLengthComparator implements Comparator<Pair<LiteralList, TWiseConfiguration>> {
+class CandidateLengthComparator implements Comparator<Pair<SortedIntegerList, TWiseConfiguration>> {
 
     @Override
-    public int compare(Pair<LiteralList, TWiseConfiguration> o1, Pair<LiteralList, TWiseConfiguration> o2) {
+    public int compare(Pair<SortedIntegerList, TWiseConfiguration> o1, Pair<SortedIntegerList, TWiseConfiguration> o2) {
         final int diff = o2.getValue().countLiterals - o1.getValue().countLiterals;
         return diff != 0 ? diff : o2.getKey().size() - o1.getKey().size();
     }

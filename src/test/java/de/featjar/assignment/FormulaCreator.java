@@ -20,9 +20,9 @@
  */
 package de.featjar.assignment;
 
+import de.featjar.formula.analysis.solver.Assumable;
+import de.featjar.formula.analysis.Assignment;
 import de.featjar.formula.structure.Expression;
-import de.featjar.formula.assignment.Assignment;
-import de.featjar.formula.assignment.VariableAssignment;
 import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
@@ -55,15 +55,15 @@ public class FormulaCreator {
                 new Or(new And(s.invert(), r), new And(s, r.invert())));
     }
 
-    public static void testAllAssignments(TermMap map, Consumer<Assignment> testFunction) {
-        final Assignment assignment = new VariableAssignment(map);
+    public static void testAllAssignments(TermMap map, Consumer<Assumable> testFunction) {
+        final Assumable assumable = new Assignment(map);
         final int numVariables = map.getVariableCount();
         final int numAssignments = (int) Math.pow(2, numVariables);
         for (int i = 0; i < numAssignments; i++) {
             for (int j = 0; j < numVariables; j++) {
-                assignment.set(j + 1, ((i >> j) & 1) == 1);
+                assumable.set(j + 1, ((i >> j) & 1) == 1);
             }
-            testFunction.accept(assignment);
+            testFunction.accept(assumable);
         }
     }
 }

@@ -20,8 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.clauses.solutions.combinations.CombinationIterator;
-import de.featjar.formula.clauses.solutions.combinations.IteratorFactory;
+import de.featjar.formula.analysis.sat.solution.combinations.CombinationIterator;
+import de.featjar.formula.analysis.sat.solution.combinations.IteratorFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

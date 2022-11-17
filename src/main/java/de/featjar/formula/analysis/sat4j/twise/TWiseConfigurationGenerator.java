@@ -23,9 +23,8 @@ package de.featjar.formula.analysis.sat4j.twise;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.sat4j.configuration.AbstractConfigurationGenerator;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.ClauseList;
-import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.analysis.sat.clause.CNF;
+import de.featjar.formula.analysis.sat.LiteralMatrix;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.IntervalThread;
 
@@ -66,7 +65,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<ClauseList>> convertLiterals(LiteralList literalSet) {
+    public static List<List<LiteralMatrix>> convertLiterals(SortedIntegerList literalSet) {
         return TWiseCombiner.convertGroupedLiterals(Arrays.asList(literalSet));
     }
 
@@ -77,7 +76,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<ClauseList>> convertGroupedLiterals(List<LiteralList> groupedLiterals) {
+    public static List<List<LiteralMatrix>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
         return TWiseCombiner.convertGroupedLiterals(groupedLiterals);
     }
 
@@ -89,7 +88,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<ClauseList>> convertExpressions(List<ClauseList> expressions) {
+    public static List<List<LiteralMatrix>> convertExpressions(List<LiteralMatrix> expressions) {
         return TWiseCombiner.convertExpressions(expressions);
     }
 
@@ -113,7 +112,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     protected Random random = new Random(0);
 
     protected int t;
-    protected List<List<ClauseList>> nodes;
+    protected List<List<LiteralMatrix>> nodes;
     protected PresenceConditionManager presenceConditionManager;
 
     protected long numberOfCombinations, count, coveredCount, invalidCount;
@@ -143,11 +142,11 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         this.t = t;
     }
 
-    public List<List<ClauseList>> getNodes() {
+    public List<List<LiteralMatrix>> getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<List<ClauseList>> nodes) {
+    public void setNodes(List<List<LiteralMatrix>> nodes) {
         this.nodes = nodes;
     }
 
@@ -169,9 +168,9 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         solver.setSelectionStrategy(SStrategy.random(random));
 
         if (nodes == null) {
-            nodes = convertLiterals(LiteralList.getLiterals(cnf));
+            nodes = convertLiterals(SortedIntegerList.getLiterals(cnf));
         }
-        if (cnf.getClauses().isEmpty()) {
+        if (cnf.getClauseList().isEmpty()) {
             util = new TWiseConfigurationUtil(cnf, null);
         } else {
             util = new TWiseConfigurationUtil(cnf, solver);
@@ -183,7 +182,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
 
         Feat.log().debug("Compute random sample... ");
 
-        if (!cnf.getClauses().isEmpty()) {
+        if (!cnf.getClauseList().isEmpty()) {
             util.computeRandomSample(randomSampleSize);
             if (useMig) {
                 if (modalImplicationGraph != null) {
@@ -224,7 +223,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     }
 
     @Override
-    public LiteralList get() {
+    public SortedIntegerList get() {
         return bestResult.isEmpty()
                 ? null
                 : bestResult.remove(bestResult.size() - 1).getCompleteSolution();
@@ -268,7 +267,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
                 );
 
         // TODO Variation Point: Combination order
-        final ICombinationSupplier<ClauseList> it;
+        final ICombinationSupplier<LiteralMatrix> it;
         presenceConditionManager.shuffleSort(random);
         final List<List<PresenceCondition>> groupedPresenceConditions =
                 presenceConditionManager.getGroupedPresenceConditions();
@@ -283,12 +282,12 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         coveredCount = 0;
         invalidCount = 0;
 
-        final List<ClauseList> combinationListUncovered = new ArrayList<>();
+        final List<LiteralMatrix> combinationListUncovered = new ArrayList<>();
         count = coveredCount;
         phaseCount++;
         ICoverStrategy phase = phaseList.get(0);
         while (true) {
-            final ClauseList combinedCondition = it.get();
+            final LiteralMatrix combinedCondition = it.get();
             if (combinedCondition == null) {
                 break;
             }
@@ -322,7 +321,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             phase = phaseList.get(j);
             count = coveredCount + invalidCount;
             for (int i = coveredIndex + 1; i < combinationListUncovered.size(); i++) {
-                final ClauseList combination = combinationListUncovered.get(i);
+                final LiteralMatrix combination = combinationListUncovered.get(i);
                 final ICoverStrategy.CombinationStatus covered = phase.cover(combination);
                 switch (covered) {
                     case COVERED:

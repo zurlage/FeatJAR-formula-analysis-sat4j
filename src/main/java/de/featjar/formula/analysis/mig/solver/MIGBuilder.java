@@ -24,8 +24,7 @@ import de.featjar.formula.analysis.mig.solver.Vertex.Status;
 import de.featjar.formula.analysis.sat4j.solver.SStrategy;
 import de.featjar.formula.analysis.sat4j.solver.Sat4JSolutionSolver;
 import de.featjar.formula.analysis.solver.SATSolver;
-import de.featjar.formula.clauses.CNF;
-import de.featjar.formula.clauses.LiteralList;
+import de.featjar.formula.analysis.sat.clause.CNF;
 import de.featjar.base.task.Monitor;
 import de.featjar.base.task.MonitorableFunction;
 import java.util.ArrayDeque;
@@ -49,7 +48,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
     /**
      * For sorting clauses by length. Starting with the longest.
      */
-    protected static final Comparator<LiteralList> lengthComparator = Comparator.comparing(o -> o.getLiterals().length);
+    protected static final Comparator<SortedIntegerList> lengthComparator = Comparator.comparing(o -> o.getIntegers().length);
 
     protected final Random random = new Random(112358);
 
@@ -57,7 +56,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
     protected boolean detectStrong = true;
 
     protected Sat4JSolutionSolver solver;
-    protected List<LiteralList> cleanedClausesList;
+    protected List<SortedIntegerList> cleanedClausesList;
     protected int[] fixedFeatures;
 
     protected ModalImplicationGraph modalImplicationGraph;
@@ -82,20 +81,20 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         for (int i = 0; i < fixedFeatures.length; i++) {
             final int varX = fixedFeatures[i];
             if (varX != 0) {
-                solver.getAssumptions().push(-varX);
+                solver.getAssumptionList().push(-varX);
                 final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case FALSE:
-                        solver.getAssumptions().replaceLast(varX);
+                        solver.getAssumptionList().replaceLast(varX);
                         modalImplicationGraph.getVertex(-varX).setStatus(Status.Dead);
                         modalImplicationGraph.getVertex(varX).setStatus(Status.Core);
                         break;
                     case TIMEOUT:
-                        solver.getAssumptions().pop();
+                        solver.getAssumptionList().pop();
                         break;
                     case TRUE:
-                        solver.getAssumptions().pop();
-                        LiteralList.resetConflicts(fixedFeatures, solver.getInternalSolution());
+                        solver.getAssumptionList().pop();
+                        SortedIntegerList.resetConflicts(fixedFeatures, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                         break;
                 }
@@ -107,7 +106,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
 
     protected long addClauses(CNF cnf, boolean checkRedundancy, Monitor monitor) {
         monitor.setTotalSteps(cleanedClausesList.size());
-        Stream<LiteralList> stream = cleanedClausesList.stream();
+        Stream<SortedIntegerList> stream = cleanedClausesList.stream();
         if (checkRedundancy) {
             final Sat4JSolutionSolver newSolver = new Sat4JSolutionSolver(new CNF(cnf.getVariableMap()));
             stream = stream.sorted(lengthComparator)
@@ -115,7 +114,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
                     .peek(c -> monitor.addStep())
                     .filter(
                             clause -> //
-                            (clause.getLiterals().length < 3) //
+                            (clause.getIntegers().length < 3) //
                                             || !isRedundant(newSolver, clause)) //
                     .peek(newSolver.getFormula()::push); //
         } else {
@@ -198,15 +197,15 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
     //	}
 
     protected void cleanClauses() {
-        cleanedClausesList = new ArrayList<>(modalImplicationGraph.getCnf().getClauses().size());
-        modalImplicationGraph.getCnf().getClauses().stream()
+        cleanedClausesList = new ArrayList<>(modalImplicationGraph.getCnf().getClauseList().size());
+        modalImplicationGraph.getCnf().getClauseList().stream()
                 .map(c -> cleanClause(c, modalImplicationGraph))
                 .filter(Objects::nonNull)
                 .forEach(cleanedClausesList::add);
     }
 
-    protected LiteralList cleanClause(LiteralList clause, ModalImplicationGraph modalImplicationGraph) {
-        final int[] literals = clause.getLiterals();
+    protected SortedIntegerList cleanClause(SortedIntegerList clause, ModalImplicationGraph modalImplicationGraph) {
+        final int[] literals = clause.getIntegers();
         final LinkedHashSet<Integer> literalSet = new LinkedHashSet<>(literals.length << 1);
 
         // Sort out dead and core features
@@ -244,11 +243,11 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         for (final int lit : literalSet) {
             literalArray[i++] = lit;
         }
-        return new LiteralList(literalArray, LiteralList.Order.NATURAL);
+        return new SortedIntegerList(literalArray, SortedIntegerList.Order.NATURAL);
     }
 
-    protected final boolean isRedundant(Sat4JSolutionSolver solver, LiteralList curClause) {
-        return solver.hasSolution(curClause.negate()) == SATSolver.Result<Boolean>.FALSE;
+    protected final boolean isRedundant(Sat4JSolutionSolver solver, SortedIntegerList curSortedIntegerList) {
+        return solver.hasSolution(curSortedIntegerList.negate()) == SATSolver.Result<Boolean>.FALSE;
     }
 
     protected void bfsStrong(Monitor monitor) {
@@ -283,50 +282,50 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         monitor.setDone();
     }
 
-    protected void bfsWeak(LiteralList affectedVariables, Monitor monitor) {
+    protected void bfsWeak(SortedIntegerList affectedVariables, Monitor monitor) {
         monitor.setTotalSteps(modalImplicationGraph.getVertices().size());
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
         final ArrayList<Integer> literals = new ArrayList<>();
         final boolean[] mark = new boolean[modalImplicationGraph.size() + 1];
         final int[] fixed = new int[modalImplicationGraph.size() + 1];
-        final int orgSize = solver.getAssumptions().size();
+        final int orgSize = solver.getAssumptionList().size();
         solver.setSelectionStrategy(SStrategy.original());
         for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             if (vertex.isNormal()
                     && ((affectedVariables == null)
-                            || affectedVariables.containsAnyVariable(Math.abs(vertex.getVar())))) {
+                            || affectedVariables.containsAny(Math.abs(vertex.getVar())))) {
                 final int var = vertex.getVar();
                 final int negVar = -var;
                 Arrays.fill(mark, false);
                 Arrays.fill(fixed, 0);
                 int[] model = null;
 
-                for (final LiteralList solution : solver.getSolutionHistory()) {
-                    if (solution.containsAllLiterals(var)) {
+                for (final SortedIntegerList solution : solver.getSolutionHistory()) {
+                    if (solution.containsAll(var)) {
                         if (model == null) {
-                            model = Arrays.copyOf(solution.getLiterals(), solution.size());
+                            model = Arrays.copyOf(solution.getIntegers(), solution.size());
                         } else {
-                            LiteralList.resetConflicts(model, solution.getLiterals());
+                            SortedIntegerList.resetConflicts(model, solution.getIntegers());
                         }
                     }
                 }
 
-                solver.getAssumptions().push(var);
+                solver.getAssumptionList().push(var);
                 fixed[Math.abs(var)] = var;
                 mark[Math.abs(var)] = true;
                 for (final Vertex strongVertex : vertex.getStrongEdges()) {
                     final int strongVar = strongVertex.getVar();
-                    solver.getAssumptions().push(strongVar);
+                    solver.getAssumptionList().push(strongVar);
                     final int index = Math.abs(strongVar);
                     fixed[index] = strongVar;
                     mark[index] = true;
                     strongVertex.getComplexClauses().stream()
-                            .flatMapToInt(c -> IntStream.of(c.getLiterals()))
+                            .flatMapToInt(c -> IntStream.of(c.getIntegers()))
                             .forEach(literals::add);
                 }
 
                 vertex.getComplexClauses().stream()
-                        .flatMapToInt(c -> IntStream.of(c.getLiterals()))
+                        .flatMapToInt(c -> IntStream.of(c.getIntegers()))
                         .forEach(literals::add);
 
                 if (model == null) {
@@ -349,35 +348,35 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
                     final int varX = model[Math.abs(curVertex.getVar()) - 1];
                     if (varX != 0) {
                         curVertex = modalImplicationGraph.getVertex(varX);
-                        solver.getAssumptions().push(-varX);
+                        solver.getAssumptionList().push(-varX);
                         switch (solver.hasSolution()) {
                             case FALSE:
-                                solver.getAssumptions().replaceLast(varX);
+                                solver.getAssumptionList().replaceLast(varX);
                                 fixed[Math.abs(varX)] = varX;
-                                final LiteralList literalList = new LiteralList(negVar, varX);
-                                cleanedClausesList.add(literalList);
-                                modalImplicationGraph.getDetectedStrong().add(literalList);
+                                final SortedIntegerList sortedIntegerList = new SortedIntegerList(negVar, varX);
+                                cleanedClausesList.add(sortedIntegerList);
+                                modalImplicationGraph.getDetectedStrong().add(sortedIntegerList);
                                 for (final Vertex strongVertex : curVertex.getStrongEdges()) {
                                     final int index = Math.abs(strongVertex.getVar());
                                     mark[index] = true;
                                     if (fixed[index] == 0) {
-                                        solver.getAssumptions().push(strongVertex.getVar());
+                                        solver.getAssumptionList().push(strongVertex.getVar());
                                         fixed[index] = strongVertex.getVar();
                                     }
                                     strongVertex.getComplexClauses().stream()
-                                            .flatMapToInt(c -> IntStream.of(c.getLiterals()))
+                                            .flatMapToInt(c -> IntStream.of(c.getIntegers()))
                                             .forEach(literals::add);
                                 }
                                 break;
                             case TIMEOUT:
-                                solver.getAssumptions().pop();
+                                solver.getAssumptionList().pop();
                                 curVertex.getStrongEdges().stream()
                                         .map(Vertex::getVar)
                                         .forEach(literals::add);
                                 break;
                             case TRUE:
-                                solver.getAssumptions().pop();
-                                LiteralList.resetConflicts(model, solver.getInternalSolution());
+                                solver.getAssumptionList().pop();
+                                SortedIntegerList.resetConflicts(model, solver.getInternalSolution());
                                 solver.shuffleOrder(random);
                                 curVertex.getStrongEdges().stream()
                                         .map(Vertex::getVar)
@@ -398,7 +397,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
                         //						}
                     }
                     curVertex.getComplexClauses().stream()
-                            .flatMapToInt(c -> IntStream.of(c.getLiterals()))
+                            .flatMapToInt(c -> IntStream.of(c.getIntegers()))
                             .forEach(literals::add);
 
                     //					Vertex complement = mig.getVertex(-curVertex.getVar());
@@ -418,7 +417,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
                     literals.clear();
                 }
             }
-            solver.getAssumptions().clear(orgSize);
+            solver.getAssumptionList().clear(orgSize);
             monitor.addStep();
         }
         for (final Vertex vertex : modalImplicationGraph.getVertices()) {

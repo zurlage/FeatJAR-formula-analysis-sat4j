@@ -21,7 +21,6 @@
 package de.featjar.formula.analysis.sat4j.configuration;
 
 import de.featjar.formula.analysis.solver.SolverContradictionException;
-import de.featjar.formula.clauses.LiteralList;
 
 /**
  * Generates all configurations for a given propositional formula.
@@ -32,11 +31,11 @@ public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
     private boolean satisfiable = true;
 
     @Override
-    public LiteralList get() {
+    public SortedIntegerList get() {
         if (!satisfiable) {
             return null;
         }
-        final LiteralList solution = solver.findSolution();
+        final SortedIntegerList solution = solver.findSolution();
         if (solution == null) {
             satisfiable = false;
             return null;

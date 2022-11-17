@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.clauses.LiteralList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,12 +33,12 @@ import java.util.List;
  */
 public class SampleDistribution extends LiteralDistribution {
 
-    private final ArrayList<LiteralList> samples = new ArrayList<>();
+    private final ArrayList<SortedIntegerList> samples = new ArrayList<>();
     private int startIndex;
 
     private final byte[] model;
 
-    public SampleDistribution(List<LiteralList> sample) {
+    public SampleDistribution(List<SortedIntegerList> sample) {
         samples.addAll(sample);
         startIndex = 0;
         model = new byte[sample.get(0).size()];
@@ -59,7 +58,7 @@ public class SampleDistribution extends LiteralDistribution {
             model[index] = 0;
             final int literal = sign > 0 ? var : -var;
             for (int i = 0; i < startIndex; i++) {
-                if (samples.get(i).getLiterals()[index] == -literal) {
+                if (samples.get(i).getIntegers()[index] == -literal) {
                     Collections.swap(samples, i--, --startIndex);
                 }
             }
@@ -72,7 +71,7 @@ public class SampleDistribution extends LiteralDistribution {
         if (model[index] == 0) {
             model[index] = (byte) (literal > 0 ? 1 : -1);
             for (int i = startIndex; i < samples.size(); i++) {
-                if (samples.get(i).getLiterals()[index] == -literal) {
+                if (samples.get(i).getIntegers()[index] == -literal) {
                     Collections.swap(samples, i, startIndex++);
                 }
             }
@@ -90,8 +89,8 @@ public class SampleDistribution extends LiteralDistribution {
 
     public int getPositiveCount(int index) {
         int sum = 0;
-        for (final LiteralList l : samples.subList(startIndex, samples.size())) {
-            sum += (~l.getLiterals()[index]) >>> 31;
+        for (final SortedIntegerList l : samples.subList(startIndex, samples.size())) {
+            sum += (~l.getIntegers()[index]) >>> 31;
         }
         return sum;
     }

@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.formula.clauses.ClauseList;
+import de.featjar.formula.analysis.sat.LiteralMatrix;
 import java.util.List;
 
 /**
@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class SingleIterator implements ICombinationSupplier<ClauseList> {
+public class SingleIterator implements ICombinationSupplier<LiteralMatrix> {
 
     private final List<PresenceCondition> expressionSet;
     private final ICombinationSupplier<int[]> supplier;
@@ -49,13 +49,13 @@ public class SingleIterator implements ICombinationSupplier<ClauseList> {
     }
 
     @Override
-    public ClauseList get() {
+    public LiteralMatrix get() {
         final int[] js = supplier.get();
         if (js != null) {
             for (int j = 0; j < js.length; j++) {
                 nextCombination[j] = expressionSet.get(js[j]);
             }
-            final ClauseList combinedCondition = new ClauseList();
+            final LiteralMatrix combinedCondition = new LiteralMatrix();
             combiner.combineConditions(nextCombination, combinedCondition);
             return combinedCondition;
         } else {
