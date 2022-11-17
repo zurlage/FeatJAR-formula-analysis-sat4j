@@ -39,8 +39,12 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
         Analysis.WithAssumedClauseList<BooleanClauseList> {
     protected Computation<BooleanClauseList> clauseListComputation;
     protected Long timeout;
-    protected BooleanAssignment assumedAssignment;
-    protected BooleanClauseList assumedClauseList;
+    protected BooleanAssignment assumedAssignment = new BooleanAssignment();
+    protected BooleanClauseList assumedClauseList = new BooleanClauseList();
+
+    public SAT4JAnalysis(Computation<BooleanClauseList> clauseListComputation) {
+        this.clauseListComputation = clauseListComputation;
+    }
 
     @Override
     public Computation<BooleanClauseList> getInputComputation() {
@@ -99,6 +103,10 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
     }
 
     static abstract class Solution<T extends SAT4JAnalysis<T, U>, U> extends SAT4JAnalysis<T, U> {
+        public Solution(Computation<BooleanClauseList> clauseListComputation) {
+            super(clauseListComputation);
+        }
+
         @Override
         protected SAT4JSolutionSolver newSolver(BooleanClauseList clauseList) {
             return new SAT4JSolutionSolver(clauseList);
@@ -106,6 +114,10 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
     }
 
     static abstract class Explanation<T extends SAT4JAnalysis<T, U>, U> extends SAT4JAnalysis<T, U> {
+        public Explanation(Computation<BooleanClauseList> clauseListComputation) {
+            super(clauseListComputation);
+        }
+
         @Override
         protected SAT4JExplanationSolver newSolver(BooleanClauseList clauseList) {
             return new SAT4JExplanationSolver(clauseList);

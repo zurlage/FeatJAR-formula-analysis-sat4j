@@ -20,10 +20,12 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
+import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.Monitor;
 import de.featjar.formula.analysis.Analysis;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
@@ -43,6 +45,10 @@ import java.util.Random;
 public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadAnalysis, BooleanSolution>
     implements Analysis.WithRandom {
     protected Random random;
+
+    public SAT4JCoreDeadAnalysis(Computation<BooleanClauseList> clauseListComputation) {
+        super(clauseListComputation);
+    }
 
     @Override
     public Random getRandom() {

@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
+import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.CountSolutionsAnalysis;
@@ -31,6 +32,10 @@ import java.math.BigInteger;
 
 public class SAT4JCountSolutionsAnalysis extends SAT4JAnalysis.Solution<SAT4JCountSolutionsAnalysis, BigInteger> implements
         CountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
+    public SAT4JCountSolutionsAnalysis(Computation<BooleanClauseList> clauseListComputation) {
+        super(clauseListComputation);
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public FutureResult<BigInteger> compute() {

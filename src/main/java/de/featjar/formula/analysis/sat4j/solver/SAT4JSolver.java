@@ -37,7 +37,7 @@ import java.util.Optional;
  * @author Elias Kuiter
  */
 public abstract class SAT4JSolver {
-    protected final ISolver internalSolver;
+    protected final ISolver internalSolver = newInternalSolver();
     protected final SAT4JClauseList clauseList;
     protected final SAT4JAssignment assignment = new SAT4JAssignment();
     protected SolutionHistory solutionHistory = new SolutionHistory.RememberUpTo(1000);
@@ -45,7 +45,6 @@ public abstract class SAT4JSolver {
     protected boolean globalTimeout;
 
     public SAT4JSolver(BooleanClauseList clauseList) {
-        internalSolver = newInternalSolver();
         internalSolver.setDBSimplificationAllowed(true);
         internalSolver.setKeepSolverHot(true);
         internalSolver.setVerbose(false);
@@ -94,7 +93,10 @@ public abstract class SAT4JSolver {
 
     public void setTimeout(Long timeout) {
         this.timeout = timeout;
-        internalSolver.setTimeoutMs(timeout);
+        if (timeout != null)
+            internalSolver.setTimeoutMs(timeout);
+        else
+            internalSolver.expireTimeout();
     }
 
     public boolean isGlobalTimeout() {

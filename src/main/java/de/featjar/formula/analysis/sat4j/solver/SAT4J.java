@@ -12,21 +12,21 @@ import de.featjar.formula.analysis.sat4j.SAT4JHasSolutionAnalysis;
 public class SAT4J implements Solver<Integer> {
     @Override
     public SAT4JHasSolutionAnalysis hasSolutionAnalysis() {
-        return new SAT4JHasSolutionAnalysis();
+        return null; //new SAT4JHasSolutionAnalysis();
     }
 
     @Override
     public GetSolutionAnalysis<?, ?, ?> getSolutionAnalysis() {
-        return new SAT4JGetSolutionAnalysis();
+        return null; //new SAT4JGetSolutionAnalysis();
     }
 
     @Override
     public CountSolutionsAnalysis<?, ?> countSolutionsAnalysis() {
-        return new SAT4JCountSolutionsAnalysis();
+        return null; //new SAT4JCountSolutionsAnalysis();
     }
 
     @Override
     public GetSolutionsAnalysis<?, ?, ?> getSolutionsAnalysis() {
-        return new SAT4JGetSolutionsAnalysis();
+        return null; //new SAT4JGetSolutionsAnalysis();
     }
 }
