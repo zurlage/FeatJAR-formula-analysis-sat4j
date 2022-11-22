@@ -34,7 +34,7 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List<SortedIntegerList>, de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver> { // todo: AVariableAnalysis
+public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List<SortedIntegerList>, de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver> { // TODO: AVariableAnalysis
     public AtomicSetAnalysis(Computation<CNF> inputComputation) {
         super(inputComputation);
     }
@@ -78,7 +78,7 @@ public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List
                             solver.getAssumptionList().replaceLast(varX);
                         } else if (Result.empty().equals(hasSolution)) {
                             solver.getAssumptionList().pop();
-                            // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
+                            // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
                         } else if (Result.of(true).equals(hasSolution)) {
                             solver.getAssumptionList().pop();
                             SortedIntegerList.resetConflicts(model1Copy, solver.getInternalSolution());
@@ -118,7 +118,7 @@ public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List
                                 if (Result.of(false).equals(hasSolution)) {
                                     done[j] = 1;
                                 } else if (Result.empty().equals(hasSolution)) {
-                                    // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
+                                    // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
                                 } else if (Result.of(true).equals(hasSolution)) {
                                     SortedIntegerList.resetConflicts(xModel0, solver.getInternalSolution());
                                     solver.shuffleOrder(random);
@@ -136,7 +136,7 @@ public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List
                             for (int j = i + 1; j < xModel0.length; j++) {
                                 done[j] = 0;
                             }
-                            // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
+                            // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
                         } else if (Result.of(true).equals(hasSolution)) {
                             xModel0 = solver.getInternalSolution();
                         }
@@ -154,7 +154,7 @@ public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List
                                     } else if (Result.empty().equals(solution)) {
                                         done[j] = 0;
                                         solver.getAssumptionList().pop();
-                                        // return Result.empty(new TimeoutException()); // todo: optionally ignore timeout or continue?
+                                        // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
                                     } else if (Result.of(true).equals(solution)) {
                                         done[j] = 0;
                                         SortedIntegerList.resetConflicts(xModel0, solver.getInternalSolution());

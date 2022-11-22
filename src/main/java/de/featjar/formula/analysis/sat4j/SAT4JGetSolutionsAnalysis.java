@@ -52,7 +52,7 @@ public class SAT4JGetSolutionsAnalysis extends SAT4JAnalysis.Solution<SAT4JGetSo
                 solver.getClauseList().add(solution.toClause().negate());
                 hasSolution = solver.hasSolution();
             }
-            // todo: if timeout is reached, return subset with a warning
+            // TODO: if timeout is reached, return subset with a warning
             return hasSolution.map(_hasSolution -> solutionList);
         });
     }

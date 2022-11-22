@@ -37,7 +37,7 @@ import java.util.Random;
 
 /**
  * Finds core and dead features.
- * todo: currently probably broken
+ * TODO: currently probably broken
  *
  * @author Sebastian Krieter
  */
@@ -183,7 +183,7 @@ public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadA
             solver.setSelectionStrategy(SelectionStrategy.inverse(model1));
             final int[] model2 = solver.findSolution().get().getIntegers();
 
-            // todo: what does this do??
+            // TODO: what does this do??
 //            if (variables != null) {
 //                final int[] model3 = new int[model1.length];
 //                for (int i = 0; i < variables.getIntegers().length; i++) {
@@ -220,6 +220,6 @@ public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadA
             }
         }
 
-        return solver.getAssignment().toAssignment().toSolution(); // todo: toAssignment unintuitive?
+        return solver.getAssignment().toAssignment().toSolution(); // TODO: toAssignment unintuitive?
     }
 }

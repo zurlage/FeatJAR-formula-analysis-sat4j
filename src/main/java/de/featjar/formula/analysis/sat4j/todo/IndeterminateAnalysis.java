@@ -34,7 +34,7 @@ import org.sat4j.core.VecInt;
  *
  * @author Sebastian Krieter
  */
-public class IndeterminateAnalysis extends VariableAnalysis<SortedIntegerList> { // todo: variable-analysis does not work
+public class IndeterminateAnalysis extends VariableAnalysis<SortedIntegerList> { // TODO: variable-analysis does not work
     // reliably (false positives) (use old
     // analysis first?)
 
@@ -57,7 +57,7 @@ public class IndeterminateAnalysis extends VariableAnalysis<SortedIntegerList> {
             final VecInt resultList = new VecInt();
             variableLoop:
             for (final int variable : variables.getIntegers()) {
-                final SAT4JSolutionSolver modSolver = new SAT4JSolutionSolver(solver.getCNF()); // todo: before, this was passed the variable map?
+                final SAT4JSolutionSolver modSolver = new SAT4JSolutionSolver(solver.getCNF()); // TODO: before, this was passed the variable map?
                 final List<SortedIntegerList> sortedIntegerLists = solver.getCNF().getClauseList();
                 for (final SortedIntegerList sortedIntegerList : sortedIntegerLists) {
                     final SortedIntegerList newSortedIntegerList = sortedIntegerList.removeVariables(variable);

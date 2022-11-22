@@ -49,7 +49,7 @@ public class SAT4JCountSolutionsAnalysis extends SAT4JAnalysis.Solution<SAT4JCou
                 hasSolution = solver.hasSolution();
             }
             BigInteger finalSolutionCount = solutionCount;
-            // todo: if timeout is reached, return lower bound with a warning
+            // TODO: if timeout is reached, return lower bound with a warning
             return hasSolution.map(_hasSolution -> finalSolutionCount);
         });
     }

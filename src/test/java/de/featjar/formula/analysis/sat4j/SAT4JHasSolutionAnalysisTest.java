@@ -22,7 +22,7 @@ public class SAT4JHasSolutionAnalysisTest {
                 .get();
     }
 
-    //todo: all tests below only work when the formula is wrapped in and(...) as an auxiliary root. fix this, it is a big potential bug source
+    //TODO: all tests below only work when the formula is wrapped in and(...) as an auxiliary root. fix this, it is a big potential bug source
     @Test
     void satisfiableFormulaInCNFHasSolution() {
         assertTrue(hasSolution(and(literal("x"), literal(false, "y"))));
