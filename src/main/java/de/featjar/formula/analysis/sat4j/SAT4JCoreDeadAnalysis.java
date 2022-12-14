@@ -44,7 +44,7 @@ import java.util.Random;
 
 public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadAnalysis, BooleanSolution>
     implements Analysis.WithRandom {
-    protected Random random;
+    protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
     public SAT4JCoreDeadAnalysis(Computation<BooleanClauseList> clauseListComputation) {
         super(clauseListComputation);
@@ -58,6 +58,12 @@ public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadA
     @Override
     public SAT4JCoreDeadAnalysis setRandom(Random random) {
         this.random = random;
+        return this;
+    }
+
+    @Override
+    public SAT4JCoreDeadAnalysis setRandom(Long seed) {
+        WithRandom.super.setRandom(seed);
         return this;
     }
 

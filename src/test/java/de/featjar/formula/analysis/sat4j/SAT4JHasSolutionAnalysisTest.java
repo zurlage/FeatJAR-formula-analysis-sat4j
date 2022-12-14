@@ -1,8 +1,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
-import de.featjar.formula.analysis.Assignment;
-import de.featjar.formula.analysis.bool.ToLiteralClauseList;
+import de.featjar.formula.analysis.bool.ToBooleanClauseList;
 import de.featjar.formula.structure.formula.Formula;
 import de.featjar.formula.transformer.ToCNF;
 import de.featjar.formula.transformer.ToNNF;
@@ -16,7 +15,7 @@ public class SAT4JHasSolutionAnalysisTest {
         return Computation.of(formula)
                 .then(ToNNF::new)
                 .then(ToCNF::new)
-                .then(ToLiteralClauseList::new)
+                .then(ToBooleanClauseList::new)
                 .then(SAT4JHasSolutionAnalysis::new)
                 .getResult()
                 .get();
