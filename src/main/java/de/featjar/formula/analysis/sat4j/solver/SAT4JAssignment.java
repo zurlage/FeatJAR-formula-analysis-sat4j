@@ -152,8 +152,8 @@ public class SAT4JAssignment implements Assignment<Integer> {
     }
 
     @Override
-    public Map<Integer, Object> getAll() {
-        final Map<Integer, Object> map = new HashMap<>();
+    public LinkedHashMap<Integer, Object> getAll() {
+        final LinkedHashMap<Integer, Object> map = new LinkedHashMap<>();
         for (int i = 0; i < integers.size(); i++) {
             final int l = integers.unsafeGet(i);
             if (l != 0) {

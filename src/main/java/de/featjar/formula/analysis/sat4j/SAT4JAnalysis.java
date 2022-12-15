@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
+import de.featjar.base.Feat;
 import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.formula.analysis.Analysis;
@@ -76,7 +77,7 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
                     BooleanClauseList clauseList = pair.getKey();
                     ValueAssignment valueAssignment = pair.getValue();
                     // todo: this ignores warnings besides logging. is this a good idea?
-                    return clauseList.getVariableMap().toBoolean(valueAssignment).getAndLogProblems();
+                    return valueAssignment.toBoolean(clauseList.getVariableMap()).getAndLogProblems();
                 }));
     }
 
@@ -97,7 +98,7 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
                     BooleanClauseList clauseList = pair.getKey();
                     ValueClauseList valueClauseList = pair.getValue();
                     // todo: this ignores warnings besides logging. is this a good idea?
-                    return clauseList.getVariableMap().toBoolean(valueClauseList).getAndLogProblems();
+                    return valueClauseList.toBoolean(clauseList.getVariableMap()).getAndLogProblems();
                 }));
     }
 
@@ -117,18 +118,25 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
     public FutureResult<SAT4JSolver> initializeSolver() {
         return Computation.allOf(clauseListComputation, assumedAssignmentComputation, assumedClauseListComputation)
                 .get().thenCompute((list, monitor) -> {
-            BooleanClauseList clauseList = (BooleanClauseList) list.get(0);
-            BooleanAssignment assumedAssignment = (BooleanAssignment) list.get(1);
-            BooleanClauseList assumeClauseList = (BooleanClauseList) list.get(2);
-            SAT4JSolver solver = newSolver(clauseList);
-            solver.setTimeout(timeout);
-            solver.getClauseList().addAll(assumeClauseList);
-            solver.getAssignment().addAll(assumedAssignment);
-            return solver;
-        });
+                    BooleanClauseList clauseList = (BooleanClauseList) list.get(0);
+                    BooleanAssignment assumedAssignment = (BooleanAssignment) list.get(1);
+                    BooleanClauseList assumedClauseList = (BooleanClauseList) list.get(2);
+                    Feat.log().debug("initializing SAT4J");
+                    Feat.log().debug(clauseList.toValue().get());
+                    Feat.log().debug(assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
+                    Feat.log().debug(assumedClauseList.toValue().get());
+                    Feat.log().debug(clauseList);
+                    Feat.log().debug(assumedAssignment);
+                    Feat.log().debug(assumedClauseList);
+                    SAT4JSolver solver = newSolver(clauseList);
+                    solver.setTimeout(timeout);
+                    solver.getClauseList().addAll(assumedClauseList);
+                    solver.getAssignment().addAll(assumedAssignment);
+                    return solver;
+                });
     }
 
-    static abstract class   Solution<T extends SAT4JAnalysis<T, U>, U> extends SAT4JAnalysis<T, U> {
+    static abstract class Solution<T extends SAT4JAnalysis<T, U>, U> extends SAT4JAnalysis<T, U> {
         public Solution(Computation<BooleanClauseList> clauseListComputation) {
             super(clauseListComputation);
         }
