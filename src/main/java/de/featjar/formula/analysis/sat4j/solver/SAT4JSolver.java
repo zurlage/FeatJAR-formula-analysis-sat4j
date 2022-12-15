@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.Feat;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -29,6 +30,7 @@ import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -96,6 +98,7 @@ public abstract class SAT4JSolver {
     }
 
     public void setTimeout(Long timeout) {
+        Feat.log().debug(timeout != null ? "setting timeout to " + timeout + "ms" : "setting no timeout");
         this.timeout = timeout;
         if (timeout != null)
             internalSolver.setTimeoutMs(timeout);
@@ -133,15 +136,19 @@ public abstract class SAT4JSolver {
         }
 
         try {
+            Feat.log().debug("calling SAT4J");
             if (internalSolver.isSatisfiable(integers, globalTimeout)) {
                 BooleanSolution solution = new BooleanSolution(internalSolver.model());
+                Feat.log().debug("has solution " + solution);
                 solutionHistory.addNewSolution(solution);
                 return Result.of(true);
             } else {
+                Feat.log().debug("no solution");
                 solutionHistory.setLastSolution(null);
                 return Result.of(false);
             }
         } catch (final TimeoutException e) {
+            Feat.log().debug("timeout occurred");
             solutionHistory.setLastSolution(null);
             return Result.empty();
         }

@@ -123,15 +123,16 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
                     BooleanClauseList assumedClauseList = (BooleanClauseList) list.get(2);
                     Feat.log().debug("initializing SAT4J");
                     Feat.log().debug(clauseList.toValue().get());
-                    Feat.log().debug(assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
-                    Feat.log().debug(assumedClauseList.toValue().get());
+                    Feat.log().debug("assuming " + assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
+                    Feat.log().debug("assuming " + assumedClauseList.toValue().get());
+                    Feat.log().debug(clauseList.getVariableMap());
                     Feat.log().debug(clauseList);
-                    Feat.log().debug(assumedAssignment);
-                    Feat.log().debug(assumedClauseList);
+                    Feat.log().debug("assuming " + assumedAssignment);
+                    Feat.log().debug("assuming " + assumedClauseList);
                     SAT4JSolver solver = newSolver(clauseList);
-                    solver.setTimeout(timeout);
                     solver.getClauseList().addAll(assumedClauseList);
                     solver.getAssignment().addAll(assumedAssignment);
+                    solver.setTimeout(timeout);
                     return solver;
                 });
     }
