@@ -46,10 +46,6 @@ public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadA
     implements Analysis.WithRandom {
     protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
-    public SAT4JCoreDeadAnalysis(Computation<BooleanClauseList> clauseListComputation) {
-        super(clauseListComputation);
-    }
-
     @Override
     public Random getRandom() {
         return random;
