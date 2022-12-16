@@ -115,7 +115,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
             if (!remainingSortedIntegerLists.isEmpty()) {
                 final List<SortedIntegerList> result =
                         Computation.of(solver.getCNF())
-                                .then(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult()
+                                .map(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult()
                         .orElse(p -> Feat.log().problems(p));
                 remainingSortedIntegerLists.removeIf(result::contains);
             }
@@ -123,7 +123,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
             if (remainingVariables.getIntegers().length > 0) {
                 remainingVariables = remainingVariables.removeAll(
-                        Computation.of(solver.getCNF()).then(CoreDeadAnalysis.class, remainingVariables).getResult()
+                        Computation.of(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult()
                                 .orElse(p -> Feat.log().problems(p)));
             }
             monitor.addStep();
@@ -140,7 +140,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
                 if (relevantConstraint[i]) {
                     if (remainingVariables.getIntegers().length > 0) {
                         final SortedIntegerList deadVariables =
-                                Computation.of(solver.getCNF()).then(CoreDeadAnalysis.class, remainingVariables).getResult().get();
+                                Computation.of(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult().get();
                         if (deadVariables.getIntegers().length != 0) {
                             getAnomalies(resultList, i).setDeadVariables(deadVariables);
                             remainingVariables = remainingVariables.removeAll(deadVariables);
@@ -149,7 +149,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
                     if (!remainingSortedIntegerLists.isEmpty()) {
                         final List<SortedIntegerList> newLiteralListIndexList =
-                                Computation.of(solver.getCNF()).then(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult().get();
+                                Computation.of(solver.getCNF()).map(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult().get();
                         newLiteralListIndexList.removeIf(Objects::isNull);
                         if (!newLiteralListIndexList.isEmpty()) {
                             getAnomalies(resultList, i).setRedundantClauses(newLiteralListIndexList);

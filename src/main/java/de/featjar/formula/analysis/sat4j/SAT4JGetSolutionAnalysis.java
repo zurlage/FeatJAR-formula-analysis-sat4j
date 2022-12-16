@@ -20,21 +20,14 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.formula.analysis.GetSolutionAnalysis;
-import de.featjar.formula.analysis.HasSolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.bool.BooleanSolutionList;
 
 public class SAT4JGetSolutionAnalysis extends SAT4JAnalysis.Solution<SAT4JGetSolutionAnalysis, BooleanSolution> implements
         GetSolutionAnalysis<BooleanClauseList, BooleanSolution, BooleanAssignment> {
-    public SAT4JGetSolutionAnalysis(Computation<BooleanClauseList> clauseListComputation) {
-        super(clauseListComputation);
-    }
-
     @Override
     public FutureResult<BooleanSolution> compute() {
         return initializeSolver().thenComputeResult((solver, monitor) -> solver.findSolution());

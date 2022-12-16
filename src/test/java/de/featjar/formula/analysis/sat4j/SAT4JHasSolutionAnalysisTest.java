@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SAT4JHasSolutionAnalysisTest {
     public boolean hasSolution(Formula formula) {
         return Computation.of(formula)
-                .then(ToNNF::new)
-                .then(ToCNF::new)
-                .then(ToBooleanClauseList::new)
-                .then(SAT4JHasSolutionAnalysis::new)
+                .map(ToNNF::new)
+                .map(ToCNF::new)
+                .map(ToBooleanClauseList::new)
+                .map(SAT4JHasSolutionAnalysis::new)
                 .getResult()
                 .get();
     }

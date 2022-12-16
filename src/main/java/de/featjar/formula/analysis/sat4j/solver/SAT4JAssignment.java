@@ -25,6 +25,8 @@ import de.featjar.formula.analysis.bool.BooleanAssignment;
 
 import java.util.*;
 
+import de.featjar.formula.analysis.bool.BooleanClause;
+import de.featjar.formula.analysis.bool.BooleanSolution;
 import org.sat4j.core.VecInt;
 
 /**
@@ -103,10 +105,6 @@ public class SAT4JAssignment implements Assignment<Integer> {
         return Arrays.copyOfRange(integers.toArray(), from, to);
     }
 
-    public BooleanAssignment toAssignment() {
-        return new BooleanAssignment(toArray());
-    }
-
     public int peek() {
         return integers.get(integers.size() - 1);
     }
@@ -166,5 +164,20 @@ public class SAT4JAssignment implements Assignment<Integer> {
     @Override
     public int size() {
         return integers.size();
+    }
+
+    @Override
+    public BooleanAssignment toAssignment() {
+        return new BooleanAssignment(toArray());
+    }
+
+    @Override
+    public BooleanClause toClause() {
+        return new BooleanClause(toArray());
+    }
+
+    @Override
+    public BooleanSolution toSolution() {
+        return new BooleanSolution(toArray());
     }
 }
