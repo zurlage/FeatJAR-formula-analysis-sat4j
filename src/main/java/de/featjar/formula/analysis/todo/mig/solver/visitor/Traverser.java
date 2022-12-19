@@ -25,7 +25,6 @@ import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.Visitor.VisitResult;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;

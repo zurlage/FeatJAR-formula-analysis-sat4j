@@ -55,7 +55,7 @@ public class PresenceCondition extends BooleanAssignmentList {
         groups.add(group);
     }
 
-    public Set<Integer> getGroups() {
+    public LinkedHashSet<Integer> getGroups() {
         return groups;
     }
 

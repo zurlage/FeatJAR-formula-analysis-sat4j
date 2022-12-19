@@ -24,11 +24,8 @@ import de.featjar.formula.analysis.todo.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.IteratorInt;
