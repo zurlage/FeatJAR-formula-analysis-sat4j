@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import de.featjar.formula.analysis.Analysis;
 import de.featjar.formula.analysis.todo.mig.ConditionallyCoreDeadAnalysisMIG;
 import de.featjar.formula.analysis.sat4j.todo.AddRedundancyAnalysis;
-import de.featjar.formula.analysis.sat4j.todo.AtomicSetAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.AnalyzeAtomicSetsSAT4J;
 import de.featjar.formula.analysis.sat4j.todo.CauseAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.ContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.CoreDeadAnalysis;
@@ -71,7 +71,7 @@ public class CNFTest {
 
         executeAnalysis(rep, new AnalyzeHasSolutionSAT4J());
         executeAnalysis(rep, new AddRedundancyAnalysis());
-        executeAnalysis(rep, new AtomicSetAnalysis());
+        executeAnalysis(rep, new AnalyzeAtomicSetsSAT4J());
         executeAnalysis(rep, new CauseAnalysis());
         executeAnalysis(rep, new ContradictionAnalysis());
         executeAnalysis(rep, new CoreDeadAnalysis());

@@ -20,33 +20,46 @@
  */
 package de.featjar.formula.analysis.sat4j.todo;
 
-import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
+import de.featjar.formula.analysis.Analysis;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
+import de.featjar.formula.analysis.sat4j.SAT4JAnalysis;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Finds atomic sets.
  *
  * @author Sebastian Krieter
  */
-public class AtomicSetAnalysis extends de.featjar.formula.analysis.Analysis<List<SortedIntegerList>, de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver> { // TODO: AVariableAnalysis
-    public AtomicSetAnalysis(Computation<CNF> inputComputation) {
-        super(inputComputation);
-    }
+public class AnalyzeAtomicSetsSAT4J extends SAT4JAnalysis.Solution<AnalyzeAtomicSetsSAT4J, BooleanSolutionList> implements Analysis.WithRandom { // todo: here, a BooleanAssignmentList would be better
+    protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
-    public AtomicSetAnalysis(Computation<CNF> inputComputation, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+    @Override
+    public Random getRandom() {
+        return random;
     }
 
     @Override
-    public FutureResult<List<SortedIntegerList>> compute() {
+    public AnalyzeAtomicSetsSAT4J setRandom(Random random) {
+        this.random = random;
+        return this;
+    }
+
+    @Override
+    public AnalyzeAtomicSetsSAT4J setRandom(Long seed) {
+        WithRandom.super.setRandom(seed);
+        return this;
+    }
+
+    @Override
+    public FutureResult<BooleanSolutionList> compute() {
         return initializeSolver().thenCompute(((solver, monitor) -> {
-            final List<SortedIntegerList> result = new ArrayList<>();
+            final BooleanSolutionList result = new BooleanSolutionList();
             //		if (variables == null) {
             //			variables = LiteralList.getVariables(solver.getVariables());
             //		}

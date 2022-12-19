@@ -22,7 +22,7 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import de.featjar.formula.analysis.sat4j.todo.AtomicSetAnalysis;
+import de.featjar.formula.analysis.sat4j.todo.AnalyzeAtomicSetsSAT4J;
 import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.Expression;
 import de.featjar.base.io.IO;
@@ -42,7 +42,7 @@ public class CNFTransformTest {
 
         final ModelRepresentation rep = new ModelRepresentation(expression);
         final List<SortedIntegerList> atomicSets =
-                rep.getResult(new AtomicSetAnalysis()).orElseThrow();
+                rep.getResult(new AnalyzeAtomicSetsSAT4J()).orElseThrow();
         assertEquals(5, atomicSets.size());
     }
 }

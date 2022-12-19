@@ -24,6 +24,7 @@ import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.Monitor;
 import de.featjar.formula.analysis.Analysis;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
@@ -40,7 +41,7 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 
-public class AnalyzeCoreDeadSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDeadSAT4J, BooleanSolution>
+public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDeadVariablesSAT4J, BooleanAssignment>
     implements Analysis.WithRandom {
     protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
@@ -50,20 +51,20 @@ public class AnalyzeCoreDeadSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDead
     }
 
     @Override
-    public AnalyzeCoreDeadSAT4J setRandom(Random random) {
+    public AnalyzeCoreDeadVariablesSAT4J setRandom(Random random) {
         this.random = random;
         return this;
     }
 
     @Override
-    public AnalyzeCoreDeadSAT4J setRandom(Long seed) {
+    public AnalyzeCoreDeadVariablesSAT4J setRandom(Long seed) {
         WithRandom.super.setRandom(seed);
         return this;
     }
 
     @Override
-    public FutureResult<BooleanSolution> compute() {
-        return initializeSolver().thenCompute(this::analyze);
+    public FutureResult<BooleanAssignment> compute() {
+        return initializeSolver().thenComputeResult(this::analyze);
     }
 
     // currently unused (divide & conquer)
@@ -173,15 +174,21 @@ public class AnalyzeCoreDeadSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDead
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public BooleanSolution analyze(SAT4JSolver _solver, Monitor monitor) {
+    public Result<BooleanAssignment> analyze(SAT4JSolver _solver, Monitor monitor) {
         SAT4JSolutionSolver solver = (SAT4JSolutionSolver) _solver;
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(SelectionStrategy.positive());
-        int[] model1 = solver.findSolution().get().getIntegers();
+        Result<BooleanSolution> solution = solver.findSolution();
+        if (solution.isEmpty())
+            return Result.empty();
+        int[] model1 = solution.get().getIntegers();
 
         if (model1 != null) {
             solver.setSelectionStrategy(SelectionStrategy.inverse(model1));
-            final int[] model2 = solver.findSolution().get().getIntegers();
+            solution = solver.findSolution();
+            if (solution.isEmpty())
+                return Result.empty();
+            final int[] model2 = solution.get().getIntegers();
 
             // TODO: what does this do??
 //            if (variables != null) {
@@ -220,6 +227,6 @@ public class AnalyzeCoreDeadSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDead
             }
         }
 
-        return solver.getAssignment().toAssignment().toSolution(); // TODO: toAssignment unintuitive?
+        return Result.of(solver.getAssignment().toAssignment());
     }
 }
