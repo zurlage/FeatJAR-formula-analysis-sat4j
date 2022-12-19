@@ -29,8 +29,8 @@ import de.featjar.formula.analysis.sat4j.todo.AtomicSetAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.CauseAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.ContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.CoreDeadAnalysis;
-import de.featjar.formula.analysis.sat4j.SAT4JCountSolutionsAnalysis;
-import de.featjar.formula.analysis.sat4j.SAT4JHasSolutionAnalysis;
+import de.featjar.formula.analysis.sat4j.AnalyzeCountSolutionsSAT4J;
+import de.featjar.formula.analysis.sat4j.AnalyzeHasSolutionSAT4J;
 import de.featjar.formula.analysis.sat4j.todo.IndependentContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.IndependentRedundancyAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.IndeterminateAnalysis;
@@ -69,13 +69,13 @@ public class CNFTest {
 
         final ModelRepresentation rep = new ModelRepresentation(formula);
 
-        executeAnalysis(rep, new SAT4JHasSolutionAnalysis());
+        executeAnalysis(rep, new AnalyzeHasSolutionSAT4J());
         executeAnalysis(rep, new AddRedundancyAnalysis());
         executeAnalysis(rep, new AtomicSetAnalysis());
         executeAnalysis(rep, new CauseAnalysis());
         executeAnalysis(rep, new ContradictionAnalysis());
         executeAnalysis(rep, new CoreDeadAnalysis());
-        executeAnalysis(rep, new SAT4JCountSolutionsAnalysis());
+        executeAnalysis(rep, new AnalyzeCountSolutionsSAT4J());
         executeAnalysis(rep, new IndependentContradictionAnalysis());
         executeAnalysis(rep, new IndependentRedundancyAnalysis());
         executeAnalysis(rep, new IndeterminateAnalysis());

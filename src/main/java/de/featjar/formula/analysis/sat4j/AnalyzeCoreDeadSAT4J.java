@@ -20,12 +20,10 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.Monitor;
 import de.featjar.formula.analysis.Analysis;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
@@ -42,7 +40,7 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 
-public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadAnalysis, BooleanSolution>
+public class AnalyzeCoreDeadSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDeadSAT4J, BooleanSolution>
     implements Analysis.WithRandom {
     protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
@@ -52,13 +50,13 @@ public class SAT4JCoreDeadAnalysis extends SAT4JAnalysis.Solution<SAT4JCoreDeadA
     }
 
     @Override
-    public SAT4JCoreDeadAnalysis setRandom(Random random) {
+    public AnalyzeCoreDeadSAT4J setRandom(Random random) {
         this.random = random;
         return this;
     }
 
     @Override
-    public SAT4JCoreDeadAnalysis setRandom(Long seed) {
+    public AnalyzeCoreDeadSAT4J setRandom(Long seed) {
         WithRandom.super.setRandom(seed);
         return this;
     }

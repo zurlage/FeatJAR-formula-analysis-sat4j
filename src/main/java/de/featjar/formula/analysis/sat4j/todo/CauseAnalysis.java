@@ -26,6 +26,8 @@ import de.featjar.base.data.FutureResult;
 
 import java.util.*;
 
+import static de.featjar.base.data.Computations.async;
+
 /**
  * Finds clauses responsible for core and dead features.
  *
@@ -114,7 +116,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
             if (!remainingSortedIntegerLists.isEmpty()) {
                 final List<SortedIntegerList> result =
-                        Computation.of(solver.getCNF())
+                        async(solver.getCNF())
                                 .map(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult()
                         .orElse(p -> Feat.log().problems(p));
                 remainingSortedIntegerLists.removeIf(result::contains);
@@ -123,7 +125,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
             if (remainingVariables.getIntegers().length > 0) {
                 remainingVariables = remainingVariables.removeAll(
-                        Computation.of(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult()
+                        async(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult()
                                 .orElse(p -> Feat.log().problems(p)));
             }
             monitor.addStep();
@@ -140,7 +142,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
                 if (relevantConstraint[i]) {
                     if (remainingVariables.getIntegers().length > 0) {
                         final SortedIntegerList deadVariables =
-                                Computation.of(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult().get();
+                                async(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult().get();
                         if (deadVariables.getIntegers().length != 0) {
                             getAnomalies(resultList, i).setDeadVariables(deadVariables);
                             remainingVariables = remainingVariables.removeAll(deadVariables);
@@ -149,7 +151,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
                     if (!remainingSortedIntegerLists.isEmpty()) {
                         final List<SortedIntegerList> newLiteralListIndexList =
-                                Computation.of(solver.getCNF()).map(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult().get();
+                                async(solver.getCNF()).map(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult().get();
                         newLiteralListIndexList.removeIf(Objects::isNull);
                         if (!newLiteralListIndexList.isEmpty()) {
                             getAnomalies(resultList, i).setRedundantClauses(newLiteralListIndexList);

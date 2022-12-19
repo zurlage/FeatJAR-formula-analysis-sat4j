@@ -1,22 +1,22 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.data.Computation;
-import de.featjar.formula.analysis.bool.ToBooleanClauseList;
+import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.structure.formula.Formula;
-import de.featjar.formula.transformer.ToCNF;
-import de.featjar.formula.transformer.ToNNF;
+import de.featjar.formula.transformer.ComputeCNFFormula;
+import de.featjar.formula.transformer.ComputeNNFFormula;
 import org.junit.jupiter.api.Test;
 
 import static de.featjar.formula.structure.Expressions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SAT4JHasSolutionAnalysisTest {
+public class AnalyzeHasSolutionSAT4JTest {
     public boolean hasSolution(Formula formula) {
         return Computation.of(formula)
-                .map(ToNNF::new)
-                .map(ToCNF::new)
-                .map(ToBooleanClauseList::new)
-                .map(SAT4JHasSolutionAnalysis::new)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(ComputeBooleanRepresentation::new)
+                .map(AnalyzeHasSolutionSAT4J::new)
                 .getResult()
                 .get();
     }

@@ -29,10 +29,10 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
-import de.featjar.formula.analysis.value.ValueAssignment;
-import de.featjar.formula.analysis.value.ValueClauseList;
 
 import java.util.Optional;
+
+import static de.featjar.base.data.Computations.async;
 
 @SuppressWarnings("unchecked")
 public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
@@ -40,30 +40,30 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
         Analysis.WithAssumedAssignment<BooleanAssignment>,
         Analysis.WithAssumedClauseList<BooleanClauseList>,
         Analysis.WithTimeout {
-    protected Computation<BooleanClauseList> clauseListComputation;
-    protected Computation<BooleanAssignment> assumedAssignmentComputation = Computation.of(new BooleanAssignment());
-    protected Computation<BooleanClauseList> assumedClauseListComputation = Computation.of(new BooleanClauseList());
+    protected Computation<BooleanClauseList> clauseList;
+    protected Computation<BooleanAssignment> assumedAssignment = async(new BooleanAssignment());
+    protected Computation<BooleanClauseList> assumedClauseList = async(new BooleanClauseList());
     protected Long timeout;
 
     @Override
     public Computation<BooleanClauseList> getInput() {
-        return clauseListComputation;
+        return clauseList;
     }
 
     @Override
-    public T setInput(Computation<BooleanClauseList> clauseListComputation) {
-        this.clauseListComputation = clauseListComputation;
+    public T setInput(Computation<BooleanClauseList> input) {
+        this.clauseList = input;
         return (T) this;
     }
 
     @Override
     public Computation<BooleanAssignment> getAssumedAssignment() {
-        return assumedAssignmentComputation;
+        return assumedAssignment;
     }
 
     @Override
-    public T setAssumedAssignment(Computation<BooleanAssignment> assumedAssignmentComputation) {
-        this.assumedAssignmentComputation = assumedAssignmentComputation;
+    public T setAssumedAssignment(Computation<BooleanAssignment> assignment) {
+        this.assumedAssignment = assignment;
         return (T) this;
     }
 
@@ -79,12 +79,12 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
 
     @Override
     public Computation<BooleanClauseList> getAssumedClauseList() {
-        return assumedClauseListComputation;
+        return assumedClauseList;
     }
 
     @Override
-    public T setAssumedClauseList(Computation<BooleanClauseList> assumedClauseListComputation) {
-        this.assumedClauseListComputation = assumedClauseListComputation;
+    public T setAssumedClauseList(Computation<BooleanClauseList> clauseList) {
+        this.assumedClauseList = clauseList;
         return (T) this;
     }
 
@@ -112,7 +112,7 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
     abstract protected SAT4JSolver newSolver(BooleanClauseList clauseList);
 
     public FutureResult<SAT4JSolver> initializeSolver() {
-        return Computation.allOf(clauseListComputation, assumedAssignmentComputation, assumedClauseListComputation)
+        return Computation.allOf(clauseList, assumedAssignment, assumedClauseList)
                 .get().thenCompute((list, monitor) -> {
                     BooleanClauseList clauseList = (BooleanClauseList) list.get(0);
                     BooleanAssignment assumedAssignment = (BooleanAssignment) list.get(1);

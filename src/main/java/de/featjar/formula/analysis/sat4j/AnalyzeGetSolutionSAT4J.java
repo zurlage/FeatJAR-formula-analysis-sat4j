@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 
-public class SAT4JGetSolutionAnalysis extends SAT4JAnalysis.Solution<SAT4JGetSolutionAnalysis, BooleanSolution> implements
+public class AnalyzeGetSolutionSAT4J extends SAT4JAnalysis.Solution<AnalyzeGetSolutionSAT4J, BooleanSolution> implements
         GetSolutionAnalysis<BooleanClauseList, BooleanSolution, BooleanAssignment> {
     @Override
     public FutureResult<BooleanSolution> compute() {

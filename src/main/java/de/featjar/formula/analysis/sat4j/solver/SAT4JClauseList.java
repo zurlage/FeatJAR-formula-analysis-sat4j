@@ -68,12 +68,16 @@ public class SAT4JClauseList extends BooleanClauseList {
 
     @Override
     public void add(int index, BooleanClause clause) {
-        throw new UnsupportedOperationException();
+        if (index != assignments.size())
+            throw new UnsupportedOperationException();
+        super.add(index, clause);
     }
 
     @Override
     public Optional<BooleanClause> remove(int index) {
-        throw new UnsupportedOperationException();
+        if (index != assignments.size())
+            throw new UnsupportedOperationException();
+        return super.remove(index);
     }
 
     protected void addConstraint(BooleanClause clause) {

@@ -20,13 +20,12 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.formula.analysis.HasSolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 
-public class SAT4JHasSolutionAnalysis extends SAT4JAnalysis.Solution<SAT4JHasSolutionAnalysis, Boolean> implements
+public class AnalyzeHasSolutionSAT4J extends SAT4JAnalysis.Solution<AnalyzeHasSolutionSAT4J, Boolean> implements
         HasSolutionAnalysis<BooleanClauseList, BooleanAssignment> {
     @Override
     public FutureResult<Boolean> compute() {

@@ -20,33 +20,30 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.Computation;
 import de.featjar.base.data.FutureResult;
 import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.CountSolutionsAnalysis;
+import de.featjar.formula.analysis.GetSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
 
-import java.math.BigInteger;
-
-public class SAT4JCountSolutionsAnalysis extends SAT4JAnalysis.Solution<SAT4JCountSolutionsAnalysis, BigInteger> implements
-        CountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
+public class AnalyzeGetSolutionsSAT4J extends SAT4JAnalysis.Solution<AnalyzeGetSolutionsSAT4J, BooleanSolutionList> implements
+        GetSolutionsAnalysis<BooleanClauseList, BooleanSolutionList, BooleanAssignment> {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
-    public FutureResult<BigInteger> compute() {
+    public FutureResult<BooleanSolutionList> compute() {
         return initializeSolver().thenComputeResult((solver, monitor) -> {
-            BigInteger solutionCount = BigInteger.ZERO;
+            BooleanSolutionList solutionList = new BooleanSolutionList();
             Result<Boolean> hasSolution = solver.hasSolution();
             while (hasSolution.equals(Result.of(true))) {
-                solutionCount = solutionCount.add(BigInteger.ONE);
                 BooleanSolution solution = solver.getSolutionHistory().getLastSolution().get();
+                solutionList.add(solution);
                 solver.getClauseList().add(solution.toClause().negate());
                 hasSolution = solver.hasSolution();
             }
-            BigInteger finalSolutionCount = solutionCount;
-            // TODO: if timeout is reached, return lower bound with a warning
-            return hasSolution.map(_hasSolution -> finalSolutionCount);
+            // TODO: if timeout is reached, return subset with a warning
+            return hasSolution.map(_hasSolution -> solutionList);
         });
     }
 }
