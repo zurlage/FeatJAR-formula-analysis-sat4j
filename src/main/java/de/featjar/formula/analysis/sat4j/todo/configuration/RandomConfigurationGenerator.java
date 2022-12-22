@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import java.util.Random;
 
 /**
@@ -37,7 +37,7 @@ public abstract class RandomConfigurationGenerator extends AbstractConfiguration
     }
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         super.init(monitor);
         satisfiable = true;
     }

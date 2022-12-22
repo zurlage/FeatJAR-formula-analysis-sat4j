@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import org.sat4j.core.VecInt;
 
 /**
@@ -70,7 +70,7 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
     }
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         initialAssignmentLength = solver.getAssumptions().size();
 
         switch (coverStrategy) {

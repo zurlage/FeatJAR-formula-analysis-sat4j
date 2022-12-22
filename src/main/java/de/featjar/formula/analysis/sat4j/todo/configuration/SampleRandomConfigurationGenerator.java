@@ -25,7 +25,7 @@ import de.featjar.formula.analysis.sat4j.solver.SampleDistribution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import de.featjar.base.log.Log;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
     private SampleDistribution dist;
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         satisfiable = findCoreFeatures(solver);
         if (!satisfiable) {
             return;

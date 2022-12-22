@@ -21,14 +21,14 @@
 package de.featjar.formula.analysis.todo.mig.io;
 
 import de.featjar.formula.analysis.todo.mig.solver.ModalImplicationGraph;
-import de.featjar.base.io.format.Format;
+import de.featjar.base.io.format.IFormat;
 
 /**
  * Reads / Writes a MIG.
  *
  * @author Sebastian Krieter
  */
-public class MIGFormat implements Format<ModalImplicationGraph> {
+public class MIGFormat implements IFormat<ModalImplicationGraph> {
 
     @Override
     public boolean supportsParse() {

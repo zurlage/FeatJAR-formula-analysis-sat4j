@@ -25,8 +25,8 @@ import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
-import de.featjar.base.task.Monitor;
-import de.featjar.base.tree.structure.Traversable;
+import de.featjar.base.task.IMonitor;
+import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -170,7 +170,7 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public Result<BooleanAssignment> analyze(Pair<SAT4JSolver, Random> pair, Monitor monitor) {
+    public Result<BooleanAssignment> analyze(Pair<SAT4JSolver, Random> pair, IMonitor monitor) {
         SAT4JSolutionSolver solver = (SAT4JSolutionSolver) pair.getKey();
         Random random = pair.getValue();
         final int initialAssignmentLength = solver.getAssignment().size();
@@ -228,7 +228,7 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @Override
-    public Traversable<IComputation<?>> cloneNode() {
+    public ITree<IComputation<?>> cloneNode() {
         return new AnalyzeCoreDeadVariablesSAT4J(getInput());
     }
 }

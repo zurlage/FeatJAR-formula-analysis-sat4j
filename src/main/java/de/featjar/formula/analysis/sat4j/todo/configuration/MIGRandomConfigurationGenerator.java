@@ -25,7 +25,7 @@ import de.featjar.formula.analysis.todo.mig.solver.MIGDistribution;
 import de.featjar.formula.analysis.todo.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import de.featjar.base.log.Log;
 
 /**
@@ -38,7 +38,7 @@ public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerato
     private MIGDistribution dist;
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
         final ModalImplicationGraph modalImplicationGraph = Executor.apply(migBuilder, solver.getCnf()).orElse(Log::problems);
         satisfiable = modalImplicationGraph != null;

@@ -22,8 +22,8 @@ package de.featjar.formula.analysis.todo.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.base.task.Monitor;
-import de.featjar.base.task.MonitorableFunction;
+import de.featjar.base.task.IMonitor;
+import de.featjar.base.task.IMonitorableFunction;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
  *
  * @author Sebastian Krieter
  */
-public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplicationGraph> {
+public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImplicationGraph> {
 
     /**
      * For sorting clauses by length. Starting with the longest.
@@ -69,7 +69,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         return fixedFeatures != null;
     }
 
-    protected void findCoreFeatures(Monitor monitor) {
+    protected void findCoreFeatures(IMonitor monitor) {
         monitor.setTotalSteps(fixedFeatures.length);
 
         solver.setSelectionStrategy(SelectionStrategy.inverse(fixedFeatures));
@@ -101,7 +101,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         monitor.setDone();
     }
 
-    protected long addClauses(CNF cnf, boolean checkRedundancy, Monitor monitor) {
+    protected long addClauses(CNF cnf, boolean checkRedundancy, IMonitor monitor) {
         monitor.setTotalSteps(cleanedClausesList.size());
         Stream<SortedIntegerList> stream = cleanedClausesList.stream();
         if (checkRedundancy) {
@@ -247,7 +247,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         return solver.hasSolution(curSortedIntegerList.negate()) == SATSolver.Result<Boolean>.FALSE;
     }
 
-    protected void bfsStrong(Monitor monitor) {
+    protected void bfsStrong(IMonitor monitor) {
         monitor.setTotalSteps(modalImplicationGraph.getVertices().size());
         final boolean[] mark = new boolean[modalImplicationGraph.size() + 1];
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
@@ -279,7 +279,7 @@ public abstract class MIGBuilder implements MonitorableFunction<CNF, ModalImplic
         monitor.setDone();
     }
 
-    protected void bfsWeak(SortedIntegerList affectedVariables, Monitor monitor) {
+    protected void bfsWeak(SortedIntegerList affectedVariables, IMonitor monitor) {
         monitor.setTotalSteps(modalImplicationGraph.getVertices().size());
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
         final ArrayList<Integer> literals = new ArrayList<>();

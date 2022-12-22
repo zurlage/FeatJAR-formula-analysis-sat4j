@@ -24,7 +24,7 @@ import de.featjar.formula.analysis.todo.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.sat4j.todo.configuration.AbstractConfigurationGenerator;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
 import de.featjar.formula.analysis.bool.BooleanAssignmentList;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import de.featjar.base.task.IntervalThread;
 
 import java.util.ArrayList;
@@ -160,7 +160,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     }
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         Feat.log().debug("Create util instance... ");
         final CNF cnf = solver.getCnf();
         solver.rememberSolutionHistory(10);

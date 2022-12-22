@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
-import de.featjar.base.tree.structure.Traversable;
+import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.GetSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -54,7 +54,7 @@ public class AnalyzeGetSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSol
     }
 
     @Override
-    public Traversable<IComputation<?>> cloneNode() {
+    public ITree<IComputation<?>> cloneNode() {
         return new AnalyzeGetSolutionsSAT4J(getInput());
     }
 }

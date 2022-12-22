@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j.todo.configuration;
 
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import de.featjar.base.log.Log;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +37,7 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
     private List<SortedIntegerList> allConfigurations;
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         final AllConfigurationGenerator gen = new AllConfigurationGenerator();
         allConfigurations = Executor.apply(gen::execute, solver.getCnf(), monitor)
                 .map(BooleanSolutionList::getSolutions)

@@ -27,7 +27,7 @@ import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -370,7 +370,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
     }
 
     @Override
-    protected void init(Monitor monitor) {
+    protected void init(IMonitor monitor) {
         numVariables = solver.getCnf().getVariableMap().getVariableCount();
         solver.rememberSolutionHistory(Math.min(numVariables, SAT4JSolver.MAX_SOLUTION_HISTORY));
 

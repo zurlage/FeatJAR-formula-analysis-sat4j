@@ -20,11 +20,11 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.base.data.IntegerList;
+import de.featjar.base.data.AIntegerList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.structure.map.TermMap;
-import de.featjar.base.task.Monitor;
-import de.featjar.base.task.MonitorableFunction;
+import de.featjar.base.task.IMonitor;
+import de.featjar.base.task.IMonitorableFunction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
  *
  * @author Sebastian Krieter
  */
-public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
+public class CNFSlicer implements IMonitorableFunction<CNF, CNF> {
 
-    protected static final Comparator<IntegerList<?>> lengthComparator = new IntegerList.DescendingLengthComparator();
+    protected static final Comparator<AIntegerList<?>> lengthComparator = new AIntegerList.DescendingLengthComparator();
 
     protected CNF orgCNF;
     protected CNF cnfCopy;
@@ -80,7 +80,7 @@ public class CNFSlicer implements MonitorableFunction<CNF, CNF> {
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
 
     @Override
-    public CNF execute(CNF orgCNF, Monitor monitor) {
+    public CNF execute(CNF orgCNF, IMonitor monitor) {
         this.orgCNF = orgCNF;
         cnfCopy = new CNF(orgCNF.getVariableMap());
 

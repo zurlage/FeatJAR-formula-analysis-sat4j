@@ -26,7 +26,7 @@ import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.CollectingVisitor;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.Traverser;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
-import de.featjar.base.task.Monitor;
+import de.featjar.base.task.IMonitor;
 import org.sat4j.core.VecInt;
 
 /**
@@ -58,7 +58,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<SortedInt
     }
 
     @Override
-    public SortedIntegerList analyze(SAT4JMIGSolver solver, Monitor monitor) throws Exception {
+    public SortedIntegerList analyze(SAT4JMIGSolver solver, IMonitor monitor) throws Exception {
         monitor.setTotalSteps(solver.getVariableMap().getVariableCount() + 2);
 
         final Traverser traverser = solver.modalImplicationGraph.traverse();
@@ -151,7 +151,7 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<SortedInt
             SAT4JMIGSolver solver,
             int[] unknownValues,
             VecInt valuesToCalculate,
-            Monitor monitor,
+            IMonitor monitor,
             Traverser traverser) {
         final CollectingVisitor visitor = new CollectingVisitor();
         traverser.setVisitor(visitor);
