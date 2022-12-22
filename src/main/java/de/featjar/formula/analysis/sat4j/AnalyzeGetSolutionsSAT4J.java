@@ -29,6 +29,7 @@ import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
 public class AnalyzeGetSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList> implements
         IGetSolutionsAnalysis<BooleanClauseList, BooleanSolutionList, BooleanAssignment> {
@@ -39,7 +40,8 @@ public class AnalyzeGetSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSol
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public FutureResult<BooleanSolutionList> compute() {
-        return computeSolver().get().thenComputeResult((solver, monitor) -> {
+        return initializeSolver().thenComputeResult((pair, monitor) -> {
+            SAT4JSolver solver = pair.getKey();
             BooleanSolutionList solutionList = new BooleanSolutionList();
             Result<Boolean> hasSolution = solver.hasSolution();
             while (hasSolution.equals(Result.of(true))) {

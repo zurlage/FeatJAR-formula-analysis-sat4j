@@ -21,8 +21,6 @@
 package de.featjar.formula.analysis.sat4j.todo;
 
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.analysis.IFormulaAnalysis;
-import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 
 import java.util.List;
 
@@ -35,7 +33,7 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public abstract class ClauseAnalysis<T> extends IFormulaAnalysis<T, SAT4JSolutionSolver> {
+public abstract class ClauseAnalysis<T> {
 
     protected List<SortedIntegerList> literalListIndexList;
     protected int[] clauseGroupSize;

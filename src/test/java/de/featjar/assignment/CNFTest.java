@@ -22,7 +22,6 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.todo.mig.ConditionallyCoreDeadAnalysisMIG;
 import de.featjar.formula.analysis.sat4j.todo.AddRedundancyAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.AnalyzeAtomicSetsSAT4J;

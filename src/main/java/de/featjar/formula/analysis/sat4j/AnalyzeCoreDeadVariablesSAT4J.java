@@ -23,6 +23,7 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.FutureResult;
+import de.featjar.base.computation.IRandomDependency;
 import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.IMonitor;
@@ -36,6 +37,7 @@ import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.IteratorInt;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -46,7 +48,7 @@ import java.util.Random;
  */
 
 public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
-    implements IComputation.WithRandom {
+    implements IRandomDependency {
     protected final static Dependency<Random> RANDOM = newDependency();
 
     public AnalyzeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
@@ -60,7 +62,11 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
 
     @Override
     public FutureResult<BooleanAssignment> compute() {
-        return IComputation.of(computeSolver(), getRandom()).get().thenComputeResult(this::analyze);
+        return initializeSolver().thenComputeResult(
+                (Pair<SAT4JSolver, List<?>> pair, IMonitor monitor) ->
+                        analyze((SAT4JSolutionSolver) pair.getKey(),
+                                (Random) RANDOM.get(pair.getValue()),
+                                monitor));
     }
 
     // currently unused (divide & conquer)
@@ -170,9 +176,7 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public Result<BooleanAssignment> analyze(Pair<SAT4JSolver, Random> pair, IMonitor monitor) {
-        SAT4JSolutionSolver solver = (SAT4JSolutionSolver) pair.getKey();
-        Random random = pair.getValue();
+    public Result<BooleanAssignment> analyze(SAT4JSolutionSolver solver, Random random, IMonitor monitor) {
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();

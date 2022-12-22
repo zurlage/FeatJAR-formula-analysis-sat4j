@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
-import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.computation.Cache;
@@ -36,7 +35,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Sebastian Krieter
  */
-public abstract class AbstractConfigurationGenerator extends IFormulaAnalysis<BooleanSolutionList, SAT4JSolutionSolver>
+public abstract class AbstractConfigurationGenerator
         implements ConfigurationGenerator {
 
     private int maxSampleSize = Integer.MAX_VALUE;

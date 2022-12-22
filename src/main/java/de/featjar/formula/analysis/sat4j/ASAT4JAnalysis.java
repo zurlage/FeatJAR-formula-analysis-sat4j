@@ -22,20 +22,24 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.Feat;
 import de.featjar.base.computation.*;
-import de.featjar.formula.analysis.IFormulaAnalysis;
+import de.featjar.base.data.Pair;
+import de.featjar.formula.analysis.IAssumedAssignmentDependency;
+import de.featjar.formula.analysis.IAssumedClauseListDependency;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
+import java.util.List;
+
 import static de.featjar.base.computation.Computations.async;
 
 public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         IAnalysis<BooleanClauseList, T>,
-        IFormulaAnalysis.WithAssumedAssignment<BooleanAssignment>,
-        IFormulaAnalysis.WithAssumedClauseList<BooleanClauseList>,
-        IComputation.WithTimeout {
+        IAssumedAssignmentDependency<BooleanAssignment>,
+        IAssumedClauseListDependency<BooleanClauseList>,
+        ITimeoutDependency {
     protected final static Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST = newDependency();
     protected final static Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT = newDependency(new BooleanAssignment());
     protected final static Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST = newDependency(new BooleanClauseList());
@@ -68,8 +72,8 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
 
     abstract protected SAT4JSolver newSolver(BooleanClauseList clauseList);
 
-    public IComputation<SAT4JSolver> computeSolver() {
-        return IComputation.allOf(getChildren()).mapResult(ASAT4JAnalysis.class, "computeSolver", list -> { // caches the solver
+    public FutureResult<Pair<SAT4JSolver, List<?>>> initializeSolver() {
+        return IComputation.allOf(getChildren()).get().thenCompute((list, monitor) -> {
                     BooleanClauseList clauseList = (BooleanClauseList) BOOLEAN_CLAUSE_LIST.get(list);
                     BooleanAssignment assumedAssignment = (BooleanAssignment) ASSUMED_ASSIGNMENT.get(list);
                     BooleanClauseList assumedClauseList = (BooleanClauseList) ASSUMED_CLAUSE_LIST.get(list);
@@ -84,9 +88,9 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
                     Feat.log().debug("assuming " + assumedClauseList);
                     SAT4JSolver solver = newSolver(clauseList);
                     solver.getClauseList().addAll(assumedClauseList);
-                    solver.getAssignment().addAll(assumedAssignment); // todo: the assumed assignment is mutable, so the solver should not be cached?
+                    solver.getAssignment().addAll(assumedAssignment);
                     solver.setTimeout(timeout);
-                    return solver;
+                    return new Pair<>(solver, list);
                 });
     }
 

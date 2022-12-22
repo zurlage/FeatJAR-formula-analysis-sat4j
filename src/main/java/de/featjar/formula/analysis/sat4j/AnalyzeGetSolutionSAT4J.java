@@ -36,7 +36,7 @@ public class AnalyzeGetSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolu
 
     @Override
     public FutureResult<BooleanSolution> compute() {
-        return computeSolver().get().thenComputeResult((solver, monitor) -> solver.findSolution());
+        return initializeSolver().thenComputeResult((pair, monitor) -> pair.getKey().findSolution());
     }
 
     @Override

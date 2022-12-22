@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.todo.mig;
 
-import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.todo.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.todo.mig.solver.SAT4JMIGSolver;
 import de.featjar.base.task.IMonitor;
@@ -34,7 +33,7 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public abstract class Sat4JMIGAnalysis<T> extends IFormulaAnalysis<T, SAT4JMIGSolver, ModalImplicationGraph> {
+public abstract class Sat4JMIGAnalysis<T> {
 
     protected boolean timeoutOccurred = false;
     private boolean throwTimeoutException = true;
