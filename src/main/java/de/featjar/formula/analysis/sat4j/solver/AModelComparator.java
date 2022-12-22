@@ -20,31 +20,23 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import java.util.Random;
+public abstract class AModelComparator {
 
-/**
- * Uses a sample of configurations to achieve a phase selection that corresponds
- * to a uniform distribution of configurations in the configuration space.
- *
- * @author Sebastian Krieter
- */
-public abstract class LiteralDistribution {
-
-    protected Random random = new Random(0);
-
-    public Random getRandom() {
-        return random;
-    }
-
-    public void setRandom(Random random) {
-        this.random = random;
-    }
-
-    public abstract void reset();
-
-    public abstract void set(int literal);
-
-    public abstract void unset(int var);
-
-    public abstract int getRandomLiteral(int var);
+//    public static boolean eq(CNF cnf1, final CNF cnf2) throws TimeoutException {
+//        return compare(cnf2, cnf1) && compare(cnf1, cnf2);
+//    }
+//
+//    public static boolean compare(CNF cnf1, final CNF cnf2) throws TimeoutException {
+//        final SAT4JSolutionSolver solver = new SAT4JSolutionSolver(cnf1);
+//        for (final BooleanClause sortedIntegerList : cnf2.getClauseList().getAll()) {
+//            final Result<Boolean> hasSolution = solver.hasSolution(new BooleanSolution(sortedIntegerList.negate().getIntegers())); // TODO: add .toSolution and friends
+//            if (hasSolution.isEmpty())
+//                throw new TimeoutException();
+//            if (hasSolution.equals(Result.of(true)))
+//                return false;
+//            else
+//                break;
+//        }
+//        return true;
+//    }
 }

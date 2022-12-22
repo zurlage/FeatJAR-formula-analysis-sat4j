@@ -24,7 +24,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +74,7 @@ public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<SortedInt
             final List<SortedIntegerList> solutionList = solver.rememberSolutionHistory(SAT4JSolver.MAX_SOLUTION_HISTORY);
 
             if (solver.hasSolution().equals(Result.of(true))) {
-                solver.setSelectionStrategy(SelectionStrategy.random(random));
+                solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
                 int endIndex = 0;
                 groupLoop:

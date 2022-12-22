@@ -22,8 +22,8 @@ package de.featjar.formula.analysis.sat4j.todo.twise;
 
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.todo.twise.TWiseStatisticGenerator.ConfigurationScore;
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
-import de.featjar.formula.analysis.combinations.CombinationIterator;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
+import de.featjar.formula.analysis.combinations.ICombinationIterator;
 import de.featjar.formula.analysis.combinations.LexicographicIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +55,7 @@ public class TWiseConfigurationTester {
         }
     }
 
-    public void setNodes(List<List<BooleanAssignmentList>> expressions) {
+    public void setNodes(List<List<ABooleanAssignmentList>> expressions) {
         presenceConditionManager = new PresenceConditionManager(getUtil(), expressions);
     }
 
@@ -115,42 +115,42 @@ public class TWiseConfigurationTester {
     }
 
     public boolean hasUncoveredConditions() {
-        final List<BooleanAssignmentList> uncoveredConditions = getUncoveredConditions(true);
+        final List<ABooleanAssignmentList> uncoveredConditions = getUncoveredConditions(true);
         return !uncoveredConditions.isEmpty();
     }
 
-    public BooleanAssignmentList getFirstUncoveredCondition() {
-        final List<BooleanAssignmentList> uncoveredConditions = getUncoveredConditions(true);
+    public ABooleanAssignmentList getFirstUncoveredCondition() {
+        final List<ABooleanAssignmentList> uncoveredConditions = getUncoveredConditions(true);
         return uncoveredConditions.isEmpty() ? null : uncoveredConditions.get(0);
     }
 
-    public List<BooleanAssignmentList> getUncoveredConditions() {
+    public List<ABooleanAssignmentList> getUncoveredConditions() {
         return getUncoveredConditions(false);
     }
 
-    private List<BooleanAssignmentList> getUncoveredConditions(boolean cancelAfterFirst) {
-        final ArrayList<BooleanAssignmentList> uncoveredConditions = new ArrayList<>();
+    private List<ABooleanAssignmentList> getUncoveredConditions(boolean cancelAfterFirst) {
+        final ArrayList<ABooleanAssignmentList> uncoveredConditions = new ArrayList<>();
         final TWiseCombiner combiner =
                 new TWiseCombiner(getUtil().getCnf().getVariableMap().getVariableCount());
-        BooleanAssignmentList combinedCondition = new BooleanAssignmentList();
+        ABooleanAssignmentList combinedCondition = new ABooleanAssignmentList();
         final PresenceCondition[] clauseListArray = new PresenceCondition[t];
 
         groupLoop:
         for (final List<PresenceCondition> expressions : presenceConditionManager.getGroupedPresenceConditions()) {
-            for (final CombinationIterator iterator = new LexicographicIterator(t, expressions.size());
-                    iterator.hasNext(); ) {
+            for (final ICombinationIterator iterator = new LexicographicIterator(t, expressions.size());
+                 iterator.hasNext(); ) {
                 final int[] next = iterator.next();
                 if (next == null) {
                     break;
                 }
-                CombinationIterator.select(expressions, next, clauseListArray);
+                ICombinationIterator.select(expressions, next, clauseListArray);
 
                 combinedCondition.clear();
                 combiner.combineConditions(clauseListArray, combinedCondition);
                 if (!TWiseConfigurationUtil.isCovered(combinedCondition, sample)
                         && getUtil().isCombinationValid(combinedCondition)) {
                     uncoveredConditions.add(combinedCondition);
-                    combinedCondition = new BooleanAssignmentList();
+                    combinedCondition = new ABooleanAssignmentList();
                     if (cancelAfterFirst) {
                         break groupLoop;
                     }

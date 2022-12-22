@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import java.util.Random;
 
-public interface SelectionStrategy {
+public interface ISelectionStrategy {
 
     enum Strategy {
         Original,
@@ -37,28 +37,28 @@ public interface SelectionStrategy {
 
     Strategy strategy();
 
-    class OriginalStrategy implements SelectionStrategy {
+    class OriginalStrategy implements ISelectionStrategy {
         @Override
         public Strategy strategy() {
             return Strategy.Original;
         }
     }
 
-    class NegativeStrategy implements SelectionStrategy {
+    class NegativeStrategy implements ISelectionStrategy {
         @Override
         public Strategy strategy() {
             return Strategy.Negative;
         }
     }
 
-    class PositiveStrategy implements SelectionStrategy {
+    class PositiveStrategy implements ISelectionStrategy {
         @Override
         public Strategy strategy() {
             return Strategy.Positive;
         }
     }
 
-    class FixedStrategy implements SelectionStrategy {
+    class FixedStrategy implements ISelectionStrategy {
         private final int[] model;
 
         public FixedStrategy(int[] model) {
@@ -75,7 +75,7 @@ public interface SelectionStrategy {
         }
     }
 
-    class InverseFixedStrategy implements SelectionStrategy {
+    class InverseFixedStrategy implements ISelectionStrategy {
         private final int[] model;
 
         public InverseFixedStrategy(int[] model) {
@@ -92,7 +92,7 @@ public interface SelectionStrategy {
         }
     }
 
-    class FastRandomStrategy implements SelectionStrategy {
+    class FastRandomStrategy implements ISelectionStrategy {
         private final Random random;
 
         public FastRandomStrategy(Random random) {
@@ -109,10 +109,10 @@ public interface SelectionStrategy {
         }
     }
 
-    class UniformRandomStrategy implements SelectionStrategy {
-        private final LiteralDistribution dist;
+    class UniformRandomStrategy implements ISelectionStrategy {
+        private final ALiteralDistribution dist;
 
-        public UniformRandomStrategy(LiteralDistribution dist) {
+        public UniformRandomStrategy(ALiteralDistribution dist) {
             this.dist = dist;
         }
 
@@ -121,7 +121,7 @@ public interface SelectionStrategy {
             return Strategy.UniformRandom;
         }
 
-        public LiteralDistribution getDist() {
+        public ALiteralDistribution getDist() {
             return dist;
         }
     }
@@ -171,7 +171,7 @@ public interface SelectionStrategy {
         return new InverseFixedStrategy(model);
     }
 
-    static UniformRandomStrategy uniform(LiteralDistribution dist) {
+    static UniformRandomStrategy uniform(ALiteralDistribution dist) {
         return new UniformRandomStrategy(dist);
     }
 

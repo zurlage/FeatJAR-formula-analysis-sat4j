@@ -20,13 +20,13 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Covers a given {@link BooleanAssignmentList expressions} within a list of
+ * Covers a given {@link ABooleanAssignmentList expressions} within a list of
  * {@link TWiseConfiguration solutions}.
  *
  * @author Sebastian Krieter
@@ -42,7 +42,7 @@ class CoverAll implements ICoverStrategy {
     private final List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList = new ArrayList<>();
 
     @Override
-    public CombinationStatus cover(BooleanAssignmentList nextCondition) {
+    public CombinationStatus cover(ABooleanAssignmentList nextCondition) {
         if (util.isCovered(nextCondition)) {
             return CombinationStatus.COVERED;
         }

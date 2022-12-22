@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.Assignment;
+import de.featjar.formula.analysis.IAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 
 import java.util.*;
@@ -35,7 +35,7 @@ import org.sat4j.core.VecInt;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class SAT4JAssignment implements Assignment<Integer> {
+public class SAT4JAssignment implements IAssignment<Integer> {
     protected final VecInt integers;
 
     public SAT4JAssignment() {

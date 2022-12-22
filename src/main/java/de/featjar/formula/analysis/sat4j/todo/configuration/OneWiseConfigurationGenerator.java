@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.task.IMonitor;
 import org.sat4j.core.VecInt;
 
@@ -75,10 +75,10 @@ public class OneWiseConfigurationGenerator extends AbstractConfigurationGenerato
 
         switch (coverStrategy) {
             case NEGATIVE:
-                solver.setSelectionStrategy(SelectionStrategy.negative());
+                solver.setSelectionStrategy(ISelectionStrategy.negative());
                 break;
             case POSITIVE:
-                solver.setSelectionStrategy(SelectionStrategy.positive());
+                solver.setSelectionStrategy(ISelectionStrategy.positive());
                 break;
             default:
                 throw new RuntimeException("Unknown " + CoverStrategy.class.getName() + ": " + coverStrategy);

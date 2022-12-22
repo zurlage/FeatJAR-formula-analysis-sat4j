@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.featjar.formula.analysis.sat4j.todo.configuration.AllConfigurationGenerator;
 import de.featjar.formula.analysis.solver.Assumable;
-import de.featjar.formula.structure.Expression;
+import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.tmp.Formulas;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.tree.Trees;
@@ -44,8 +44,8 @@ public class TseitinTransformTest {
         testTransform(FormulaCreator.getFormula02());
     }
 
-    private void testTransform(final Expression expressionOrg) {
-        final Expression expressionClone = Trees.clone(expressionOrg);
+    private void testTransform(final IExpression expressionOrg) {
+        final IExpression expressionClone = Trees.clone(expressionOrg);
         final TermMap map = expressionOrg.getTermMap().orElseThrow();
         final TermMap mapClone = map.clone();
 

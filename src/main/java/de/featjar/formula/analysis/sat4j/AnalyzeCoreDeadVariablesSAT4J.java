@@ -32,7 +32,7 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.IteratorInt;
 
@@ -174,14 +174,14 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         SAT4JSolutionSolver solver = (SAT4JSolutionSolver) pair.getKey();
         Random random = pair.getValue();
         final int initialAssignmentLength = solver.getAssignment().size();
-        solver.setSelectionStrategy(SelectionStrategy.positive());
+        solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();
         if (solution.isEmpty())
             return Result.empty();
         int[] model1 = solution.get().getIntegers();
 
         if (model1 != null) {
-            solver.setSelectionStrategy(SelectionStrategy.inverse(model1));
+            solver.setSelectionStrategy(ISelectionStrategy.inverse(model1));
             solution = solver.findSolution();
             if (solution.isEmpty())
                 return Result.empty();

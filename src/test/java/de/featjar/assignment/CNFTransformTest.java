@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.featjar.formula.analysis.sat4j.todo.AnalyzeAtomicSetsSAT4J;
 import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.Expression;
+import de.featjar.formula.structure.IExpression;
 import de.featjar.base.io.IO;
 
 import java.nio.file.Path;
@@ -37,7 +37,7 @@ public class CNFTransformTest {
     @Test
     public void testDistributiveBug() {
         final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final Expression expression =
+        final IExpression expression =
                 IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
 
         final ModelRepresentation rep = new ModelRepresentation(expression);

@@ -26,9 +26,9 @@ import de.featjar.formula.analysis.todo.mig.solver.MIGBuilder;
 import de.featjar.formula.analysis.todo.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.todo.configuration.FastRandomConfigurationGenerator;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.data.Pair;
 import de.featjar.base.io.IO;
@@ -175,7 +175,7 @@ public class TWiseConfigurationUtil {
         if (firstSolution != null) {
             final int[] coreDeadArray = new int[firstSolution.length];
             int coreDeadIndex = 0;
-            solver.setSelectionStrategy(SelectionStrategy.inverse(firstSolution));
+            solver.setSelectionStrategy(ISelectionStrategy.inverse(firstSolution));
             solver.hasSolution();
             SortedIntegerList.resetConflicts(firstSolution, solver.getInternalSolution());
 
@@ -265,7 +265,7 @@ public class TWiseConfigurationUtil {
         return !isCombinationInvalidMIG(literals) && isCombinationValidSAT(literals);
     }
 
-    public boolean isCombinationValid(BooleanAssignmentList clauses) {
+    public boolean isCombinationValid(ABooleanAssignmentList clauses) {
         if (hasSolver()) {
             if (invalidClausesList == InvalidClausesList.Use) {
                 for (final SortedIntegerList literalSet : clauses) {
@@ -344,7 +344,7 @@ public class TWiseConfigurationUtil {
     }
 
     public boolean removeInvalidClauses(
-            BooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ABooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
         final LinkedList<SortedIntegerList> invalidSortedIntegerLists = new LinkedList<>();
         for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
             final SortedIntegerList literals = conditionIterator.next();
@@ -363,7 +363,7 @@ public class TWiseConfigurationUtil {
     }
 
     public boolean removeInvalidClausesSat(
-            BooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ABooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
         final LinkedList<SortedIntegerList> invalidSortedIntegerLists = new LinkedList<>();
         for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
             final SortedIntegerList literals = conditionIterator.next();
@@ -382,7 +382,7 @@ public class TWiseConfigurationUtil {
     }
 
     public boolean removeInvalidClausesLight(
-            BooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ABooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
         final LinkedList<SortedIntegerList> invalidSortedIntegerLists = new LinkedList<>();
         for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
             final SortedIntegerList literals = conditionIterator.next();
@@ -413,7 +413,7 @@ public class TWiseConfigurationUtil {
         }
     }
 
-    public boolean removeInvalidClausesLight(BooleanAssignmentList nextCondition) {
+    public boolean removeInvalidClausesLight(ABooleanAssignmentList nextCondition) {
         for (final Iterator<SortedIntegerList> conditionIterator = nextCondition.iterator(); conditionIterator.hasNext(); ) {
             final SortedIntegerList literals = conditionIterator.next();
             if (isCombinationInvalidMIG(literals)) {
@@ -471,7 +471,7 @@ public class TWiseConfigurationUtil {
         return true;
     }
 
-    public static boolean isCovered(BooleanAssignmentList condition, Iterable<? extends SortedIntegerList> solutionList) {
+    public static boolean isCovered(ABooleanAssignmentList condition, Iterable<? extends SortedIntegerList> solutionList) {
         for (final SortedIntegerList configuration : solutionList) {
             for (final SortedIntegerList literals : condition) {
                 if (configuration.containsAll(literals)) {
@@ -486,7 +486,7 @@ public class TWiseConfigurationUtil {
         return Stream.concat(getCompleteSolutionList().parallelStream(), getIncompleteSolutionList().parallelStream());
     }
 
-    public boolean isCoveredPara(BooleanAssignmentList condition) {
+    public boolean isCoveredPara(ABooleanAssignmentList condition) {
         final Optional<TWiseConfiguration> coveringSolution = condition.stream() //
                 .flatMap(literals -> getConfigurationStream() //
                         .filter(configuration -> configuration.containsAllLiteralIntegers(literals))) //
@@ -494,7 +494,7 @@ public class TWiseConfigurationUtil {
         return coveringSolution.isPresent();
     }
 
-    public boolean isCovered(BooleanAssignmentList condition) {
+    public boolean isCovered(ABooleanAssignmentList condition) {
         return isCovered(condition, completeSolutionList) || isCovered(condition, incompleteSolutionList);
     }
 
@@ -552,7 +552,7 @@ public class TWiseConfigurationUtil {
     }
 
     public void initCandidatesListPara(
-            BooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ABooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
         candidatesList.clear();
         nextCondition.stream() //
                 .flatMap(literals -> getIncompleteSolutionList().parallelStream() //
@@ -563,7 +563,7 @@ public class TWiseConfigurationUtil {
     }
 
     public void initCandidatesList(
-            BooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
+            ABooleanAssignmentList nextCondition, List<Pair<SortedIntegerList, TWiseConfiguration>> candidatesList) {
         candidatesList.clear();
         for (final SortedIntegerList literals : nextCondition) {
             for (final TWiseConfiguration configuration : getIncompleteSolutionList()) {

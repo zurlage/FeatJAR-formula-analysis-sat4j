@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +42,7 @@ public class TWiseCombiner {
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<BooleanAssignmentList>> convertLiterals(SortedIntegerList literalSet) {
+    public static List<List<ABooleanAssignmentList>> convertLiterals(SortedIntegerList literalSet) {
         return convertGroupedLiterals(Arrays.asList(literalSet));
     }
 
@@ -53,13 +53,13 @@ public class TWiseCombiner {
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<BooleanAssignmentList>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
-        final List<List<BooleanAssignmentList>> groupedExpressions = new ArrayList<>(groupedLiterals.size());
+    public static List<List<ABooleanAssignmentList>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
+        final List<List<ABooleanAssignmentList>> groupedExpressions = new ArrayList<>(groupedLiterals.size());
         for (final SortedIntegerList literalSet : groupedLiterals) {
-            final List<BooleanAssignmentList> arrayList = new ArrayList<>(literalSet.size());
+            final List<ABooleanAssignmentList> arrayList = new ArrayList<>(literalSet.size());
             groupedExpressions.add(arrayList);
             for (final Integer literal : literalSet.getIntegers()) {
-                final BooleanAssignmentList booleanAssignmentList = new BooleanAssignmentList(1);
+                final ABooleanAssignmentList booleanAssignmentList = new ABooleanAssignmentList(1);
                 booleanAssignmentList.add(new SortedIntegerList(literal));
                 arrayList.add(booleanAssignmentList);
             }
@@ -75,7 +75,7 @@ public class TWiseCombiner {
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<BooleanAssignmentList>> convertExpressions(List<BooleanAssignmentList> expressions) {
+    public static List<List<ABooleanAssignmentList>> convertExpressions(List<ABooleanAssignmentList> expressions) {
         return Arrays.asList(expressions);
     }
 
@@ -86,11 +86,11 @@ public class TWiseCombiner {
         features = new int[numberOfVariables + 1];
     }
 
-    public boolean combineConditions(BooleanAssignmentList[] conditionArray, BooleanAssignmentList combinedCondition) {
+    public boolean combineConditions(ABooleanAssignmentList[] conditionArray, ABooleanAssignmentList combinedCondition) {
         return combineConditions(conditionArray, 0, combinedCondition);
     }
 
-    private boolean combineConditions(BooleanAssignmentList[] conditionArray, int t, BooleanAssignmentList combinedCondition) {
+    private boolean combineConditions(ABooleanAssignmentList[] conditionArray, int t, ABooleanAssignmentList combinedCondition) {
         if (t == conditionArray.length) {
             final int[] combinedLiteralsArray = Arrays.copyOfRange(lits.toArray(), 0, lits.size());
             combinedCondition.add(new SortedIntegerList(combinedLiteralsArray));
@@ -139,7 +139,7 @@ public class TWiseCombiner {
         return true;
     }
 
-    private boolean combineIteratively(PresenceCondition[] conditionArray, BooleanAssignmentList combinedCondition) {
+    private boolean combineIteratively(PresenceCondition[] conditionArray, ABooleanAssignmentList combinedCondition) {
         final int[] clauseIndex = new int[conditionArray.length];
         clauseIndex[0] = -1;
 
@@ -185,7 +185,7 @@ public class TWiseCombiner {
         return literalSet;
     }
 
-    private boolean combineConditions3(PresenceCondition[] conditionArray, int t, BooleanAssignmentList combinedCondition) {
+    private boolean combineConditions3(PresenceCondition[] conditionArray, int t, ABooleanAssignmentList combinedCondition) {
         if (t == conditionArray.length) {
             final int[] combinedLiteralsArray = Arrays.copyOfRange(lits.toArray(), 0, lits.size());
             combinedCondition.add(new SortedIntegerList(combinedLiteralsArray));
@@ -233,7 +233,7 @@ public class TWiseCombiner {
         return true;
     }
 
-    private boolean combineConditions2(PresenceCondition[] conditionArray, int t, BooleanAssignmentList combinedCondition) {
+    private boolean combineConditions2(PresenceCondition[] conditionArray, int t, ABooleanAssignmentList combinedCondition) {
         if (t == conditionArray.length) {
             if (combinedCondition.size() >= 1) {
                 return false;

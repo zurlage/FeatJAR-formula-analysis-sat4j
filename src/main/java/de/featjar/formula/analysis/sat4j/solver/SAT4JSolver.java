@@ -30,7 +30,6 @@ import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -43,7 +42,7 @@ public abstract class SAT4JSolver {
     protected final ISolver internalSolver = newInternalSolver();
     protected final SAT4JClauseList clauseList;
     protected final SAT4JAssignment assignment = new SAT4JAssignment();
-    protected SolutionHistory solutionHistory = new SolutionHistory.RememberUpTo(1000);
+    protected ISolutionHistory solutionHistory = new ISolutionHistory.RememberUpTo(1000);
     private Long timeout;
     protected boolean globalTimeout;
 
@@ -85,11 +84,11 @@ public abstract class SAT4JSolver {
         return assignment;
     }
 
-    public SolutionHistory getSolutionHistory() {
+    public ISolutionHistory getSolutionHistory() {
         return solutionHistory;
     }
 
-    public void setSolutionHistory(SolutionHistory solutionHistory) {
+    public void setSolutionHistory(ISolutionHistory solutionHistory) {
         this.solutionHistory = solutionHistory;
     }
 

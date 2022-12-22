@@ -20,21 +20,21 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.combinations.CombinationIterator;
+import de.featjar.formula.analysis.combinations.ICombinationIterator;
 import de.featjar.formula.analysis.combinations.IteratorFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * Combines multiple {@link CombinationIterator iterators} and returns results
+ * Combines multiple {@link ICombinationIterator iterators} and returns results
  * from each iterator by turns.
  *
  * @author Sebastian Krieter
  */
-public class MergeIterator implements CombinationIterator {
+public class MergeIterator implements ICombinationIterator {
 
-    protected final List<CombinationIterator> setIterators;
+    protected final List<ICombinationIterator> setIterators;
     protected final long numberOfCombinations;
     protected final int t;
 
@@ -45,7 +45,7 @@ public class MergeIterator implements CombinationIterator {
         setIterators = new ArrayList<>(expressionSets.size());
         long sumNumberOfCombinations = 0;
         for (final List<PresenceCondition> expressions : expressionSets) {
-            final CombinationIterator iterator = IteratorFactory.getIterator(id, expressions.size(), t);
+            final ICombinationIterator iterator = IteratorFactory.getIterator(id, expressions.size(), t);
             setIterators.add(iterator);
             sumNumberOfCombinations += iterator.size();
         }
@@ -54,7 +54,7 @@ public class MergeIterator implements CombinationIterator {
 
     @Override
     public boolean hasNext() {
-        for (final CombinationIterator iterator : setIterators) {
+        for (final ICombinationIterator iterator : setIterators) {
             if (iterator.hasNext()) {
                 return true;
             }
@@ -66,7 +66,7 @@ public class MergeIterator implements CombinationIterator {
     public int[] next() {
         for (int i = 0; i < setIterators.size(); i++) {
             iteratorIndex = (iteratorIndex + 1) % setIterators.size();
-            final CombinationIterator iterator = setIterators.get(iteratorIndex);
+            final ICombinationIterator iterator = setIterators.get(iteratorIndex);
             if (iterator.hasNext()) {
                 final int[] next = iterator.next();
                 if (next != null) {
@@ -89,7 +89,7 @@ public class MergeIterator implements CombinationIterator {
     @Override
     public void reset() {
         iteratorIndex = 0;
-        for (final CombinationIterator iterator : setIterators) {
+        for (final ICombinationIterator iterator : setIterators) {
             iterator.reset();
         }
     }

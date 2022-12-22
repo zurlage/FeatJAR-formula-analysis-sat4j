@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SampleDistribution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
@@ -61,7 +61,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
 
         dist = new SampleDistribution(sample);
         dist.setRandom(random);
-        solver.setSelectionStrategy(SelectionStrategy.uniform(dist));
+        solver.setSelectionStrategy(ISelectionStrategy.uniform(dist));
     }
 
     @Override
@@ -74,7 +74,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         if (fixedFeatures == null) {
             return false;
         }
-        solver.setSelectionStrategy(SelectionStrategy.inverse(fixedFeatures));
+        solver.setSelectionStrategy(ISelectionStrategy.inverse(fixedFeatures));
 
         // find core/dead features
         for (int i = 0; i < fixedFeatures.length; i++) {

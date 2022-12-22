@@ -21,9 +21,9 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy.FixedStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy.InverseFixedStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy.UniformRandomStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy.FixedStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy.InverseFixedStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy.UniformRandomStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedLiteralSelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap2;
@@ -47,11 +47,11 @@ import org.sat4j.minisat.orders.VarOrderHeap;
  */
 public class SAT4JSolutionSolver extends SAT4JSolver {
     protected final int[] order;
-    protected SelectionStrategy strategy;
+    protected ISelectionStrategy strategy;
 
     public SAT4JSolutionSolver(BooleanClauseList clauseList) {
         super(clauseList);
-        strategy = SelectionStrategy.original();
+        strategy = ISelectionStrategy.original();
         order = new int[clauseList.getVariableCount()];
         setOrderFix();
         ((Solver<?>) internalSolver).getOrder().init();
@@ -66,7 +66,7 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
         return order;
     }
 
-    public SelectionStrategy getSelectionStrategy() {
+    public ISelectionStrategy getSelectionStrategy() {
         return strategy;
     }
 
@@ -99,7 +99,7 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
         ((Solver<?>) internalSolver).getOrder().init();
     }
 
-    public void setSelectionStrategy(SelectionStrategy strategy) {
+    public void setSelectionStrategy(ISelectionStrategy strategy) {
         this.strategy = strategy;
         switch (strategy.strategy()) {
             case FastRandom:

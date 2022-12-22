@@ -20,10 +20,9 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -31,7 +30,7 @@ import java.util.TreeSet;
  *
  * @author Sebastian Krieter
  */
-public class PresenceCondition extends BooleanAssignmentList {
+public class PresenceCondition extends ABooleanAssignmentList {
 
 
     private final transient TreeSet<Integer> groups = new TreeSet<>();
@@ -39,7 +38,7 @@ public class PresenceCondition extends BooleanAssignmentList {
     public PresenceCondition() {
     }
 
-    public PresenceCondition(BooleanAssignmentList otherBooleanAssignmentList) {
+    public PresenceCondition(ABooleanAssignmentList otherBooleanAssignmentList) {
         super(otherBooleanAssignmentList);
     }
 

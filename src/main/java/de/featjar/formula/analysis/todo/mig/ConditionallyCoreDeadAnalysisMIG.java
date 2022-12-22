@@ -25,7 +25,7 @@ import de.featjar.formula.analysis.todo.mig.solver.SAT4JMIGSolver;
 import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.CollectingVisitor;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.Traverser;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.task.IMonitor;
 import org.sat4j.core.VecInt;
 
@@ -120,17 +120,17 @@ public class ConditionallyCoreDeadAnalysisMIG extends Sat4JMIGAnalysis<SortedInt
         monitor.checkCancel();
 
         if (!valuesToCompute.isEmpty()) {
-            solver.setSelectionStrategy(SelectionStrategy.positive());
+            solver.setSelectionStrategy(ISelectionStrategy.positive());
             final int[] unknownValues = solver.findSolution().getLiterals();
             monitor.addStep();
 
             if (unknownValues != null) {
-                solver.setSelectionStrategy(SelectionStrategy.negative());
+                solver.setSelectionStrategy(ISelectionStrategy.negative());
                 final int[] model2 = solver.findSolution().getLiterals();
                 monitor.addStep();
 
                 SortedIntegerList.resetConflicts(unknownValues, model2);
-                solver.setSelectionStrategy(SelectionStrategy.inverse(unknownValues));
+                solver.setSelectionStrategy(ISelectionStrategy.inverse(unknownValues));
 
                 for (int k = 0; k < knownValues.length; k++) {
                     final int var = knownValues[k];

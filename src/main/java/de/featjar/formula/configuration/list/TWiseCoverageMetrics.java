@@ -27,8 +27,8 @@ import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationGenerator;
 import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationUtil;
 import de.featjar.formula.analysis.sat4j.todo.twise.TWiseConfigurationUtil.InvalidClausesList;
 import de.featjar.formula.analysis.sat4j.todo.twise.TWiseStatisticGenerator;
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
-import de.featjar.formula.analysis.metrics.SampleMetric;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
+import de.featjar.formula.analysis.metrics.ISampleMetric;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class TWiseCoverageMetrics {
 
-    public class TWiseCoverageMetric implements SampleMetric {
+    public class TWiseCoverageMetric implements ISampleMetric {
         private final int t;
         private boolean firstUse = true;
 
@@ -85,13 +85,13 @@ public class TWiseCoverageMetrics {
     private PresenceConditionManager presenceConditionManager;
     private String name;
     private CNF cnf;
-    private List<List<BooleanAssignmentList>> expressions;
+    private List<List<ABooleanAssignmentList>> expressions;
 
     public void setCNF(CNF cnf) {
         this.cnf = cnf;
     }
 
-    public void setExpressions(List<List<BooleanAssignmentList>> expressions) {
+    public void setExpressions(List<List<ABooleanAssignmentList>> expressions) {
         this.expressions = expressions;
     }
 
@@ -117,7 +117,7 @@ public class TWiseCoverageMetrics {
     }
 
     public static List<TWiseCoverageMetric> getTWiseCoverageMetrics(
-            CNF cnf, List<List<BooleanAssignmentList>> expressions, String name, int... tValues) {
+            CNF cnf, List<List<ABooleanAssignmentList>> expressions, String name, int... tValues) {
         final TWiseCoverageMetrics metrics = new TWiseCoverageMetrics();
         metrics.setName(name);
         metrics.setExpressions(expressions);

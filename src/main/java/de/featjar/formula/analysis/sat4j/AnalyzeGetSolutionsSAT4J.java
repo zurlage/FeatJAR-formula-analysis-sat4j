@@ -24,14 +24,14 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.GetSolutionsAnalysis;
+import de.featjar.formula.analysis.IGetSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 
 public class AnalyzeGetSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList> implements
-        GetSolutionsAnalysis<BooleanClauseList, BooleanSolutionList, BooleanAssignment> {
+        IGetSolutionsAnalysis<BooleanClauseList, BooleanSolutionList, BooleanAssignment> {
     public AnalyzeGetSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }

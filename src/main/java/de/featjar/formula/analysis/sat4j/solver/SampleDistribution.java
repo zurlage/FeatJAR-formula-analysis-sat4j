@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class SampleDistribution extends LiteralDistribution {
+public class SampleDistribution extends ALiteralDistribution {
 
     private final ArrayList<BooleanAssignment> samples = new ArrayList<>();
     private int startIndex;

@@ -22,8 +22,8 @@ package de.featjar.formula.analysis.sat4j.todo.twise;
 
 import de.featjar.formula.analysis.todo.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.sat4j.todo.configuration.AbstractConfigurationGenerator;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import de.featjar.base.task.IMonitor;
 import de.featjar.base.task.IntervalThread;
 
@@ -64,7 +64,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<BooleanAssignmentList>> convertLiterals(SortedIntegerList literalSet) {
+    public static List<List<ABooleanAssignmentList>> convertLiterals(SortedIntegerList literalSet) {
         return TWiseCombiner.convertGroupedLiterals(Arrays.asList(literalSet));
     }
 
@@ -75,7 +75,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<BooleanAssignmentList>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
+    public static List<List<ABooleanAssignmentList>> convertGroupedLiterals(List<SortedIntegerList> groupedLiterals) {
         return TWiseCombiner.convertGroupedLiterals(groupedLiterals);
     }
 
@@ -87,7 +87,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
      * @return a grouped expression list (can be used as an input for the
      *         configuration generator).
      */
-    public static List<List<BooleanAssignmentList>> convertExpressions(List<BooleanAssignmentList> expressions) {
+    public static List<List<ABooleanAssignmentList>> convertExpressions(List<ABooleanAssignmentList> expressions) {
         return TWiseCombiner.convertExpressions(expressions);
     }
 
@@ -111,7 +111,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
     protected Random random = new Random(0);
 
     protected int t;
-    protected List<List<BooleanAssignmentList>> nodes;
+    protected List<List<ABooleanAssignmentList>> nodes;
     protected PresenceConditionManager presenceConditionManager;
 
     protected long numberOfCombinations, count, coveredCount, invalidCount;
@@ -141,11 +141,11 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         this.t = t;
     }
 
-    public List<List<BooleanAssignmentList>> getNodes() {
+    public List<List<ABooleanAssignmentList>> getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<List<BooleanAssignmentList>> nodes) {
+    public void setNodes(List<List<ABooleanAssignmentList>> nodes) {
         this.nodes = nodes;
     }
 
@@ -164,7 +164,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         Feat.log().debug("Create util instance... ");
         final CNF cnf = solver.getCnf();
         solver.rememberSolutionHistory(10);
-        solver.setSelectionStrategy(SelectionStrategy.random(random));
+        solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
         if (nodes == null) {
             nodes = convertLiterals(SortedIntegerList.getLiterals(cnf));
@@ -266,7 +266,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
                 );
 
         // TODO Variation Point: Combination order
-        final ICombinationSupplier<BooleanAssignmentList> it;
+        final ICombinationSupplier<ABooleanAssignmentList> it;
         presenceConditionManager.shuffleSort(random);
         final List<List<PresenceCondition>> groupedPresenceConditions =
                 presenceConditionManager.getGroupedPresenceConditions();
@@ -281,12 +281,12 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         coveredCount = 0;
         invalidCount = 0;
 
-        final List<BooleanAssignmentList> combinationListUncovered = new ArrayList<>();
+        final List<ABooleanAssignmentList> combinationListUncovered = new ArrayList<>();
         count = coveredCount;
         phaseCount++;
         ICoverStrategy phase = phaseList.get(0);
         while (true) {
-            final BooleanAssignmentList combinedCondition = it.get();
+            final ABooleanAssignmentList combinedCondition = it.get();
             if (combinedCondition == null) {
                 break;
             }
@@ -320,7 +320,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             phase = phaseList.get(j);
             count = coveredCount + invalidCount;
             for (int i = coveredIndex + 1; i < combinationListUncovered.size(); i++) {
-                final BooleanAssignmentList combination = combinationListUncovered.get(i);
+                final ABooleanAssignmentList combination = combinationListUncovered.get(i);
                 final ICoverStrategy.CombinationStatus covered = phase.cover(combination);
                 switch (covered) {
                     case COVERED:

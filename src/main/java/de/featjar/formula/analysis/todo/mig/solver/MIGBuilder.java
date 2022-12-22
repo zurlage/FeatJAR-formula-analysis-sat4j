@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.todo.mig.solver;
 
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.task.IMonitor;
 import de.featjar.base.task.IMonitorableFunction;
@@ -72,7 +72,7 @@ public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImpli
     protected void findCoreFeatures(IMonitor monitor) {
         monitor.setTotalSteps(fixedFeatures.length);
 
-        solver.setSelectionStrategy(SelectionStrategy.inverse(fixedFeatures));
+        solver.setSelectionStrategy(ISelectionStrategy.inverse(fixedFeatures));
 
         // find core/dead features
         for (int i = 0; i < fixedFeatures.length; i++) {
@@ -286,7 +286,7 @@ public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImpli
         final boolean[] mark = new boolean[modalImplicationGraph.size() + 1];
         final int[] fixed = new int[modalImplicationGraph.size() + 1];
         final int orgSize = solver.getAssignment().size();
-        solver.setSelectionStrategy(SelectionStrategy.original());
+        solver.setSelectionStrategy(ISelectionStrategy.original());
         for (final Vertex vertex : modalImplicationGraph.getVertices()) {
             if (vertex.isNormal()
                     && ((affectedVariables == null)
@@ -328,7 +328,7 @@ public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImpli
                 if (model == null) {
                     model = solver.findSolution().getLiterals();
                 }
-                solver.setSelectionStrategy(SelectionStrategy.inverse(model));
+                solver.setSelectionStrategy(ISelectionStrategy.inverse(model));
 
                 for (final Integer literal : literals) {
                     final int index = Math.abs(literal);

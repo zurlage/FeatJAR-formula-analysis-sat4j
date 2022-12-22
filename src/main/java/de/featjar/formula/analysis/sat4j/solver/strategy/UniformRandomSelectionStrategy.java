@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.sat4j.solver.strategy;
 import static org.sat4j.core.LiteralsUtils.negLit;
 import static org.sat4j.core.LiteralsUtils.posLit;
 
-import de.featjar.formula.analysis.sat4j.solver.LiteralDistribution;
+import de.featjar.formula.analysis.sat4j.solver.ALiteralDistribution;
 import org.sat4j.core.LiteralsUtils;
 import org.sat4j.minisat.core.IPhaseSelectionStrategy;
 
@@ -36,9 +36,9 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
 public class UniformRandomSelectionStrategy implements IPhaseSelectionStrategy {
 
 
-    private final LiteralDistribution dist;
+    private final ALiteralDistribution dist;
 
-    public UniformRandomSelectionStrategy(LiteralDistribution dist) {
+    public UniformRandomSelectionStrategy(ALiteralDistribution dist) {
         this.dist = dist;
     }
 

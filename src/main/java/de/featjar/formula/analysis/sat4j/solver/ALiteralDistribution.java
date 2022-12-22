@@ -18,31 +18,33 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j.todo.configuration;
+package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
+import java.util.Random;
 
 /**
- * Generates random configurations for a given propositional formula.
+ * Uses a sample of configurations to achieve a phase selection that corresponds
+ * to a uniform distribution of configurations in the configuration space.
  *
  * @author Sebastian Krieter
  */
-public class FastRandomConfigurationGenerator extends RandomConfigurationGenerator {
+public abstract class ALiteralDistribution {
 
-    private ISelectionStrategy originalSelectionStrategy;
+    protected Random random = new Random(0);
 
-    @Override
-    protected void prepareSolver(SAT4JSolutionSolver solver) {
-        super.prepareSolver(solver);
-        originalSelectionStrategy = solver.getSelectionStrategy();
-        solver.setSelectionStrategy(ISelectionStrategy.random(random));
+    public Random getRandom() {
+        return random;
     }
 
-    @Override
-    protected void resetSolver(SAT4JSolutionSolver solver) {
-        super.resetSolver(solver);
-        solver.setSelectionStrategy(originalSelectionStrategy);
-        originalSelectionStrategy = null;
+    public void setRandom(Random random) {
+        this.random = random;
     }
+
+    public abstract void reset();
+
+    public abstract void set(int literal);
+
+    public abstract void unset(int var);
+
+    public abstract int getRandomLiteral(int var);
 }

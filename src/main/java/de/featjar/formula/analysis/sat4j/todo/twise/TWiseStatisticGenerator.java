@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import de.featjar.base.data.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class TWiseStatisticGenerator {
 
         final TWiseCombiner combiner =
                 new TWiseCombiner(util.getCnf().getVariableMap().getVariableCount());
-        final BooleanAssignmentList combinedCondition = new BooleanAssignmentList();
+        final ABooleanAssignmentList combinedCondition = new ABooleanAssignmentList();
         final PresenceCondition[] clauseListArray = new PresenceCondition[t];
         final ArrayList<ArrayList<List<Pair<Integer, SortedIntegerList>>>> configurationSubLists =
                 new ArrayList<>(sampleListSize);

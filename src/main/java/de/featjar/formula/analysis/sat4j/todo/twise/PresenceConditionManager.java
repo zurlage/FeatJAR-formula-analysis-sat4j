@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class PresenceConditionManager {
     private final List<List<PresenceCondition>> dictionary = new ArrayList<>();
     private final List<List<PresenceCondition>> groupedPresenceConditions = new ArrayList<>();
 
-    public PresenceConditionManager(TWiseConfigurationUtil util, List<List<BooleanAssignmentList>> expressions) {
+    public PresenceConditionManager(TWiseConfigurationUtil util, List<List<ABooleanAssignmentList>> expressions) {
         final SortedIntegerList coreDeadFeature = util.getDeadCoreFeatures();
         final int numberOfVariables = util.getCnf().getVariableMap().getVariableCount();
 
@@ -54,10 +54,10 @@ public class PresenceConditionManager {
         }
 
         int groupIndex = 0;
-        for (final List<BooleanAssignmentList> group : expressions) {
+        for (final List<ABooleanAssignmentList> group : expressions) {
             final List<PresenceCondition> newFormulaList = new ArrayList<>();
             expressionLoop:
-            for (final BooleanAssignmentList clauses : group) {
+            for (final ABooleanAssignmentList clauses : group) {
                 final List<SortedIntegerList> newSortedIntegerLists = new ArrayList<>();
                 for (final SortedIntegerList sortedIntegerList : clauses) {
                     // If clause can be satisfied
@@ -71,7 +71,7 @@ public class PresenceConditionManager {
                     }
                 }
                 if (!newSortedIntegerLists.isEmpty()) {
-                    final PresenceCondition pc = new PresenceCondition(new BooleanAssignmentList(newSortedIntegerLists));
+                    final PresenceCondition pc = new PresenceCondition(new ABooleanAssignmentList(newSortedIntegerLists));
                     PresenceCondition mappedPc = presenceConditionSet.get(pc);
                     if (mappedPc == null) {
                         mappedPc = pc;

@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.todo.mig.solver;
 
-import de.featjar.formula.analysis.sat4j.solver.LiteralDistribution;
+import de.featjar.formula.analysis.sat4j.solver.ALiteralDistribution;
 
 import java.util.Arrays;
 
@@ -30,7 +30,7 @@ import java.util.Arrays;
  *
  * @author Sebastian Krieter
  */
-public class MIGDistribution extends LiteralDistribution {
+public class MIGDistribution extends ALiteralDistribution {
 
     private final byte[] model;
     private final ModalImplicationGraph modalImplicationGraph;

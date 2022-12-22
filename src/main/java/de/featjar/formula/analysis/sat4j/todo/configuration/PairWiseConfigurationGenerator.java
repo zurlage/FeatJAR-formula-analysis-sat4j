@@ -25,7 +25,7 @@ import de.featjar.formula.analysis.todo.mig.solver.MIGBuilder;
 import de.featjar.formula.analysis.todo.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.task.Executor;
 import de.featjar.base.task.IMonitor;
 import java.util.Arrays;
@@ -417,13 +417,13 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
     public SortedIntegerList get() {
         switch (mode) {
             case 0: {
-                return findFirstSolution(SelectionStrategy.positive());
+                return findFirstSolution(ISelectionStrategy.positive());
             }
             case 1: {
-                return findFirstSolution(SelectionStrategy.negative());
+                return findFirstSolution(ISelectionStrategy.negative());
             }
             case 2: {
-                solver.setSelectionStrategy(SelectionStrategy.random(random));
+                solver.setSelectionStrategy(ISelectionStrategy.random(random));
                 final int[] varStatus = new int[2];
                 final boolean[] featuresUsed = Arrays.copyOf(featuresUsedOrg, featuresUsedOrg.length);
 
@@ -494,7 +494,7 @@ public class PairWiseConfigurationGenerator extends AbstractConfigurationGenerat
         }
     }
 
-    private SortedIntegerList findFirstSolution(final SelectionStrategy strategy) {
+    private SortedIntegerList findFirstSolution(final ISelectionStrategy strategy) {
         solver.setSelectionStrategy(strategy);
         final SortedIntegerList allYesSolution = solver.findSolution();
         if (handleNewConfig(allYesSolution, featuresUsedOrg)) {

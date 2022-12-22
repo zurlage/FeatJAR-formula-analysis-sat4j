@@ -25,7 +25,7 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.sat4j.ASAT4JAnalysis;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,15 +66,15 @@ public class AnalyzeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<AnalyzeAtomi
 
             // for all variables not in this.variables, set done[...] to 2
 
-            solver.setSelectionStrategy(SelectionStrategy.positive());
+            solver.setSelectionStrategy(ISelectionStrategy.positive());
             final int[] model1 = solver.findSolution().get().getIntegers();
             final List<SortedIntegerList> solutions = solver.rememberSolutionHistory(1000);
 
             if (model1 != null) {
                 // initial atomic set consists of core and dead features
-                solver.setSelectionStrategy(SelectionStrategy.negative());
+                solver.setSelectionStrategy(ISelectionStrategy.negative());
                 final int[] model2 = solver.findSolution().get().getIntegers();
-                solver.setSelectionStrategy(SelectionStrategy.positive());
+                solver.setSelectionStrategy(ISelectionStrategy.positive());
 
                 final byte[] done = new byte[model1.length];
 
@@ -102,7 +102,7 @@ public class AnalyzeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<AnalyzeAtomi
                 final int fixedSize = solver.getAssumptionList().size();
                 result.add(new SortedIntegerList(solver.getAssumptionList().asArray(0, fixedSize)));
 
-                solver.setSelectionStrategy(SelectionStrategy.random(random));
+                solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
                 for (int i = 0; i < model1.length; i++) {
                     if (done[i] == 0) {

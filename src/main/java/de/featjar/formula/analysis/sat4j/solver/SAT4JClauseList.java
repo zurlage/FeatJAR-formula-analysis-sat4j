@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.AssignmentList;
+import de.featjar.formula.analysis.IAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import org.sat4j.core.VecInt;
@@ -116,7 +116,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public void addAll(AssignmentList<BooleanClause> clauseList) {
+    public void addAll(IAssignmentList<BooleanClause> clauseList) {
         addAll(clauseList.getAll());
     }
 

@@ -20,10 +20,10 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 
 /**
- * A strategy for covering a given {@link BooleanAssignmentList expressions} within a list
+ * A strategy for covering a given {@link ABooleanAssignmentList expressions} within a list
  * of {@link TWiseConfiguration solutions}.
  *
  * @author Sebastian Krieter
@@ -36,5 +36,5 @@ interface ICoverStrategy {
         INVALID,
     }
 
-    CombinationStatus cover(final BooleanAssignmentList nextCondition);
+    CombinationStatus cover(final ABooleanAssignmentList nextCondition);
 }

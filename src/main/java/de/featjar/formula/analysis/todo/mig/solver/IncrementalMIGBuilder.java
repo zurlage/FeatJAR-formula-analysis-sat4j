@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.todo.mig.solver;
 
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.task.IMonitor;
@@ -385,7 +385,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     }
 
     protected void checkOldCoreLiterals(int[] coreDead) {
-        solver.setSelectionStrategy(SelectionStrategy.inverse(fixedFeatures));
+        solver.setSelectionStrategy(ISelectionStrategy.inverse(fixedFeatures));
         for (final int literal : coreDead) {
             final int varX = fixedFeatures[Math.abs(literal) - 1];
             if (varX == 0) {

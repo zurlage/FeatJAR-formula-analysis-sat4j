@@ -4,7 +4,7 @@ import de.featjar.formula.analysis.bool.BooleanSolution;
 
 import java.util.*;
 
-public interface SolutionHistory extends Iterable<BooleanSolution> {
+public interface ISolutionHistory extends Iterable<BooleanSolution> {
     List<BooleanSolution> getSolutionHistory();
     Optional<BooleanSolution> getLastSolution();
     void setLastSolution(BooleanSolution solution);
@@ -16,7 +16,7 @@ public interface SolutionHistory extends Iterable<BooleanSolution> {
         return getSolutionHistory().iterator();
     }
 
-    class RememberLast implements SolutionHistory {
+    class RememberLast implements ISolutionHistory {
         protected BooleanSolution lastSolution;
 
         @Override

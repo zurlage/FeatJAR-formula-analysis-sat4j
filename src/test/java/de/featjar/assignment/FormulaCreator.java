@@ -21,7 +21,7 @@
 package de.featjar.assignment;
 
 import de.featjar.formula.analysis.solver.Assumable;
-import de.featjar.formula.structure.Expression;
+import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.formula.predicate.Literal;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 
 public class FormulaCreator {
 
-    public static Expression getFormula01() {
+    public static IExpression getFormula01() {
         final TermMap map = new TermMap();
         final Literal p = map.createLiteral("p");
         final Literal q = map.createLiteral("q");
@@ -41,7 +41,7 @@ public class FormulaCreator {
         return new Implies(new And(new Or(p, q), r), s.invert());
     }
 
-    public static Expression getFormula02() {
+    public static IExpression getFormula02() {
         final TermMap map = new TermMap();
         final Literal p = map.createLiteral("p");
         final Literal q = map.createLiteral("q");

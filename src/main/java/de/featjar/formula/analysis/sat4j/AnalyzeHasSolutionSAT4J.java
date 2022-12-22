@@ -23,12 +23,12 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.HasSolutionAnalysis;
+import de.featjar.formula.analysis.IHasSolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 
 public class AnalyzeHasSolutionSAT4J extends ASAT4JAnalysis.Solution<Boolean> implements
-        HasSolutionAnalysis<BooleanClauseList, BooleanAssignment> {
+        IHasSolutionAnalysis<BooleanClauseList, BooleanAssignment> {
     public AnalyzeHasSolutionSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }

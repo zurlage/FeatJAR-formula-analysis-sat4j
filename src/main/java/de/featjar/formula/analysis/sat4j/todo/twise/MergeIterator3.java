@@ -20,23 +20,23 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.twise;
 
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Combines multiple {@link ICombinationSupplier supplies} of {@link BooleanAssignmentList}
+ * Combines multiple {@link ICombinationSupplier supplies} of {@link ABooleanAssignmentList}
  * and returns results from each supplier by turns.
  *
  * @author Sebastian Krieter
  */
-public class MergeIterator3 implements ICombinationSupplier<BooleanAssignmentList> {
+public class MergeIterator3 implements ICombinationSupplier<ABooleanAssignmentList> {
 
     private final List<List<PresenceCondition>> expressionSets;
     private final ICombinationSupplier<int[]>[] suppliers;
     private final long numberOfCombinations;
 
-    private final List<BooleanAssignmentList> buffer = new ArrayList<>();
+    private final List<ABooleanAssignmentList> buffer = new ArrayList<>();
     private final TWiseCombiner combiner;
     private final PresenceCondition[] nextCombination;
 
@@ -63,7 +63,7 @@ public class MergeIterator3 implements ICombinationSupplier<BooleanAssignmentLis
     }
 
     @Override
-    public BooleanAssignmentList get() {
+    public ABooleanAssignmentList get() {
         if (buffer.isEmpty()) {
             for (int i = 0; i <= maxIteratorIndex; i++) {
                 final ICombinationSupplier<int[]> supplier = suppliers[i];
@@ -74,7 +74,7 @@ public class MergeIterator3 implements ICombinationSupplier<BooleanAssignmentLis
                         for (int j = 0; j < js.length; j++) {
                             nextCombination[j] = expressionSet.get(js[j]);
                         }
-                        final BooleanAssignmentList combinedCondition = new BooleanAssignmentList();
+                        final ABooleanAssignmentList combinedCondition = new ABooleanAssignmentList();
                         combiner.combineConditions(nextCombination, combinedCondition);
                         buffer.add(combinedCondition);
                     } else {
@@ -86,7 +86,7 @@ public class MergeIterator3 implements ICombinationSupplier<BooleanAssignmentLis
                 return null;
             }
         }
-        final BooleanAssignmentList remove = buffer.get(bufferIndex++);
+        final ABooleanAssignmentList remove = buffer.get(bufferIndex++);
         if (bufferIndex == buffer.size()) {
             buffer.clear();
             bufferIndex = 0;

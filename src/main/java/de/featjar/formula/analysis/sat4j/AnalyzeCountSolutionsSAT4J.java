@@ -24,7 +24,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.CountSolutionsAnalysis;
+import de.featjar.formula.analysis.ICountSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -32,7 +32,7 @@ import de.featjar.formula.analysis.bool.BooleanSolution;
 import java.math.BigInteger;
 
 public class AnalyzeCountSolutionsSAT4J extends ASAT4JAnalysis.Solution<BigInteger> implements
-        CountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
+        ICountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
     public AnalyzeCountSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }

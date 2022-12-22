@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.sat4j.todo.twise;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.DefaultVisitor;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.Traverser;
 import de.featjar.formula.analysis.todo.mig.solver.visitor.Visitor;
-import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class TWiseConfiguration extends SortedIntegerList {
             if (unknownValues == null) {
                 final SAT4JSolutionSolver solver = util.getSolver();
                 setUpSolver(solver);
-                solver.setSelectionStrategy(SelectionStrategy.original());
+                solver.setSelectionStrategy(ISelectionStrategy.original());
                 switch (solver.hasSolution()) {
                     case FALSE:
                         return VisitResult.Cancel;
@@ -87,7 +87,7 @@ public class TWiseConfiguration extends SortedIntegerList {
                         throw new RuntimeException();
                 }
                 if (unknownValues != null) {
-                    solver.setSelectionStrategy(SelectionStrategy.inverse(unknownValues));
+                    solver.setSelectionStrategy(ISelectionStrategy.inverse(unknownValues));
                     solver.hasSolution();
                     final int[] model2 = solver.getInternalSolution();
                     util.addSolverSolution(Arrays.copyOf(model2, model2.length));
@@ -268,11 +268,11 @@ public class TWiseConfiguration extends SortedIntegerList {
         } else {
             orgAssignmentSize = setUpSolver(solver);
 
-            solver.setSelectionStrategy(SelectionStrategy.original());
+            solver.setSelectionStrategy(ISelectionStrategy.original());
             final int[] firstSolution = solver.findSolution().getLiterals();
             if (firstSolution != null) {
                 util.addSolverSolution(Arrays.copyOf(firstSolution, firstSolution.length));
-                solver.setSelectionStrategy(SelectionStrategy.inverse(firstSolution));
+                solver.setSelectionStrategy(ISelectionStrategy.inverse(firstSolution));
                 util.getSolver().hasSolution();
                 final int[] secondSolution = util.getSolver().getInternalSolution();
                 util.addSolverSolution(Arrays.copyOf(secondSolution, secondSolution.length));
@@ -309,7 +309,7 @@ public class TWiseConfiguration extends SortedIntegerList {
             }
         }
         solver.getAssignment().clear(orgAssignmentSize);
-        solver.setSelectionStrategy(SelectionStrategy.random(util.random));
+        solver.setSelectionStrategy(ISelectionStrategy.random(util.random));
     }
 
     public void clear() {
@@ -405,7 +405,7 @@ public class TWiseConfiguration extends SortedIntegerList {
 
     public void generateRandomSolutions(int count) {
         final SAT4JSolutionSolver solver = util.getSolver();
-        solver.setSelectionStrategy(SelectionStrategy.random(util.random));
+        solver.setSelectionStrategy(ISelectionStrategy.random(util.random));
         final int orgAssignmentSize = setUpSolver(solver);
         try {
             for (int i = 0; i < count; i++) {
@@ -421,9 +421,9 @@ public class TWiseConfiguration extends SortedIntegerList {
 
     public boolean isValid() {
         final SAT4JSolutionSolver solver = util.getSolver();
-        final SelectionStrategy selectionStrategy = solver.getSelectionStrategy();
+        final ISelectionStrategy selectionStrategy = solver.getSelectionStrategy();
         final int orgAssignmentSize = setUpSolver(solver);
-        solver.setSelectionStrategy(SelectionStrategy.original());
+        solver.setSelectionStrategy(ISelectionStrategy.original());
         try {
             return solver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
         } finally {

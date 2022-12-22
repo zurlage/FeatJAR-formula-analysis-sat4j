@@ -35,7 +35,7 @@ import org.sat4j.specs.TimeoutException;
 import org.sat4j.tools.xplain.Xplain;
 
 /**
- * Implements a MUS {@link de.featjar.formula.analysis.Solver} using Sat4J.
+ * Implements a MUS {@link de.featjar.formula.analysis.ISolver} using Sat4J.
  *
  * <br>
  * <br>
