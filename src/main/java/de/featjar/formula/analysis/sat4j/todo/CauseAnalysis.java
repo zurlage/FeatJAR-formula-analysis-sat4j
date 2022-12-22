@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j.todo;
 
 import de.featjar.base.Feat;
-import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 
 import java.util.*;
@@ -34,12 +34,12 @@ import static de.featjar.base.computation.Computations.async;
  * @author Sebastian Krieter
  */
 public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>> {
-    public CauseAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputable, literalListIndexList);
+    public CauseAnalysis(IComputation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
+        super(inputComputation, literalListIndexList);
     }
 
-    public CauseAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputable, literalListIndexList, assumptions, timeoutInMs, randomSeed);
+    public CauseAnalysis(IComputation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
     }
 
     public static class Anomalies {

@@ -22,9 +22,9 @@ package de.featjar.formula.analysis.sat4j.todo;
 
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.FormulaAnalysis;
+import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
-import de.featjar.formula.analysis.sat4j.SAT4JAnalysis;
+import de.featjar.formula.analysis.sat4j.ASAT4JAnalysis;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
 
 import java.util.Arrays;
@@ -36,7 +36,7 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public class AnalyzeAtomicSetsSAT4J extends SAT4JAnalysis.Solution<AnalyzeAtomicSetsSAT4J, BooleanSolutionList> implements FormulaAnalysis.WithRandom { // todo: here, a BooleanAssignmentList would be better
+public class AnalyzeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<AnalyzeAtomicSetsSAT4J, BooleanSolutionList> implements IFormulaAnalysis.WithRandom { // todo: here, a BooleanAssignmentList would be better
     protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
     @Override

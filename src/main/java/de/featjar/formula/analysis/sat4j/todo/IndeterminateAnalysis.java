@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo;
 
-import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
@@ -38,12 +38,12 @@ public class IndeterminateAnalysis extends VariableAnalysis<SortedIntegerList> {
     // reliably (false positives) (use old
     // analysis first?)
 
-    public IndeterminateAnalysis(Computable<CNF> inputComputable, SortedIntegerList variables) {
-        super(inputComputable, variables);
+    public IndeterminateAnalysis(IComputation<CNF> inputComputation, SortedIntegerList variables) {
+        super(inputComputation, variables);
     }
 
-    public IndeterminateAnalysis(Computable<CNF> inputComputable, SortedIntegerList variables, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputable, variables, assumptions, timeoutInMs, randomSeed);
+    public IndeterminateAnalysis(IComputation<CNF> inputComputation, SortedIntegerList variables, Assignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, variables, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override

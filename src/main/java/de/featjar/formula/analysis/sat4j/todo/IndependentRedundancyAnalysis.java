@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.todo;
 
-import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
@@ -45,12 +45,12 @@ import java.util.List;
  */
 public class IndependentRedundancyAnalysis extends ClauseAnalysis<List<SortedIntegerList>> {
 
-    public IndependentRedundancyAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputable, literalListIndexList);
+    public IndependentRedundancyAnalysis(IComputation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
+        super(inputComputation, literalListIndexList);
     }
 
-    public IndependentRedundancyAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputable, literalListIndexList, assumptions, timeoutInMs, randomSeed);
+    public IndependentRedundancyAnalysis(IComputation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override

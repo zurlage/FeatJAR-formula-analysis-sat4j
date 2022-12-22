@@ -1,6 +1,6 @@
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.IComputation;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.structure.formula.Formula;
 import de.featjar.formula.transformer.TransformCNFFormula;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AnalyzeHasSolutionSAT4JTest {
     public boolean hasSolution(Formula formula) {
-        return Computable.of(formula)
+        return IComputation.of(formula)
                 .map(TransformNNFFormula::new)
                 .map(TransformCNFFormula::new)
                 .map(ComputeBooleanRepresentation::new)

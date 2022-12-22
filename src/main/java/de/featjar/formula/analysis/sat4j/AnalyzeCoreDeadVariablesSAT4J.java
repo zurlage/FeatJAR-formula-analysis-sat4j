@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Pair;
@@ -45,11 +45,11 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 
-public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<BooleanAssignment>
-    implements Computable.WithRandom {
+public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
+    implements IComputation.WithRandom {
     protected final static Dependency<Random> RANDOM = newDependency();
 
-    public AnalyzeCoreDeadVariablesSAT4J(Computable<BooleanClauseList> booleanClauseList) {
+    public AnalyzeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }
 
@@ -60,7 +60,7 @@ public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<Boolea
 
     @Override
     public FutureResult<BooleanAssignment> compute() {
-        return Computable.of(computeSolver(), getRandom()).get().thenComputeResult(this::analyze);
+        return IComputation.of(computeSolver(), getRandom()).get().thenComputeResult(this::analyze);
     }
 
     // currently unused (divide & conquer)
@@ -228,7 +228,7 @@ public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<Boolea
     }
 
     @Override
-    public Traversable<Computable<?>> cloneNode() {
+    public Traversable<IComputation<?>> cloneNode() {
         return new AnalyzeCoreDeadVariablesSAT4J(getInput());
     }
 }

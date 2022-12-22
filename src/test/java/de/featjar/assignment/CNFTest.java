@@ -22,7 +22,7 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-import de.featjar.formula.analysis.FormulaAnalysis;
+import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.todo.mig.ConditionallyCoreDeadAnalysisMIG;
 import de.featjar.formula.analysis.sat4j.todo.AddRedundancyAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.AnalyzeAtomicSetsSAT4J;
@@ -90,7 +90,7 @@ public class CNFTest {
         slicedCNF.adapt(cnf.getVariableMap()).orElse(Log::problems);
     }
 
-    private void executeAnalysis(ModelRepresentation rep, FormulaAnalysis<?> analysis) {
+    private void executeAnalysis(ModelRepresentation rep, IFormulaAnalysis<?> analysis) {
         final Result<?> result = rep.getResult(analysis);
         Feat.log().info(analysis.getClass().getName());
         result.map(Object::toString).orElse(this::reportProblems);

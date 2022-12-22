@@ -21,31 +21,27 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.Feat;
-import de.featjar.base.cli.Option;
 import de.featjar.base.computation.*;
-import de.featjar.formula.analysis.FormulaAnalysis;
+import de.featjar.formula.analysis.IFormulaAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import static de.featjar.base.computation.Computations.async;
 
-public abstract class SAT4JAnalysis<T> extends Computation<T> implements
-        Analysis<BooleanClauseList, T>,
-        FormulaAnalysis.WithAssumedAssignment<BooleanAssignment>,
-        FormulaAnalysis.WithAssumedClauseList<BooleanClauseList>,
-        Computable.WithTimeout {
+public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
+        IAnalysis<BooleanClauseList, T>,
+        IFormulaAnalysis.WithAssumedAssignment<BooleanAssignment>,
+        IFormulaAnalysis.WithAssumedClauseList<BooleanClauseList>,
+        IComputation.WithTimeout {
     protected final static Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST = newDependency();
     protected final static Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT = newDependency(new BooleanAssignment());
     protected final static Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST = newDependency(new BooleanClauseList());
     protected final static Dependency<Long> TIMEOUT = newDependency();
 
-    public SAT4JAnalysis(Computable<BooleanClauseList> booleanClauseList) {
+    public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList) {
         dependOn(BOOLEAN_CLAUSE_LIST, ASSUMED_ASSIGNMENT, ASSUMED_CLAUSE_LIST, TIMEOUT);
         setInput(booleanClauseList);
     }
@@ -72,8 +68,8 @@ public abstract class SAT4JAnalysis<T> extends Computation<T> implements
 
     abstract protected SAT4JSolver newSolver(BooleanClauseList clauseList);
 
-    public Computable<SAT4JSolver> computeSolver() {
-        return Computable.allOf(getChildren()).mapResult(SAT4JAnalysis.class, "computeSolver", list -> { // caches the solver
+    public IComputation<SAT4JSolver> computeSolver() {
+        return IComputation.allOf(getChildren()).mapResult(ASAT4JAnalysis.class, "computeSolver", list -> { // caches the solver
                     BooleanClauseList clauseList = (BooleanClauseList) BOOLEAN_CLAUSE_LIST.get(list);
                     BooleanAssignment assumedAssignment = (BooleanAssignment) ASSUMED_ASSIGNMENT.get(list);
                     BooleanClauseList assumedClauseList = (BooleanClauseList) ASSUMED_CLAUSE_LIST.get(list);
@@ -94,8 +90,8 @@ public abstract class SAT4JAnalysis<T> extends Computation<T> implements
                 });
     }
 
-    static abstract class Solution<T> extends SAT4JAnalysis<T> {
-        public Solution(Computable<BooleanClauseList> booleanClauseList) {
+    static abstract class Solution<T> extends ASAT4JAnalysis<T> {
+        public Solution(IComputation<BooleanClauseList> booleanClauseList) {
             super(booleanClauseList);
         }
 
@@ -105,8 +101,8 @@ public abstract class SAT4JAnalysis<T> extends Computation<T> implements
         }
     }
 
-    static abstract class Explanation<T> extends SAT4JAnalysis<T> {
-        public Explanation(Computable<BooleanClauseList> booleanClauseList) {
+    static abstract class Explanation<T> extends ASAT4JAnalysis<T> {
+        public Explanation(IComputation<BooleanClauseList> booleanClauseList) {
             super(booleanClauseList);
         }
 
