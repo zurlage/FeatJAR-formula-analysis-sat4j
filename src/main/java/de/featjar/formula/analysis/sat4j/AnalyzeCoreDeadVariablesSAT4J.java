@@ -20,11 +20,15 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.FutureResult;
+import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.Dependency;
+import de.featjar.base.computation.FutureResult;
+import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.Monitor;
-import de.featjar.formula.analysis.Analysis;
+import de.featjar.base.tree.structure.Traversable;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
@@ -41,30 +45,22 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 
-public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<AnalyzeCoreDeadVariablesSAT4J, BooleanAssignment>
-    implements Analysis.WithRandom {
-    protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
+public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<BooleanAssignment>
+    implements Computable.WithRandom {
+    protected final static Dependency<Random> RANDOM = newDependency();
 
-    @Override
-    public Random getRandom() {
-        return random;
+    public AnalyzeCoreDeadVariablesSAT4J(Computable<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
     }
 
     @Override
-    public AnalyzeCoreDeadVariablesSAT4J setRandom(Random random) {
-        this.random = random;
-        return this;
-    }
-
-    @Override
-    public AnalyzeCoreDeadVariablesSAT4J setRandom(Long seed) {
-        WithRandom.super.setRandom(seed);
-        return this;
+    public Dependency<Random> getRandomDependency() {
+        return RANDOM;
     }
 
     @Override
     public FutureResult<BooleanAssignment> compute() {
-        return initializeSolver().thenComputeResult(this::analyze);
+        return Computable.of(computeSolver(), getRandom()).get().thenComputeResult(this::analyze);
     }
 
     // currently unused (divide & conquer)
@@ -174,8 +170,9 @@ public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<Analyz
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public Result<BooleanAssignment> analyze(SAT4JSolver _solver, Monitor monitor) {
-        SAT4JSolutionSolver solver = (SAT4JSolutionSolver) _solver;
+    public Result<BooleanAssignment> analyze(Pair<SAT4JSolver, Random> pair, Monitor monitor) {
+        SAT4JSolutionSolver solver = (SAT4JSolutionSolver) pair.getKey();
+        Random random = pair.getValue();
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(SelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();
@@ -228,5 +225,10 @@ public class AnalyzeCoreDeadVariablesSAT4J extends SAT4JAnalysis.Solution<Analyz
         }
 
         return Result.of(solver.getAssignment().toAssignment());
+    }
+
+    @Override
+    public Traversable<Computable<?>> cloneNode() {
+        return new AnalyzeCoreDeadVariablesSAT4J(getInput());
     }
 }

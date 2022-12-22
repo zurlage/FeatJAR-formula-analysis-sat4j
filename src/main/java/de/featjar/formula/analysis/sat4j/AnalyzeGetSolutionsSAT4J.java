@@ -20,20 +20,26 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.FutureResult;
+import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
+import de.featjar.base.tree.structure.Traversable;
 import de.featjar.formula.analysis.GetSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 
-public class AnalyzeGetSolutionsSAT4J extends SAT4JAnalysis.Solution<AnalyzeGetSolutionsSAT4J, BooleanSolutionList> implements
+public class AnalyzeGetSolutionsSAT4J extends SAT4JAnalysis.Solution<BooleanSolutionList> implements
         GetSolutionsAnalysis<BooleanClauseList, BooleanSolutionList, BooleanAssignment> {
+    public AnalyzeGetSolutionsSAT4J(Computable<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public FutureResult<BooleanSolutionList> compute() {
-        return initializeSolver().thenComputeResult((solver, monitor) -> {
+        return computeSolver().get().thenComputeResult((solver, monitor) -> {
             BooleanSolutionList solutionList = new BooleanSolutionList();
             Result<Boolean> hasSolution = solver.hasSolution();
             while (hasSolution.equals(Result.of(true))) {
@@ -45,5 +51,10 @@ public class AnalyzeGetSolutionsSAT4J extends SAT4JAnalysis.Solution<AnalyzeGetS
             // TODO: if timeout is reached, return subset with a warning
             return hasSolution.map(_hasSolution -> solutionList);
         });
+    }
+
+    @Override
+    public Traversable<Computable<?>> cloneNode() {
+        return new AnalyzeGetSolutionsSAT4J(getInput());
     }
 }

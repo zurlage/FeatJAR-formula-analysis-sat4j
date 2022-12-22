@@ -20,8 +20,10 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.FutureResult;
+import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
+import de.featjar.base.tree.structure.Traversable;
 import de.featjar.formula.analysis.CountSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -29,12 +31,16 @@ import de.featjar.formula.analysis.bool.BooleanSolution;
 
 import java.math.BigInteger;
 
-public class AnalyzeCountSolutionsSAT4J extends SAT4JAnalysis.Solution<AnalyzeCountSolutionsSAT4J, BigInteger> implements
+public class AnalyzeCountSolutionsSAT4J extends SAT4JAnalysis.Solution<BigInteger> implements
         CountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
+    public AnalyzeCountSolutionsSAT4J(Computable<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public FutureResult<BigInteger> compute() {
-        return initializeSolver().thenComputeResult((solver, monitor) -> {
+        return computeSolver().get().thenComputeResult((solver, monitor) -> {
             BigInteger solutionCount = BigInteger.ZERO;
             Result<Boolean> hasSolution = solver.hasSolution();
             while (hasSolution.equals(Result.of(true))) {
@@ -47,5 +53,10 @@ public class AnalyzeCountSolutionsSAT4J extends SAT4JAnalysis.Solution<AnalyzeCo
             // TODO: if timeout is reached, return lower bound with a warning
             return hasSolution.map(_hasSolution -> finalSolutionCount);
         });
+    }
+
+    @Override
+    public Traversable<Computable<?>> cloneNode() {
+        return new AnalyzeCountSolutionsSAT4J(getInput());
     }
 }

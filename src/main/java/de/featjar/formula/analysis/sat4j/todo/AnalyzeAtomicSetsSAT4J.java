@@ -20,9 +20,9 @@
  */
 package de.featjar.formula.analysis.sat4j.todo;
 
-import de.featjar.base.data.FutureResult;
+import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.Analysis;
+import de.featjar.formula.analysis.FormulaAnalysis;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.sat4j.SAT4JAnalysis;
 import de.featjar.formula.analysis.sat4j.solver.SelectionStrategy;
@@ -36,7 +36,7 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public class AnalyzeAtomicSetsSAT4J extends SAT4JAnalysis.Solution<AnalyzeAtomicSetsSAT4J, BooleanSolutionList> implements Analysis.WithRandom { // todo: here, a BooleanAssignmentList would be better
+public class AnalyzeAtomicSetsSAT4J extends SAT4JAnalysis.Solution<AnalyzeAtomicSetsSAT4J, BooleanSolutionList> implements FormulaAnalysis.WithRandom { // todo: here, a BooleanAssignmentList would be better
     protected Random random = new Random(WithRandom.DEFAULT_RANDOM_SEED);
 
     @Override
@@ -58,7 +58,7 @@ public class AnalyzeAtomicSetsSAT4J extends SAT4JAnalysis.Solution<AnalyzeAtomic
 
     @Override
     public FutureResult<BooleanSolutionList> compute() {
-        return initializeSolver().thenCompute(((solver, monitor) -> {
+        return computeSolver().thenCompute(((solver, monitor) -> {
             final BooleanSolutionList result = new BooleanSolutionList();
             //		if (variables == null) {
             //			variables = LiteralList.getVariables(solver.getVariables());

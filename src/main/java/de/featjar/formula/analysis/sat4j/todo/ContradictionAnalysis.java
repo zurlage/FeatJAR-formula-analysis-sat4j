@@ -20,8 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j.todo;
 
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
+import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 
 import java.util.ArrayList;
@@ -44,12 +44,12 @@ import java.util.List;
  * @see IndependentContradictionAnalysis
  */
 public class ContradictionAnalysis extends ClauseAnalysis<List<SortedIntegerList>> {
-    public ContradictionAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputation, literalListIndexList);
+    public ContradictionAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList) {
+        super(inputComputable, literalListIndexList);
     }
 
-    public ContradictionAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, literalListIndexList, assumptions, timeoutInMs, randomSeed);
+    public ContradictionAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputable, literalListIndexList, assumptions, timeoutInMs, randomSeed);
     }
 
     @Override

@@ -21,102 +21,63 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.Feat;
-import de.featjar.base.data.Computation;
-import de.featjar.base.data.FutureResult;
-import de.featjar.formula.analysis.Analysis;
+import de.featjar.base.cli.Option;
+import de.featjar.base.computation.*;
+import de.featjar.formula.analysis.FormulaAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.function.Consumer;
 
-import static de.featjar.base.data.Computations.async;
+import static de.featjar.base.computation.Computations.async;
 
-@SuppressWarnings("unchecked")
-public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
-        Analysis<BooleanClauseList, U>,
-        Analysis.WithAssumedAssignment<BooleanAssignment>,
-        Analysis.WithAssumedClauseList<BooleanClauseList>,
-        Analysis.WithTimeout {
-    protected Computation<BooleanClauseList> clauseList;
-    protected Computation<BooleanAssignment> assumedAssignment = async(new BooleanAssignment());
-    protected Computation<BooleanClauseList> assumedClauseList = async(new BooleanClauseList());
-    protected Long timeout;
+public abstract class SAT4JAnalysis<T> extends Computation<T> implements
+        Analysis<BooleanClauseList, T>,
+        FormulaAnalysis.WithAssumedAssignment<BooleanAssignment>,
+        FormulaAnalysis.WithAssumedClauseList<BooleanClauseList>,
+        Computable.WithTimeout {
+    protected final static Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST = newDependency();
+    protected final static Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT = newDependency(new BooleanAssignment());
+    protected final static Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST = newDependency(new BooleanClauseList());
+    protected final static Dependency<Long> TIMEOUT = newDependency();
 
-    @Override
-    public Computation<BooleanClauseList> getInput() {
-        return clauseList;
+    public SAT4JAnalysis(Computable<BooleanClauseList> booleanClauseList) {
+        dependOn(BOOLEAN_CLAUSE_LIST, ASSUMED_ASSIGNMENT, ASSUMED_CLAUSE_LIST, TIMEOUT);
+        setInput(booleanClauseList);
     }
 
     @Override
-    public T setInput(Computation<BooleanClauseList> input) {
-        this.clauseList = input;
-        return (T) this;
+    public Dependency<BooleanClauseList> getInputDependency() {
+        return BOOLEAN_CLAUSE_LIST;
     }
 
     @Override
-    public Computation<BooleanAssignment> getAssumedAssignment() {
-        return assumedAssignment;
+    public Dependency<Long> getTimeoutDependency() {
+        return TIMEOUT;
     }
 
     @Override
-    public T setAssumedAssignment(Computation<BooleanAssignment> assignment) {
-        this.assumedAssignment = assignment;
-        return (T) this;
-    }
-
-//    public T setAssumedValueAssignment(Computation<ValueAssignment> valueAssignmentComputation) {
-//        return setAssumedAssignment(Computation.allOf(getInput(), valueAssignmentComputation)
-//                .mapResult(pair -> {
-//                    BooleanClauseList clauseList = pair.getKey();
-//                    ValueAssignment valueAssignment = pair.getValue();
-//                    // todo: this ignores warnings besides logging. is this a good idea?
-//                    return valueAssignment.toBoolean(clauseList.getVariableMap()).getAndLogProblems();
-//                }));
-//    }
-
-    @Override
-    public Computation<BooleanClauseList> getAssumedClauseList() {
-        return assumedClauseList;
+    public Dependency<BooleanAssignment> getAssumedAssignmentDependency() {
+        return ASSUMED_ASSIGNMENT;
     }
 
     @Override
-    public T setAssumedClauseList(Computation<BooleanClauseList> clauseList) {
-        this.assumedClauseList = clauseList;
-        return (T) this;
-    }
-
-//    public T setAssumedValueClauseList(Computation<ValueClauseList> valueClauseListComputation) {
-//        return setAssumedClauseList(Computation.allOf(getInput(), valueClauseListComputation)
-//                .mapResult(pair -> {
-//                    BooleanClauseList clauseList = pair.getKey();
-//                    ValueClauseList valueClauseList = pair.getValue();
-//                    // todo: this ignores warnings besides logging. is this a good idea?
-//                    return valueClauseList.toBoolean(clauseList.getVariableMap()).getAndLogProblems();
-//                }));
-//    }
-
-    @Override
-    public Optional<Long> getTimeout() {
-        return Optional.ofNullable(timeout);
-    }
-
-    @Override
-    public T setTimeout(Long timeout) {
-        this.timeout = timeout;
-        return (T) this;
+    public Dependency<BooleanClauseList> getAssumedClauseListDependency() {
+        return ASSUMED_CLAUSE_LIST;
     }
 
     abstract protected SAT4JSolver newSolver(BooleanClauseList clauseList);
 
-    public FutureResult<SAT4JSolver> initializeSolver() {
-        return Computation.allOf(clauseList, assumedAssignment, assumedClauseList)
-                .get().thenCompute((list, monitor) -> {
-                    BooleanClauseList clauseList = (BooleanClauseList) list.get(0);
-                    BooleanAssignment assumedAssignment = (BooleanAssignment) list.get(1);
-                    BooleanClauseList assumedClauseList = (BooleanClauseList) list.get(2);
+    public Computable<SAT4JSolver> computeSolver() {
+        return Computable.allOf(getChildren()).mapResult(SAT4JAnalysis.class, "computeSolver", list -> { // caches the solver
+                    BooleanClauseList clauseList = (BooleanClauseList) BOOLEAN_CLAUSE_LIST.get(list);
+                    BooleanAssignment assumedAssignment = (BooleanAssignment) ASSUMED_ASSIGNMENT.get(list);
+                    BooleanClauseList assumedClauseList = (BooleanClauseList) ASSUMED_CLAUSE_LIST.get(list);
+                    Long timeout = (Long) TIMEOUT.get(list);
                     Feat.log().debug("initializing SAT4J");
 //                    Feat.log().debug(clauseList.toValue().get());
 //                    Feat.log().debug("assuming " + assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
@@ -127,20 +88,28 @@ public abstract class SAT4JAnalysis<T extends SAT4JAnalysis<T, U>, U> implements
                     Feat.log().debug("assuming " + assumedClauseList);
                     SAT4JSolver solver = newSolver(clauseList);
                     solver.getClauseList().addAll(assumedClauseList);
-                    solver.getAssignment().addAll(assumedAssignment);
+                    solver.getAssignment().addAll(assumedAssignment); // todo: the assumed assignment is mutable, so the solver should not be cached?
                     solver.setTimeout(timeout);
                     return solver;
                 });
     }
 
-    static abstract class Solution<T extends SAT4JAnalysis<T, U>, U> extends SAT4JAnalysis<T, U> {
+    static abstract class Solution<T> extends SAT4JAnalysis<T> {
+        public Solution(Computable<BooleanClauseList> booleanClauseList) {
+            super(booleanClauseList);
+        }
+
         @Override
         protected SAT4JSolutionSolver newSolver(BooleanClauseList clauseList) {
             return new SAT4JSolutionSolver(clauseList);
         }
     }
 
-    static abstract class Explanation<T extends SAT4JAnalysis<T, U>, U> extends SAT4JAnalysis<T, U> {
+    static abstract class Explanation<T> extends SAT4JAnalysis<T> {
+        public Explanation(Computable<BooleanClauseList> booleanClauseList) {
+            super(booleanClauseList);
+        }
+
         @Override
         protected SAT4JExplanationSolver newSolver(BooleanClauseList clauseList) {
             return new SAT4JExplanationSolver(clauseList);

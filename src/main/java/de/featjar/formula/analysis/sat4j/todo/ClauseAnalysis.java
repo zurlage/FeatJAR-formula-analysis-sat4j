@@ -20,7 +20,9 @@
  */
 package de.featjar.formula.analysis.sat4j.todo;
 
-import de.featjar.base.data.Computation;
+import de.featjar.base.computation.Computable;
+import de.featjar.formula.analysis.FormulaAnalysis;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 
 import java.util.List;
 
@@ -33,18 +35,18 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public abstract class ClauseAnalysis<T> extends de.featjar.formula.analysis.Analysis<T, de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver> {
+public abstract class ClauseAnalysis<T> extends FormulaAnalysis<T, SAT4JSolutionSolver> {
 
     protected List<SortedIntegerList> literalListIndexList;
     protected int[] clauseGroupSize;
 
-    protected ClauseAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList) {
-        super(inputComputation);
+    protected ClauseAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList) {
+        super(inputComputable);
         this.literalListIndexList = literalListIndexList;
     }
 
-    protected ClauseAnalysis(Computation<CNF> inputComputation, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
-        super(inputComputation, assumptions, timeoutInMs, randomSeed);
+    protected ClauseAnalysis(Computable<CNF> inputComputable, List<SortedIntegerList> literalListIndexList, Assignment assumptions, long timeoutInMs, long randomSeed) {
+        super(inputComputable, assumptions, timeoutInMs, randomSeed);
         this.literalListIndexList = literalListIndexList;
     }
 

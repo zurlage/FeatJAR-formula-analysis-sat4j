@@ -20,9 +20,9 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
-import de.featjar.base.data.Computation;
+import de.featjar.base.computation.Computable;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
-import de.featjar.base.data.Cache;
+import de.featjar.base.computation.Cache;
 import de.featjar.base.task.Monitor;
 import java.util.Spliterator;
 import java.util.function.Supplier;
@@ -35,7 +35,7 @@ import java.util.stream.Stream;
  * @author Sebastian Krieter
  */
 public interface ConfigurationGenerator
-        extends Supplier<SortedIntegerList>, Spliterator<SortedIntegerList>, Computation {
+        extends Supplier<SortedIntegerList>, Spliterator<SortedIntegerList>, Computable {
 
     void init(Cache rep, Monitor monitor);
 

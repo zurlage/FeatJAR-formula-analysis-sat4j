@@ -20,15 +20,26 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.data.FutureResult;
+import de.featjar.base.computation.Computable;
+import de.featjar.base.computation.FutureResult;
+import de.featjar.base.tree.structure.Traversable;
 import de.featjar.formula.analysis.HasSolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 
-public class AnalyzeHasSolutionSAT4J extends SAT4JAnalysis.Solution<AnalyzeHasSolutionSAT4J, Boolean> implements
+public class AnalyzeHasSolutionSAT4J extends SAT4JAnalysis.Solution<Boolean> implements
         HasSolutionAnalysis<BooleanClauseList, BooleanAssignment> {
+    public AnalyzeHasSolutionSAT4J(Computable<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
+    }
+
     @Override
     public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult((solver, monitor) -> solver.hasSolution());
+        return computeSolver().get().thenComputeResult((solver, monitor) -> solver.hasSolution());
+    }
+
+    @Override
+    public Traversable<Computable<?>> cloneNode() {
+        return new AnalyzeHasSolutionSAT4J(getInput());
     }
 }
