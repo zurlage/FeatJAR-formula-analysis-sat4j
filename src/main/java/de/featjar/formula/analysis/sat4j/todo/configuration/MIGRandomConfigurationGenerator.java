@@ -40,7 +40,7 @@ public class MIGRandomConfigurationGenerator extends RandomConfigurationGenerato
     @Override
     protected void init(IMonitor monitor) {
         final RegularMIGBuilder migBuilder = new RegularMIGBuilder();
-        final ModalImplicationGraph modalImplicationGraph = Executor.apply(migBuilder, solver.getCnf()).orElse(Log::problems);
+        final ModalImplicationGraph modalImplicationGraph = Executor.apply(migBuilder, solver.getCnf()).orElse(Log::problem);
         satisfiable = modalImplicationGraph != null;
         if (!satisfiable) {
             return;

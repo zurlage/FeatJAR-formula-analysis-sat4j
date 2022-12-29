@@ -1,12 +1,13 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 
 import java.util.*;
 
 public interface ISolutionHistory extends Iterable<BooleanSolution> {
     List<BooleanSolution> getSolutionHistory();
-    Optional<BooleanSolution> getLastSolution();
+    Result<BooleanSolution> getLastSolution();
     void setLastSolution(BooleanSolution solution);
     void addNewSolution(BooleanSolution solution);
     void clear();
@@ -25,8 +26,8 @@ public interface ISolutionHistory extends Iterable<BooleanSolution> {
         }
 
         @Override
-        public Optional<BooleanSolution> getLastSolution() {
-            return Optional.ofNullable(lastSolution);
+        public Result<BooleanSolution> getLastSolution() {
+            return Result.ofNullable(lastSolution);
         }
 
         @Override

@@ -83,20 +83,20 @@ public class CNFTest {
 
         final CNF cnf = rep.get(CNFComputation.fromFormula());
         final CNFSlicer slicer = new CNFSlicer(new SortedIntegerList(2));
-        final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Log::problems);
+        final CNF slicedCNF = Executor.apply(slicer, cnf).orElse(Log::problem);
 
-        cnf.adapt(slicedCNF.getVariableMap()).orElse(Log::problems);
-        slicedCNF.adapt(cnf.getVariableMap()).orElse(Log::problems);
+        cnf.adapt(slicedCNF.getVariableMap()).orElse(Log::problem);
+        slicedCNF.adapt(cnf.getVariableMap()).orElse(Log::problem);
     }
 
     private void executeAnalysis(ModelRepresentation rep, IFormulaAnalysis<?> analysis) {
         final Result<?> result = rep.getResult(analysis);
         Feat.log().info(analysis.getClass().getName());
-        result.map(Object::toString).orElse(this::reportProblems);
+        result.map(Object::toString).orElseGet(this::reportProblems);
     }
 
     private void reportProblems(List<Problem> problems) {
-        Log.problems(problems);
+        Log.problem(problems);
         fail();
     }
 }

@@ -22,10 +22,14 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
+import de.featjar.base.data.Result;
+import de.featjar.base.task.IMonitor;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.IHasSolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
+
+import java.util.List;
 
 public class AnalyzeHasSolutionSAT4J extends ASAT4JAnalysis.Solution<Boolean> implements
         IHasSolutionAnalysis<BooleanClauseList, BooleanAssignment> {
@@ -34,8 +38,8 @@ public class AnalyzeHasSolutionSAT4J extends ASAT4JAnalysis.Solution<Boolean> im
     }
 
     @Override
-    public FutureResult<Boolean> compute() {
-        return initializeSolver().thenComputeResult((pair, monitor) -> pair.getKey().hasSolution());
+    public Result<Boolean> computeResult(List<?> results, IMonitor monitor) {
+        return initializeSolver(results).hasSolution();
     }
 
     @Override

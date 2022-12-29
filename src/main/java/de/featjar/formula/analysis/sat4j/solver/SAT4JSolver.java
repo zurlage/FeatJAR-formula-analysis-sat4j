@@ -30,7 +30,6 @@ import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
 
-import java.util.Optional;
 
 /**
  * Base class for solvers using Sat4J.
@@ -92,14 +91,14 @@ public abstract class SAT4JSolver {
         this.solutionHistory = solutionHistory;
     }
 
-    public Optional<Long> getTimeout() {
-        return Optional.ofNullable(timeout);
+    public Result<Long> getTimeout() {
+        return Result.ofNullable(timeout);
     }
 
     public void setTimeout(Long timeout) {
         Feat.log().debug(timeout != null ? "setting timeout to " + timeout + "ms" : "setting no timeout");
         this.timeout = timeout;
-        if (timeout != null)
+        if (timeout != null && timeout >= 0)
             internalSolver.setTimeoutMs(timeout);
         else
             internalSolver.expireTimeout();
@@ -118,7 +117,7 @@ public abstract class SAT4JSolver {
     }
 
     public Result<BooleanSolution> findSolution() {
-        return hasSolution().equals(Result.of(true)) ? Result.ofOptional(solutionHistory.getLastSolution()) : Result.empty();
+        return hasSolution().equals(Result.of(true)) ? solutionHistory.getLastSolution() : Result.empty();
     }
 
     protected Result<Boolean> hasSolution(VecInt integers) {

@@ -41,7 +41,7 @@ public class EnumeratingRandomConfigurationGenerator extends RandomConfiguration
         final AllConfigurationGenerator gen = new AllConfigurationGenerator();
         allConfigurations = Executor.apply(gen::execute, solver.getCnf(), monitor)
                 .map(BooleanSolutionList::getSolutions)
-                .orElse(Collections::emptyList, Log::problems);
+                .orElse(Collections::emptyList, Log::problem);
         if (!allowDuplicates) {
             Collections.shuffle(allConfigurations, random);
         }

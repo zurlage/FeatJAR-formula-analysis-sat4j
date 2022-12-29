@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -74,7 +75,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public Optional<BooleanClause> remove(int index) {
+    public Result<BooleanClause> remove(int index) {
         if (index != assignments.size())
             throw new UnsupportedOperationException();
         return super.remove(index);
@@ -121,7 +122,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public Optional<BooleanClause> remove() {
+    public Result<BooleanClause> remove() {
         solver.getSolutionHistory().clear();
         if (addedConstraints.size() > 0) {
             final IConstr lastConstraint = addedConstraints.pop();

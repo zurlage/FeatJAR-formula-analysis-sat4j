@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 
@@ -113,19 +114,19 @@ public class SAT4JAssignment implements IAssignment<Integer> {
         return integers.get(i);
     }
 
-    public Optional<Boolean> getValue(int variable) {
+    public Result<Boolean> getValue(int variable) {
         for (int i = 0; i < integers.size(); i++) {
             final int l = integers.unsafeGet(i);
             if (Math.abs(l) == variable) {
-                return Optional.of(l > 0);
+                return Result.of(l > 0);
             }
         }
-        return Optional.empty();
+        return Result.empty();
     }
 
     @Override
-    public Optional<Object> getValue(Integer variable) {
-        return Optional.ofNullable(getValue((int) variable).orElse(null));
+    public Result<Object> getValue(Integer variable) {
+        return Result.ofNullable(getValue((int) variable).orElse(null));
     }
 
     public void setValue(int variable, boolean value) {

@@ -118,7 +118,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
                 final List<SortedIntegerList> result =
                         async(solver.getCNF())
                                 .map(IndependentRedundancyAnalysis.class, remainingSortedIntegerLists).getResult()
-                        .orElse(p -> Feat.log().problems(p));
+                        .orElse(p -> Feat.log().problem(p));
                 remainingSortedIntegerLists.removeIf(result::contains);
             }
             monitor.addStep();
@@ -126,7 +126,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
             if (remainingVariables.getIntegers().length > 0) {
                 remainingVariables = remainingVariables.removeAll(
                         async(solver.getCNF()).map(CoreDeadAnalysis.class, remainingVariables).getResult()
-                                .orElse(p -> Feat.log().problems(p)));
+                                .orElse(p -> Feat.log().problem(p)));
             }
             monitor.addStep();
 

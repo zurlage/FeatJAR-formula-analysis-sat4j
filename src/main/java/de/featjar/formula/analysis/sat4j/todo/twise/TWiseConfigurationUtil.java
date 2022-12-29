@@ -106,7 +106,7 @@ public class TWiseConfigurationUtil {
         randomGenerator.setLimit(randomSampleSize);
         randomSample = Executor.apply(randomGenerator::execute, cnf) //
                 .map(BooleanSolutionList::getSolutions) //
-                .orElse(Log::problems);
+                .orElse(Log::problem);
 
         for (final SortedIntegerList solution : randomSample) {
             addSolverSolution(solution.getIntegers());

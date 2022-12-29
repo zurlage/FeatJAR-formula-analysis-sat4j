@@ -53,7 +53,7 @@ public class SampleRandomConfigurationGenerator extends RandomConfigurationGener
         gen.setLimit(sampleSize);
         sample = Executor.apply(gen::execute, solver.getCnf())
                 .map(BooleanSolutionList::getSolutions)
-                .orElse(Log::problems);
+                .orElse(Log::problem);
         if ((sample == null) || sample.isEmpty()) {
             satisfiable = false;
             return;

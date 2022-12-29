@@ -22,9 +22,7 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.FutureResult;
 import de.featjar.base.computation.IRandomDependency;
-import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.IMonitor;
 import de.featjar.base.tree.structure.ITree;
@@ -32,7 +30,6 @@ import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.IteratorInt;
@@ -49,10 +46,10 @@ import java.util.Random;
 
 public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     implements IRandomDependency {
-    protected final static Dependency<Random> RANDOM = newDependency();
+    protected final static Dependency<Random> RANDOM = newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
 
     public AnalyzeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+        super(booleanClauseList, RANDOM);
     }
 
     @Override
@@ -61,12 +58,8 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @Override
-    public FutureResult<BooleanAssignment> compute() {
-        return initializeSolver().thenComputeResult(
-                (Pair<SAT4JSolver, List<?>> pair, IMonitor monitor) ->
-                        analyze((SAT4JSolutionSolver) pair.getKey(),
-                                (Random) RANDOM.get(pair.getValue()),
-                                monitor));
+    public Result<BooleanAssignment> computeResult(List<?> results, IMonitor monitor) {
+        return analyze(initializeSolver(results), RANDOM.get(results), monitor);
     }
 
     // currently unused (divide & conquer)

@@ -23,6 +23,7 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
+import de.featjar.base.task.IMonitor;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.ICountSolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -31,6 +32,7 @@ import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class AnalyzeCountSolutionsSAT4J extends ASAT4JAnalysis.Solution<BigInteger> implements
         ICountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
@@ -38,23 +40,20 @@ public class AnalyzeCountSolutionsSAT4J extends ASAT4JAnalysis.Solution<BigInteg
         super(booleanClauseList);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
-    public FutureResult<BigInteger> compute() {
-        return initializeSolver().thenComputeResult((pair, monitor) -> {
-            SAT4JSolver solver = pair.getKey();
-            BigInteger solutionCount = BigInteger.ZERO;
-            Result<Boolean> hasSolution = solver.hasSolution();
-            while (hasSolution.equals(Result.of(true))) {
-                solutionCount = solutionCount.add(BigInteger.ONE);
-                BooleanSolution solution = solver.getSolutionHistory().getLastSolution().get();
-                solver.getClauseList().add(solution.toClause().negate());
-                hasSolution = solver.hasSolution();
-            }
-            BigInteger finalSolutionCount = solutionCount;
-            // TODO: if timeout is reached, return lower bound with a warning
-            return hasSolution.map(_hasSolution -> finalSolutionCount);
-        });
+    public Result<BigInteger> computeResult(List<?> results, IMonitor monitor) {
+        SAT4JSolver solver = initializeSolver(results);
+        BigInteger solutionCount = BigInteger.ZERO;
+        Result<Boolean> hasSolution = solver.hasSolution();
+        while (hasSolution.equals(Result.of(true))) {
+            solutionCount = solutionCount.add(BigInteger.ONE);
+            BooleanSolution solution = solver.getSolutionHistory().getLastSolution().get();
+            solver.getClauseList().add(solution.toClause().negate());
+            hasSolution = solver.hasSolution();
+        }
+        BigInteger finalSolutionCount = solutionCount;
+        // TODO: if timeout is reached, return lower bound with a warning
+        return hasSolution.map(_hasSolution -> finalSolutionCount);
     }
 
     @Override
