@@ -29,7 +29,6 @@ import de.featjar.formula.analysis.sat4j.todo.CauseAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.ContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.CoreDeadAnalysis;
 import de.featjar.formula.analysis.sat4j.AnalyzeCountSolutionsSAT4J;
-import de.featjar.formula.analysis.sat4j.AnalyzeHasSolutionSAT4J;
 import de.featjar.formula.analysis.sat4j.todo.IndependentContradictionAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.IndependentRedundancyAnalysis;
 import de.featjar.formula.analysis.sat4j.todo.IndeterminateAnalysis;

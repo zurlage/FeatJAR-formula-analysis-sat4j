@@ -39,7 +39,6 @@ import java.util.Random;
 
 /**
  * Finds core and dead features.
- * TODO: currently probably broken
  *
  * @author Sebastian Krieter
  */

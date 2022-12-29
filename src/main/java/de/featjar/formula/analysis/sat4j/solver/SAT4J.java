@@ -1,14 +1,10 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.ICountSolutionsAnalysis;
-import de.featjar.formula.analysis.IGetSolutionAnalysis;
-import de.featjar.formula.analysis.IGetSolutionsAnalysis;
-import de.featjar.formula.analysis.ISolver;
-import de.featjar.formula.analysis.sat4j.AnalyzeHasSolutionSAT4J;
+import de.featjar.formula.analysis.*;
 
 public class SAT4J implements ISolver<Integer> {
     @Override
-    public AnalyzeHasSolutionSAT4J hasSolutionAnalysis() {
+    public IHasSolutionAnalysis<?, ?> hasSolutionAnalysis() {
         return null; //new SAT4JHasSolutionAnalysis();
     }
 
