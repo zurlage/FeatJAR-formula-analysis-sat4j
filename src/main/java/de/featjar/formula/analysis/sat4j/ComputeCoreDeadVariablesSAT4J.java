@@ -43,11 +43,11 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 
-public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
+public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     implements IRandomDependency {
     protected final static Dependency<Random> RANDOM = newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
 
-    public AnalyzeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+    public ComputeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList, RANDOM);
     }
 
@@ -225,6 +225,6 @@ public class AnalyzeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
 
     @Override
     public ITree<IComputation<?>> cloneNode() {
-        return new AnalyzeCoreDeadVariablesSAT4J(getInput());
+        return new ComputeCoreDeadVariablesSAT4J(getInput());
     }
 }

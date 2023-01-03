@@ -2,12 +2,11 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.ComputePresence;
-import de.featjar.formula.analysis.bool.AComputeBooleanRepresentation;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentationOfFormula;
 import de.featjar.formula.structure.formula.IFormula;
-import de.featjar.formula.transformer.TransformCNFFormula;
-import de.featjar.formula.transformer.TransformNNFFormula;
+import de.featjar.formula.transformer.ComputeCNFFormula;
+import de.featjar.formula.transformer.ComputeNNFFormula;
 import org.junit.jupiter.api.Test;
 
 import static de.featjar.base.computation.Computations.async;
@@ -18,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AnalyzeHasSolutionSAT4JTest {
     public boolean hasSolution(IFormula formula) {
         return async(formula)
-                .map(TransformNNFFormula::new)
-                .map(TransformCNFFormula::new)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanRepresentationOfFormula::new)
                 .map(Computations::getKey)
-                .map(AnalyzeGetSolutionSAT4J::new)
+                .map(ComputeSolutionSAT4J::new)
                 .map(ComputePresence<BooleanSolution>::new)
                 .getResult()
                 .get();

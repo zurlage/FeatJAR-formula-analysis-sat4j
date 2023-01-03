@@ -21,11 +21,10 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.IMonitor;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.ICountSolutionsAnalysis;
+import de.featjar.formula.analysis.ISolutionCountAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -34,9 +33,9 @@ import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import java.math.BigInteger;
 import java.util.List;
 
-public class AnalyzeCountSolutionsSAT4J extends ASAT4JAnalysis.Solution<BigInteger> implements
-        ICountSolutionsAnalysis<BooleanClauseList, BooleanAssignment> {
-    public AnalyzeCountSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigInteger> implements
+        ISolutionCountAnalysis<BooleanClauseList, BooleanAssignment> {
+    public ComputeSolutionCountSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }
 
@@ -58,6 +57,6 @@ public class AnalyzeCountSolutionsSAT4J extends ASAT4JAnalysis.Solution<BigInteg
 
     @Override
     public ITree<IComputation<?>> cloneNode() {
-        return new AnalyzeCountSolutionsSAT4J(getInput());
+        return new ComputeSolutionCountSAT4J(getInput());
     }
 }

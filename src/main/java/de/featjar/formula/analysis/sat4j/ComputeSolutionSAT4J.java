@@ -21,42 +21,29 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.FutureResult;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.IMonitor;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.IGetSolutionsAnalysis;
+import de.featjar.formula.analysis.ISolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.bool.BooleanSolutionList;
-import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
 import java.util.List;
 
-public class AnalyzeGetSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList> implements
-        IGetSolutionsAnalysis<BooleanClauseList, BooleanSolutionList, BooleanAssignment> {
-    public AnalyzeGetSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolution> implements
+        ISolutionAnalysis<BooleanClauseList, BooleanSolution, BooleanAssignment> {
+    public ComputeSolutionSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }
 
     @Override
-    public Result<BooleanSolutionList> computeResult(List<?> results, IMonitor monitor) {
-        SAT4JSolver solver = initializeSolver(results);
-        BooleanSolutionList solutionList = new BooleanSolutionList();
-        Result<Boolean> hasSolution = solver.hasSolution();
-        while (hasSolution.equals(Result.of(true))) {
-            BooleanSolution solution = solver.getSolutionHistory().getLastSolution().get();
-            solutionList.add(solution);
-            solver.getClauseList().add(solution.toClause().negate());
-            hasSolution = solver.hasSolution();
-        }
-        // TODO: if timeout is reached, return subset with a warning
-        return hasSolution.map(_hasSolution -> solutionList);
+    public Result<BooleanSolution> computeResult(List<?> results, IMonitor monitor) {
+        return initializeSolver(results).findSolution();
     }
 
     @Override
     public ITree<IComputation<?>> cloneNode() {
-        return new AnalyzeGetSolutionsSAT4J(getInput());
+        return new ComputeSolutionSAT4J(getInput());
     }
 }
