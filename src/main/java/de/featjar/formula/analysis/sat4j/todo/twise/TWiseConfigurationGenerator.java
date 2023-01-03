@@ -161,7 +161,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
 
     @Override
     protected void init(IMonitor monitor) {
-        Feat.log().debug("Create util instance... ");
+        FeatJAR.log().debug("Create util instance... ");
         final CNF cnf = solver.getCnf();
         solver.rememberSolutionHistory(10);
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
@@ -179,7 +179,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
         util.setCreateConfigurationDeduce(createConfigurationDeduce);
         util.setExtendConfigurationDeduce(extendConfigurationDeduce);
 
-        Feat.log().debug("Compute random sample... ");
+        FeatJAR.log().debug("Compute random sample... ");
 
         if (!cnf.getClauseList().isEmpty()) {
             util.computeRandomSample(randomSampleSize);
@@ -192,7 +192,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             }
         }
 
-        Feat.log().debug("Set up PresenceConditionManager... ");
+        FeatJAR.log().debug("Set up PresenceConditionManager... ");
 
         // TODO Variation Point: Sorting Nodes
         presenceConditionManager = new PresenceConditionManager(util, nodes);
@@ -391,7 +391,7 @@ public class TWiseConfigurationGenerator extends AbstractConfigurationGenerator 
             sb.append(" (");
             sb.append(invalidCount);
             sb.append(")");
-            Feat.log().progress(sb.toString());
+            FeatJAR.log().progress(sb.toString());
         }
         return true;
     }

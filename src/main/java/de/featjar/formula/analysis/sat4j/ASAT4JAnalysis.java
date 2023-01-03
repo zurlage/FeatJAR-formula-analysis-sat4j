@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.Feat;
+import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.*;
 import de.featjar.formula.analysis.IAssumedAssignmentDependency;
 import de.featjar.formula.analysis.IAssumedClauseListDependency;
@@ -84,14 +84,14 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         BooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(results);
         BooleanClauseList assumedClauseList = ASSUMED_CLAUSE_LIST.get(results);
         Long timeout = TIMEOUT.get(results);
-        Feat.log().debug("initializing SAT4J");
+        FeatJAR.log().debug("initializing SAT4J");
 //                    Feat.log().debug(clauseList.toValue().get());
 //                    Feat.log().debug("assuming " + assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
 //                    Feat.log().debug("assuming " + assumedClauseList.toValue().get());
 //                    Feat.log().debug(clauseList.getVariableMap());
-        Feat.log().debug(clauseList);
-        Feat.log().debug("assuming " + assumedAssignment);
-        Feat.log().debug("assuming " + assumedClauseList);
+        FeatJAR.log().debug(clauseList);
+        FeatJAR.log().debug("assuming " + assumedAssignment);
+        FeatJAR.log().debug("assuming " + assumedClauseList);
         U solver = (U) newSolver(clauseList);
         solver.getClauseList().addAll(assumedClauseList);
         solver.getAssignment().addAll(assumedAssignment);

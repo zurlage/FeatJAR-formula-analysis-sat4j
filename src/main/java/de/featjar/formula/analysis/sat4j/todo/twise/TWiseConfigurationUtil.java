@@ -114,8 +114,8 @@ public class TWiseConfigurationUtil {
     }
 
     public void computeMIG(boolean migCheckRedundancy, boolean migDetectStrong) {
-        Feat.log().debug("Init graph... ");
-        Feat.log().debug("\tCompute graph... ");
+        FeatJAR.log().debug("Init graph... ");
+        FeatJAR.log().debug("\tCompute graph... ");
         final MIGBuilder migBuilder = new RegularMIGBuilder();
         migBuilder.setCheckRedundancy(migCheckRedundancy);
         migBuilder.setDetectStrong(migDetectStrong);
@@ -124,8 +124,8 @@ public class TWiseConfigurationUtil {
     }
 
     public void computeMIG(Path migPath) {
-        Feat.log().debug("Init graph... ");
-        Feat.log().debug("\tLoad graph from " + migPath);
+        FeatJAR.log().debug("Init graph... ");
+        FeatJAR.log().debug("\tLoad graph from " + migPath);
         modalImplicationGraph = IO.load(migPath, new MIGFormat()).get();
         setupMIG();
     }

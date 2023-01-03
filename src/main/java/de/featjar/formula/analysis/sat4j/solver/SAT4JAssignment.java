@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import de.featjar.base.data.Maps;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -152,7 +153,7 @@ public class SAT4JAssignment implements IAssignment<Integer> {
 
     @Override
     public LinkedHashMap<Integer, Object> getAll() {
-        final LinkedHashMap<Integer, Object> map = new LinkedHashMap<>();
+        final LinkedHashMap<Integer, Object> map = Maps.empty();
         for (int i = 0; i < integers.size(); i++) {
             final int l = integers.unsafeGet(i);
             if (l != 0) {

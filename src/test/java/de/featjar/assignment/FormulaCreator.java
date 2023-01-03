@@ -20,10 +20,8 @@
  */
 package de.featjar.assignment;
 
-import de.featjar.formula.analysis.solver.Assumable;
 import de.featjar.formula.structure.IExpression;
 import de.featjar.formula.structure.formula.predicate.Literal;
-import de.featjar.formula.structure.map.TermMap;
 import de.featjar.formula.structure.formula.connective.And;
 import de.featjar.formula.structure.formula.connective.Implies;
 import de.featjar.formula.structure.formula.connective.Or;
@@ -31,38 +29,38 @@ import java.util.function.Consumer;
 
 public class FormulaCreator {
 
-    public static IExpression getFormula01() {
-        final TermMap map = new TermMap();
-        final Literal p = map.createLiteral("p");
-        final Literal q = map.createLiteral("q");
-        final Literal r = map.createLiteral("r");
-        final Literal s = map.createLiteral("s");
-
-        return new Implies(new And(new Or(p, q), r), s.invert());
-    }
-
-    public static IExpression getFormula02() {
-        final TermMap map = new TermMap();
-        final Literal p = map.createLiteral("p");
-        final Literal q = map.createLiteral("q");
-        final Literal r = map.createLiteral("r");
-        final Literal s = map.createLiteral("s");
-
-        return new And(
-                new Implies(r, new And(p, q)),
-                new Implies(s, new And(q, p)),
-                new Or(new And(s.invert(), r), new And(s, r.invert())));
-    }
-
-    public static void testAllAssignments(TermMap map, Consumer<Assumable> testFunction) {
-        final Assumable assumable = new Assignment(map);
-        final int numVariables = map.getVariableCount();
-        final int numAssignments = (int) Math.pow(2, numVariables);
-        for (int i = 0; i < numAssignments; i++) {
-            for (int j = 0; j < numVariables; j++) {
-                assumable.set(j + 1, ((i >> j) & 1) == 1);
-            }
-            testFunction.accept(assumable);
-        }
-    }
+//    public static IExpression getFormula01() {
+//        final TermMap map = new TermMap();
+//        final Literal p = map.createLiteral("p");
+//        final Literal q = map.createLiteral("q");
+//        final Literal r = map.createLiteral("r");
+//        final Literal s = map.createLiteral("s");
+//
+//        return new Implies(new And(new Or(p, q), r), s.invert());
+//    }
+//
+//    public static IExpression getFormula02() {
+//        final TermMap map = new TermMap();
+//        final Literal p = map.createLiteral("p");
+//        final Literal q = map.createLiteral("q");
+//        final Literal r = map.createLiteral("r");
+//        final Literal s = map.createLiteral("s");
+//
+//        return new And(
+//                new Implies(r, new And(p, q)),
+//                new Implies(s, new And(q, p)),
+//                new Or(new And(s.invert(), r), new And(s, r.invert())));
+//    }
+//
+//    public static void testAllAssignments(TermMap map, Consumer<Assumable> testFunction) {
+//        final Assumable assumable = new Assignment(map);
+//        final int numVariables = map.getVariableCount();
+//        final int numAssignments = (int) Math.pow(2, numVariables);
+//        for (int i = 0; i < numAssignments; i++) {
+//            for (int j = 0; j < numVariables; j++) {
+//                assumable.set(j + 1, ((i >> j) & 1) == 1);
+//            }
+//            testFunction.accept(assumable);
+//        }
+//    }
 }
