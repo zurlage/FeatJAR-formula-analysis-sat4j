@@ -47,6 +47,7 @@ public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigIntege
         Result<Boolean> hasSolution = solver.hasSolution();
         while (hasSolution.equals(Result.of(true))) {
             solutionCount = solutionCount.add(BigInteger.ONE);
+            progress.incrementCurrentStep();
             BooleanSolution solution = solver.getSolutionHistory().getLastSolution().get();
             solver.getClauseList().add(solution.toClause().negate());
             hasSolution = solver.hasSolution();
