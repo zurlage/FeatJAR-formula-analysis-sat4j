@@ -53,7 +53,7 @@ public class IndependentContradictionAnalysis extends ClauseAnalysis<List<Sorted
 
     @Override
     public FutureResult<List<SortedIntegerList>> compute() {
-        return initializeSolver().thenCompute((solver, monitor) -> {
+        return initializeSolver().thenCompute((solver, progress) -> {
             if (literalListIndexList == null) {
                 literalListIndexList = solver.getCNF().getClauseList();
             }

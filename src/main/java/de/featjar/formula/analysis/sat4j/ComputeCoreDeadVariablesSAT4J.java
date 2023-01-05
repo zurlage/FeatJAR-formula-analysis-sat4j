@@ -24,7 +24,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IRandomDependency;
 import de.featjar.base.data.Result;
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -57,8 +57,8 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @Override
-    public Result<BooleanAssignment> computeResult(List<?> results, IMonitor monitor) {
-        return analyze(initializeSolver(results), RANDOM.get(results), monitor);
+    public Result<BooleanAssignment> computeResult(List<?> results, Progress progress) {
+        return analyze(initializeSolver(results), RANDOM.get(results), progress);
     }
 
     private void foundVariables(SAT4JSolutionSolver solver, int[] model, VecInt vars) {
@@ -69,7 +69,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         }
     }
 
-    public Result<BooleanAssignment> analyze(SAT4JSolutionSolver solver, Random random, IMonitor monitor) {
+    public Result<BooleanAssignment> analyze(SAT4JSolutionSolver solver, Random random, Progress progress) {
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();

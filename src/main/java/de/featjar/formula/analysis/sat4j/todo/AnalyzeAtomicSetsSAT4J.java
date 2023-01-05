@@ -58,7 +58,7 @@ public class AnalyzeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<AnalyzeAtomi
 
     @Override
     public FutureResult<BooleanSolutionList> compute() {
-        return initializeSolver().thenCompute(((solver, monitor) -> {
+        return initializeSolver().thenCompute(((solver, progress) -> {
             final BooleanSolutionList result = new BooleanSolutionList();
             //		if (variables == null) {
             //			variables = LiteralList.getVariables(solver.getVariables());

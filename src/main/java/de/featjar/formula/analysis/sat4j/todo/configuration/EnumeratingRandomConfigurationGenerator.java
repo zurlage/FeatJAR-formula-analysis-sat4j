@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.sat4j.todo.configuration;
 
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.IMonitor;
 import de.featjar.base.log.Log;
 import java.util.Collections;
 import java.util.List;

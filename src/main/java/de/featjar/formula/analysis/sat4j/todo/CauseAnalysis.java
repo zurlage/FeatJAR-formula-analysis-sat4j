@@ -92,7 +92,7 @@ public class CauseAnalysis extends ClauseAnalysis<List<CauseAnalysis.Anomalies>>
 
     @Override
     public FutureResult<List<Anomalies>> compute() {
-        return initializeSolver().thenCompute((solver, monitor) -> {
+        return initializeSolver().thenCompute((solver, progress) -> {
             if (literalListIndexList == null) {
                 return Collections.emptyList();
             }

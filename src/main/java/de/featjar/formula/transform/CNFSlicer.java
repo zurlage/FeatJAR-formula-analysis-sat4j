@@ -23,8 +23,8 @@ package de.featjar.formula.transform;
 import de.featjar.base.data.AIntegerList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.structure.map.TermMap;
-import de.featjar.base.task.IMonitor;
-import de.featjar.base.task.IMonitorableFunction;
+import de.featjar.base.computation.Progress;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -80,7 +80,7 @@ public class CNFSlicer implements IMonitorableFunction<CNF, CNF> {
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
 
     @Override
-    public CNF execute(CNF orgCNF, IMonitor monitor) {
+    public CNF execute(CNF orgCNF, Progress progress) {
         this.orgCNF = orgCNF;
         cnfCopy = new CNF(orgCNF.getVariableMap());
 

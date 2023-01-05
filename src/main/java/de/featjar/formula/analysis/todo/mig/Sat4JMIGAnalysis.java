@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.todo.mig;
 
 import de.featjar.formula.analysis.todo.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.todo.mig.solver.SAT4JMIGSolver;
-import de.featjar.base.task.IMonitor;
 
 import java.util.Random;
 
@@ -59,7 +58,7 @@ public abstract class Sat4JMIGAnalysis<T> {
     }
 
     public final T execute(IMonitor monitor) {
-        return solver != null ? execute(solver, monitor) : null;
+        return solver != null ? execute(solver, progress) : null;
     }
 
     @Override

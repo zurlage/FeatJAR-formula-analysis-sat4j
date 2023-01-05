@@ -22,8 +22,8 @@ package de.featjar.formula.analysis.todo.mig.solver;
 
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.base.task.IMonitor;
-import de.featjar.base.task.IMonitorableFunction;
+import de.featjar.base.computation.Progress;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +101,7 @@ public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImpli
         monitor.setDone();
     }
 
-    protected long addClauses(CNF cnf, boolean checkRedundancy, IMonitor monitor) {
+    protected long addClauses(CNF cnf, boolean checkRedundancy, Progress progress) {
         monitor.setTotalSteps(cleanedClausesList.size());
         Stream<SortedIntegerList> stream = cleanedClausesList.stream();
         if (checkRedundancy) {
@@ -279,7 +279,7 @@ public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImpli
         monitor.setDone();
     }
 
-    protected void bfsWeak(SortedIntegerList affectedVariables, IMonitor monitor) {
+    protected void bfsWeak(SortedIntegerList affectedVariables, Progress progress) {
         monitor.setTotalSteps(modalImplicationGraph.getVertices().size());
         final ArrayDeque<Vertex> queue = new ArrayDeque<>();
         final ArrayList<Integer> literals = new ArrayList<>();

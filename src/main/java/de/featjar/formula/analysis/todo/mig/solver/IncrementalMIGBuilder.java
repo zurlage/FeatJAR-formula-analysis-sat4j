@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.todo.mig.solver;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.structure.map.TermMap;
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -54,7 +54,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
     }
 
     @Override
-    public ModalImplicationGraph execute(CNF cnf, IMonitor monitor) {
+    public ModalImplicationGraph execute(CNF cnf, Progress progress) {
         Objects.requireNonNull(cnf);
         Objects.requireNonNull(oldModalImplicationGraph);
 
@@ -166,7 +166,7 @@ public class IncrementalMIGBuilder extends MIGBuilder {
         //		changeRatio = (addedClauses.size() + removedClauses.size()) / (double) allClauses.size();
     }
 
-    private void core(CNF cnf, IMonitor monitor) {
+    private void core(CNF cnf, Progress progress) {
         final int[] coreDead = oldModalImplicationGraph.getVertices().stream() //
                 .filter(Vertex::isCore) //
                 .mapToInt(Vertex::getVar) //

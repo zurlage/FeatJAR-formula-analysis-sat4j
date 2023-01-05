@@ -21,7 +21,6 @@
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.base.task.IMonitor;
 import org.sat4j.core.VecInt;
 
 /**

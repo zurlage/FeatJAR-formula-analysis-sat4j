@@ -25,7 +25,6 @@ import de.featjar.formula.analysis.todo.mig.solver.MIGDistribution;
 import de.featjar.formula.analysis.todo.mig.solver.RegularMIGBuilder;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.IMonitor;
 import de.featjar.base.log.Log;
 
 /**

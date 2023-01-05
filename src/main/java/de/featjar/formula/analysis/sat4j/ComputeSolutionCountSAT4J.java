@@ -21,9 +21,8 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.ISolutionCountAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -41,7 +40,7 @@ public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigIntege
     }
 
     @Override
-    public Result<BigInteger> computeResult(List<?> results, IMonitor monitor) {
+    public Result<BigInteger> computeResult(List<?> results, Progress progress) {
         SAT4JSolver solver = initializeSolver(results);
         solver.setGlobalTimeout(true);
         BigInteger solutionCount = BigInteger.ZERO;

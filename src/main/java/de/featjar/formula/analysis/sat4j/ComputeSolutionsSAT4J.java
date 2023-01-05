@@ -21,9 +21,8 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.ISolutionsAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -41,7 +40,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
     }
 
     @Override
-    public Result<BooleanSolutionList> computeResult(List<?> results, IMonitor monitor) {
+    public Result<BooleanSolutionList> computeResult(List<?> results, Progress progress) {
         SAT4JSolver solver = initializeSolver(results);
         solver.setGlobalTimeout(true);
         BooleanSolutionList solutionList = new BooleanSolutionList();

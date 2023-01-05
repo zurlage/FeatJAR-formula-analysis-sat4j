@@ -56,7 +56,7 @@ public class AddRedundancyAnalysis extends ClauseAnalysis<List<SortedIntegerList
 
     @Override
     public FutureResult<List<SortedIntegerList>> compute() {
-        return initializeSolver().thenCompute((solver, monitor) -> {
+        return initializeSolver().thenCompute((solver, progress) -> {
             if (literalListIndexList == null) {
                 return Collections.emptyList();
             }

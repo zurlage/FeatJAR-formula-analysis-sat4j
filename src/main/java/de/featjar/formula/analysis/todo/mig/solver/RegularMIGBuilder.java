@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.todo.mig.solver;
 
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 
 /**
  * Adjacency matrix implementation for a feature graph.
@@ -30,7 +30,7 @@ import de.featjar.base.task.IMonitor;
 public class RegularMIGBuilder extends MIGBuilder {
 
     @Override
-    public ModalImplicationGraph execute(CNF cnf, IMonitor monitor) {
+    public ModalImplicationGraph execute(CNF cnf, Progress progress) {
         monitor.setTotalSteps(24 + (detectStrong ? 1020 : 0) + (checkRedundancy ? 100 : 10));
 
         init(cnf);

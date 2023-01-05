@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.todo.configuration;
 
-import de.featjar.base.task.IMonitor;
 import java.util.Random;
 
 /**

@@ -27,7 +27,7 @@ import de.featjar.formula.analysis.todo.mig.solver.Vertex;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.task.Executor;
-import de.featjar.base.task.IMonitor;
+
 import java.util.Arrays;
 import java.util.Random;
 

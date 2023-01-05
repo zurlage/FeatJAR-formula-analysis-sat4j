@@ -22,7 +22,7 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.data.Result;
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.ISolutionAnalysis;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -38,7 +38,7 @@ public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutio
     }
 
     @Override
-    public Result<BooleanSolution> computeResult(List<?> results, IMonitor monitor) {
+    public Result<BooleanSolution> computeResult(List<?> results, Progress progress) {
         return initializeSolver(results).findSolution();
     }
 

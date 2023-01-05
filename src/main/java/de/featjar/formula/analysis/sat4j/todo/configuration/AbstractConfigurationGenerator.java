@@ -23,7 +23,7 @@ package de.featjar.formula.analysis.sat4j.todo.configuration;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.base.computation.Cache;
-import de.featjar.base.task.IMonitor;
+import de.featjar.base.computation.Progress;
 import java.util.ArrayList;
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -89,7 +89,7 @@ public abstract class AbstractConfigurationGenerator
     }
 
     @Override
-    public void init(Cache c, IMonitor monitor) {
+    public void init(Cache c, Progress progress) {
         solver = createSolver(c.get(solverInputComputation).get());
         monitor.checkCancel();
         prepareSolver(solver);
@@ -99,7 +99,7 @@ public abstract class AbstractConfigurationGenerator
     protected void init(IMonitor monitor) {}
 
     @Override
-    public final BooleanSolutionList analyze(SAT4JSolutionSolver solver, IMonitor monitor) throws Exception {
+    public final BooleanSolutionList analyze(SAT4JSolutionSolver solver, Progress progress) throws Exception {
         init(monitor);
         monitor.setTotalSteps(maxSampleSize);
         return new BooleanSolutionList(

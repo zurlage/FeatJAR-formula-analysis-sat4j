@@ -48,7 +48,7 @@ public class IndeterminateAnalysis extends VariableAnalysis<SortedIntegerList> {
 
     @Override
     public FutureResult<SortedIntegerList> compute() {
-        return initializeSolver().thenCompute(((solver, monitor) -> {
+        return initializeSolver().thenCompute(((solver, progress) -> {
             if (variables == null) {
                 variables = SortedIntegerList.getAbsoluteValuesOfIntegers(solver.getCNF().getVariableMap());
             }
