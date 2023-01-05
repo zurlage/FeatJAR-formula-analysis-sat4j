@@ -61,104 +61,6 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         return analyze(initializeSolver(results), RANDOM.get(results), monitor);
     }
 
-    // currently unused (divide & conquer)
-//    public SortedIntegerList analyze2(SAT4JSolutionSolver solver, Monitor monitor) throws Exception {
-//        final int initialAssignmentLength = solver.getAssignment().size();
-//        solver.setSelectionStrategy(SelectionStrategy.positive());
-//        int[] model1 = solver.findSolution().get().getIntegers();
-//
-//        if (model1 != null) {
-//            solver.setSelectionStrategy(SelectionStrategy.negative());
-//            final int[] model2 = solver.findSolution().get().getIntegers();
-//
-//            if (variables != null) {
-//                final int[] model3 = new int[model1.length];
-//                for (int i = 0; i < variables.getIntegers().length; i++) {
-//                    final int index = variables.getIntegers()[i] - 1;
-//                    if (index >= 0) {
-//                        model3[index] = model1[index];
-//                    }
-//                }
-//                model1 = model3;
-//            }
-//
-//            for (int i = 0; i < initialAssignmentLength; i++) {
-//                model1[Math.abs(solver.getAssignment().peek(i)) - 1] = 0;
-//            }
-//
-//            SortedIntegerList.resetConflicts(model1, model2);
-//            solver.setSelectionStrategy(SelectionStrategy.inverse(model1));
-//
-//            vars = new VecInt(model1.length);
-//            split(solver, model1, 0, model1.length);
-//        }
-//        return new SortedIntegerList(solver.getAssignment()
-//                .asArray(initialAssignmentLength, solver.getAssignment().size()));
-//    }
-
-    //VecInt vars;
-
-//    private void split(SAT4JSolutionSolver solver, int[] model, int start, int end) {
-//        vars.clear();
-//        for (int j = start; j < end; j++) {
-//            final int var = model[j];
-//            if (var != 0) {
-//                vars.push(-var);
-//            }
-//        }
-//        switch (vars.size()) {
-//            case 0:
-//                return;
-//            case 1:
-//                test(solver, model, 0);
-//                break;
-//            case 2:
-//                test(solver, model, 0);
-//                test(solver, model, 1);
-//                break;
-//            default:
-//                try {
-//                    solver.getClauseList().add(new BooleanClause(Arrays.copyOf(vars.toArray(), vars.size())));
-//                    Result<Boolean> hasSolution = solver.hasSolution();
-//                    if (Result.of(false).equals(hasSolution)) {
-//                        foundVariables(solver, model, vars);
-//                    } else if (Result.empty().equals(hasSolution)) {
-//                        //reportTimeout();
-//                    } else if (Result.of(true).equals(hasSolution)) {
-//                        SortedIntegerList.resetConflicts(model, solver.getInternalSolution());
-//                        solver.shuffleOrder(random);
-//
-//                        final int halfLength = (end - start) / 2;
-//                        if (halfLength > 0) {
-//                            split(solver, model, start + halfLength, end);
-//                            split(solver, model, start, start + halfLength);
-//                        }
-//                    }
-//                    solver.getSolverFormula().pop();
-//                } catch (final SolverContradictionException e) {
-//                    foundVariables(solver, model, vars);
-//                }
-//                break;
-//        }
-//    }
-
-//    private void test(SAT4JSolutionSolver solver, int[] model, int i) {
-//        final int var = vars.get(i);
-//        solver.getAssignment().add(var);
-//        Result<Boolean> hasSolution = solver.hasSolution();
-//        if (Result.of(false).equals(hasSolution)) {
-//            solver.getAssignment().replaceLast(-var);
-//            model[Math.abs(var) - 1] = 0;
-//        } else if (Result.empty().equals(hasSolution)) {
-//            solver.getAssignment().remove();
-//            //reportTimeout();
-//        } else if (Result.of(true).equals(hasSolution)) {
-//            solver.getAssignment().remove();
-//            SortedIntegerList.resetConflicts(model, solver.getInternalSolution());
-//            solver.shuffleOrder(random);
-//        }
-//    }
-
     private void foundVariables(SAT4JSolutionSolver solver, int[] model, VecInt vars) {
         for (final IteratorInt iterator = vars.iterator(); iterator.hasNext(); ) {
             final int var = iterator.next();
@@ -167,7 +69,6 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         }
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public Result<BooleanAssignment> analyze(SAT4JSolutionSolver solver, Random random, IMonitor monitor) {
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive());

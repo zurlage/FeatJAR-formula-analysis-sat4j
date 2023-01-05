@@ -22,6 +22,8 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.*;
+import de.featjar.base.data.Problem;
+import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssumedAssignmentDependency;
 import de.featjar.formula.analysis.IAssumedClauseListDependency;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -97,6 +99,12 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         solver.getAssignment().addAll(assumedAssignment);
         solver.setTimeout(timeout);
         return solver;
+    }
+
+    protected Result<T> partialResult(Result<?> solverResult, T partialResult, String timeoutExplanation) {
+        if (solverResult.isEmpty())
+            return solverResult.merge(Result.of(partialResult, new Problem(timeoutExplanation, Problem.Severity.WARNING)));
+        return solverResult.merge(Result.of(partialResult));
     }
 
     static abstract class Solution<T> extends ASAT4JAnalysis<T> {

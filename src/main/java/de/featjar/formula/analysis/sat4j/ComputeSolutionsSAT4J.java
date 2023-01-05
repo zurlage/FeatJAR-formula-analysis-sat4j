@@ -21,6 +21,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.IComputation;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.base.task.IMonitor;
 import de.featjar.base.tree.structure.ITree;
@@ -42,6 +43,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
     @Override
     public Result<BooleanSolutionList> computeResult(List<?> results, IMonitor monitor) {
         SAT4JSolver solver = initializeSolver(results);
+        solver.setGlobalTimeout(true);
         BooleanSolutionList solutionList = new BooleanSolutionList();
         Result<Boolean> hasSolution = solver.hasSolution();
         while (hasSolution.equals(Result.of(true))) {
@@ -50,8 +52,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
             solver.getClauseList().add(solution.toClause().negate());
             hasSolution = solver.hasSolution();
         }
-        // TODO: if timeout is reached, return subset with a warning
-        return hasSolution.map(_hasSolution -> solutionList);
+        return partialResult(hasSolution, solutionList, "result is a subset");
     }
 
     @Override

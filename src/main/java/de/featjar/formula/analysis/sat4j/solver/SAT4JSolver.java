@@ -21,6 +21,7 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -146,9 +147,9 @@ public abstract class SAT4JSolver {
                 return Result.of(false);
             }
         } catch (final TimeoutException e) {
-            FeatJAR.log().debug("timeout occurred");
+            FeatJAR.log().debug("solver timeout occurred");
             solutionHistory.setLastSolution(null);
-            return Result.empty();
+            return Result.empty(new Problem("solver timeout occurred", Problem.Severity.WARNING));
         }
     }
 

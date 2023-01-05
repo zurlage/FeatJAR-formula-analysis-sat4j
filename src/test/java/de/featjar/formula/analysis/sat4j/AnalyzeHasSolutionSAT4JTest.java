@@ -5,8 +5,8 @@ import de.featjar.base.computation.ComputePresence;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentationOfFormula;
 import de.featjar.formula.structure.formula.IFormula;
-import de.featjar.formula.transformer.ComputeCNFFormula;
-import de.featjar.formula.transformer.ComputeNNFFormula;
+import de.featjar.formula.transformation.ComputeCNFFormula;
+import de.featjar.formula.transformation.ComputeNNFFormula;
 import org.junit.jupiter.api.Test;
 
 import static de.featjar.base.computation.Computations.async;
