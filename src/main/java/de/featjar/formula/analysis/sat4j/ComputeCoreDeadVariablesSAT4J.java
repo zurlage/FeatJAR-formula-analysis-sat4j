@@ -20,11 +20,8 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.IRandomDependency;
+import de.featjar.base.computation.*;
 import de.featjar.base.data.Result;
-import de.featjar.base.computation.Progress;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -34,7 +31,6 @@ import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.IteratorInt;
 
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -57,8 +53,8 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @Override
-    public Result<BooleanAssignment> computeResult(List<?> results, Progress progress) {
-        return analyze(initializeSolver(results), RANDOM.get(results), progress);
+    public Result<BooleanAssignment> compute(DependencyList dependencyList, Progress progress) {
+        return analyze(initializeSolver(dependencyList), dependencyList.get(RANDOM), progress);
     }
 
     private void foundVariables(SAT4JSolutionSolver solver, int[] model, VecInt vars) {

@@ -81,11 +81,11 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
     abstract protected SAT4JSolver newSolver(BooleanClauseList clauseList);
 
     @SuppressWarnings("unchecked")
-    public <U extends SAT4JSolver> U initializeSolver(List<?> results) {
-        BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(results);
-        BooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(results);
-        BooleanClauseList assumedClauseList = ASSUMED_CLAUSE_LIST.get(results);
-        Long timeout = TIMEOUT.get(results);
+    public <U extends SAT4JSolver> U initializeSolver(DependencyList dependencyList) {
+        BooleanClauseList clauseList = dependencyList.get(BOOLEAN_CLAUSE_LIST);
+        BooleanAssignment assumedAssignment = dependencyList.get(ASSUMED_ASSIGNMENT);
+        BooleanClauseList assumedClauseList = dependencyList.get(ASSUMED_CLAUSE_LIST);
+        Long timeout = dependencyList.get(TIMEOUT);
         FeatJAR.log().debug("initializing SAT4J");
 //                    Feat.log().debug(clauseList.toValue().get());
 //                    Feat.log().debug("assuming " + assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
