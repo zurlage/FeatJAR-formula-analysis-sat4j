@@ -41,7 +41,6 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
     @Override
     public Result<BooleanSolutionList> compute(DependencyList dependencyList, Progress progress) {
         SAT4JSolver solver = initializeSolver(dependencyList);
-        solver.setGlobalTimeout(true);
         BooleanSolutionList solutionList = new BooleanSolutionList();
         Result<Boolean> hasSolution = solver.hasSolution();
         while (hasSolution.equals(Result.of(true))) {

@@ -98,6 +98,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         solver.getClauseList().addAll(assumedClauseList);
         solver.getAssignment().addAll(assumedAssignment);
         solver.setTimeout(timeout);
+        solver.setGlobalTimeout(true);
         return solver;
     }
 

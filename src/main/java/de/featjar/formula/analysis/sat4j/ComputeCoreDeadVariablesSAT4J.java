@@ -42,9 +42,10 @@ import java.util.Random;
 public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     implements IRandomDependency {
     protected final static Dependency<Random> RANDOM = newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
+    protected final static Dependency<BooleanAssignment> VARIABLES_OF_INTEREST = newOptionalDependency(new BooleanAssignment());
 
     public ComputeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList, RANDOM);
+        super(booleanClauseList, RANDOM, VARIABLES_OF_INTEREST);
     }
 
     @Override
@@ -52,20 +53,15 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         return RANDOM;
     }
 
+    public Dependency<BooleanAssignment> getVariablesOfInterest() {
+        return VARIABLES_OF_INTEREST;
+    }
+
     @Override
     public Result<BooleanAssignment> compute(DependencyList dependencyList, Progress progress) {
-        return analyze(initializeSolver(dependencyList), dependencyList.get(RANDOM), progress);
-    }
-
-    private void foundVariables(SAT4JSolutionSolver solver, int[] model, VecInt vars) {
-        for (final IteratorInt iterator = vars.iterator(); iterator.hasNext(); ) {
-            final int var = iterator.next();
-            solver.getAssignment().add(-var);
-            model[Math.abs(var) - 1] = 0;
-        }
-    }
-
-    public Result<BooleanAssignment> analyze(SAT4JSolutionSolver solver, Random random, Progress progress) {
+        SAT4JSolutionSolver solver = initializeSolver(dependencyList);
+        Random random = dependencyList.get(RANDOM);
+        BooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();
@@ -80,17 +76,16 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                 return Result.empty();
             final int[] model2 = solution.get().getIntegers();
 
-            // TODO: what does this do??
-//            if (variables != null) {
-//                final int[] model3 = new int[model1.length];
-//                for (int i = 0; i < variables.getIntegers().length; i++) {
-//                    final int index = variables.getIntegers()[i] - 1;
-//                    if (index >= 0) {
-//                        model3[index] = model1[index];
-//                    }
-//                }
-//                model1 = model3;
-//            }
+            if (!variablesOfInterest.isEmpty()) {
+                final int[] model3 = new int[model1.length];
+                for (int i = 0; i < variablesOfInterest.getIntegers().length; i++) {
+                    final int index = variablesOfInterest.getIntegers()[i] - 1;
+                    if (index >= 0) {
+                        model3[index] = model1[index];
+                    }
+                }
+                model1 = model3;
+            }
 
             for (int i = 0; i < initialAssignmentLength; i++) {
                 model1[Math.abs(solver.getAssignment().peek(i)) - 1] = 0;
@@ -107,7 +102,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                         solver.getAssignment().replaceLast(varX);
                     } else if (Result.empty().equals(hasSolution)) {
                         solver.getAssignment().remove();
-                        //reportTimeout();
+                        //reportTimeout(); todo
                     } else if (Result.of(true).equals(hasSolution)) {
                         solver.getAssignment().remove();
                         model1 = BooleanSolution.resetConflicts(model1, solver.getSolutionHistory().getLastSolution().get().getIntegers());
