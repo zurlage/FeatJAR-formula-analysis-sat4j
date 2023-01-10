@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2022 Sebastian Krieter
+ * Copyright (C) 2023 Sebastian Krieter
  *
- * This file is part of formula-analysis-sat4j.
+ * This file is part of FeatJAR-formula-analysis-sat4j.
  *
  * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
