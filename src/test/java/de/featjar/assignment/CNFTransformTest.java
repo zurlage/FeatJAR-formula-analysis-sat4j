@@ -22,14 +22,13 @@ package de.featjar.assignment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import de.featjar.formula.analysis.sat4j.todo.AnalyzeAtomicSetsSAT4J;
 import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.IExpression;
 import de.featjar.base.io.IO;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 public class CNFTransformTest {

@@ -163,7 +163,7 @@ public class TWiseConfigurationUtil {
             }
             coreDead = new SortedIntegerList(Arrays.copyOf(coreDeadArray, index));
             if (!coreDead.isEmpty()) {
-                localSolver.getAssignment().pushAll(coreDead.getIntegers());
+                localSolver.getAssignment().addAll(coreDead.getIntegers());
             }
         }
         return coreDead;
@@ -202,7 +202,7 @@ public class TWiseConfigurationUtil {
             }
             coreDead = new SortedIntegerList(Arrays.copyOf(coreDeadArray, coreDeadIndex));
             if (!coreDead.isEmpty()) {
-                localSolver.getAssignment().pushAll(coreDead.getIntegers());
+                localSolver.getAssignment().addAll(coreDead.getIntegers());
             }
         } else {
             coreDead = new SortedIntegerList();
@@ -322,7 +322,7 @@ public class TWiseConfigurationUtil {
             //			solver.setSelectionStrategy(SStrategy.random(random));
             final int orgAssignmentLength = solver.getAssignment().size();
             try {
-                solver.getAssignment().pushAll(literals.getIntegers());
+                solver.getAssignment().addAll(literals.getIntegers());
                 final SATSolver.Result<Boolean> hasSolution = solver.hasSolution();
                 switch (hasSolution) {
                     case TRUE:

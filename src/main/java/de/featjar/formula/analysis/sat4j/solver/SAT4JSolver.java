@@ -46,6 +46,7 @@ public abstract class SAT4JSolver {
     private Long timeout;
     protected boolean globalTimeout;
 
+    protected boolean isTimeoutOccurred;
     protected boolean trivialContradictionFound;
 
     public SAT4JSolver(BooleanClauseList clauseList) {
@@ -113,6 +114,26 @@ public abstract class SAT4JSolver {
         this.globalTimeout = globalTimeout;
     }
 
+    public boolean isTimeoutOccurred() {
+        return isTimeoutOccurred;
+    }
+
+    public <T> Result<T> createResult(T result) {
+        return createResult(Result.of(result));
+    }
+
+    public <T> Result<T> createResult(Result<T> result) {
+        return createResult(result, null);
+    }
+
+    public <T> Result<T> createResult(T result, String timeoutExplanation) {
+        return createResult(Result.of(result), timeoutExplanation);
+    }
+
+    public <T> Result<T> createResult(Result<T> result, String timeoutExplanation) {
+        return isTimeoutOccurred() ? Result.empty(getTimeoutProblem(timeoutExplanation)).merge(result) : result;
+    }
+
     public boolean isTrivialContradictionFound() {
         return trivialContradictionFound;
     }
@@ -149,8 +170,13 @@ public abstract class SAT4JSolver {
         } catch (final TimeoutException e) {
             FeatJAR.log().debug("solver timeout occurred");
             solutionHistory.setLastSolution(null);
-            return Result.empty(new Problem("solver timeout occurred", Problem.Severity.WARNING));
+            isTimeoutOccurred = true;
+            return Result.empty(getTimeoutProblem(null));
         }
+    }
+
+    protected Problem getTimeoutProblem(String timeoutExplanation) {
+        return new Problem("solver timeout occurred" + (timeoutExplanation != null ? ", " + timeoutExplanation : ""), Problem.Severity.WARNING);
     }
 
     public Result<Boolean> hasSolution() {
@@ -163,5 +189,9 @@ public abstract class SAT4JSolver {
      */
     public Result<Boolean> hasSolution(BooleanAssignment assignment) {
         return hasSolution(new VecInt(assignment.getIntegers()));
+    }
+
+    public int[] getInternalSolution() { // todo: refactor
+        return getSolutionHistory().getLastSolution().get().getIntegers();
     }
 }

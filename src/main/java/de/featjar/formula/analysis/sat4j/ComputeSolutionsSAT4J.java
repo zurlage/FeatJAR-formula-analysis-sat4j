@@ -49,7 +49,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
             solver.getClauseList().add(solution.toClause().negate());
             hasSolution = solver.hasSolution();
         }
-        return partialResult(hasSolution, solutionList, "result is a subset");
+        return solver.createResult(solutionList, "result is a subset");
     }
 
     @Override

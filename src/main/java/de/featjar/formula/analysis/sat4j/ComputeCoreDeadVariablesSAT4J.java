@@ -28,8 +28,6 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
-import org.sat4j.core.VecInt;
-import org.sat4j.specs.IteratorInt;
 
 import java.util.Random;
 
@@ -102,17 +100,16 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                         solver.getAssignment().replaceLast(varX);
                     } else if (Result.empty().equals(hasSolution)) {
                         solver.getAssignment().remove();
-                        //reportTimeout(); todo
                     } else if (Result.of(true).equals(hasSolution)) {
                         solver.getAssignment().remove();
-                        model1 = BooleanSolution.resetConflicts(model1, solver.getSolutionHistory().getLastSolution().get().getIntegers());
+                        model1 = BooleanSolution.resetConflicts(model1, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                     }
                 }
             }
         }
 
-        return Result.of(solver.getAssignment().toAssignment());
+        return solver.createResult(solver.getAssignment().toAssignment());
     }
 
     @Override

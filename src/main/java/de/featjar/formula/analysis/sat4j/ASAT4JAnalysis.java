@@ -102,13 +102,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         return solver;
     }
 
-    protected Result<T> partialResult(Result<?> solverResult, T partialResult, String timeoutExplanation) {
-        if (solverResult.isEmpty())
-            return solverResult.merge(Result.of(partialResult, new Problem(timeoutExplanation, Problem.Severity.WARNING)));
-        return solverResult.merge(Result.of(partialResult));
-    }
-
-    static abstract class Solution<T> extends ASAT4JAnalysis<T> {
+    public static abstract class Solution<T> extends ASAT4JAnalysis<T> {
         public Solution(IComputation<BooleanClauseList> booleanClauseList, Dependency<?>... dependencies) {
             super(booleanClauseList, dependencies);
         }
