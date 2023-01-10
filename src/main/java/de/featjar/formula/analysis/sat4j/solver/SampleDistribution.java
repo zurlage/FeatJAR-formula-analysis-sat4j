@@ -21,7 +21,6 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.formula.analysis.bool.BooleanAssignment;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

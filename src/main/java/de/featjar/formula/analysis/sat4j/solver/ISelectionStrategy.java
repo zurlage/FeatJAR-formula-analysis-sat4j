@@ -126,22 +126,22 @@ public interface ISelectionStrategy {
         }
     }
 
-//    class MIGRandomStrategy implements SStrategy {
-//        private final MIGDistribution dist;
-//
-//        public MIGRandomStrategy(MIGDistribution dist) {
-//            this.dist = dist;
-//        }
-//
-//        @Override
-//        public Strategy strategy() {
-//            return Strategy.MIGRandom;
-//        }
-//
-//        public MIGDistribution getDist() {
-//            return dist;
-//        }
-//    }
+    //    class MIGRandomStrategy implements SStrategy {
+    //        private final MIGDistribution dist;
+    //
+    //        public MIGRandomStrategy(MIGDistribution dist) {
+    //            this.dist = dist;
+    //        }
+    //
+    //        @Override
+    //        public Strategy strategy() {
+    //            return Strategy.MIGRandom;
+    //        }
+    //
+    //        public MIGDistribution getDist() {
+    //            return dist;
+    //        }
+    //    }
 
     static OriginalStrategy original() {
         return new OriginalStrategy();
@@ -175,7 +175,7 @@ public interface ISelectionStrategy {
         return new UniformRandomStrategy(dist);
     }
 
-//    static MIGRandomStrategy mig(MIGDistribution dist) {
-//        return new MIGRandomStrategy(dist);
-//    }
+    //    static MIGRandomStrategy mig(MIGDistribution dist) {
+    //        return new MIGRandomStrategy(dist);
+    //    }
 }

@@ -456,7 +456,7 @@ public class TWiseConfigurationUtil {
                     }
                 }
                 if (orgAssignmentSize < localSolver.getAssignment().size()) {
-                    if (localSolver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
+                    if (localSolver.hasSolution() == SATSolver.Result.TRUE) {
                         final int[] solution = localSolver.getInternalSolution();
                         addSolverSolution(Arrays.copyOf(solution, solution.length));
                         localSolver.shuffleOrder(random);

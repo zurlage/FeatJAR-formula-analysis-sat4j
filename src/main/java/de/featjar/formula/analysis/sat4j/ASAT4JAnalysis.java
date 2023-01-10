@@ -22,8 +22,6 @@ package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.*;
-import de.featjar.base.data.Problem;
-import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssumedAssignmentDependency;
 import de.featjar.formula.analysis.IAssumedClauseListDependency;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -31,21 +29,20 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.featjar.base.computation.Computations.async;
-
-public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
-        IAnalysis<BooleanClauseList, T>,
-        IAssumedAssignmentDependency<BooleanAssignment>,
-        IAssumedClauseListDependency<BooleanClauseList>,
-        ITimeoutDependency {
-    protected final static Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST = newRequiredDependency();
-    protected final static Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT = newOptionalDependency(new BooleanAssignment());
-    protected final static Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST = newOptionalDependency(new BooleanClauseList());
-    protected final static Dependency<Long> TIMEOUT = newOptionalDependency(ITimeoutDependency.DEFAULT_TIMEOUT);
+public abstract class ASAT4JAnalysis<T> extends AComputation<T>
+        implements IAnalysis<BooleanClauseList, T>,
+                IAssumedAssignmentDependency<BooleanAssignment>,
+                IAssumedClauseListDependency<BooleanClauseList>,
+                ITimeoutDependency {
+    protected static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST = newRequiredDependency();
+    protected static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
+            newOptionalDependency(new BooleanAssignment());
+    protected static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
+            newOptionalDependency(new BooleanClauseList());
+    protected static final Dependency<Long> TIMEOUT = newOptionalDependency(ITimeoutDependency.DEFAULT_TIMEOUT);
 
     public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Dependency<?>... dependencies) {
         List<Dependency<?>> dependenciesList = new ArrayList<>();
@@ -78,7 +75,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         return ASSUMED_CLAUSE_LIST;
     }
 
-    abstract protected SAT4JSolver newSolver(BooleanClauseList clauseList);
+    protected abstract SAT4JSolver newSolver(BooleanClauseList clauseList);
 
     @SuppressWarnings("unchecked")
     public <U extends SAT4JSolver> U initializeSolver(DependencyList dependencyList) {
@@ -87,10 +84,11 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         BooleanClauseList assumedClauseList = dependencyList.get(ASSUMED_CLAUSE_LIST);
         Long timeout = dependencyList.get(TIMEOUT);
         FeatJAR.log().debug("initializing SAT4J");
-//                    Feat.log().debug(clauseList.toValue().get());
-//                    Feat.log().debug("assuming " + assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
-//                    Feat.log().debug("assuming " + assumedClauseList.toValue().get());
-//                    Feat.log().debug(clauseList.getVariableMap());
+        //                    Feat.log().debug(clauseList.toValue().get());
+        //                    Feat.log().debug("assuming " +
+        // assumedAssignment.toValue(clauseList.getVariableMap()).getAndLogProblems());
+        //                    Feat.log().debug("assuming " + assumedClauseList.toValue().get());
+        //                    Feat.log().debug(clauseList.getVariableMap());
         FeatJAR.log().debug(clauseList);
         FeatJAR.log().debug("assuming " + assumedAssignment);
         FeatJAR.log().debug("assuming " + assumedClauseList);
@@ -102,7 +100,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         return solver;
     }
 
-    public static abstract class Solution<T> extends ASAT4JAnalysis<T> {
+    public abstract static class Solution<T> extends ASAT4JAnalysis<T> {
         public Solution(IComputation<BooleanClauseList> booleanClauseList, Dependency<?>... dependencies) {
             super(booleanClauseList, dependencies);
         }
@@ -113,7 +111,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> implements
         }
     }
 
-    static abstract class Explanation<T> extends ASAT4JAnalysis<T> {
+    abstract static class Explanation<T> extends ASAT4JAnalysis<T> {
         public Explanation(IComputation<BooleanClauseList> booleanClauseList) {
             super(booleanClauseList);
         }

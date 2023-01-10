@@ -29,7 +29,6 @@ public class ReverseFixedLiteralSelectionStrategy extends FixedLiteralSelectionS
         super(model);
     }
 
-
     @Override
     protected void reset(int nlength) {
         for (int i = 1; i < nlength; i++) {

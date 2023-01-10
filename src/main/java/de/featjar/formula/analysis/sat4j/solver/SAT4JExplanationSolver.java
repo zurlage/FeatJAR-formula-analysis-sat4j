@@ -21,14 +21,12 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
-
+import de.featjar.formula.analysis.bool.BooleanClause;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import de.featjar.formula.analysis.bool.BooleanClause;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
@@ -77,6 +75,7 @@ public class SAT4JExplanationSolver extends SAT4JSolver {
     }
 
     public Result<List<List<BooleanClause>>> getAllMinimalUnsatisfiableSubsets() {
-        return Result.of(Collections.singletonList(getMinimalUnsatisfiableSubset().get()));
+        return Result.of(
+                Collections.singletonList(getMinimalUnsatisfiableSubset().get()));
     }
 }

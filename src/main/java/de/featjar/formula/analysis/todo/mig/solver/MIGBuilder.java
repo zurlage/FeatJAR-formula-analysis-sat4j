@@ -244,7 +244,7 @@ public abstract class MIGBuilder implements IMonitorableFunction<CNF, ModalImpli
     }
 
     protected final boolean isRedundant(SAT4JSolutionSolver solver, SortedIntegerList curSortedIntegerList) {
-        return solver.hasSolution(curSortedIntegerList.negate()) == SATSolver.Result<Boolean>.FALSE;
+        return solver.hasSolution(curSortedIntegerList.negate()) == SATSolver.Result.FALSE;
     }
 
     protected void bfsStrong(IMonitor monitor) {

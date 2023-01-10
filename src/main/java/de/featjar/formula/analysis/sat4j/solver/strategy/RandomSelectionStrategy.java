@@ -33,7 +33,6 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
  */
 public class RandomSelectionStrategy implements IPhaseSelectionStrategy {
 
-
     public final Random RAND = new Random(123456789);
 
     @Override

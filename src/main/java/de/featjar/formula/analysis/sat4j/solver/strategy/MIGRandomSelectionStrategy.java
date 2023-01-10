@@ -35,7 +35,6 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
  */
 public class MIGRandomSelectionStrategy implements IPhaseSelectionStrategy {
 
-
     private final SampleDistribution dist;
 
     public MIGRandomSelectionStrategy(SampleDistribution sampleDistribution) {

@@ -35,7 +35,6 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
  */
 public class UniformRandomSelectionStrategy implements IPhaseSelectionStrategy {
 
-
     private final ALiteralDistribution dist;
 
     public UniformRandomSelectionStrategy(ALiteralDistribution dist) {

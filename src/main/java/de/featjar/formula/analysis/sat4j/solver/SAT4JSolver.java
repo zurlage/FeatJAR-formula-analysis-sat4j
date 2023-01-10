@@ -31,7 +31,6 @@ import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
 
-
 /**
  * Base class for solvers using Sat4J.
  *
@@ -100,10 +99,8 @@ public abstract class SAT4JSolver {
     public void setTimeout(Long timeout) {
         FeatJAR.log().debug(timeout != null ? "setting timeout to " + timeout + "ms" : "setting no timeout");
         this.timeout = timeout;
-        if (timeout != null && timeout >= 0)
-            internalSolver.setTimeoutMs(timeout);
-        else
-            internalSolver.expireTimeout();
+        if (timeout != null && timeout >= 0) internalSolver.setTimeoutMs(timeout);
+        else internalSolver.expireTimeout();
     }
 
     public boolean isGlobalTimeout() {
@@ -131,7 +128,9 @@ public abstract class SAT4JSolver {
     }
 
     public <T> Result<T> createResult(Result<T> result, String timeoutExplanation) {
-        return isTimeoutOccurred() ? Result.empty(getTimeoutProblem(timeoutExplanation)).merge(result) : result;
+        return isTimeoutOccurred()
+                ? Result.empty(getTimeoutProblem(timeoutExplanation)).merge(result)
+                : result;
     }
 
     public boolean isTrivialContradictionFound() {
@@ -176,7 +175,9 @@ public abstract class SAT4JSolver {
     }
 
     protected Problem getTimeoutProblem(String timeoutExplanation) {
-        return new Problem("solver timeout occurred" + (timeoutExplanation != null ? ", " + timeoutExplanation : ""), Problem.Severity.WARNING);
+        return new Problem(
+                "solver timeout occurred" + (timeoutExplanation != null ? ", " + timeoutExplanation : ""),
+                Problem.Severity.WARNING);
     }
 
     public Result<Boolean> hasSolution() {

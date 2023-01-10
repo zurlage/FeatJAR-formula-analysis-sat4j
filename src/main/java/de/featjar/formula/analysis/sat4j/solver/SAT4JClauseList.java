@@ -24,11 +24,10 @@ import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
+import java.util.*;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.IConstr;
-
-import java.util.*;
 
 /**
  * ...
@@ -69,22 +68,20 @@ public class SAT4JClauseList extends BooleanClauseList {
 
     @Override
     public void add(int index, BooleanClause clause) {
-        if (index != assignments.size())
-            throw new UnsupportedOperationException();
+        if (index != assignments.size()) throw new UnsupportedOperationException();
         super.add(index, clause);
     }
 
     @Override
     public Result<BooleanClause> remove(int index) {
-        if (index != assignments.size())
-            throw new UnsupportedOperationException();
+        if (index != assignments.size()) throw new UnsupportedOperationException();
         return super.remove(index);
     }
 
     protected void addConstraint(BooleanClause clause) {
         try {
-            addedConstraints.add(solver.internalSolver.addClause(
-                    new VecInt(Arrays.copyOf(clause.getIntegers(), clause.size()))));
+            addedConstraints.add(
+                    solver.internalSolver.addClause(new VecInt(Arrays.copyOf(clause.getIntegers(), clause.size()))));
         } catch (ContradictionException e) {
             solver.trivialContradictionFound = true;
         }
@@ -134,8 +131,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     @Override
     public void clear() {
         solver.getSolutionHistory().clear();
-        while (addedConstraints.size() > 0)
-            remove();
+        while (addedConstraints.size() > 0) remove();
         super.clear();
     }
 }

@@ -5,16 +5,16 @@ import de.featjar.formula.analysis.*;
 public class SAT4J implements ISolver<Integer> {
     @Override
     public ISolutionAnalysis<?, ?, ?> getSolutionAnalysis() {
-        return null; //new SAT4JGetSolutionAnalysis();
+        return null; // new SAT4JGetSolutionAnalysis();
     }
 
     @Override
     public ISolutionCountAnalysis<?, ?> countSolutionsAnalysis() {
-        return null; //new SAT4JCountSolutionsAnalysis();
+        return null; // new SAT4JCountSolutionsAnalysis();
     }
 
     @Override
     public ISolutionsAnalysis<?, ?, ?> getSolutionsAnalysis() {
-        return null; //new SAT4JGetSolutionsAnalysis();
+        return null; // new SAT4JGetSolutionsAnalysis();
     }
 }

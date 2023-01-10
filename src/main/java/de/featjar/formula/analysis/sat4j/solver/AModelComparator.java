@@ -22,21 +22,22 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 public abstract class AModelComparator {
 
-//    public static boolean eq(CNF cnf1, final CNF cnf2) throws TimeoutException {
-//        return compare(cnf2, cnf1) && compare(cnf1, cnf2);
-//    }
-//
-//    public static boolean compare(CNF cnf1, final CNF cnf2) throws TimeoutException {
-//        final SAT4JSolutionSolver solver = new SAT4JSolutionSolver(cnf1);
-//        for (final BooleanClause sortedIntegerList : cnf2.getClauseList().getAll()) {
-//            final Result<Boolean> hasSolution = solver.hasSolution(new BooleanSolution(sortedIntegerList.negate().getIntegers())); // TODO: add .toSolution and friends
-//            if (hasSolution.isEmpty())
-//                throw new TimeoutException();
-//            if (hasSolution.equals(Result.of(true)))
-//                return false;
-//            else
-//                break;
-//        }
-//        return true;
-//    }
+    //    public static boolean eq(CNF cnf1, final CNF cnf2) throws TimeoutException {
+    //        return compare(cnf2, cnf1) && compare(cnf1, cnf2);
+    //    }
+    //
+    //    public static boolean compare(CNF cnf1, final CNF cnf2) throws TimeoutException {
+    //        final SAT4JSolutionSolver solver = new SAT4JSolutionSolver(cnf1);
+    //        for (final BooleanClause sortedIntegerList : cnf2.getClauseList().getAll()) {
+    //            final Result<Boolean> hasSolution = solver.hasSolution(new
+    // BooleanSolution(sortedIntegerList.negate().getIntegers())); // TODO: add .toSolution and friends
+    //            if (hasSolution.isEmpty())
+    //                throw new TimeoutException();
+    //            if (hasSolution.equals(Result.of(true)))
+    //                return false;
+    //            else
+    //                break;
+    //        }
+    //        return true;
+    //    }
 }

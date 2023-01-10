@@ -29,9 +29,7 @@ import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap;
 import de.featjar.formula.analysis.sat4j.solver.strategy.FixedOrderHeap2;
 import de.featjar.formula.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
-
 import java.util.Random;
-
 import org.sat4j.minisat.SolverFactory;
 import org.sat4j.minisat.core.IOrder;
 import org.sat4j.minisat.core.Solver;
@@ -117,10 +115,11 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
                                 new FixedLiteralSelectionStrategy(((InverseFixedStrategy) strategy).getModel()), //
                                 order));
                 break;
-//            case MIGRandom:
-//                setSelectionStrategy(new FixedOrderHeap2(
-//                        new UniformRandomSelectionStrategy(((MIGRandomStrategy) strategy).getDist()), order));
-//                break;
+                //            case MIGRandom:
+                //                setSelectionStrategy(new FixedOrderHeap2(
+                //                        new UniformRandomSelectionStrategy(((MIGRandomStrategy) strategy).getDist()),
+                // order));
+                //                break;
             case Negative:
                 setSelectionStrategy(new FixedOrderHeap(new NegativeLiteralSelectionStrategy(), order));
                 break;

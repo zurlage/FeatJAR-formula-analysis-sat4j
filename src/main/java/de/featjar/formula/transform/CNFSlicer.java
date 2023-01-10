@@ -365,7 +365,7 @@ public class CNFSlicer implements IMonitorableFunction<CNF, CNF> {
         } catch (final SolverContradictionException e) {
             return false;
         }
-        return newSolver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
+        return newSolver.hasSolution() == SATSolver.Result.TRUE;
     }
 
     protected void release() {

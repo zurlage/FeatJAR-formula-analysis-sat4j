@@ -30,7 +30,6 @@ import org.sat4j.specs.ISolver;
  */
 public class FixedOrderHeap2 extends FixedOrderHeap {
 
-
     private final UniformRandomSelectionStrategy selectionStrategy;
 
     public FixedOrderHeap2(UniformRandomSelectionStrategy strategy, int[] order) {

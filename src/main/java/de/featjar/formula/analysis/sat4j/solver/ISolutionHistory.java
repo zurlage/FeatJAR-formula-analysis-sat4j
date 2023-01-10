@@ -2,14 +2,17 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-
 import java.util.*;
 
 public interface ISolutionHistory extends Iterable<BooleanSolution> {
     List<BooleanSolution> getSolutionHistory();
+
     Result<BooleanSolution> getLastSolution();
+
     void setLastSolution(BooleanSolution solution);
+
     void addNewSolution(BooleanSolution solution);
+
     void clear();
 
     @Override
@@ -51,8 +54,7 @@ public interface ISolutionHistory extends Iterable<BooleanSolution> {
         protected final LinkedList<BooleanSolution> solutionHistory = new LinkedList<>();
 
         public RememberUpTo(int limit) {
-            if (limit < 1)
-                throw new IllegalArgumentException();
+            if (limit < 1) throw new IllegalArgumentException();
             this.limit = limit;
         }
 

@@ -26,9 +26,8 @@ import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
-
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import java.util.Random;
 
 /**
@@ -36,11 +35,12 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-
 public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
-    implements IRandomDependency {
-    protected final static Dependency<Random> RANDOM = newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
-    protected final static Dependency<BooleanAssignment> VARIABLES_OF_INTEREST = newOptionalDependency(new BooleanAssignment());
+        implements IRandomDependency {
+    protected static final Dependency<Random> RANDOM =
+            newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
+    protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
+            newOptionalDependency(new BooleanAssignment());
 
     public ComputeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList, RANDOM, VARIABLES_OF_INTEREST);
@@ -63,15 +63,13 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();
-        if (solution.isEmpty())
-            return Result.empty();
+        if (solution.isEmpty()) return Result.empty();
         int[] model1 = solution.get().getIntegers();
 
         if (model1 != null) {
             solver.setSelectionStrategy(ISelectionStrategy.inverse(model1));
             solution = solver.findSolution();
-            if (solution.isEmpty())
-                return Result.empty();
+            if (solution.isEmpty()) return Result.empty();
             final int[] model2 = solution.get().getIntegers();
 
             if (!variablesOfInterest.isEmpty()) {

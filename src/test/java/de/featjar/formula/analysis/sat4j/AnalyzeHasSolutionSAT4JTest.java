@@ -1,5 +1,9 @@
 package de.featjar.formula.analysis.sat4j;
 
+import static de.featjar.base.computation.Computations.async;
+import static de.featjar.formula.structure.Expressions.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.ComputePresence;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -8,11 +12,6 @@ import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformation.ComputeCNFFormula;
 import de.featjar.formula.transformation.ComputeNNFFormula;
 import org.junit.jupiter.api.Test;
-
-import static de.featjar.base.computation.Computations.async;
-import static de.featjar.base.computation.Computations.getKey;
-import static de.featjar.formula.structure.Expressions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class AnalyzeHasSolutionSAT4JTest {
     public boolean hasSolution(IFormula formula) {
@@ -27,7 +26,8 @@ public class AnalyzeHasSolutionSAT4JTest {
                 .get();
     }
 
-    //TODO: all tests below only work when the formula is wrapped in and(...) as an auxiliary root. fix this, it is a big potential bug source
+    // TODO: all tests below only work when the formula is wrapped in and(...) as an auxiliary root. fix this, it is a
+    // big potential bug source
     @Test
     void satisfiableFormulaInCNFHasSolution() {
         assertTrue(hasSolution(and(literal("x"), literal(false, "y"))));

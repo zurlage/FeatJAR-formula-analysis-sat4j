@@ -23,16 +23,13 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.computation.*;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.ISolutionHistory;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
-
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -40,8 +37,10 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList> implements IRandomDependency { // todo: here, a BooleanAssignmentList would be better
-    protected final static Dependency<Random> RANDOM = newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
+public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList>
+        implements IRandomDependency { // todo: here, a BooleanAssignmentList would be better
+    protected static final Dependency<Random> RANDOM =
+            newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
 
     public ComputeAtomicSetsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList, RANDOM);
@@ -128,7 +127,8 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
                             if (Result.of(false).equals(hasSolution)) {
                                 done[j] = 1;
                             } else if (Result.empty().equals(hasSolution)) {
-                                // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
+                                // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or
+                                // continue?
                             } else if (Result.of(true).equals(hasSolution)) {
                                 BooleanSolution.resetConflicts(xModel0, solver.getInternalSolution());
                                 solver.shuffleOrder(random);
@@ -164,7 +164,8 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
                                 } else if (Result.empty().equals(solution)) {
                                     done[j] = 0;
                                     solver.getAssignment().remove();
-                                    // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
+                                    // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout
+                                    // or continue?
                                 } else if (Result.of(true).equals(solution)) {
                                     done[j] = 0;
                                     BooleanSolution.resetConflicts(xModel0, solver.getInternalSolution());
@@ -177,7 +178,9 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
                         }
                     }
 
-                    result.add(new BooleanSolution(solver.getAssignment().toSolution().get(fixedSize, solver.getAssignment().size())));
+                    result.add(new BooleanSolution(solver.getAssignment()
+                            .toSolution()
+                            .get(fixedSize, solver.getAssignment().size())));
                     solver.getAssignment().clear(fixedSize);
                 }
             }

@@ -334,7 +334,7 @@ public class TWiseConfiguration extends SortedIntegerList {
                     final SAT4JSolutionSolver solver = util.getSolver();
                     final int orgAssignmentSize = setUpSolver(solver);
                     try {
-                        if (solver.hasSolution() == SATSolver.Result<Boolean>.TRUE) {
+                        if (solver.hasSolution() == SATSolver.Result.TRUE) {
                             System.arraycopy(solver.getInternalSolution(), 0, integers, 0, integers.length);
                         }
                     } finally {
@@ -380,7 +380,7 @@ public class TWiseConfiguration extends SortedIntegerList {
                                 s = solver.getInternalSolution();
                                 break;
                             default:
-                                throw new RuntimeException(Result<Boolean>.toString());
+                                throw new RuntimeException(Result.toString());
                         }
                     } finally {
                         solver.getAssignment().clear(orgAssignmentSize);
@@ -425,7 +425,7 @@ public class TWiseConfiguration extends SortedIntegerList {
         final int orgAssignmentSize = setUpSolver(solver);
         solver.setSelectionStrategy(ISelectionStrategy.original());
         try {
-            return solver.hasSolution() == SATSolver.Result<Boolean>.TRUE;
+            return solver.hasSolution() == SATSolver.Result.TRUE;
         } finally {
             solver.getAssignment().clear(orgAssignmentSize);
             solver.setSelectionStrategy(selectionStrategy);

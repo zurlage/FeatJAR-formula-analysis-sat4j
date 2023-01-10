@@ -24,11 +24,9 @@ import de.featjar.base.data.Maps;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
-
-import java.util.*;
-
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanSolution;
+import java.util.*;
 import org.sat4j.core.VecInt;
 
 /**
@@ -89,7 +87,6 @@ public class SAT4JAssignment implements IAssignment<Integer> {
     public void replaceLast(int var) {
         integers.pop().unsafePush(var);
     }
-
 
     public void set(int index, int var) {
         integers.set(index, var);
