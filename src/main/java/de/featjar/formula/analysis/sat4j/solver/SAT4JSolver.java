@@ -21,6 +21,7 @@
 package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.FeatJAR;
+import de.featjar.base.computation.ITimeoutDependency;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -30,6 +31,9 @@ import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
+
+import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Base class for solvers using Sat4J.
@@ -42,7 +46,7 @@ public abstract class SAT4JSolver {
     protected final SAT4JClauseList clauseList;
     protected final SAT4JAssignment assignment = new SAT4JAssignment();
     protected ISolutionHistory solutionHistory = new ISolutionHistory.RememberUpTo(1000);
-    private Long timeout;
+    protected Duration timeout = ITimeoutDependency.DEFAULT_TIMEOUT;
     protected boolean globalTimeout;
 
     protected boolean isTimeoutOccurred;
@@ -92,14 +96,16 @@ public abstract class SAT4JSolver {
         this.solutionHistory = solutionHistory;
     }
 
-    public Result<Long> getTimeout() {
+    public Result<Duration> getTimeout() {
         return Result.ofNullable(timeout);
     }
 
-    public void setTimeout(Long timeout) {
-        FeatJAR.log().debug(timeout != null ? "setting timeout to " + timeout + "ms" : "setting no timeout");
+    public void setTimeout(Duration timeout) {
+        Objects.requireNonNull(timeout);
+        FeatJAR.log().debug("setting timeout to " + timeout);
         this.timeout = timeout;
-        if (timeout != null && timeout >= 0) internalSolver.setTimeoutMs(timeout);
+        if (!timeout.isZero())
+            internalSolver.setTimeoutMs(timeout.toMillis());
         else internalSolver.expireTimeout();
     }
 

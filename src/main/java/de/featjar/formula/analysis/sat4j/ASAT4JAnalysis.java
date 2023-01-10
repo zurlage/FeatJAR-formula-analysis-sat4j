@@ -29,6 +29,8 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
+
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +44,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
             newOptionalDependency(new BooleanAssignment());
     protected static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
             newOptionalDependency(new BooleanClauseList());
-    protected static final Dependency<Long> TIMEOUT = newOptionalDependency(ITimeoutDependency.DEFAULT_TIMEOUT);
+    protected static final Dependency<Duration> TIMEOUT = newOptionalDependency(ITimeoutDependency.DEFAULT_TIMEOUT);
 
     public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Dependency<?>... dependencies) {
         List<Dependency<?>> dependenciesList = new ArrayList<>();
@@ -61,7 +63,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     }
 
     @Override
-    public Dependency<Long> getTimeoutDependency() {
+    public Dependency<Duration> getTimeoutDependency() {
         return TIMEOUT;
     }
 
@@ -82,7 +84,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
         BooleanClauseList clauseList = dependencyList.get(BOOLEAN_CLAUSE_LIST);
         BooleanAssignment assumedAssignment = dependencyList.get(ASSUMED_ASSIGNMENT);
         BooleanClauseList assumedClauseList = dependencyList.get(ASSUMED_CLAUSE_LIST);
-        Long timeout = dependencyList.get(TIMEOUT);
+        Duration timeout = dependencyList.get(TIMEOUT);
         FeatJAR.log().debug("initializing SAT4J");
         //                    Feat.log().debug(clauseList.toValue().get());
         //                    Feat.log().debug("assuming " +
