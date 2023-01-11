@@ -195,10 +195,10 @@ public abstract class SAT4JSolver {
      * assignment variable of the solver.
      */
     public Result<Boolean> hasSolution(BooleanAssignment assignment) {
-        return hasSolution(new VecInt(assignment.getIntegers()));
+        return hasSolution(new VecInt(assignment.get()));
     }
 
     public int[] getInternalSolution() { // todo: refactor
-        return getSolutionHistory().getLastSolution().get().getIntegers();
+        return getSolutionHistory().getLastSolution().get().get();
     }
 }

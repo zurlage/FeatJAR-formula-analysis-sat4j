@@ -43,7 +43,7 @@ public class SAT4JAssignment implements IAssignment<Integer> {
     }
 
     public SAT4JAssignment(BooleanAssignment assignment) {
-        this.integers = new VecInt(assignment.getIntegers());
+        this.integers = new VecInt(assignment.get());
     }
 
     public VecInt getIntegers() {
@@ -81,7 +81,7 @@ public class SAT4JAssignment implements IAssignment<Integer> {
     }
 
     public void addAll(BooleanAssignment assignment) {
-        addAll(assignment.getIntegers());
+        addAll(assignment.get());
     }
 
     public void replaceLast(int var) {

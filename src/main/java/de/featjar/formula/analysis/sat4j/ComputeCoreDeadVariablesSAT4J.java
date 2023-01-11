@@ -64,18 +64,18 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();
         if (solution.isEmpty()) return Result.empty();
-        int[] model1 = solution.get().getIntegers();
+        int[] model1 = solution.get().get();
 
         if (model1 != null) {
             solver.setSelectionStrategy(ISelectionStrategy.inverse(model1));
             solution = solver.findSolution();
             if (solution.isEmpty()) return Result.empty();
-            final int[] model2 = solution.get().getIntegers();
+            final int[] model2 = solution.get().get();
 
             if (!variablesOfInterest.isEmpty()) {
                 final int[] model3 = new int[model1.length];
-                for (int i = 0; i < variablesOfInterest.getIntegers().length; i++) {
-                    final int index = variablesOfInterest.getIntegers()[i] - 1;
+                for (int i = 0; i < variablesOfInterest.get().length; i++) {
+                    final int index = variablesOfInterest.get()[i] - 1;
                     if (index >= 0) {
                         model3[index] = model1[index];
                     }
@@ -87,7 +87,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                 model1[Math.abs(solver.getAssignment().peek(i)) - 1] = 0;
             }
 
-            model1 = BooleanSolution.resetConflicts(model1, model2);
+            model1 = BooleanSolution.removeConflicts(model1, model2);
 
             for (int i = 0; i < model1.length; i++) {
                 final int varX = model1[i];
@@ -100,7 +100,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                         solver.getAssignment().remove();
                     } else if (Result.of(true).equals(hasSolution)) {
                         solver.getAssignment().remove();
-                        model1 = BooleanSolution.resetConflicts(model1, solver.getInternalSolution());
+                        model1 = BooleanSolution.removeConflicts(model1, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                     }
                 }

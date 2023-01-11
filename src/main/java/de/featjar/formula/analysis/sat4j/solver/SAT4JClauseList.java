@@ -81,7 +81,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     protected void addConstraint(BooleanClause clause) {
         try {
             addedConstraints.add(
-                    solver.internalSolver.addClause(new VecInt(Arrays.copyOf(clause.getIntegers(), clause.size()))));
+                    solver.internalSolver.addClause(new VecInt(Arrays.copyOf(clause.get(), clause.size()))));
         } catch (ContradictionException e) {
             solver.trivialContradictionFound = true;
         }
@@ -100,7 +100,7 @@ public class SAT4JClauseList extends BooleanClauseList {
         for (final BooleanClause clause : clauses) {
             try {
                 constraints.add(solver.internalSolver.addClause(
-                        new VecInt(Arrays.copyOf(clause.getIntegers(), clause.size()))));
+                        new VecInt(Arrays.copyOf(clause.get(), clause.size()))));
             } catch (ContradictionException e) {
                 for (final IConstr constraint : constraints) {
                     solver.internalSolver.removeConstr(constraint);

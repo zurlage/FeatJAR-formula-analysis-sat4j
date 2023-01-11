@@ -59,7 +59,7 @@ public class SampleDistribution extends ALiteralDistribution {
             model[index] = 0;
             final int literal = sign > 0 ? var : -var;
             for (int i = 0; i < startIndex; i++) {
-                if (samples.get(i).getIntegers()[index] == -literal) {
+                if (samples.get(i).get()[index] == -literal) {
                     Collections.swap(samples, i--, --startIndex);
                 }
             }
@@ -72,7 +72,7 @@ public class SampleDistribution extends ALiteralDistribution {
         if (model[index] == 0) {
             model[index] = (byte) (literal > 0 ? 1 : -1);
             for (int i = startIndex; i < samples.size(); i++) {
-                if (samples.get(i).getIntegers()[index] == -literal) {
+                if (samples.get(i).get()[index] == -literal) {
                     Collections.swap(samples, i, startIndex++);
                 }
             }
@@ -91,7 +91,7 @@ public class SampleDistribution extends ALiteralDistribution {
     public int getPositiveCount(int index) {
         int sum = 0;
         for (final BooleanAssignment l : samples.subList(startIndex, samples.size())) {
-            sum += (~l.getIntegers()[index]) >>> 31;
+            sum += (~l.get()[index]) >>> 31;
         }
         return sum;
     }

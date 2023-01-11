@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.base.data.AIntegerList;
+import de.featjar.base.data.IntegerList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.structure.map.TermMap;
 import de.featjar.base.computation.Progress;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 public class CNFSlicer implements IMonitorableFunction<CNF, CNF> {
 
-    protected static final Comparator<AIntegerList<?>> lengthComparator = new AIntegerList.DescendingLengthComparator();
+    protected static final Comparator<IntegerList<?>> lengthComparator = new IntegerList.DescendingLengthComparator();
 
     protected CNF orgCNF;
     protected CNF cnfCopy;
@@ -219,9 +219,9 @@ public class CNFSlicer implements IMonitorableFunction<CNF, CNF> {
     private void resolution(DirtyFeature nextFeature) {
         final int curFeatureID = nextFeature.getId();
         for (int i = dirtyListPosIndex; i < dirtyListNegIndex; i++) {
-            final int[] posOrChildren = dirtyClauseList.get(i).getIntegers();
+            final int[] posOrChildren = dirtyClauseList.get(i).get();
             for (int j = dirtyListNegIndex; j < dirtyClauseList.size(); j++) {
-                final int[] negOrChildren = dirtyClauseList.get(j).getIntegers();
+                final int[] negOrChildren = dirtyClauseList.get(j).get();
                 final int[] newChildren = new int[posOrChildren.length + negOrChildren.length];
 
                 System.arraycopy(posOrChildren, 0, newChildren, 0, posOrChildren.length);
