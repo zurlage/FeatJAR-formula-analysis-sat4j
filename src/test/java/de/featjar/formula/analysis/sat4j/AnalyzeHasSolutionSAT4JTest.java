@@ -42,7 +42,7 @@ public class AnalyzeHasSolutionSAT4JTest {
                 .map(Computations::getKey)
                 .map(ComputeSolutionSAT4J::new)
                 .map(ComputePresence<BooleanSolution>::new)
-                .getResult()
+                .get()
                 .get();
     }
 

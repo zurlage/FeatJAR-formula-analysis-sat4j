@@ -41,7 +41,7 @@ import java.util.Objects;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public abstract class SAT4JSolver {
+public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver {
     protected final ISolver internalSolver = newInternalSolver();
     protected final SAT4JClauseList clauseList;
     protected final SAT4JAssignment assignment = new SAT4JAssignment();
@@ -96,10 +96,12 @@ public abstract class SAT4JSolver {
         this.solutionHistory = solutionHistory;
     }
 
-    public Result<Duration> getTimeout() {
-        return Result.ofNullable(timeout);
+    @Override
+    public Duration getTimeout() {
+        return timeout;
     }
 
+    @Override
     public void setTimeout(Duration timeout) {
         Objects.requireNonNull(timeout);
         FeatJAR.log().debug("setting timeout to " + timeout);
@@ -117,26 +119,9 @@ public abstract class SAT4JSolver {
         this.globalTimeout = globalTimeout;
     }
 
+    @Override
     public boolean isTimeoutOccurred() {
         return isTimeoutOccurred;
-    }
-
-    public <T> Result<T> createResult(T result) {
-        return createResult(Result.of(result));
-    }
-
-    public <T> Result<T> createResult(Result<T> result) {
-        return createResult(result, null);
-    }
-
-    public <T> Result<T> createResult(T result, String timeoutExplanation) {
-        return createResult(Result.of(result), timeoutExplanation);
-    }
-
-    public <T> Result<T> createResult(Result<T> result, String timeoutExplanation) {
-        return isTimeoutOccurred()
-                ? Result.empty(getTimeoutProblem(timeoutExplanation)).merge(result)
-                : result;
     }
 
     public boolean isTrivialContradictionFound() {
@@ -176,14 +161,8 @@ public abstract class SAT4JSolver {
             FeatJAR.log().debug("solver timeout occurred");
             solutionHistory.setLastSolution(null);
             isTimeoutOccurred = true;
-            return Result.empty(getTimeoutProblem(null));
+            return Result.empty(de.featjar.formula.analysis.ISolver.getTimeoutProblem(null));
         }
-    }
-
-    protected Problem getTimeoutProblem(String timeoutExplanation) {
-        return new Problem(
-                "solver timeout occurred" + (timeoutExplanation != null ? ", " + timeoutExplanation : ""),
-                Problem.Severity.WARNING);
     }
 
     public Result<Boolean> hasSolution() {

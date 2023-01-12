@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<extensions>
-    <point id="de.featjar.formula.analysis.Solvers">
-        <extension id="de.featjar.formula.analysis.sat4j.solver.SAT4J" />
-    </point>
-</extensions>
