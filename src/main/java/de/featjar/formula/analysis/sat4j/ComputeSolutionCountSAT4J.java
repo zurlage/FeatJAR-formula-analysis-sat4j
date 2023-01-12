@@ -26,6 +26,7 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.ISolutionCountAnalysis;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -48,7 +49,7 @@ public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigIntege
             progress.incrementCurrentStep();
             BooleanSolution solution =
                     solver.getSolutionHistory().getLastSolution().get();
-            solver.getClauseList().add(solution.toClause().negate());
+            solver.getClauseList().add(solution.toClause().getNegatedValues());
             hasSolution = solver.hasSolution();
         }
         return solver.createResult(solutionCount, "result is a lower bound");

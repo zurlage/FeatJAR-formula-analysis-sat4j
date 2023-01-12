@@ -25,6 +25,7 @@ import de.featjar.formula.analysis.bool.BooleanSolution;
 import java.util.*;
 
 public interface ISolutionHistory extends Iterable<BooleanSolution> {
+    // todo: store int[] instead of creating new solution instances
     List<BooleanSolution> getSolutionHistory();
 
     Result<BooleanSolution> getLastSolution();

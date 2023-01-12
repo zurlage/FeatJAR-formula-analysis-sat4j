@@ -24,7 +24,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.ITimeoutDependency;
 import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.bool.BooleanAssignment;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import org.sat4j.core.VecInt;
@@ -194,7 +194,7 @@ public abstract class SAT4JSolver {
      * Does only consider the given {@code assignment} and <b>not</b> the global
      * assignment variable of the solver.
      */
-    public Result<Boolean> hasSolution(BooleanAssignment assignment) {
+    public Result<Boolean> hasSolution(ABooleanAssignment assignment) {
         return hasSolution(new VecInt(assignment.get()));
     }
 

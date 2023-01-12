@@ -23,10 +23,13 @@ package de.featjar.formula.analysis.sat4j.solver;
 import de.featjar.base.data.Maps;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.IAssignment;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import java.util.*;
+import java.util.function.Supplier;
+
 import org.sat4j.core.VecInt;
 
 /**
@@ -35,14 +38,14 @@ import org.sat4j.core.VecInt;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class SAT4JAssignment implements IAssignment<Integer> {
+public class SAT4JAssignment implements IAssignment<Integer>, Supplier<int[]> {
     protected final VecInt integers;
 
     public SAT4JAssignment() {
         this.integers = new VecInt();
     }
 
-    public SAT4JAssignment(BooleanAssignment assignment) {
+    public SAT4JAssignment(ABooleanAssignment assignment) {
         this.integers = new VecInt(assignment.get());
     }
 
@@ -80,7 +83,7 @@ public class SAT4JAssignment implements IAssignment<Integer> {
         integers.pushAll(new VecInt(vars));
     }
 
-    public void addAll(BooleanAssignment assignment) {
+    public void addAll(ABooleanAssignment assignment) {
         addAll(assignment.get());
     }
 
@@ -92,15 +95,15 @@ public class SAT4JAssignment implements IAssignment<Integer> {
         integers.set(index, var);
     }
 
-    public int[] toArray() {
+    public int[] get() {
         return Arrays.copyOf(integers.toArray(), integers.size());
     }
 
-    public int[] toArray(int from) {
+    public int[] copy(int from) {
         return Arrays.copyOfRange(integers.toArray(), from, integers.size());
     }
 
-    public int[] toArray(int from, int to) {
+    public int[] copy(int from, int to) {
         return Arrays.copyOfRange(integers.toArray(), from, to);
     }
 
@@ -167,16 +170,16 @@ public class SAT4JAssignment implements IAssignment<Integer> {
 
     @Override
     public BooleanAssignment toAssignment() {
-        return new BooleanAssignment(toArray());
+        return new BooleanAssignment(get());
     }
 
     @Override
     public BooleanClause toClause() {
-        return new BooleanClause(toArray());
+        return new BooleanClause(get());
     }
 
     @Override
     public BooleanSolution toSolution() {
-        return new BooleanSolution(toArray());
+        return new BooleanSolution(get());
     }
 }

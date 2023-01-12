@@ -20,7 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
-import de.featjar.formula.analysis.bool.BooleanAssignment;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,12 +34,12 @@ import java.util.List;
  */
 public class SampleDistribution extends ALiteralDistribution {
 
-    private final ArrayList<BooleanAssignment> samples = new ArrayList<>();
+    private final ArrayList<ABooleanAssignment> samples = new ArrayList<>();
     private int startIndex;
 
     private final byte[] model;
 
-    public SampleDistribution(List<BooleanAssignment> sample) {
+    public SampleDistribution(List<ABooleanAssignment> sample) {
         samples.addAll(sample);
         startIndex = 0;
         model = new byte[sample.get(0).size()];
@@ -90,7 +90,7 @@ public class SampleDistribution extends ALiteralDistribution {
 
     public int getPositiveCount(int index) {
         int sum = 0;
-        for (final BooleanAssignment l : samples.subList(startIndex, samples.size())) {
+        for (final ABooleanAssignment l : samples.subList(startIndex, samples.size())) {
             sum += (~l.get()[index]) >>> 31;
         }
         return sum;

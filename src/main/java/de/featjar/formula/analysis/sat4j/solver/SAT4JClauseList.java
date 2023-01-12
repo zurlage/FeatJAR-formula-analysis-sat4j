@@ -62,11 +62,6 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    protected SAT4JClauseList newAssignmentList(List<BooleanClause> clauses) {
-        throw new UnsupportedOperationException(); // cannot clone this as it is tied to one solver instance
-    }
-
-    @Override
     public void add(int index, BooleanClause clause) {
         if (index != assignments.size()) throw new UnsupportedOperationException();
         super.add(index, clause);
@@ -78,10 +73,14 @@ public class SAT4JClauseList extends BooleanClauseList {
         return super.remove(index);
     }
 
-    protected void addConstraint(BooleanClause clause) {
+    protected void addConstraint(BooleanClause booleanClause) {
+        addConstraint(booleanClause.get());
+    }
+
+    protected void addConstraint(int... integers) {
         try {
             addedConstraints.add(
-                    solver.internalSolver.addClause(new VecInt(Arrays.copyOf(clause.get(), clause.size()))));
+                    solver.internalSolver.addClause(new VecInt(Arrays.copyOf(integers, integers.length))));
         } catch (ContradictionException e) {
             solver.trivialContradictionFound = true;
         }
@@ -89,9 +88,13 @@ public class SAT4JClauseList extends BooleanClauseList {
 
     @Override
     public void add(BooleanClause clause) {
-        addConstraint(clause);
+        addConstraint(clause.get());
         super.add(clause);
         solver.getSolutionHistory().clear();
+    }
+
+    public void add(int... integers) {
+        add(new BooleanClause(integers));
     }
 
     @Override

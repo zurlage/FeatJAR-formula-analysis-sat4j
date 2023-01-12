@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.ComputePresence;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentationOfFormula;
+import de.featjar.formula.analysis.bool.ComputeBooleanRepresentationOfCNFFormula;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformation.ComputeCNFFormula;
 import de.featjar.formula.transformation.ComputeNNFFormula;
@@ -38,7 +38,7 @@ public class AnalyzeHasSolutionSAT4JTest {
         return async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanRepresentationOfFormula::new)
+                .map(ComputeBooleanRepresentationOfCNFFormula::new)
                 .map(Computations::getKey)
                 .map(ComputeSolutionSAT4J::new)
                 .map(ComputePresence<BooleanSolution>::new)

@@ -26,10 +26,7 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ITree;
 import de.featjar.formula.analysis.ISolutionsAnalysis;
-import de.featjar.formula.analysis.bool.BooleanAssignment;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.bool.BooleanSolutionList;
+import de.featjar.formula.analysis.bool.*;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 
 public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList>
@@ -47,7 +44,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
             BooleanSolution solution =
                     solver.getSolutionHistory().getLastSolution().get();
             solutionList.add(solution);
-            solver.getClauseList().add(solution.toClause().negate());
+            solver.getClauseList().add(solution.toClause().getNegatedValues());
             hasSolution = solver.hasSolution();
         }
         return solver.createResult(solutionList, "result is a subset");

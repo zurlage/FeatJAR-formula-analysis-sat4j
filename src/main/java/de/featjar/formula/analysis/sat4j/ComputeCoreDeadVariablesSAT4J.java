@@ -23,6 +23,7 @@ package de.featjar.formula.analysis.sat4j;
 import de.featjar.base.computation.*;
 import de.featjar.base.data.Result;
 import de.featjar.base.tree.structure.ITree;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -59,7 +60,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     public Result<BooleanAssignment> compute(DependencyList dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = dependencyList.get(RANDOM);
-        BooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
+        ABooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> solution = solver.findSolution();

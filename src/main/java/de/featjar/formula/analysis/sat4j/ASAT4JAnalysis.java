@@ -24,6 +24,7 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.*;
 import de.featjar.formula.analysis.IAssumedAssignmentDependency;
 import de.featjar.formula.analysis.IAssumedClauseListDependency;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
@@ -82,7 +83,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     @SuppressWarnings("unchecked")
     public <U extends SAT4JSolver> U initializeSolver(DependencyList dependencyList) {
         BooleanClauseList clauseList = dependencyList.get(BOOLEAN_CLAUSE_LIST);
-        BooleanAssignment assumedAssignment = dependencyList.get(ASSUMED_ASSIGNMENT);
+        ABooleanAssignment assumedAssignment = dependencyList.get(ASSUMED_ASSIGNMENT);
         BooleanClauseList assumedClauseList = dependencyList.get(ASSUMED_CLAUSE_LIST);
         Duration timeout = dependencyList.get(TIMEOUT);
         FeatJAR.log().debug("initializing SAT4J");
