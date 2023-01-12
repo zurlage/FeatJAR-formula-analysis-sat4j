@@ -501,9 +501,4 @@ public class TWiseConfiguration extends SortedIntegerList {
     public int hashCode() {
         return Arrays.hashCode(integers);
     }
-
-    @Override
-    public TWiseConfiguration clone() {
-        return new TWiseConfiguration(this);
-    }
 }

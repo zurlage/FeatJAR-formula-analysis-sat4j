@@ -171,9 +171,4 @@ public class DirtyClause extends ABooleanAssignment {
     public int getRelevance() {
         return relevance;
     }
-
-    @Override
-    public DirtyClause clone() {
-        return new DirtyClause(this);
-    }
 }

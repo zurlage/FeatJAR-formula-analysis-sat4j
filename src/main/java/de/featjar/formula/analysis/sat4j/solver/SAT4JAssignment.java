@@ -27,10 +27,11 @@ import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import java.util.*;
-import java.util.function.Supplier;
-
 import org.sat4j.core.VecInt;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.function.Supplier;
 
 /**
  * ...
