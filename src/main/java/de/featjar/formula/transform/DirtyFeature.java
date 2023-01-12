@@ -20,15 +20,13 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.base.data.IHashable;
-
 /**
  * Representation of a feature that will be removed from a feature model by the
  * {@link CNFSlicer}.
  *
  * @author Sebastian Krieter
  */
-public class DirtyFeature implements Comparable<DirtyFeature>, IHashable {
+public class DirtyFeature implements Comparable<DirtyFeature> {
 
     private final int id;
 
