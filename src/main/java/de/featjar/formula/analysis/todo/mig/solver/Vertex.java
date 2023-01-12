@@ -20,12 +20,14 @@
  */
 package de.featjar.formula.analysis.todo.mig.solver;
 
+import de.featjar.base.data.IHashable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class Vertex implements Comparable<Vertex> {
+public class Vertex implements Comparable<Vertex>, IHashable {
 
     public enum Status {
         Normal,

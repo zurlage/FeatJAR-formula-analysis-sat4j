@@ -497,8 +497,9 @@ public class TWiseConfiguration extends SortedIntegerList {
         return solverSolutionIndex;
     }
 
-    @Override
-    public int hashCode() {
-        return Arrays.hashCode(integers);
-    }
+//    @Override
+//    public int hashCode() {
+//        return Arrays.hashCode(integers);
+//    }
+    // todo: equals
 }
