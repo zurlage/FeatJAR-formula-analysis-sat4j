@@ -62,7 +62,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         Random random = dependencyList.get(RANDOM);
         ABooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
         final int initialAssignmentLength = solver.getAssignment().size();
-        solver.setSelectionStrategy(ISelectionStrategy.positive());
+        solver.setSelectionStrategy(ISelectionStrategy.positive()); // todo: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();
         if (solution.isEmpty()) return Result.empty();
         int[] model1 = solution.get().get();
