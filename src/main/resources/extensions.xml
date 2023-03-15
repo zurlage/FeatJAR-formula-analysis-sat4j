@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<extensions>
+	<point id="de.featjar.base.cli.Commands">
+		<extension id="de.featjar.formula.analysis.sat4j.cli.analysis.ComputeAtomicSetsSAT4J" />
+		<extension id="de.featjar.formula.analysis.sat4j.cli.analysis.ComputeCoreDeadVariablesSAT4J" />
+		<extension id="de.featjar.formula.analysis.sat4j.cli.analysis.ComputeSolutionCountSAT4J" />
+		<extension id="de.featjar.formula.analysis.sat4j.cli.analysis.ComputeSolutionSAT4J" />
+		<extension id="de.featjar.formula.analysis.sat4j.cli.analysis.ComputeSolutionsSAT4J" />
+	</point>
+</extensions>
