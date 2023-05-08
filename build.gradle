@@ -4,30 +4,12 @@ plugins {
 
 dependencies {
     api 'de.featjar:formula'
-    api 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.5'
+    api 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.6'
 }
 
 license {
     ext {
         author = 'Sebastian Krieter'
         url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j'
-    }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main'
-            exclude '**/twise/**'
-            exclude '**/configuration/**'
-            exclude '**/todo/**'
-            exclude '**/transform/**'
-        }
-    }
-    test {
-        java {
-            srcDir 'src/test'
-            exclude '**/assignment/**'
-        }
     }
 }
