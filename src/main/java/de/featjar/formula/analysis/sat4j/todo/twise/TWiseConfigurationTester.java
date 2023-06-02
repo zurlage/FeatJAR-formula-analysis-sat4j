@@ -24,7 +24,7 @@ import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.todo.twise.TWiseStatisticGenerator.ConfigurationScore;
 import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import de.featjar.formula.analysis.combinations.ICombinationIterator;
-import de.featjar.formula.analysis.combinations.LexicographicIterator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
