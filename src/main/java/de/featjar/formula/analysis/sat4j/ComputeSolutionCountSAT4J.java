@@ -24,19 +24,18 @@ import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.base.tree.structure.ITree;
-import de.featjar.formula.analysis.ISolutionCountAnalysis;
-import de.featjar.formula.analysis.bool.ABooleanAssignment;
-import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import java.math.BigInteger;
 
-public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigInteger>
-        implements ISolutionCountAnalysis<BooleanClauseList, BooleanAssignment> {
+public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigInteger> {
     public ComputeSolutionCountSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
+    }
+
+    protected ComputeSolutionCountSAT4J(ComputeSolutionCountSAT4J other) {
+        super(other);
     }
 
     @Override
@@ -47,16 +46,10 @@ public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigIntege
         while (hasSolution.equals(Result.of(true))) {
             solutionCount = solutionCount.add(BigInteger.ONE);
             progress.incrementCurrentStep();
-            BooleanSolution solution =
-                    solver.getSolutionHistory().getLastSolution().get();
+            BooleanSolution solution = solver.getSolution();
             solver.getClauseList().add(solution.toClause().getNegatedValues());
             hasSolution = solver.hasSolution();
         }
         return solver.createResult(solutionCount, "result is a lower bound");
-    }
-
-    @Override
-    public ITree<IComputation<?>> cloneNode() {
-        return new ComputeSolutionCountSAT4J(getInput());
     }
 }

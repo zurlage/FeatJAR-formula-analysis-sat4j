@@ -22,18 +22,17 @@ package de.featjar.formula.analysis.sat4j.solver;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.ITimeoutDependency;
-import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.Objects;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.ISolver;
 import org.sat4j.specs.TimeoutException;
-
-import java.time.Duration;
-import java.util.Objects;
 
 /**
  * Base class for solvers using Sat4J.
@@ -45,12 +44,29 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
     protected final ISolver internalSolver = newInternalSolver();
     protected final SAT4JClauseList clauseList;
     protected final SAT4JAssignment assignment = new SAT4JAssignment();
-    protected ISolutionHistory solutionHistory = new ISolutionHistory.RememberUpTo(1000);
     protected Duration timeout = ITimeoutDependency.DEFAULT_TIMEOUT;
     protected boolean globalTimeout;
 
     protected boolean isTimeoutOccurred;
     protected boolean trivialContradictionFound;
+
+    /**
+     * Replaces all values in {@code model} that are different in {@code otherModel}
+     * with zero. Does not modify {@code otherModel}. Assumes that {@code model} and
+     * {@code otherModel} have the same length.
+     *
+     * @param model      First model
+     * @param otherModel Second model, is not modified
+     */
+    public static void zeroConflicts(int[] model, int[] otherModel) {
+        assert model.length == otherModel.length;
+        for (int i = 0; i < model.length; i++) {
+            final int literal = model[i];
+            if (literal != 0 && literal != otherModel[i]) {
+                model[i] = 0;
+            }
+        }
+    }
 
     public SAT4JSolver(BooleanClauseList clauseList) {
         internalSolver.setDBSimplificationAllowed(true);
@@ -65,7 +81,8 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
             }
             if (size > 0) {
                 // due to a bug in SAT4J, each variable must be mentioned at least once
-                // so, add a single pseudo-clause that is tautological and mentions every variable
+                // so, add a single pseudo-clause that is tautological and mentions every
+                // variable
                 final VecInt pseudoClause = new VecInt(size + 1);
                 for (int i = 1; i <= size; i++) {
                     pseudoClause.push(i);
@@ -88,14 +105,6 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
         return assignment;
     }
 
-    public ISolutionHistory getSolutionHistory() {
-        return solutionHistory;
-    }
-
-    public void setSolutionHistory(ISolutionHistory solutionHistory) {
-        this.solutionHistory = solutionHistory;
-    }
-
     @Override
     public Duration getTimeout() {
         return timeout;
@@ -106,8 +115,7 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
         Objects.requireNonNull(timeout);
         FeatJAR.log().debug("setting timeout to " + timeout);
         this.timeout = timeout;
-        if (!timeout.isZero())
-            internalSolver.setTimeoutMs(timeout.toMillis());
+        if (!timeout.isZero()) internalSolver.setTimeoutMs(timeout.toMillis());
         else internalSolver.expireTimeout();
     }
 
@@ -129,37 +137,32 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
     }
 
     public Result<BooleanSolution> findSolution() {
-        return hasSolution().equals(Result.of(true)) ? solutionHistory.getLastSolution() : Result.empty();
+        final Result<Boolean> hasSolution = hasSolution();
+        return hasSolution.isPresent()
+                ? hasSolution().get() ? Result.of(getSolution()) : Result.empty()
+                : Result.empty(hasSolution.getProblems());
+    }
+
+    public Result<Boolean> hasSolution(int... integers) {
+        return hasSolution(new VecInt(integers));
     }
 
     protected Result<Boolean> hasSolution(VecInt integers) {
         if (trivialContradictionFound) {
-            solutionHistory.setLastSolution(null);
-            return Result.of(false);
-        }
-
-        for (final BooleanSolution solution : solutionHistory) {
-            if (solution.containsAll(integers.toArray())) {
-                solutionHistory.setLastSolution(solution);
-                return Result.of(true);
-            }
+            return Result.of(Boolean.FALSE);
         }
 
         try {
             FeatJAR.log().debug("calling SAT4J");
             if (internalSolver.isSatisfiable(integers, globalTimeout)) {
-                BooleanSolution solution = new BooleanSolution(internalSolver.model());
-                FeatJAR.log().debug("has solution " + solution);
-                solutionHistory.addNewSolution(solution);
-                return Result.of(true);
+                FeatJAR.log().debug("has solution");
+                return Result.of(Boolean.TRUE);
             } else {
                 FeatJAR.log().debug("no solution");
-                solutionHistory.setLastSolution(null);
-                return Result.of(false);
+                return Result.of(Boolean.FALSE);
             }
         } catch (final TimeoutException e) {
             FeatJAR.log().debug("solver timeout occurred");
-            solutionHistory.setLastSolution(null);
             isTimeoutOccurred = true;
             return Result.empty(de.featjar.formula.analysis.ISolver.getTimeoutProblem(null));
         }
@@ -177,7 +180,12 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
         return hasSolution(new VecInt(assignment.get()));
     }
 
-    public int[] getInternalSolution() { // todo: refactor
-        return getSolutionHistory().getLastSolution().get().get();
+    public BooleanSolution getSolution() {
+        int[] internalSolution = getInternalSolution();
+        return new BooleanSolution(Arrays.copyOf(internalSolution, internalSolution.length));
+    }
+
+    public int[] getInternalSolution() {
+        return internalSolver.model();
     }
 }

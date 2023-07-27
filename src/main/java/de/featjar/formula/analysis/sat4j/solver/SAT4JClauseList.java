@@ -41,20 +41,6 @@ public class SAT4JClauseList extends BooleanClauseList {
     protected final SAT4JSolver solver;
     protected final LinkedList<IConstr> addedConstraints = new LinkedList<>();
 
-    public SAT4JClauseList(SAT4JSolver solver) {
-        this.solver = solver;
-    }
-
-    public SAT4JClauseList(SAT4JSolver solver, int size) {
-        super(size);
-        this.solver = solver;
-    }
-
-    public SAT4JClauseList(SAT4JSolver solver, Collection<? extends BooleanClause> clauses) {
-        this.solver = solver;
-        assignments.forEach(this::addConstraint);
-    }
-
     public SAT4JClauseList(SAT4JSolver solver, BooleanClauseList other) {
         super(other);
         this.solver = solver;
@@ -79,8 +65,7 @@ public class SAT4JClauseList extends BooleanClauseList {
 
     protected void addConstraint(int... integers) {
         try {
-            addedConstraints.add(
-                    solver.internalSolver.addClause(new VecInt(Arrays.copyOf(integers, integers.length))));
+            addedConstraints.add(solver.internalSolver.addClause(new VecInt(Arrays.copyOf(integers, integers.length))));
         } catch (ContradictionException e) {
             solver.trivialContradictionFound = true;
         }
@@ -90,7 +75,6 @@ public class SAT4JClauseList extends BooleanClauseList {
     public void add(BooleanClause clause) {
         addConstraint(clause.get());
         super.add(clause);
-        solver.getSolutionHistory().clear();
     }
 
     public void add(int... integers) {
@@ -98,12 +82,12 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public void addAll(Collection<BooleanClause> clauses) {
+    public void addAll(Collection<? extends BooleanClause> clauses) {
         final ArrayList<IConstr> constraints = new ArrayList<>();
         for (final BooleanClause clause : clauses) {
             try {
-                constraints.add(solver.internalSolver.addClause(
-                        new VecInt(Arrays.copyOf(clause.get(), clause.size()))));
+                constraints.add(
+                        solver.internalSolver.addClause(new VecInt(Arrays.copyOf(clause.get(), clause.size()))));
             } catch (ContradictionException e) {
                 for (final IConstr constraint : constraints) {
                     solver.internalSolver.removeConstr(constraint);
@@ -111,19 +95,17 @@ public class SAT4JClauseList extends BooleanClauseList {
                 solver.trivialContradictionFound = true;
             }
         }
-        solver.getSolutionHistory().clear();
         addedConstraints.addAll(constraints);
         super.addAll(clauses);
     }
 
     @Override
-    public void addAll(IAssignmentList<BooleanClause> clauseList) {
+    public void addAll(IAssignmentList<? extends BooleanClause> clauseList) {
         addAll(clauseList.getAll());
     }
 
     @Override
     public Result<BooleanClause> remove() {
-        solver.getSolutionHistory().clear();
         if (addedConstraints.size() > 0) {
             final IConstr lastConstraint = addedConstraints.pop();
             solver.internalSolver.removeConstr(lastConstraint);
@@ -133,7 +115,6 @@ public class SAT4JClauseList extends BooleanClauseList {
 
     @Override
     public void clear() {
-        solver.getSolutionHistory().clear();
         while (addedConstraints.size() > 0) remove();
         super.clear();
     }

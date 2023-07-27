@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2023 Sebastian Krieter
+ * Copyright (C) 2022 Sebastian Krieter
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of formula-analysis-sat4j.
  *
  * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -18,45 +18,50 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.mig;
 
-import de.featjar.base.computation.*;
+import de.featjar.base.computation.ComputeConstant;
+import de.featjar.base.computation.Dependency;
+import de.featjar.base.computation.DependencyList;
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
+import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
+import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph.Visitor;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import java.util.Random;
 
 /**
- * Finds core and dead features.
+ * Finds core and dead features using a {@link ModalImplicationGraph model implication graph}.
  *
  * @author Sebastian Krieter
  */
-public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment> {
+public class ComputeCoreDead extends ASAT4JMIGAnalysis<BooleanAssignment> {
+
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeCoreDeadVariablesSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+    public ComputeCoreDead(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
-    protected ComputeCoreDeadVariablesSAT4J(ComputeCoreDeadVariablesSAT4J other) {
+    protected ComputeCoreDead(ComputeCoreDead other) {
         super(other);
-    }
-
-    public Dependency<BooleanAssignment> getVariablesOfInterest() {
-        return VARIABLES_OF_INTEREST;
     }
 
     @Override
     public Result<BooleanAssignment> compute(DependencyList dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = dependencyList.get(RANDOM);
+        BooleanAssignment assignment = dependencyList.get(ASSUMED_ASSIGNMENT);
         ABooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
-        final int initialAssignmentLength = solver.getAssignment().size();
+        ModalImplicationGraph mig = dependencyList.get(MIG);
+
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();
         if (solution.isEmpty()) return Result.empty();
@@ -76,8 +81,12 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                 model1 = model3;
             }
 
-            for (int i = 0; i < initialAssignmentLength; i++) {
-                model1[Math.abs(solver.getAssignment().peek(i)) - 1] = 0;
+            Visitor visitor = mig.getVisitor();
+            visitor.propagate(assignment.get());
+
+            int addedLiteralCount = visitor.getAddedLiteralCount();
+            for (int i = 0; i < addedLiteralCount; i++) {
+                model1[Math.abs(visitor.getAddedLiterals()[i]) - 1] = 0;
             }
 
             for (int i = 0; i < model1.length; i++) {
@@ -87,6 +96,11 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (hasSolution.valueEquals(false)) {
                         solver.getAssignment().replaceLast(varX);
+                        visitor.propagate(varX);
+                        for (int j = addedLiteralCount; j < visitor.getAddedLiteralCount(); j++) {
+                            model1[Math.abs(visitor.getAddedLiterals()[j]) - 1] = 0;
+                        }
+                        addedLiteralCount = visitor.getAddedLiteralCount();
                     } else if (hasSolution.isEmpty()) {
                         solver.getAssignment().remove();
                     } else if (hasSolution.valueEquals(true)) {

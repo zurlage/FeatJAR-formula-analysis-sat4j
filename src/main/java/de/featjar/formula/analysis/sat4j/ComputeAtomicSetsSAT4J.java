@@ -20,14 +20,16 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.*;
+import de.featjar.base.computation.DependencyList;
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.base.tree.structure.ITree;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.formula.analysis.sat4j.solver.ISolutionHistory;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JAssignment;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import java.util.Arrays;
 import java.util.Random;
@@ -37,25 +39,23 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList>
-        implements IRandomDependency { // todo: here, a BooleanAssignmentList would be better
-    protected static final Dependency<Random> RANDOM =
-            newOptionalDependency(new Random(IRandomDependency.DEFAULT_RANDOM_SEED));
+public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
+    // TODO: here, a BooleanAssignmentList would be better
 
     public ComputeAtomicSetsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList, RANDOM);
+        super(booleanClauseList);
+    }
+
+    protected ComputeAtomicSetsSAT4J(ComputeAtomicSetsSAT4J other) {
+        super(other);
     }
 
     @Override
-    public Dependency<Random> getRandomDependency() {
-        return RANDOM;
-    }
-
-    @Override
-    public Result<BooleanSolutionList> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanAssignmentList> compute(DependencyList dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = dependencyList.get(RANDOM);
-        final BooleanSolutionList result = new BooleanSolutionList();
+        final BooleanAssignmentList result = new BooleanAssignmentList(
+                dependencyList.get(BOOLEAN_CLAUSE_LIST).getVariableCount());
         //		if (variables == null) {
         //			variables = LiteralList.getVariables(solver.getVariables());
         //		}
@@ -63,8 +63,8 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
 
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         final int[] model1 = solver.findSolution().get().get();
-        solver.setSolutionHistory(new ISolutionHistory.RememberUpTo(1000));
-        final ISolutionHistory solutions = solver.getSolutionHistory();
+        //        solver.setSolutionHistory(new ISolutionHistory.RememberUpTo(1000));
+        //        final ISolutionHistory solutions = solver.getSolutionHistory();
 
         if (model1 != null) {
             // initial atomic set consists of core and dead features
@@ -96,7 +96,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
                 }
             }
             final int fixedSize = solver.getAssignment().size();
-            result.add(new BooleanSolution(solver.getAssignment().toSolution().copyOfRange(0, fixedSize)));
+            result.add(new BooleanAssignment(solver.getAssignment().copy(0, fixedSize)));
 
             solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
@@ -113,13 +113,13 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
                     for (int j = i + 1; j < xModel0.length; j++) {
                         final int my0 = xModel0[j];
                         if ((my0 != 0) && (done[j] == 0)) {
-                            for (final BooleanSolution solution : solutions) {
-                                final int mxI = solution.get()[i];
-                                final int myI = solution.get()[j];
-                                if ((mx0 == mxI) != (my0 == myI)) {
-                                    continue inner;
-                                }
-                            }
+                            //                            for (final BooleanSolution solution : solutions) {
+                            //                                final int mxI = solution.get()[i];
+                            //                                final int myI = solution.get()[j];
+                            //                                if ((mx0 == mxI) != (my0 == myI)) {
+                            //                                    continue inner;
+                            //                                }
+                            //                            }
 
                             solver.getAssignment().add(-my0);
 
@@ -177,19 +177,13 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolut
                             }
                         }
                     }
-
-                    result.add(new BooleanSolution(solver.getAssignment()
-                            .toSolution()
-                            .copyOfRange(fixedSize, solver.getAssignment().size())));
+                    SAT4JAssignment assignment = solver.getAssignment();
+                    result.add(new BooleanAssignment(
+                            assignment.copy(fixedSize, solver.getAssignment().size())));
                     solver.getAssignment().clear(fixedSize);
                 }
             }
         }
         return solver.createResult(result);
-    }
-
-    @Override
-    public ITree<IComputation<?>> cloneNode() {
-        return new ComputeAtomicSetsSAT4J(getInput());
     }
 }

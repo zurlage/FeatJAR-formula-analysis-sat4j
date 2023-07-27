@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2023 Sebastian Krieter
+ * Copyright (C) 2022 Sebastian Krieter
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of formula-analysis-sat4j.
  *
  * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -18,30 +18,31 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j.solver.strategy;
-
-import org.sat4j.specs.ISolver;
+package de.featjar.todo.formula.analysis.sat4j.configuration;
 
 /**
- * Modified variable order for {@link ISolver}.<br>
- * Uses the {@link UniformRandomSelectionStrategy}.
+ * Generates all configurations for a given propositional formula.
  *
  * @author Sebastian Krieter
  */
-public class FixedOrderHeap2 extends FixedOrderHeap {
-
-    private static final long serialVersionUID = 1L;
-
-    private final UniformRandomSelectionStrategy selectionStrategy;
-
-    public FixedOrderHeap2(UniformRandomSelectionStrategy strategy, int[] order) {
-        super(strategy, order);
-        selectionStrategy = strategy;
-    }
+public class AllConfigurationGenerator extends AbstractConfigurationGenerator {
+    private boolean satisfiable = true;
 
     @Override
-    public void undo(int x) {
-        super.undo(x);
-        selectionStrategy.undo(x);
+    public SortedIntegerList get() {
+        if (!satisfiable) {
+            return null;
+        }
+        final SortedIntegerList solution = solver.findSolution();
+        if (solution == null) {
+            satisfiable = false;
+            return null;
+        }
+        try {
+            solver.getFormula().push(solution.negate());
+        } catch (final SolverContradictionException e) {
+            satisfiable = false;
+        }
+        return solution;
     }
 }

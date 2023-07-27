@@ -22,11 +22,14 @@ package de.featjar.formula.analysis.sat4j;
 
 import static de.featjar.base.computation.Computations.async;
 import static de.featjar.base.computation.Computations.await;
-import static de.featjar.formula.structure.Expressions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static de.featjar.formula.structure.Expressions.literal;
+import static de.featjar.formula.structure.Expressions.or;
+import static org.junit.Assert.assertNotNull;
 
 import de.featjar.base.computation.Computations;
-import de.featjar.base.computation.ComputePresence;
+import de.featjar.base.computation.IComputation;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
 import de.featjar.formula.analysis.bool.BooleanSolution;
@@ -35,38 +38,27 @@ import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
 import org.junit.jupiter.api.Test;
 
-public class AnalyzeHasSolutionSAT4JTest {
-    public boolean hasSolution(IFormula formula) {
-        return await(async(formula)
+public class Sat4JAnalysesTest {
+
+    public void getTWiseSample(IFormula formula, int t) {
+        BooleanRepresentationComputation<IFormula, BooleanClauseList> cnf = async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .setDependency(ComputeCNFFormula.IS_PLAISTED_GREENBAUM, Computations.of(Boolean.TRUE))
-                .map(BooleanRepresentationComputation::new)
-                .map(Computations::getKey)
-                .map(r -> Computations.cast(r, BooleanClauseList.class))
-                .map(ComputeSolutionSAT4J::new)
-                .map(ComputePresence<BooleanSolution>::new));
-    }
+                .map(BooleanRepresentationComputation::new);
+        IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
 
-    // TODO: all tests below only work when the formula is wrapped in and(...) as an auxiliary root. fix this, it is a
-    // big potential bug source
-    @Test
-    void satisfiableFormulaInCNFHasSolution() {
-        assertTrue(hasSolution(and(literal("x"), literal(false, "y"))));
-    }
-
-    @Test
-    void unsatisfiableFormulaInCNFHasNoSolution() {
-        assertFalse(hasSolution(and(literal("x"), literal(false, "x"))));
+        BooleanSolution solution = await((IComputation<BooleanSolution>) clauses.map(ComputeSolutionSAT4J::new));
+        BooleanAssignment core =
+                await((IComputation<BooleanAssignment>) clauses.map(ComputeCoreDeadVariablesSAT4J::new));
+        BooleanAssignmentList atomicSets =
+                await((IComputation<BooleanAssignmentList>) clauses.map(ComputeAtomicSetsSAT4J::new));
+        assertNotNull(solution);
+        assertNotNull(core);
+        assertNotNull(atomicSets);
     }
 
     @Test
-    void satisfiableArbitraryFormulaHasSolution() {
-        assertTrue(hasSolution(biImplies(literal("a"), literal("b"))));
-    }
-
-    @Test
-    void unsatisfiableArbitraryFormulaHasNoSolution() {
-        assertFalse(hasSolution(and(biImplies(literal("a"), not(literal("a"))))));
+    void test() {
+        getTWiseSample(or(literal("x"), literal(false, "y"), literal(false, "z")), 2);
     }
 }

@@ -28,6 +28,8 @@ import org.sat4j.minisat.core.IPhaseSelectionStrategy;
 
 public class FixedLiteralSelectionStrategy implements IPhaseSelectionStrategy {
 
+    private static final long serialVersionUID = 1L;
+
     protected final int[] model;
 
     protected final int[] phase;

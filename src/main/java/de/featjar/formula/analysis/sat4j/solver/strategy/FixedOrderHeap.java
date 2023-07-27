@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.solver.strategy;
 
-import org.sat4j.minisat.core.Heap;
 import org.sat4j.minisat.core.IPhaseSelectionStrategy;
 import org.sat4j.minisat.orders.VarOrderHeap;
 import org.sat4j.specs.ISolver;
@@ -33,6 +32,7 @@ import org.sat4j.specs.ISolver;
  */
 public class FixedOrderHeap extends VarOrderHeap {
 
+    private static final long serialVersionUID = 1L;
     private int[] order;
 
     public FixedOrderHeap(IPhaseSelectionStrategy strategy, int[] order) {
@@ -43,16 +43,17 @@ public class FixedOrderHeap extends VarOrderHeap {
     @Override
     public void init() {
         int nlength = lits.nVars() + 1;
-        if ((activity == null) || (activity.length < nlength)) {
+        if (activity == null || activity.length < nlength) {
             activity = new double[nlength];
         }
         phaseStrategy.init(nlength);
         activity[0] = -1;
-        heap = new Heap(activity);
+        heap = createHeap(activity);
         heap.setBounds(nlength);
-        nlength--;
-        for (int i = 0; i < nlength; i++) {
-            final int x = order[i];
+        for (int i = 1; i < nlength; i++) {
+            assert i > 0;
+            assert i <= this.lits.nVars() : "" + this.lits.nVars() + "/" + i;
+            final int x = order[i - 1];
             activity[x] = 0.0;
             if (lits.belongsToPool(x)) {
                 heap.insert(x);

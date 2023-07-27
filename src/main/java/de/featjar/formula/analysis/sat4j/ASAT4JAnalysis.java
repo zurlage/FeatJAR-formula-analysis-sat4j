@@ -30,37 +30,35 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
-
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
 public abstract class ASAT4JAnalysis<T> extends AComputation<T>
-        implements IAnalysis<BooleanClauseList, T>,
-                IAssumedAssignmentDependency<BooleanAssignment>,
+        implements IAssumedAssignmentDependency<BooleanAssignment>,
                 IAssumedClauseListDependency<BooleanClauseList>,
-                ITimeoutDependency {
-    protected static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST = newRequiredDependency();
+                ITimeoutDependency,
+                IRandomDependency {
+    protected static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
+            Dependency.newDependency(BooleanClauseList.class);
     protected static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
-            newOptionalDependency(new BooleanAssignment());
+            Dependency.newDependency(BooleanAssignment.class);
     protected static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
-            newOptionalDependency(new BooleanClauseList());
-    protected static final Dependency<Duration> TIMEOUT = newOptionalDependency(ITimeoutDependency.DEFAULT_TIMEOUT);
+            Dependency.newDependency(BooleanClauseList.class);
+    protected static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
+    protected static final Dependency<Random> RANDOM = Dependency.newDependency(Random.class);
 
-    public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Dependency<?>... dependencies) {
-        List<Dependency<?>> dependenciesList = new ArrayList<>();
-        dependenciesList.add(BOOLEAN_CLAUSE_LIST);
-        dependenciesList.add(ASSUMED_ASSIGNMENT);
-        dependenciesList.add(ASSUMED_CLAUSE_LIST);
-        dependenciesList.add(TIMEOUT);
-        dependenciesList.addAll(List.of(dependencies));
-        dependOn(dependenciesList);
-        setInput(booleanClauseList);
+    public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Object... computations) {
+        super(
+                booleanClauseList,
+                Computations.of(new BooleanAssignment()),
+                Computations.of(new BooleanClauseList(-1)),
+                Computations.of(ITimeoutDependency.DEFAULT_TIMEOUT),
+                Computations.of(IRandomDependency.newDefaultRandom()),
+                computations);
     }
 
-    @Override
-    public Dependency<BooleanClauseList> getInputDependency() {
-        return BOOLEAN_CLAUSE_LIST;
+    protected ASAT4JAnalysis(ASAT4JAnalysis<T> other) {
+        super(other);
     }
 
     @Override
@@ -76,6 +74,11 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     @Override
     public Dependency<BooleanClauseList> getAssumedClauseListDependency() {
         return ASSUMED_CLAUSE_LIST;
+    }
+
+    @Override
+    public Dependency<Random> getRandomDependency() {
+        return RANDOM;
     }
 
     protected abstract SAT4JSolver newSolver(BooleanClauseList clauseList);
@@ -104,8 +107,12 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     }
 
     public abstract static class Solution<T> extends ASAT4JAnalysis<T> {
-        public Solution(IComputation<BooleanClauseList> booleanClauseList, Dependency<?>... dependencies) {
-            super(booleanClauseList, dependencies);
+        public Solution(IComputation<BooleanClauseList> booleanClauseList, Object... computations) {
+            super(booleanClauseList, computations);
+        }
+
+        protected Solution(Solution<T> other) {
+            super(other);
         }
 
         @Override

@@ -20,8 +20,7 @@
  */
 package de.featjar.formula.transform;
 
-import de.featjar.formula.analysis.bool.ABooleanAssignment;
-
+import de.featjar.formula.analysis.bool.BooleanClause;
 import java.util.HashSet;
 
 /**
@@ -29,8 +28,7 @@ import java.util.HashSet;
  *
  * @author Sebastian Krieter
  */
-public class DirtyClause extends ABooleanAssignment {
-
+public class DirtyClause extends BooleanClause {
 
     private int relevance;
 

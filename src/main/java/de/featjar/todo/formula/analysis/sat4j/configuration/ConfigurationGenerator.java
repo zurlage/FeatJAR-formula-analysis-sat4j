@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2023 Sebastian Krieter
+ * Copyright (C) 2022 Sebastian Krieter
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of formula-analysis-sat4j.
  *
  * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -18,28 +18,32 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.todo.formula.analysis.sat4j.configuration;
 
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
+import de.featjar.base.computation.Cache;
 import de.featjar.base.computation.Progress;
-import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.BooleanSolution;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolution> {
-    // TODO Add dependency of selection strategy
+/**
+ * Interface for configuration generators. Can be used as a {@link Supplier} or
+ * to get a {@link Stream} or a {@link BooleanSolutionList} of configurations.
+ *
+ * @author Sebastian Krieter
+ */
+public interface ConfigurationGenerator
+        extends Supplier<SortedIntegerList>, Spliterator<SortedIntegerList>, IComputation {
 
-    public ComputeSolutionSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
-    }
+    void init(Cache rep, Progress progress);
 
-    protected ComputeSolutionSAT4J(ComputeSolutionSAT4J other) {
-        super(other);
-    }
+    int getLimit();
 
-    @Override
-    public Result<BooleanSolution> compute(DependencyList dependencyList, Progress progress) {
-        return initializeSolver(dependencyList).findSolution();
-    }
+    void setLimit(int limit);
+
+    boolean isAllowDuplicates();
+
+    void setAllowDuplicates(boolean allowDuplicates);
 }

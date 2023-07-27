@@ -20,15 +20,21 @@
  */
 package de.featjar.assignment;
 
+import static de.featjar.base.computation.Computations.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.IExpression;
+import de.featjar.base.computation.Computations;
 import de.featjar.base.io.IO;
-
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
+import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
+import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
+import de.featjar.formula.io.KConfigReaderFormat;
+import de.featjar.formula.structure.formula.IFormula;
+import de.featjar.formula.transformer.ComputeCNFFormula;
+import de.featjar.formula.transformer.ComputeNNFFormula;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.junit.jupiter.api.Test;
 
 public class CNFTransformTest {
@@ -36,12 +42,17 @@ public class CNFTransformTest {
     @Test
     public void testDistributiveBug() {
         final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-        final IExpression expression =
-                IO.load(modelFile, new KConfigReaderFormat()).orElseThrow();
 
-//        final ModelRepresentation rep = new ModelRepresentation(expression);
-//        final List<SortedIntegerList> atomicSets =
-//                rep.getResult(new AnalyzeAtomicSetsSAT4J()).orElseThrow();
-//        assertEquals(5, atomicSets.size());
+        BooleanAssignmentList atomicSets = await(IO.load(modelFile, new KConfigReaderFormat())
+                .toComputation()
+                .cast(IFormula.class)
+                .map(ComputeNNFFormula::new)
+                .map(ComputeCNFFormula::new)
+                .map(BooleanRepresentationComputation::new)
+                .map(Computations::getKey)
+                .cast(BooleanClauseList.class)
+                .map(ComputeAtomicSetsSAT4J::new));
+
+        assertEquals(5, atomicSets.size());
     }
 }

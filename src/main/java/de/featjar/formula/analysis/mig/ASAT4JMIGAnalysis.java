@@ -18,28 +18,24 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.sat4j;
+package de.featjar.formula.analysis.mig;
 
-import de.featjar.base.computation.DependencyList;
+import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.Progress;
-import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.BooleanSolution;
+import de.featjar.formula.analysis.mig.solver.MIGBuilder;
+import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
+import de.featjar.formula.analysis.sat4j.ASAT4JAnalysis;
 
-public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolution> {
-    // TODO Add dependency of selection strategy
+public abstract class ASAT4JMIGAnalysis<T> extends ASAT4JAnalysis.Solution<T> {
+    protected static final Dependency<ModalImplicationGraph> MIG =
+            Dependency.newDependency(ModalImplicationGraph.class);
 
-    public ComputeSolutionSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+    public ASAT4JMIGAnalysis(IComputation<BooleanClauseList> booleanClauseList, Object... computations) {
+        super(booleanClauseList, new MIGBuilder(booleanClauseList), computations);
     }
 
-    protected ComputeSolutionSAT4J(ComputeSolutionSAT4J other) {
+    protected ASAT4JMIGAnalysis(ASAT4JMIGAnalysis<T> other) {
         super(other);
-    }
-
-    @Override
-    public Result<BooleanSolution> compute(DependencyList dependencyList, Progress progress) {
-        return initializeSolver(dependencyList).findSolution();
     }
 }

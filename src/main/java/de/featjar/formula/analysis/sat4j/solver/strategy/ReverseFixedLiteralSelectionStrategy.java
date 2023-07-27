@@ -25,6 +25,8 @@ import static org.sat4j.core.LiteralsUtils.posLit;
 
 public class ReverseFixedLiteralSelectionStrategy extends FixedLiteralSelectionStrategy {
 
+    private static final long serialVersionUID = 1L;
+
     public ReverseFixedLiteralSelectionStrategy(int[] model) {
         super(model);
     }
