@@ -20,12 +20,14 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.analysis.bool.*;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
+import de.featjar.formula.analysis.bool.BooleanSolution;
+import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
+import java.util.List;
 
 public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList> {
     public ComputeSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
@@ -37,7 +39,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
     }
 
     @Override
-    public Result<BooleanSolutionList> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanSolutionList> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolver solver = initializeSolver(dependencyList);
         BooleanSolutionList solutionList = new BooleanSolutionList();
         Result<BooleanSolution> solution = solver.findSolution();

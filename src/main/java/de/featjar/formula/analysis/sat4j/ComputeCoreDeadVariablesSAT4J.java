@@ -28,6 +28,7 @@ import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -52,10 +53,10 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
     }
 
     @Override
-    public Result<BooleanAssignment> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        Random random = dependencyList.get(RANDOM);
-        ABooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
+        Random random = RANDOM.get(dependencyList);
+        ABooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();

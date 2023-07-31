@@ -24,7 +24,7 @@ import static de.featjar.base.computation.Computations.async;
 import static de.featjar.base.computation.Computations.await;
 import static de.featjar.formula.structure.Expressions.literal;
 import static de.featjar.formula.structure.Expressions.or;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;

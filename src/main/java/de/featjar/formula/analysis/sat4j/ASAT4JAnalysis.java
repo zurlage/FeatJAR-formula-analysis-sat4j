@@ -21,7 +21,12 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.FeatJAR;
-import de.featjar.base.computation.*;
+import de.featjar.base.computation.AComputation;
+import de.featjar.base.computation.Computations;
+import de.featjar.base.computation.Dependency;
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.IRandomDependency;
+import de.featjar.base.computation.ITimeoutDependency;
 import de.featjar.formula.analysis.IAssumedAssignmentDependency;
 import de.featjar.formula.analysis.IAssumedClauseListDependency;
 import de.featjar.formula.analysis.bool.ABooleanAssignment;
@@ -31,6 +36,7 @@ import de.featjar.formula.analysis.sat4j.solver.SAT4JExplanationSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 
 public abstract class ASAT4JAnalysis<T> extends AComputation<T>
@@ -84,11 +90,11 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     protected abstract SAT4JSolver newSolver(BooleanClauseList clauseList);
 
     @SuppressWarnings("unchecked")
-    public <U extends SAT4JSolver> U initializeSolver(DependencyList dependencyList) {
-        BooleanClauseList clauseList = dependencyList.get(BOOLEAN_CLAUSE_LIST);
-        ABooleanAssignment assumedAssignment = dependencyList.get(ASSUMED_ASSIGNMENT);
-        BooleanClauseList assumedClauseList = dependencyList.get(ASSUMED_CLAUSE_LIST);
-        Duration timeout = dependencyList.get(TIMEOUT);
+    public <U extends SAT4JSolver> U initializeSolver(List<Object> dependencyList) {
+        BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
+        ABooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
+        BooleanClauseList assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
+        Duration timeout = TIMEOUT.get(dependencyList);
         FeatJAR.log().debug("initializing SAT4J");
         //                    Feat.log().debug(clauseList.toValue().get());
         //                    Feat.log().debug("assuming " +

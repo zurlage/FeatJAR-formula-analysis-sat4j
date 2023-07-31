@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.sat4j.twise;
 
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.IRandomDependency;
 import de.featjar.base.computation.Progress;
@@ -114,12 +113,12 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
     }
 
     @Override
-    public Result<CoverageStatistic> compute(DependencyList dependencyList, Progress progress) {
+    public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
 
-        random = dependencyList.get(RANDOM);
-        BooleanSolutionList sample = dependencyList.get(SAMPLE);
-        BooleanAssignment deadCoreFeatures = dependencyList.get(CORE);
-        int t = dependencyList.get(T);
+        random = RANDOM.get(dependencyList);
+        BooleanSolutionList sample = SAMPLE.get(dependencyList);
+        BooleanAssignment deadCoreFeatures = CORE.get(dependencyList);
+        int t = T.get(dependencyList);
         //    final int initialAssignmentLength = solver.getAssignment().size();
         //    solver.setSelectionStrategy(ISelectionStrategy.positive());
 

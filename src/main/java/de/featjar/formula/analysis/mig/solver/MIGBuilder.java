@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.mig.solver;
 
 import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
@@ -58,9 +57,9 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
     }
 
     @Override
-    public Result<ModalImplicationGraph> compute(DependencyList dependencyList, Progress progress) {
-        BooleanClauseList cnfFormula = dependencyList.get(CNF_CLAUSES);
-        BooleanAssignment coreLiterals = dependencyList.get(CORE);
+    public Result<ModalImplicationGraph> compute(List<Object> dependencyList, Progress progress) {
+        BooleanClauseList cnfFormula = CNF_CLAUSES.get(dependencyList);
+        BooleanAssignment coreLiterals = CORE.get(dependencyList);
 
         progress.setTotalSteps(8);
 

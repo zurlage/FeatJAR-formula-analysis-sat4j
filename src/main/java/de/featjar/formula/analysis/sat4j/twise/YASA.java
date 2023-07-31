@@ -23,7 +23,6 @@ package de.featjar.formula.analysis.sat4j.twise;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.IRandomDependency;
 import de.featjar.base.computation.Progress;
@@ -218,15 +217,15 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
     }
 
     @Override
-    public Result<BooleanSolutionList> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanSolutionList> compute(List<Object> dependencyList, Progress progress) {
         solver = initializeSolver(dependencyList);
-        t = dependencyList.get(T);
+        t = T.get(dependencyList);
         if (t < 1) {
             throw new IllegalArgumentException(String.valueOf(t));
         }
-        random = dependencyList.get(RANDOM);
-        cnf = dependencyList.get(BOOLEAN_CLAUSE_LIST);
-        BooleanAssignment variables = dependencyList.get(VARIABLES_OF_INTEREST);
+        random = RANDOM.get(dependencyList);
+        cnf = BOOLEAN_CLAUSE_LIST.get(dependencyList);
+        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
         //        final int initialAssignmentLength = solver.getAssignment().size();
         //        solver.setSelectionStrategy(ISelectionStrategy.positive()); // todo: fails for berkeley db
         //        Result<BooleanSolution> solution = solver.findSolution();
@@ -273,12 +272,12 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
 
         maxCombinationIndex = BinomialCalculator.computeBinomial(presenceConditions.size(), t);
         progress.setTotalSteps((int) (iterations * maxCombinationIndex));
-        //		progress.setStatusReporter(new Supplier<>() {
-        //			@Override
-        //			public String get() {
-        //				return String.valueOf(solutionList.size());
-        //			}
-        //		});
+        //        		progress.setStatusReporter(new Supplier<>() {
+        //        			@Override
+        //        			public String get() {
+        //        				return String.valueOf(solutionList.size());
+        //        			}
+        //        		});
 
         solutionList = new ArrayList<>();
         buildCombinations(progress, 0);

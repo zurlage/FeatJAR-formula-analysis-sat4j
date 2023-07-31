@@ -22,7 +22,6 @@ package de.featjar.formula.analysis.mig;
 
 import de.featjar.base.computation.ComputeConstant;
 import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
@@ -34,6 +33,7 @@ import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph.Visitor;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -55,12 +55,12 @@ public class ComputeCoreDead extends ASAT4JMIGAnalysis<BooleanAssignment> {
     }
 
     @Override
-    public Result<BooleanAssignment> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        Random random = dependencyList.get(RANDOM);
-        BooleanAssignment assignment = dependencyList.get(ASSUMED_ASSIGNMENT);
-        ABooleanAssignment variablesOfInterest = dependencyList.get(VARIABLES_OF_INTEREST);
-        ModalImplicationGraph mig = dependencyList.get(MIG);
+        Random random = RANDOM.get(dependencyList);
+        BooleanAssignment assignment = ASSUMED_ASSIGNMENT.get(dependencyList);
+        ABooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
+        ModalImplicationGraph mig = MIG.get(dependencyList);
 
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();

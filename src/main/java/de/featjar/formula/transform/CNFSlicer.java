@@ -22,7 +22,6 @@ package de.featjar.formula.transform;
 
 import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.Dependency;
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.ABooleanAssignment;
@@ -48,7 +47,6 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
     protected static final Dependency<BooleanClauseList> CNF = Dependency.newDependency(BooleanClauseList.class);
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
-    //            newOptionalDependency(new BooleanAssignment());
 
     protected static final Comparator<ABooleanAssignment> lengthComparator =
             Comparator.comparing(ABooleanAssignment::size);
@@ -94,9 +92,9 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
 
     @Override
-    public Result<BooleanClauseList> compute(DependencyList dependencyList, Progress progress) {
-        orgCNF = dependencyList.get(CNF);
-        dirtyVariables = dependencyList.get(VARIABLES_OF_INTEREST);
+    public Result<BooleanClauseList> compute(List<Object> dependencyList, Progress progress) {
+        orgCNF = CNF.get(dependencyList);
+        dirtyVariables = VARIABLES_OF_INTEREST.get(dependencyList);
 
         cnfCopy = new BooleanClauseList(orgCNF.getVariableCount());
 

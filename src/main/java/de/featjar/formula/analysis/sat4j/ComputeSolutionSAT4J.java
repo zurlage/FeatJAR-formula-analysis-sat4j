@@ -20,12 +20,12 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
+import java.util.List;
 
 public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolution> {
     // TODO Add dependency of selection strategy
@@ -39,7 +39,7 @@ public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutio
     }
 
     @Override
-    public Result<BooleanSolution> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanSolution> compute(List<Object> dependencyList, Progress progress) {
         return initializeSolver(dependencyList).findSolution();
     }
 }

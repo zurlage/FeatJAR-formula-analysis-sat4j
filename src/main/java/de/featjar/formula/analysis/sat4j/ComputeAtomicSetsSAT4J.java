@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.DependencyList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
@@ -32,6 +31,7 @@ import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JAssignment;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -51,11 +51,11 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
     }
 
     @Override
-    public Result<BooleanAssignmentList> compute(DependencyList dependencyList, Progress progress) {
+    public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        Random random = dependencyList.get(RANDOM);
+        Random random = RANDOM.get(dependencyList);
         final BooleanAssignmentList result = new BooleanAssignmentList(
-                dependencyList.get(BOOLEAN_CLAUSE_LIST).getVariableCount());
+                BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableCount());
         //		if (variables == null) {
         //			variables = LiteralList.getVariables(solver.getVariables());
         //		}
