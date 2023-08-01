@@ -92,7 +92,9 @@ public class ModalImplicationGraph {
 
         public void propagate(int... literals) throws RuntimeContradictionException {
             for (int l : literals) {
-                processLiteral(l);
+                if (l != 0) {
+                    processLiteral(l);
+                }
             }
         }
 

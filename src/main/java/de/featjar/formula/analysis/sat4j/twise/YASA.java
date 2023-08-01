@@ -20,7 +20,6 @@
  */
 package de.featjar.formula.analysis.sat4j.twise;
 
-import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
@@ -30,13 +29,17 @@ import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.RuntimeContradictionException;
 import de.featjar.formula.analysis.RuntimeTimeoutException;
+import de.featjar.formula.analysis.bool.ABooleanAssignment;
+import de.featjar.formula.analysis.bool.ABooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
+import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.combinations.BinomialCalculator;
 import de.featjar.formula.analysis.combinations.LexicographicIterator;
+import de.featjar.formula.analysis.combinations.LexicographicIterator.Combination;
 import de.featjar.formula.analysis.mig.solver.MIGBuilder;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
 import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph.Visitor;
@@ -50,11 +53,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 /**
  * YASA sampling algorithm. Generates configurations for a given propositional
@@ -64,12 +66,31 @@ import java.util.stream.LongStream;
  */
 public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandomDependency {
 
+    //    public static class NodeList extends ArrayList<List<BooleanClause>> {
+    //        private static final long serialVersionUID = 1L;
+    //    }
+    //    public static final Dependency<NodeList> NODES = Dependency.newDependency(NodeList.class);
+
+    public static final Dependency<BooleanAssignment> LITERALS = Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
-            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<Integer> LIMIT = Dependency.newDependency(Integer.class);
+    public static final Dependency<Integer> ITERATIONS = Dependency.newDependency(Integer.class);
+
+    @SuppressWarnings("rawtypes")
+    public static final Dependency<ABooleanAssignmentList> SAMPLE =
+            Dependency.newDependency(ABooleanAssignmentList.class);
+
+    public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
 
     public YASA(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList, Computations.of(2), Computations.of(new BooleanAssignment()));
+        super(
+                booleanClauseList,
+                Computations.of(new BooleanAssignment()),
+                Computations.of(2),
+                Computations.of(Integer.MAX_VALUE),
+                Computations.of(2),
+                Computations.of(new BooleanAssignmentList()),
+                new MIGBuilder(booleanClauseList));
     }
 
     protected YASA(YASA other) {
@@ -94,11 +115,9 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
     }
 
     private class PartialConfiguration extends BooleanSolution {
-
         private final int id;
 
         private Visitor visitor;
-
         private ArrayList<BooleanSolution> solverSolutions;
 
         public PartialConfiguration(PartialConfiguration config) {
@@ -167,74 +186,50 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
         }
     }
 
-    public static final int DEFAULT_ITERATIONS = 1;
     public static final int GLOBAL_SOLUTION_LIMIT = 100_000;
 
-    private List<List<BooleanClause>> nodes;
-    private ArrayDeque<BooleanSolution> randomSample;
+    private int t, maxSampleSize, iterations, numberOfVariableLiterals;
 
-    private int maxSampleSize = Integer.MAX_VALUE;
-    private int iterations = DEFAULT_ITERATIONS;
-    private int t;
+    private SAT4JSolutionSolver solver;
+    private ModalImplicationGraph mig;
+    private Random random;
+    private ABooleanAssignmentList<?> inputSample;
 
+    private final ArrayList<PartialConfiguration> candidateConfiguration = new ArrayList<>();
+    private final ArrayDeque<BooleanSolution> randomSample = new ArrayDeque<>(GLOBAL_SOLUTION_LIMIT);
     private ArrayList<ExpandableIntegerList> indexedSolutions;
     private ArrayList<ExpandableIntegerList> indexedBestSolutions;
-    private ArrayList<PartialConfiguration> solutionList;
-    private ArrayList<PartialConfiguration> bestResult;
-    private final ArrayDeque<PartialConfiguration> candidateConfiguration = new ArrayDeque<>();
+    private List<PartialConfiguration> bestSolutionList;
+    private List<PartialConfiguration> solutionList;
     private ExpandableIntegerList[] selectedIndexedSolutions;
 
     private PartialConfiguration newConfiguration;
     private int curSolutionId;
-    private long maxCombinationIndex;
-    private int numberOfVariableLiterals;
-
-    private ModalImplicationGraph mig;
-    private BooleanAssignment core;
-    private BooleanClauseList cnf;
-
-    private Random random;
-    private SAT4JSolutionSolver solver;
+    private boolean overLimit;
 
     private final List<List<BooleanClause>> presenceConditions = new ArrayList<>();
 
-    public void setNodes(List<List<BooleanClause>> nodes) {
-        this.nodes = Objects.requireNonNull(nodes);
-    }
-
-    public void setIterations(int iterations) {
-        if (iterations < 1) {
-            throw new IllegalArgumentException(String.valueOf(iterations));
-        }
-        this.iterations = iterations;
-    }
-
-    public void setMaxSampleSize(int maxSampleSize) {
-        if (maxSampleSize < 0) {
-            throw new IllegalArgumentException(String.valueOf(maxSampleSize));
-        }
-        this.maxSampleSize = maxSampleSize;
-    }
-
     @Override
     public Result<BooleanSolutionList> compute(List<Object> dependencyList, Progress progress) {
-        solver = initializeSolver(dependencyList);
         t = T.get(dependencyList);
         if (t < 1) {
             throw new IllegalArgumentException(String.valueOf(t));
         }
+        maxSampleSize = LIMIT.get(dependencyList);
+        iterations = ITERATIONS.get(dependencyList);
         random = RANDOM.get(dependencyList);
-        cnf = BOOLEAN_CLAUSE_LIST.get(dependencyList);
-        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
-        //        final int initialAssignmentLength = solver.getAssignment().size();
-        //        solver.setSelectionStrategy(ISelectionStrategy.positive()); // todo: fails for berkeley db
-        //        Result<BooleanSolution> solution = solver.findSolution();
-        //        if (solution.isEmpty()) return Result.empty();
-        //        int[] model1 = solution.get().get();
+
+        solver = initializeSolver(dependencyList);
+        mig = MIG.get(dependencyList);
+        inputSample = SAMPLE.get(dependencyList);
+        BooleanClauseList cnf = BOOLEAN_CLAUSE_LIST.get(dependencyList);
+        BooleanAssignment variables = LITERALS.get(dependencyList);
+        BooleanAssignment core = new BooleanAssignment(mig.getCore());
+
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
-        curSolutionId = 0;
         selectedIndexedSolutions = new ExpandableIntegerList[t];
-        // Logger.setPrintStackTrace(true);
+
+        List<List<BooleanClause>> nodes;
         if (variables.isEmpty()) {
             nodes = convertLiterals(
                     new BooleanAssignment(IntStream.range(-cnf.getVariableCount(), cnf.getVariableCount() + 1)
@@ -243,11 +238,6 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
         } else {
             nodes = convertLiterals(variables);
         }
-        randomSample = new ArrayDeque<>(GLOBAL_SOLUTION_LIMIT);
-
-        final MIGBuilder migBuilder = new MIGBuilder(Computations.of(cnf));
-        mig = Computations.await(migBuilder);
-        core = new BooleanAssignment(mig.getCore());
         numberOfVariableLiterals = nodes.size() - core.countNegatives() - core.countPositives();
 
         expressionLoop:
@@ -270,302 +260,141 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
             }
         }
 
-        maxCombinationIndex = BinomialCalculator.computeBinomial(presenceConditions.size(), t);
-        progress.setTotalSteps((int) (iterations * maxCombinationIndex));
-        //        		progress.setStatusReporter(new Supplier<>() {
-        //        			@Override
-        //        			public String get() {
-        //        				return String.valueOf(solutionList.size());
-        //        			}
-        //        		});
+        progress.setTotalSteps((int) (BinomialCalculator.computeBinomial(presenceConditions.size(), t)));
 
-        solutionList = new ArrayList<>();
-        buildCombinations(progress, 0);
-        FeatJAR.log().debug(solutionList.size() + " (" + bestResult.size() + ")");
-        for (int i = 1; i < iterations; i++) {
-            trimConfigurations(i);
-            buildCombinations(progress, i);
-            FeatJAR.log().debug(solutionList.size() + " (" + bestResult.size() + ")");
+        buildCombinations(progress);
+        for (int j = 1; j < iterations; j++) {
+            if (overLimit) {
+                buildCombinations(progress);
+            } else {
+                rebuildCombinations(progress);
+            }
         }
+        bestSolutionList = reduce(bestSolutionList);
 
-        bestResult.forEach(this::autoComplete);
-        Collections.reverse(bestResult);
-        BooleanSolutionList list = new BooleanSolutionList(cnf.getVariableCount());
-        bestResult.stream().map(c -> new BooleanSolution(c.get())).forEach(list::add);
-        return Result.of(list);
+        BooleanSolutionList result = new BooleanSolutionList(cnf.getVariableCount());
+        for (int j = bestSolutionList.size() - 1; j >= 0; j--) {
+            result.add(autoComplete(bestSolutionList.get(j)));
+        }
+        return Result.of(result);
     }
 
-    private void trimConfigurations(int iteration) {
-        final int indexSize = 2 * mig.size();
-        if (indexedBestSolutions == null) {
-            indexedBestSolutions = new ArrayList<>(indexSize);
-            for (int i = 0; i < indexSize; i++) {
-                indexedBestSolutions.add(new ExpandableIntegerList());
-            }
-            for (PartialConfiguration solution : bestResult) {
-                addIndexBestSolutions(solution);
-            }
-            for (ExpandableIntegerList indexList : indexedBestSolutions) {
-                indexList.sort();
-            }
-        }
+    private void buildCombinations(Progress monitor) {
+        final int[] literals = initliterals(false);
+        initSolutionList();
 
-        indexedSolutions = new ArrayList<>(indexSize);
+        final int[] combinationLiterals = new int[t];
+        LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
+            checkCancel();
+            monitor.incrementCurrentStep();
+            int[] next = combo.elementIndices;
+            for (int i = 0; i < next.length; i++) {
+                combinationLiterals[i] = literals[next[i]];
+            }
+
+            if (isCovered(combinationLiterals, indexedSolutions)) {
+                return;
+            }
+            if (isCombinationInvalidMIG(combinationLiterals)) {
+                return;
+            }
+
+            if (isCombinationValidSample(combinationLiterals)) {
+                if (firstCover(combinationLiterals)) {
+                    return;
+                }
+            } else {
+                if (isCombinationInvalidSAT(combinationLiterals)) {
+                    return;
+                }
+                addToCandidateList(combinationLiterals);
+            }
+
+            if (coverSat(combinationLiterals)) {
+                return;
+            }
+            newConfiguration(combinationLiterals);
+        });
+        setBestSolutionList();
+    }
+
+    private void rebuildCombinations(Progress monitor) {
+        final int[] literals = initliterals(true);
+        initSolutionList();
+
+        final int indexSize = indexedSolutions.size();
+        indexedBestSolutions = new ArrayList<>(indexSize);
         for (int i = 0; i < indexSize; i++) {
-            indexedSolutions.add(new ExpandableIntegerList());
+            indexedBestSolutions.add(new ExpandableIntegerList());
         }
-
-        final long[] normConfigValues = getConfigScores(solutionList);
-
-        long[] normConfigValuesSorted = Arrays.copyOf(normConfigValues, normConfigValues.length);
-        Arrays.sort(normConfigValuesSorted);
-        final int meanSearch = Arrays.binarySearch(normConfigValuesSorted, (long)
-                LongStream.of(normConfigValues).average().getAsDouble());
-        final int meanIndex = meanSearch >= 0 ? meanSearch : -meanSearch - 1;
-        final long reference = normConfigValuesSorted[
-                (int) (normConfigValues.length
-                        - ((normConfigValues.length - meanIndex) * ((double) iteration / iterations)))];
-
-        ArrayList<PartialConfiguration> newSolutionList = new ArrayList<>(solutionList.size());
-        int index = 0;
-        for (PartialConfiguration solution : solutionList) {
-            if (normConfigValues[index++] >= reference) {
-                addIndexSolutions(solution);
-                newSolutionList.add(new PartialConfiguration(solution));
-            }
-        }
-        solutionList = newSolutionList;
-
-        for (ExpandableIntegerList indexList : indexedSolutions) {
-            indexList.sort();
-        }
-    }
-
-    private long[] getConfigScores(List<PartialConfiguration> sample) {
-        final int configLength = sample.size();
-
-        final int n = cnf.getVariableCount();
-        final int t2 = (n < t) ? n : t;
-        final int n2 = n - t2;
-        final int pow = (int) Math.pow(2, t2);
-
-        final long[][] configScores = new long[pow][configLength];
-
-        int[] sampleIndex0 = IntStream.range(0, configLength).toArray();
-        IntStream.range(0, pow) //
-                .parallel() //
-                .forEach(maskIndex -> {
-                    long[] configScore = configScores[maskIndex];
-                    boolean[] mask = new boolean[t2];
-                    for (int j = 0; j < t2; j++) {
-                        mask[j] = (maskIndex >> j & 1) == 0;
-                    }
-
-                    int[][] sampleIndex = new int[t2 + 1][];
-                    sampleIndex[0] = sampleIndex0;
-                    for (int i = 1; i < sampleIndex.length; i++) {
-                        sampleIndex[i] = new int[configLength];
-                    }
-
-                    int[] literals = new int[t2];
-                    int liSample = 0;
-
-                    final int[] c = new int[t2];
-                    for (int i = 0; i < t2; i++) {
-                        c[i] = i;
-                    }
-                    int i = 0;
-
-                    combinationLoop:
-                    while (true) {
-                        liSample = Math.min(liSample, i);
-
-                        for (int k = 0; k < t2; k++) {
-                            int literal = mask[k] ? (c[k] + 1) : -(c[k] + 1);
-                            if (core.containsAnyVariable(literal)) {
-                                i = k;
-                                for (; i >= 0; i--) {
-                                    final int ci = ++c[i];
-                                    if (ci < (n2 + i)) {
-                                        break;
-                                    }
-                                }
-                                if (i == -1) {
-                                    break combinationLoop;
-                                }
-                                for (int j = i + 1; j < t2; j++) {
-                                    c[j] = c[j - 1] + 1;
-                                }
-                                continue combinationLoop;
-                            }
-                            literals[k] = literal;
-                        }
-
-                        for (int k = liSample; k < t2; k++) {
-                            final int index = c[k];
-                            final int literalValue = literals[k];
-                            int[] sampleIndex1 = sampleIndex[k];
-                            int[] sampleIndex2 = sampleIndex[k + 1];
-
-                            int sindex2 = 0;
-                            for (int sindex1 : sampleIndex1) {
-                                if (sindex1 == -1 || sindex1 >= configLength) {
-                                    break;
-                                }
-                                int[] config = sample.get(sindex1).get();
-                                if (config[index] == literalValue) {
-                                    sampleIndex2[sindex2++] = sindex1;
-                                }
-                            }
-                            if (sindex2 < sampleIndex2.length) {
-                                sampleIndex2[sindex2] = -1;
-                            }
-                        }
-                        liSample = i;
-
-                        final int[] sampleIndexK = sampleIndex[t2];
-
-                        int count = 0;
-                        for (int l = 0; l < sampleIndexK.length; l++) {
-                            int j = sampleIndexK[l];
-                            if (j < 0) {
-                                count = l;
-                                break;
-                            }
-                        }
-
-                        final double s = count == 1 ? 1 : 0;
-                        for (int l = 0; l < count; l++) {
-                            configScore[sampleIndexK[l]] += s;
-                        }
-
-                        i = t2 - 1;
-                        for (; i >= 0; i--) {
-                            final int ci = ++c[i];
-                            if (ci < (n2 + i)) {
-                                break;
-                            }
-                        }
-
-                        if (i == -1) {
-                            break;
-                        }
-                        for (int j = i + 1; j < t2; j++) {
-                            c[j] = c[j - 1] + 1;
-                        }
-                    }
-                });
-
-        int confIndex = 0;
-        final long[] configScore = configScores[0];
-        for (int j = 1; j < pow; j++) {
-            final long[] configScoreJ = configScores[j];
-            for (int k = 1; k < configLength; k++) {
-                configScore[k] += configScoreJ[k];
-            }
-        }
-        for (final BooleanSolution configuration : sample) {
-            int count = 0;
-            for (final int literal : configuration.get()) {
+        for (PartialConfiguration solution : bestSolutionList) {
+            final int[] solutionLiterals = solution.get();
+            for (int i = 0; i < solutionLiterals.length; i++) {
+                final int literal = solutionLiterals[i];
                 if (literal != 0) {
-                    count++;
+                    indexedBestSolutions
+                            .get(ModalImplicationGraph.getVertexIndex(literal))
+                            .add(solution.id);
                 }
             }
-            final double factor = Math.pow((2.0 - (((double) count) / configuration.size())), t);
-            configScore[confIndex] = (long) Math.round(configScore[confIndex] * factor);
-            confIndex++;
+        }
+        for (ExpandableIntegerList indexList : indexedBestSolutions) {
+            indexList.sort();
         }
 
-        return configScore;
+        final int[] combinationLiterals = new int[t];
+        LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
+            int[] next = combo.elementIndices;
+            for (int i = 0; i < next.length; i++) {
+                combinationLiterals[i] = literals[next[i]];
+            }
+
+            if (isCovered(combinationLiterals, indexedSolutions)) {
+                return;
+            }
+            if (!isCovered(combinationLiterals, indexedBestSolutions)) {
+                return;
+            }
+            if (firstCover(combinationLiterals)) {
+                return;
+            }
+            if (coverSat(combinationLiterals)) {
+                return;
+            }
+            newConfiguration(combinationLiterals);
+        });
+        setBestSolutionList();
     }
 
-    private void buildCombinations(Progress monitor, int phase) {
-        // TODO Variation Point: Combination order
-        shuffleSort();
+    private void setBestSolutionList() {
+        if (bestSolutionList == null || bestSolutionList.size() > solutionList.size()) {
+            bestSolutionList = solutionList;
+        }
+    }
 
+    private void initSolutionList() {
+        curSolutionId = 0;
+        overLimit = false;
+        solutionList = new ArrayList<>();
+        for (ABooleanAssignment config : inputSample) {
+            newConfiguration(config.get());
+        }
+        final int indexSize = 2 * mig.size();
+        indexedSolutions = new ArrayList<>(indexSize);
+        for (int i2 = 0; i2 < indexSize; i2++) {
+            indexedSolutions.add(new ExpandableIntegerList());
+        }
+    }
+
+    private int[] initliterals(boolean shuffle) {
+        if (shuffle) {
+            shuffleSort();
+        }
         final int[] literals = new int[presenceConditions.size()];
         for (int i1 = 0; i1 < literals.length; i1++) {
             literals[i1] = presenceConditions.get(i1).get(0).get()[0];
         }
-
-        final int[] combinationLiterals = new int[t];
-
-        if (phase == 0) {
-            final int indexSize = 2 * mig.size();
-            indexedSolutions = new ArrayList<>(indexSize);
-            for (int i2 = 0; i2 < indexSize; i2++) {
-                indexedSolutions.add(new ExpandableIntegerList());
-            }
-            LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
-                int[] next = combo.elementIndices;
-                monitor.incrementCurrentStep();
-                for (int i = 0; i < next.length; i++) {
-                    combinationLiterals[i] = literals[next[i]];
-                }
-
-                if (isCovered(combinationLiterals, indexedSolutions)) {
-                    return;
-                }
-                if (isCombinationInvalidMIG(combinationLiterals)) {
-                    return;
-                }
-
-                if (isCombinationValidSample(combinationLiterals)) {
-                    if (firstCover(combinationLiterals)) {
-                        return;
-                    }
-                } else {
-                    if (isCombinationInvalidSAT(combinationLiterals)) {
-                        return;
-                    }
-                    addToCandidateList(combinationLiterals);
-                }
-                // if (firstCover(combinationLiterals)) {
-                // continue;
-                // }
-                // if (!isCombinationValidSample(combinationLiterals) &&
-                // isCombinationInvalidSAT(combinationLiterals)) {
-                // continue;
-                // }
-
-                if (coverSat(combinationLiterals)) {
-                    return;
-                }
-                newConfiguration(combinationLiterals);
-            });
-            bestResult = solutionList;
-        } else {
-            //			long remainingCombinations = maxCombinationIndex;
-            LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
-                int[] next = combo.elementIndices;
-                monitor.incrementCurrentStep();
-                //				remainingCombinations--;
-                for (int i = 0; i < next.length; i++) {
-                    combinationLiterals[i] = literals[next[i]];
-                }
-
-                if (isCovered(combinationLiterals, indexedSolutions)) {
-                    return;
-                }
-                if (!isCovered(combinationLiterals, indexedBestSolutions)) {
-                    return;
-                }
-                if (firstCover(combinationLiterals)) {
-                    return;
-                }
-                if (coverSat(combinationLiterals)) {
-                    return;
-                }
-                //				if (solutionList.size() == bestResult.size()) {
-                //					monitor.addCurrentSteps((int) remainingCombinations);
-                //					return;
-                //				}
-                newConfiguration(combinationLiterals);
-            });
-            if (bestResult.size() > solutionList.size()) {
-                bestResult = solutionList;
-            }
-        }
+        return literals;
     }
 
     private void shuffleSort() {
@@ -579,28 +408,6 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
         presenceConditions.clear();
         for (final Map.Entry<Integer, List<List<BooleanClause>>> entry : shuffledPCs) {
             presenceConditions.addAll(entry.getValue());
-        }
-    }
-
-    private void addIndexBestSolutions(PartialConfiguration solution) {
-        final int[] literals = solution.get();
-        for (int i = 0; i < literals.length; i++) {
-            final int literal = literals[i];
-            if (literal != 0) {
-                final int vertexIndex = ModalImplicationGraph.getVertexIndex(literal);
-                ExpandableIntegerList indexList = indexedBestSolutions.get(vertexIndex);
-                indexList.add(solution.id);
-            }
-        }
-    }
-
-    private void addIndexSolutions(PartialConfiguration solution) {
-        for (int literal : solution.get()) {
-            if (literal != 0) {
-                indexedSolutions
-                        .get(ModalImplicationGraph.getVertexIndex(literal))
-                        .add(solution.id);
-            }
         }
     }
 
@@ -834,11 +641,13 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
                         newConfiguration.visitor.getAddedLiterals()[i]));
                 indexList.add(newConfiguration.id);
             }
+        } else {
+            overLimit = true;
         }
         newConfiguration = null;
     }
 
-    private void autoComplete(PartialConfiguration configuration) {
+    private BooleanSolution autoComplete(PartialConfiguration configuration) {
         if (!configuration.isComplete()) {
             if (configuration.solverSolutions.size() > 0) {
                 final int[] configuration2 =
@@ -865,6 +674,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
                 }
             }
         }
+        return new BooleanSolution(configuration.get(), false);
     }
 
     private boolean isSelectionPossibleSol(PartialConfiguration configuration, int[] literals) {
@@ -952,5 +762,40 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> implements IRandom
     @Override
     protected SAT4JSolver newSolver(BooleanClauseList clauseList) {
         return new SAT4JSolutionSolver(clauseList);
+    }
+
+    private List<PartialConfiguration> reduce(List<PartialConfiguration> solutionList) {
+        if (solutionList.isEmpty()) {
+            return solutionList;
+        }
+        final int n = solutionList.get(0).size();
+        int t2 = (n < t) ? n : t;
+        int nonUniqueIndex = solutionList.size();
+        final Function<Combination<int[]>, int[]> environmentCreator = c -> new int[t2];
+
+        for (int i = 0; i < nonUniqueIndex; i++) {
+            PartialConfiguration config = solutionList.get(i);
+            int finalNonUniqueIndex = nonUniqueIndex;
+
+            boolean hasUnique = LexicographicIterator.parallelStream(t2, n, environmentCreator)
+                    .anyMatch(combo -> {
+                        final int[] configLiterals = config.get();
+                        int[] literals = combo.environment;
+                        for (int k = 0; k < literals.length; k++) {
+                            literals[k] = configLiterals[combo.elementIndices[k]];
+                        }
+                        for (int j = 0; j < finalNonUniqueIndex; j++) {
+                            PartialConfiguration config2 = solutionList.get(j);
+                            if (config != config2 && config2.containsAll(literals)) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    });
+            if (!hasUnique) {
+                Collections.swap(solutionList, i--, --nonUniqueIndex);
+            }
+        }
+        return solutionList.subList(0, nonUniqueIndex);
     }
 }

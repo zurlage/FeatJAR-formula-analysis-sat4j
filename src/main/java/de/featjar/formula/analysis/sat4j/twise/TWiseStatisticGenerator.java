@@ -114,13 +114,10 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
 
     @Override
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
-
         random = RANDOM.get(dependencyList);
         BooleanSolutionList sample = SAMPLE.get(dependencyList);
         BooleanAssignment deadCoreFeatures = CORE.get(dependencyList);
         int t = T.get(dependencyList);
-        //    final int initialAssignmentLength = solver.getAssignment().size();
-        //    solver.setSelectionStrategy(ISelectionStrategy.positive());
 
         sampleConfigs =
                 sample.stream().map(TWiseStatisticGenerator::convertToBitSet).collect(Collectors.toList());
@@ -145,8 +142,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
             invalid = new long[pow];
             covered = new long[pow];
             uncovered = new long[pow];
-
-            //            UpdateThread monitorThread = Logger.startMonitorLogger(monitor);
 
             int[] sampleIndex0 = IntStream.range(0, sampleConfigs.size()).toArray();
             int[] randomIndex0 = IntStream.range(0, GLOBAL_SOLUTION_LIMIT).toArray();
@@ -180,7 +175,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
                         int i = 0;
 
                         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-                        //                        final Visitor visitor = util.getMig().new Visitor();
                         boolean addSolutions = true;
 
                         combinationLoop:
@@ -192,8 +186,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
                             for (int k = 0; k < t2; k++) {
                                 int literal = mask[k] ? (c[k] + 1) : -(c[k] + 1);
                                 if (deadCoreFeatures.containsAnyVariable(literal)) {
-                                    //                                    monitor.step(binomialCalculator.binomial(n -
-                                    // (c[k] + 2), t2 - (k + 1)));
                                     i = k;
                                     for (; i >= 0; i--) {
                                         final int ci = ++c[i];
@@ -217,12 +209,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
                             d:
                             {
                                 total[maskIndex]++;
-
-                                //                                visitor.reset();
-                                //                                if (visitor.isContradiction(literals)) {
-                                //                                    invalid[maskIndex]++;
-                                //                                    break d;
-                                //                                }
 
                                 int curRandomSolutionCount = randomSolutionCount;
 
@@ -250,7 +236,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
                                     uncovered[maskIndex]++;
                                 }
                             }
-                            //                            monitor.step();
 
                             i = t3;
                             for (; i >= 0; i--) {
@@ -280,9 +265,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
             statistic.setNumberOfCoveredConditions(coveredSum);
             statistic.setNumberOfInvalidConditions(invalidSum);
             statistic.setNumberOfUncoveredConditions(uncoveredSum);
-
-            //            monitor.done();
-            //            monitorThread.finish();
 
             return Result.of(statistic);
         }
