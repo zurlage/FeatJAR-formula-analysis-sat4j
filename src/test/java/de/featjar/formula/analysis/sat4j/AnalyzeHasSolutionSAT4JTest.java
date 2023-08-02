@@ -40,10 +40,10 @@ public class AnalyzeHasSolutionSAT4JTest {
         return await(async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .setDependency(ComputeCNFFormula.IS_PLAISTED_GREENBAUM, Computations.of(Boolean.TRUE))
+                .set(ComputeCNFFormula.IS_PLAISTED_GREENBAUM, Boolean.TRUE)
                 .map(BooleanRepresentationComputation::new)
                 .map(Computations::getKey)
-                .map(r -> Computations.cast(r, BooleanClauseList.class))
+                .cast(BooleanClauseList.class)
                 .map(ComputeSolutionSAT4J::new)
                 .map(ComputePresence<BooleanSolution>::new));
     }

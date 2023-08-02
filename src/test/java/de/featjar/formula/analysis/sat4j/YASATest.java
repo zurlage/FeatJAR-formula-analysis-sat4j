@@ -46,14 +46,14 @@ public class YASATest {
 
     public void getTWiseSample(IFormula formula, int t) {
         IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = await(clauses.map(YASA::new).setDependency(YASA.T, async(t)));
+        BooleanSolutionList sample = await(clauses.map(YASA::new).setDependencyComputation(YASA.T, async(t)));
         checkCoverage(t, clauses, sample);
     }
 
     private void checkCoverage(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
         CoverageStatistic statistic = await(clauses.map(TWiseStatisticGenerator::new)
-                .setDependency(TWiseStatisticGenerator.SAMPLE, async(sample))
-                .setDependency(TWiseStatisticGenerator.T, async(t)));
+                .set(TWiseStatisticGenerator.SAMPLE, sample)
+                .set(TWiseStatisticGenerator.T, t));
         System.out.println(sample.size());
         assertEquals(1.0, statistic.coverage());
     }
