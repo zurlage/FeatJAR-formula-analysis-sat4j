@@ -9,8 +9,7 @@ dependencies {
 
 license {
     ext {
-        author = 'Sebastian Krieter'
-        url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j'
+        licence_url = 'https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j'
     }
 }
 
