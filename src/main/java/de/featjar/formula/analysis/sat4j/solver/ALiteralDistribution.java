@@ -20,6 +20,7 @@
  */
 package de.featjar.formula.analysis.sat4j.solver;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
@@ -28,7 +29,9 @@ import java.util.Random;
  *
  * @author Sebastian Krieter
  */
-public abstract class ALiteralDistribution {
+public abstract class ALiteralDistribution implements Serializable {
+
+    private static final long serialVersionUID = 5431855598362532000L;
 
     protected Random random = new Random(0);
 
