@@ -38,7 +38,7 @@ import org.sat4j.core.VecInt;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class SAT4JAssignment implements IAssignment<Integer>, Supplier<int[]> {
+public class SAT4JAssignment implements IAssignment<Integer, Boolean>, Supplier<int[]> {
     protected final VecInt integers;
 
     public SAT4JAssignment() {
@@ -126,7 +126,7 @@ public class SAT4JAssignment implements IAssignment<Integer>, Supplier<int[]> {
     }
 
     @Override
-    public Result<Object> getValue(Integer variable) {
+    public Result<Boolean> getValue(Integer variable) {
         return Result.ofNullable(getValue((int) variable).orElse(null));
     }
 
@@ -152,8 +152,8 @@ public class SAT4JAssignment implements IAssignment<Integer>, Supplier<int[]> {
     }
 
     @Override
-    public LinkedHashMap<Integer, Object> getAll() {
-        final LinkedHashMap<Integer, Object> map = Maps.empty();
+    public LinkedHashMap<Integer, Boolean> getAll() {
+        final LinkedHashMap<Integer, Boolean> map = Maps.empty();
         for (int i = 0; i < integers.size(); i++) {
             final int l = integers.unsafeGet(i);
             if (l != 0) {
