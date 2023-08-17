@@ -53,7 +53,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
     @Override
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        Random random = RANDOM.get(dependencyList);
+        Random random = new Random(RANDOM_SEED.get(dependencyList));
         final BooleanAssignmentList result = new BooleanAssignmentList(
                 BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableCount());
         //		if (variables == null) {

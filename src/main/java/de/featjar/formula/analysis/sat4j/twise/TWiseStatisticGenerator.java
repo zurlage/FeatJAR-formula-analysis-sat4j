@@ -23,7 +23,6 @@ package de.featjar.formula.analysis.sat4j.twise;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.IRandomDependency;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
@@ -50,7 +49,7 @@ import java.util.stream.LongStream;
  *
  * @author Sebastian Krieter
  */
-public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> implements IRandomDependency {
+public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
     public static final Dependency<BooleanAssignment> CORE = Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
@@ -98,7 +97,7 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
         return true;
     }
 
-    long[] total, covered, uncovered, invalid;
+    long[] covered, uncovered, invalid;
 
     private static BitSet convertToBitSet(BooleanSolution configuration) {
         return convertToBitSet(configuration.get());
@@ -114,7 +113,7 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
 
     @Override
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
-        random = RANDOM.get(dependencyList);
+        random = new Random(RANDOM_SEED.get(dependencyList));
         BooleanSolutionList sample = SAMPLE.get(dependencyList);
         BooleanAssignment deadCoreFeatures = CORE.get(dependencyList);
         int t = T.get(dependencyList);
@@ -126,10 +125,9 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
         if (!sampleConfigs.isEmpty()) {
             final int n = sample.get(0).get().size();
             final int t2 = (n < t) ? n : t;
-            final int n2 = n - t2;
+            final int n2 = n - t2 + 1;
             final int pow = (int) Math.pow(2, t2);
 
-            //            deadCoreFeatures.setOrder(Order.INDEX);
             boolean[][] masks = new boolean[pow][t2];
             for (int i = 0; i < masks.length; i++) {
                 boolean[] p = masks[i];
@@ -138,7 +136,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
                 }
             }
 
-            total = new long[pow];
             invalid = new long[pow];
             covered = new long[pow];
             uncovered = new long[pow];
@@ -208,8 +205,6 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
 
                             d:
                             {
-                                total[maskIndex]++;
-
                                 int curRandomSolutionCount = randomSolutionCount;
 
                                 extracted(mask, randomIndex, c, t3, randomConfigs, liRandom, curRandomSolutionCount);
@@ -254,14 +249,11 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
                         }
                     });
 
-            long totalSum = LongStream.of(total).sum();
             long invalidSum = LongStream.of(invalid).sum();
             long coveredSum = LongStream.of(covered).sum();
             long uncoveredSum = LongStream.of(uncovered).sum();
-            assert totalSum - invalidSum == coveredSum + uncoveredSum;
 
-            CoverageStatistic statistic = new CoverageStatistic();
-            statistic.setNumberOfValidConditions(totalSum - invalidSum);
+            CoverageStatistic statistic = new CoverageStatistic(t);
             statistic.setNumberOfCoveredConditions(coveredSum);
             statistic.setNumberOfInvalidConditions(invalidSum);
             statistic.setNumberOfUncoveredConditions(uncoveredSum);
@@ -269,8 +261,7 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> i
             return Result.of(statistic);
         }
 
-        CoverageStatistic statistic = new CoverageStatistic();
-        statistic.setNumberOfValidConditions(1);
+        CoverageStatistic statistic = new CoverageStatistic(t);
         statistic.setNumberOfCoveredConditions(0);
         statistic.setNumberOfInvalidConditions(0);
         statistic.setNumberOfUncoveredConditions(1);

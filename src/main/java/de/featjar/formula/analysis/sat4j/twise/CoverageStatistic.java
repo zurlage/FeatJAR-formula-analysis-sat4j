@@ -26,36 +26,13 @@ package de.featjar.formula.analysis.sat4j.twise;
  * @author Sebastian Krieter
  */
 public class CoverageStatistic {
+    final int t;
+    long numberOfInvalidConditions;
+    long numberOfCoveredConditions;
+    long numberOfUncoveredConditions;
 
-    protected long numberOfValidConditions;
-    protected long numberOfInvalidConditions;
-    protected long numberOfCoveredConditions;
-    protected long numberOfUncoveredConditions;
-
-    protected double[] configScores;
-
-    protected void initScores(int sampleSize) {
-        configScores = new double[sampleSize];
-    }
-
-    protected void setScore(int index, double score) {
-        configScores[index] = score;
-    }
-
-    protected void addToScore(int index, double score) {
-        configScores[index] += score;
-    }
-
-    protected double getScore(int index) {
-        return configScores[index];
-    }
-
-    public double[] getConfigScores() {
-        return configScores;
-    }
-
-    public void setNumberOfValidConditions(long numberOfValidConditions) {
-        this.numberOfValidConditions = numberOfValidConditions;
+    public CoverageStatistic(int t) {
+        this.t = t;
     }
 
     public void setNumberOfInvalidConditions(long numberOfInvalidConditions) {
@@ -70,10 +47,6 @@ public class CoverageStatistic {
         this.numberOfUncoveredConditions = numberOfUncoveredConditions;
     }
 
-    public void incNumberOfValidConditions() {
-        numberOfValidConditions++;
-    }
-
     public void incNumberOfInvalidConditions() {
         numberOfInvalidConditions++;
     }
@@ -86,8 +59,12 @@ public class CoverageStatistic {
         numberOfUncoveredConditions++;
     }
 
+    public long total() {
+        return numberOfInvalidConditions + numberOfCoveredConditions + numberOfUncoveredConditions;
+    }
+
     public long valid() {
-        return numberOfValidConditions;
+        return numberOfCoveredConditions + numberOfUncoveredConditions;
     }
 
     public long invalid() {
@@ -103,15 +80,15 @@ public class CoverageStatistic {
     }
 
     public double coverage() {
-        if (numberOfValidConditions != 0) {
-            return (double) numberOfCoveredConditions / (double) numberOfValidConditions;
-        } else {
-            if (numberOfInvalidConditions == 0) {
-                return (double) numberOfCoveredConditions
-                        / (double) (numberOfCoveredConditions + numberOfUncoveredConditions);
-            } else {
-                return 1.0;
-            }
-        }
+        return (numberOfCoveredConditions + numberOfUncoveredConditions != 0)
+                ? (double) numberOfCoveredConditions / (numberOfCoveredConditions + numberOfUncoveredConditions)
+                : 1.0;
+    }
+
+    CoverageStatistic merge(CoverageStatistic other) {
+        numberOfInvalidConditions += other.numberOfInvalidConditions;
+        numberOfCoveredConditions += other.numberOfCoveredConditions;
+        numberOfUncoveredConditions += other.numberOfUncoveredConditions;
+        return this;
     }
 }

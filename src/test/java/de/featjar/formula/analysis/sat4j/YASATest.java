@@ -21,7 +21,6 @@
 package de.featjar.formula.analysis.sat4j;
 
 import static de.featjar.base.computation.Computations.async;
-import static de.featjar.base.computation.Computations.await;
 import static de.featjar.formula.structure.Expressions.literal;
 import static de.featjar.formula.structure.Expressions.or;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,10 +29,13 @@ import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
+import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
+import de.featjar.formula.analysis.sat4j.twise.TWiseCoverageComputation;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.formula.analysis.sat4j.twise.YASA;
 import de.featjar.formula.io.FormulaFormats;
@@ -53,16 +55,41 @@ public class YASATest {
 
     public void getTWiseSample(IFormula formula, int t) {
         IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = await(clauses.map(YASA::new).setDependencyComputation(YASA.T, async(t)));
+        BooleanSolutionList sample = clauses.map(YASA::new)
+                .setDependencyComputation(YASA.T, async(t))
+                .compute();
         checkCoverage(t, clauses, sample);
     }
 
     private void checkCoverage(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        CoverageStatistic statistic = await(clauses.map(TWiseStatisticGenerator::new)
+        // TODO split into multiple tests
+        CoverageStatistic statistic1 = clauses.map(TWiseCoverageComputation::new)
+                .set(TWiseCoverageComputation.SAMPLE, sample)
+                .set(TWiseCoverageComputation.T, t)
+                .compute();
+        assertEquals(1.0, statistic1.coverage());
+
+        CoverageStatistic statistic2 = clauses.map(RelativeTWiseCoverageComputation::new)
+                .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
+                .setDependencyComputation(
+                        RelativeTWiseCoverageComputation.REFERENCE_SAMPLE, clauses.map(ComputeSolutionsSAT4J::new))
+                .set(RelativeTWiseCoverageComputation.T, t)
+                .compute();
+        assertEquals(1.0, statistic2.coverage());
+
+        assertEquals(statistic1.covered(), statistic2.covered());
+        assertEquals(statistic1.uncovered(), statistic2.uncovered());
+        assertEquals(statistic1.invalid(), statistic2.invalid());
+
+        CoverageStatistic statistic3 = clauses.map(TWiseStatisticGenerator::new)
                 .set(TWiseStatisticGenerator.SAMPLE, sample)
-                .set(TWiseStatisticGenerator.T, t));
-        System.out.println(sample.size());
-        assertEquals(1.0, statistic.coverage());
+                .set(TWiseStatisticGenerator.CORE, new BooleanAssignment())
+                .set(TWiseStatisticGenerator.T, t)
+                .compute();
+        assertEquals(1.0, statistic3.coverage());
+        assertEquals(statistic1.covered(), statistic3.covered());
+        assertEquals(statistic1.uncovered(), statistic3.uncovered());
+        assertEquals(statistic1.invalid(), statistic3.invalid());
     }
 
     private IComputation<BooleanClauseList> getClauses(IFormula formula) {

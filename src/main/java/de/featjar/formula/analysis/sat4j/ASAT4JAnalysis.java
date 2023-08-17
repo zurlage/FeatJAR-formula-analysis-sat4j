@@ -37,13 +37,11 @@ import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
 import java.time.Duration;
 import java.util.List;
-import java.util.Random;
 
 public abstract class ASAT4JAnalysis<T> extends AComputation<T>
         implements IAssumedAssignmentDependency<BooleanAssignment>,
                 IAssumedClauseListDependency<BooleanClauseList>,
-                ITimeoutDependency,
-                IRandomDependency {
+                ITimeoutDependency {
     protected static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
     protected static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
@@ -51,7 +49,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     protected static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
     protected static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
-    protected static final Dependency<Random> RANDOM = Dependency.newDependency(Random.class);
+    protected static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
 
     public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Object... computations) {
         super(
@@ -59,7 +57,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
                 Computations.of(new BooleanAssignment()),
                 Computations.of(new BooleanClauseList(-1)),
                 Computations.of(ITimeoutDependency.DEFAULT_TIMEOUT),
-                Computations.of(IRandomDependency.newDefaultRandom()),
+                Computations.of(IRandomDependency.DEFAULT_RANDOM_SEED),
                 computations);
     }
 
@@ -80,11 +78,6 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     @Override
     public Dependency<BooleanClauseList> getAssumedClauseListDependency() {
         return ASSUMED_CLAUSE_LIST;
-    }
-
-    @Override
-    public Dependency<Random> getRandomDependency() {
-        return RANDOM;
     }
 
     protected abstract SAT4JSolver newSolver(BooleanClauseList clauseList);
