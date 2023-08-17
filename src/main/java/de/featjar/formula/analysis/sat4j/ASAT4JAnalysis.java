@@ -42,14 +42,14 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
         implements IAssumedAssignmentDependency<BooleanAssignment>,
                 IAssumedClauseListDependency<BooleanClauseList>,
                 ITimeoutDependency {
-    protected static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
+    public static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
-    protected static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
+    public static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
             Dependency.newDependency(BooleanAssignment.class);
-    protected static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
+    public static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
-    protected static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
-    protected static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
+    public static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
+    public static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
 
     public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Object... computations) {
         super(

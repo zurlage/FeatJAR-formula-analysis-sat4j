@@ -94,11 +94,12 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
 
     private ModalImplicationGraph mig;
     private List<Object> dependencyList;
+    private BooleanSolutionList sample;
 
     @Override
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
         this.dependencyList = dependencyList;
-        BooleanSolutionList sample = SAMPLE.get(dependencyList);
+        sample = SAMPLE.get(dependencyList);
         mig = MIG.get(dependencyList);
         t = T.get(dependencyList);
 
@@ -121,7 +122,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
                     p[j] = (i >> j & 1) == 0;
                 }
             }
-            LexicographicIterator.stream(t, size, this::createStatistic).forEach(combo -> {
+            LexicographicIterator.parallelStream(t, size, this::createStatistic).forEach(combo -> {
                 final int[] elementIndices = combo.elementIndices;
                 for (boolean[] mask : masks) {
                     checkCancel();
@@ -249,9 +250,10 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
                     }
                     env.solver.shuffleOrder(env.random);
                 }
+                return false;
+            } else {
                 return true;
             }
-            return false;
         } finally {
             env.solver.getAssignment().clear(orgAssignmentLength);
         }

@@ -182,7 +182,11 @@ public abstract class SAT4JSolver implements de.featjar.formula.analysis.ISolver
 
     public BooleanSolution getSolution() {
         int[] internalSolution = getInternalSolution();
-        return new BooleanSolution(Arrays.copyOf(internalSolution, internalSolution.length));
+        final int[] sortedIntegers = new int[internalSolution.length];
+        Arrays.stream(internalSolution)
+                .filter(integer -> integer != 0)
+                .forEach(integer -> sortedIntegers[Math.abs(integer) - 1] = integer);
+        return new BooleanSolution(sortedIntegers, false);
     }
 
     public int[] getInternalSolution() {

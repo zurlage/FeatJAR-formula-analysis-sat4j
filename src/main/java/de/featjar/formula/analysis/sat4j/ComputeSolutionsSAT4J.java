@@ -20,18 +20,32 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
+import de.featjar.base.computation.Computations;
+import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
-import de.featjar.formula.analysis.sat4j.solver.SAT4JSolver;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy.Strategy;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
 import java.util.List;
+import java.util.Random;
 
 public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSolutionList> {
+    public static final Dependency<ISelectionStrategy.Strategy> SELECTION_STRATEGY =
+            Dependency.newDependency(ISelectionStrategy.Strategy.class);
+    public static final Dependency<Integer> LIMIT = Dependency.newDependency(Integer.class);
+    public static final Dependency<Boolean> FORBID_DUPLICATES = Dependency.newDependency(Boolean.class);
+
     public ComputeSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+        super(
+                booleanClauseList,
+                Computations.of(ISelectionStrategy.Strategy.Original),
+                Computations.of(Integer.MAX_VALUE),
+                Computations.of(true));
     }
 
     protected ComputeSolutionsSAT4J(ComputeSolutionsSAT4J other) {
@@ -40,13 +54,40 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
 
     @Override
     public Result<BooleanSolutionList> compute(List<Object> dependencyList, Progress progress) {
-        SAT4JSolver solver = initializeSolver(dependencyList);
+        SAT4JSolutionSolver solver = (SAT4JSolutionSolver) initializeSolver(dependencyList);
+        int limit = LIMIT.get(dependencyList);
+        boolean forbid = FORBID_DUPLICATES.get(dependencyList);
+        final Strategy strategy = SELECTION_STRATEGY.get(dependencyList);
+        Random random = null;
+        switch (strategy) {
+            case FastRandom:
+                random = new Random(RANDOM_SEED.get(dependencyList));
+                solver.setSelectionStrategy(ISelectionStrategy.random(random));
+                break;
+            case Negative:
+                solver.setSelectionStrategy(ISelectionStrategy.negative());
+                break;
+            case Original:
+                break;
+            case Positive:
+                solver.setSelectionStrategy(ISelectionStrategy.positive());
+                break;
+            default:
+                break;
+        }
         BooleanSolutionList solutionList = new BooleanSolutionList();
-        Result<BooleanSolution> solution = solver.findSolution();
-        while (solution.isPresent()) {
+        while (solutionList.size() < limit) {
+            Result<BooleanSolution> solution = solver.findSolution();
+            if (solution.isEmpty()) {
+                break;
+            }
             solutionList.add(solution.get());
-            solver.getClauseList().add(solution.get().toClause().getNegatedValues());
-            solution = solver.findSolution();
+            if (forbid) {
+                solver.getClauseList().add(solution.get().toClause().getNegatedValues());
+            }
+            if (strategy == Strategy.FastRandom) {
+                solver.shuffleOrder(random);
+            }
         }
         return solver.createResult(solutionList, "result is a subset");
     }
