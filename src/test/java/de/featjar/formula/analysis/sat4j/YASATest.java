@@ -44,6 +44,7 @@ import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -54,43 +55,252 @@ public class YASATest {
         FeatJAR.initialize();
     }
 
-    public void getTWiseSample(IFormula formula, int t) {
+    @Test
+    void formulaHas1WiseCoverage() {
+        assertFullCoverageWithAllAlgorithms(or(literal("x"), literal(false, "y"), literal(false, "z")), 1);
+    }
+
+    @Test
+    void gplHas1WiseCoverage() {
+        assertFullCoverageWithAllAlgorithms(loadModel("GPL/model.xml"), 1);
+    }
+
+    @Test
+    void formulaHas2WiseCoverage() {
+        assertFullCoverageWithAllAlgorithms(or(literal("x"), literal(false, "y"), literal(false, "z")), 2);
+    }
+
+    @Test
+    void gplHas2WiseCoverage() {
+        assertFullCoverageWithAllAlgorithms(loadModel("GPL/model.xml"), 2);
+    }
+
+    @Test
+    void formulaHas3WiseCoverage() {
+        assertFullCoverageWithAllAlgorithms(or(literal("x"), literal(false, "y"), literal(false, "z")), 3);
+    }
+
+    @Test
+    void gplHas3WiseCoverage() {
+        assertFullCoverageWithAllAlgorithms(loadModel("GPL/model.xml"), 3);
+    }
+
+    //	@Test
+    void embToolkitHas2WiseCoverage() {
+        assertFullCoverage(loadModel("EMBToolkit/model.xml"), 2);
+    }
+
+    //	@Test
+    void financial_servicesHas2WiseCoverage() {
+        assertFullCoverage(loadModel("financial_services/model.xml"), 2);
+    }
+
+    //	@Test
+    public void testBothCoverageRandom() {
+        bothRandom(loadModel("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs"));
+    }
+
+    //	@Test
+    public void benchmark() {
+        benchmarkCompareSample("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs", 2);
+        benchmarkCompareSample("EMBToolkit/model.xml", 2);
+    }
+
+    //	@Test
+    public void variants() {
+        compareVariants(loadModel("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs"));
+        compareVariants(loadModel("EMBToolkit/model.xml"));
+    }
+
+    private void benchmarkCompareSample(String modelPath, int t) {
+        IFormula formula = loadModel(modelPath);
         IComputation<BooleanClauseList> clauses = getClauses(formula);
+
+        FeatJAR.log().info("Comparing random sample (10) for %s with t = %d", modelPath, t);
+        benchmarkCompare(clauses, computeRandomSample(clauses, 10), t);
+        FeatJAR.log().info("Comparing random sample (100) for %s with t = %d", modelPath, t);
+        benchmarkCompare(clauses, computeRandomSample(clauses, 100), t);
+        FeatJAR.log().info("Comparing  %d-wise for %s with t = %d", t, modelPath, t);
+        benchmarkCompare(clauses, computeSample(t, clauses), t);
+    }
+
+    private void benchmarkCompare(IComputation<BooleanClauseList> clauses, BooleanSolutionList sample, int t) {
+        long time;
+        time = System.currentTimeMillis();
+        computeCoverageNew(t, clauses, sample);
+        FeatJAR.log().info((System.currentTimeMillis() - time) / 1000.0);
+
+        time = System.currentTimeMillis();
+        computeCoverageOld(t, clauses, sample);
+        FeatJAR.log().info((System.currentTimeMillis() - time) / 1000.0);
+    }
+
+    void onlyNew(IFormula formula) {
+        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        BooleanSolutionList sample = computeSample(2, clauses);
+        computeCoverageNew(2, clauses, sample);
+    }
+
+    void compareVariants(IFormula formula) {
+        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        BooleanSolutionList sample = computeRandomSample(clauses, 10);
+        computeCoverageVariants(2, clauses, sample);
+    }
+
+    private void bothRandom(IFormula formula) {
+        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        BooleanSolutionList sample = computeRandomSample(clauses, 10);
+        CoverageStatistic statistic1 = computeCoverageNew(2, clauses, sample);
+        CoverageStatistic statistic3 = computeCoverageOld(2, clauses, sample);
+
+        FeatJAR.log().info("total     %d | %d", statistic1.total(), statistic3.total());
+        FeatJAR.log().info("covered   %d | %d", statistic1.covered(), statistic3.covered());
+        FeatJAR.log().info("uncovered %d | %d", statistic1.uncovered(), statistic3.uncovered());
+        FeatJAR.log().info("invalid   %d | %d", statistic1.invalid(), statistic3.invalid());
+        assertEquals(statistic1.total(), statistic3.total());
+        assertEquals(statistic1.covered(), statistic3.covered());
+        assertEquals(statistic1.uncovered(), statistic3.uncovered());
+        assertEquals(statistic1.invalid(), statistic3.invalid());
+    }
+
+    void onlyNewRandom(IFormula formula) {
+        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        BooleanSolutionList sample = computeRandomSample(clauses, 10);
+        computeCoverageNew(2, clauses, sample);
+    }
+
+    private BooleanSolutionList computeRandomSample(IComputation<BooleanClauseList> clauses, int size) {
+        BooleanSolutionList sample = clauses.map(ComputeSolutionsSAT4J::new)
+                .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FastRandom)
+                .set(ComputeSolutionsSAT4J.LIMIT, size)
+                .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
+                .compute();
+        return sample;
+    }
+
+    private IFormula loadModel(String modelPath) {
+        return IO.load(Paths.get("src/test/resources/" + modelPath), FormulaFormats.getInstance())
+                .orElseThrow();
+    }
+
+    public void assertFullCoverageWithAllAlgorithms(IFormula formula, int t) {
+        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        BooleanSolutionList sample = computeSample(t, clauses);
+
+        CoverageStatistic statistic1 = computeCoverageNew(t, clauses, sample);
+        CoverageStatistic statistic2 = computeCoverageRel(t, clauses, sample);
+        CoverageStatistic statistic3 = computeCoverageOld(t, clauses, sample);
+
+        FeatJAR.log().info("total     %d | %d | %d", statistic1.total(), statistic2.total(), statistic3.total());
+        FeatJAR.log().info("covered   %d | %d | %d", statistic1.covered(), statistic2.covered(), statistic3.covered());
+        FeatJAR.log()
+                .info("uncovered %d | %d | %d", statistic1.uncovered(), statistic2.uncovered(), statistic3.uncovered());
+        FeatJAR.log().info("invalid   %d | %d | %d", statistic1.invalid(), statistic2.invalid(), statistic3.invalid());
+
+        assertEquals(1.0, statistic1.coverage());
+        assertEquals(1.0, statistic2.coverage());
+        assertEquals(1.0, statistic3.coverage());
+
+        assertEquals(statistic1.covered(), statistic2.covered());
+        assertEquals(statistic1.uncovered(), statistic2.uncovered());
+        assertEquals(statistic1.invalid(), statistic2.invalid());
+        assertEquals(statistic1.covered(), statistic3.covered());
+        assertEquals(statistic1.uncovered(), statistic3.uncovered());
+        assertEquals(statistic1.invalid(), statistic3.invalid());
+    }
+
+    private BooleanSolutionList computeSample(int t, IComputation<BooleanClauseList> clauses) {
         BooleanSolutionList sample = clauses.map(YASA::new)
                 .setDependencyComputation(YASA.T, async(t))
                 .compute();
-        checkCoverage(t, clauses, sample);
+        FeatJAR.log().info("Sample Size: %d", sample.size());
+        return sample;
     }
 
-    private void checkCoverage(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        // TODO split into multiple tests
-        CoverageStatistic statistic1 = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .compute();
-        assertEquals(1.0, statistic1.coverage());
+    public void assertFullCoverage(IFormula formula, int t) {
+        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        BooleanSolutionList sample = computeSample(t, clauses);
 
-        CoverageStatistic statistic2 = clauses.map(RelativeTWiseCoverageComputation::new)
+        long time = System.currentTimeMillis();
+        CoverageStatistic statistic1 = computeCoverageNew(t, clauses, sample);
+        assertEquals(1.0, statistic1.coverage());
+        FeatJAR.log().info((System.currentTimeMillis() - time) / 1000.0);
+
+        time = System.currentTimeMillis();
+        CoverageStatistic statistic3 = computeCoverageOld(t, clauses, sample);
+        assertEquals(1.0, statistic3.coverage());
+        FeatJAR.log().info((System.currentTimeMillis() - time) / 1000.0);
+        assertEquals(statistic1.covered(), statistic3.covered());
+        assertEquals(statistic1.uncovered(), statistic3.uncovered());
+        assertEquals(statistic1.invalid(), statistic3.invalid());
+    }
+
+    private CoverageStatistic computeCoverageOld(
+            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+        CoverageStatistic statistic = clauses.map(TWiseStatisticGenerator::new)
+                .set(TWiseStatisticGenerator.SAMPLE, sample)
+                .set(TWiseStatisticGenerator.CORE, new BooleanAssignment())
+                .set(TWiseStatisticGenerator.T, t)
+                .compute();
+        FeatJAR.log().info("Computed Coverage (TWiseStatisticGenerator)");
+        return statistic;
+    }
+
+    private CoverageStatistic computeCoverageRel(
+            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+        CoverageStatistic statistic = clauses.map(RelativeTWiseCoverageComputation::new)
                 .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
                 .setDependencyComputation(
                         RelativeTWiseCoverageComputation.REFERENCE_SAMPLE, clauses.map(ComputeSolutionsSAT4J::new))
                 .set(RelativeTWiseCoverageComputation.T, t)
                 .compute();
-        assertEquals(1.0, statistic2.coverage());
+        FeatJAR.log().info("Computed Coverage (RelativeTWiseCoverageComputation)");
+        return statistic;
+    }
 
-        assertEquals(statistic1.covered(), statistic2.covered());
-        assertEquals(statistic1.uncovered(), statistic2.uncovered());
-        assertEquals(statistic1.invalid(), statistic2.invalid());
-
-        CoverageStatistic statistic3 = clauses.map(TWiseStatisticGenerator::new)
-                .set(TWiseStatisticGenerator.SAMPLE, sample)
-                .set(TWiseStatisticGenerator.CORE, new BooleanAssignment())
-                .set(TWiseStatisticGenerator.T, t)
+    private CoverageStatistic computeCoverageNew(
+            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+        CoverageStatistic statistic = clauses.map(TWiseCoverageComputation::new)
+                .set(TWiseCoverageComputation.SAMPLE, sample)
+                .set(TWiseCoverageComputation.T, t)
                 .compute();
-        assertEquals(1.0, statistic3.coverage());
-        assertEquals(statistic1.covered(), statistic3.covered());
-        assertEquals(statistic1.uncovered(), statistic3.uncovered());
-        assertEquals(statistic1.invalid(), statistic3.invalid());
+        FeatJAR.log().info("Computed Coverage (TWiseCoverageComputation)");
+        return statistic;
+    }
+
+    private void computeCoverageVariants(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+        BooleanAssignment core = clauses.map(ComputeCoreDeadVariablesSAT4J::new).compute();
+        BooleanAssignment atomic = new BooleanAssignment(clauses.map(ComputeAtomicSetsSAT4J::new).compute().stream()
+                .skip(1)
+                .flatMapToInt(l -> Arrays.stream(l.get(), 1, l.get().length))
+                .toArray());
+
+        CoverageStatistic statisticNone = clauses.map(TWiseCoverageComputation::new)
+                .set(TWiseCoverageComputation.SAMPLE, sample)
+                .set(TWiseCoverageComputation.T, t)
+                .compute();
+
+        CoverageStatistic statisticCore = clauses.map(TWiseCoverageComputation::new)
+                .set(TWiseCoverageComputation.SAMPLE, sample)
+                .set(TWiseCoverageComputation.T, t)
+                .set(TWiseCoverageComputation.FILTER, core)
+                .compute();
+
+        CoverageStatistic statisticAtomic = clauses.map(TWiseCoverageComputation::new)
+                .set(TWiseCoverageComputation.SAMPLE, sample)
+                .set(TWiseCoverageComputation.T, t)
+                .set(TWiseCoverageComputation.FILTER, atomic)
+                .compute();
+
+        CoverageStatistic statisticCoreAtomic = clauses.map(TWiseCoverageComputation::new)
+                .set(TWiseCoverageComputation.SAMPLE, sample)
+                .set(TWiseCoverageComputation.T, t)
+                .set(TWiseCoverageComputation.FILTER, new BooleanAssignment(core.addAll(atomic.get())))
+                .compute();
+        FeatJAR.log().info("Coverage statisticNone: %f", statisticNone.coverage());
+        FeatJAR.log().info("Coverage statisticCore: %f", statisticCore.coverage());
+        FeatJAR.log().info("Coverage statisticAtomic: %f", statisticAtomic.coverage());
+        FeatJAR.log().info("Coverage statisticCoreAtomic: %f", statisticCoreAtomic.coverage());
     }
 
     private IComputation<BooleanClauseList> getClauses(IFormula formula) {
@@ -98,108 +308,6 @@ public class YASATest {
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(BooleanRepresentationComputation::new);
-        IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
-        return clauses;
-    }
-
-    @Test
-    void formulaHas1WiseCoverage() {
-        getTWiseSample(or(literal("x"), literal(false, "y"), literal(false, "z")), 1);
-    }
-
-    @Test
-    void gplHas1WiseCoverage() {
-        getTWiseSample(loadModel("GPL/model.xml"), 1);
-    }
-
-    @Test
-    void formulaHas2WiseCoverage() {
-        getTWiseSample(or(literal("x"), literal(false, "y"), literal(false, "z")), 2);
-    }
-
-    @Test
-    void gplHas2WiseCoverage() {
-        getTWiseSample(loadModel("GPL/model.xml"), 3);
-    }
-
-    @Test
-    void formulaHas3WiseCoverage() {
-        getTWiseSample(or(literal("x"), literal(false, "y"), literal(false, "z")), 3);
-    }
-
-    @Test
-    void gplHas3WiseCoverage() {
-        getTWiseSample(loadModel("GPL/model.xml"), 3);
-    }
-
-    @Test
-    void both() {
-        IFormula formula = loadModel("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs");
-        int t = 2;
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = clauses.map(ComputeSolutionsSAT4J::new)
-                .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FastRandom)
-                .set(ComputeSolutionsSAT4J.LIMIT, 10)
-                .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
-                .compute();
-
-        CoverageStatistic statistic1 = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .compute();
-
-        CoverageStatistic statistic3 = clauses.map(TWiseStatisticGenerator::new)
-                .set(TWiseStatisticGenerator.SAMPLE, sample)
-                .set(TWiseStatisticGenerator.CORE, new BooleanAssignment())
-                .set(TWiseStatisticGenerator.T, t)
-                .compute();
-        System.out.println("total     " + statistic1.total() + " vs " + statistic3.total());
-        System.out.println("covered   " + statistic1.covered() + " vs " + statistic3.covered());
-        System.out.println("uncovered " + statistic1.uncovered() + " vs " + statistic3.uncovered());
-        System.out.println("invalid   " + statistic1.invalid() + " vs " + statistic3.invalid());
-        assertEquals(statistic1.total(), statistic3.total());
-        assertEquals(statistic1.covered(), statistic3.covered());
-        assertEquals(statistic1.uncovered(), statistic3.uncovered());
-        assertEquals(statistic1.invalid(), statistic3.invalid());
-    }
-
-    @Test
-    void onlyNew() {
-        IFormula formula = loadModel("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs");
-        int t = 2;
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = clauses.map(ComputeSolutionsSAT4J::new)
-                .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FastRandom)
-                .set(ComputeSolutionsSAT4J.LIMIT, 10)
-                .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
-                .compute();
-
-        CoverageStatistic statistic1 = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .compute();
-    }
-
-    @Test
-    void onlyOld() {
-        IFormula formula = loadModel("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs");
-        int t = 2;
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = clauses.map(ComputeSolutionsSAT4J::new)
-                .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FastRandom)
-                .set(ComputeSolutionsSAT4J.LIMIT, 10)
-                .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
-                .compute();
-
-        CoverageStatistic statistic3 = clauses.map(TWiseStatisticGenerator::new)
-                .set(TWiseStatisticGenerator.SAMPLE, sample)
-                .set(TWiseStatisticGenerator.CORE, new BooleanAssignment())
-                .set(TWiseStatisticGenerator.T, t)
-                .compute();
-    }
-
-    private IFormula loadModel(String modelPath) {
-        return IO.load(Paths.get("src/test/resources/" + modelPath), FormulaFormats.getInstance())
-                .orElseThrow();
+        return cnf.map(Computations::getKey);
     }
 }
