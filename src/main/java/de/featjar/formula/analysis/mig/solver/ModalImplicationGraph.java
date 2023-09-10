@@ -98,6 +98,7 @@ public class ModalImplicationGraph {
             }
         }
 
+        // TODO implement proper traversal
         private boolean[] traverseWeak(int literal) {
             final ArrayDeque<Integer> queue = new ArrayDeque<>();
             final boolean[] mark = new boolean[2 * size];

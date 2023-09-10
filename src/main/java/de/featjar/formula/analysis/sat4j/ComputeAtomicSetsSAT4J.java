@@ -63,8 +63,6 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
 
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         final int[] model1 = solver.findSolution().get().get();
-        //        solver.setSolutionHistory(new ISolutionHistory.RememberUpTo(1000));
-        //        final ISolutionHistory solutions = solver.getSolutionHistory();
 
         if (model1 != null) {
             // initial atomic set consists of core and dead features
@@ -76,21 +74,20 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
 
             final int[] model1Copy = Arrays.copyOf(model1, model1.length);
 
-            BooleanSolution.removeConflicts(model1Copy, model2);
+            BooleanSolution.removeConflictsInplace(model1Copy, model2);
             for (int i = 0; i < model1Copy.length; i++) {
                 final int varX = model1Copy[i];
                 if (varX != 0) {
                     solver.getAssignment().add(-varX);
                     Result<Boolean> hasSolution = solver.hasSolution();
-                    if (Result.of(false).equals(hasSolution)) {
-                        done[i] = 2;
-                        solver.getAssignment().replaceLast(varX);
-                    } else if (Result.empty().equals(hasSolution)) {
+                    if (hasSolution.isEmpty()) {
+                    	solver.getAssignment().remove();
+                    } else if (hasSolution.valueEquals(Boolean.FALSE)) {
+                    	done[i] = 2;
+                    	solver.getAssignment().replaceLast(varX);
+                    } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                         solver.getAssignment().remove();
-                        // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
-                    } else if (Result.of(true).equals(hasSolution)) {
-                        solver.getAssignment().remove();
-                        BooleanSolution.removeConflicts(model1Copy, solver.getInternalSolution());
+                        BooleanSolution.removeConflictsInplace(model1Copy, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                     }
                 }
@@ -113,24 +110,15 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                     for (int j = i + 1; j < xModel0.length; j++) {
                         final int my0 = xModel0[j];
                         if ((my0 != 0) && (done[j] == 0)) {
-                            //                            for (final BooleanSolution solution : solutions) {
-                            //                                final int mxI = solution.get()[i];
-                            //                                final int myI = solution.get()[j];
-                            //                                if ((mx0 == mxI) != (my0 == myI)) {
-                            //                                    continue inner;
-                            //                                }
-                            //                            }
-
                             solver.getAssignment().add(-my0);
 
                             Result<Boolean> hasSolution = solver.hasSolution();
-                            if (Result.of(false).equals(hasSolution)) {
-                                done[j] = 1;
-                            } else if (Result.empty().equals(hasSolution)) {
-                                // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or
-                                // continue?
-                            } else if (Result.of(true).equals(hasSolution)) {
-                                BooleanSolution.removeConflicts(xModel0, solver.getInternalSolution());
+
+                            if (hasSolution.isEmpty()) {
+                            } else if (hasSolution.valueEquals(Boolean.FALSE)) {
+                            	done[j] = 1;
+                            } else if (hasSolution.valueEquals(Boolean.TRUE)) {
+                                BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
                                 solver.shuffleOrder(random);
                             }
                             solver.getAssignment().remove();
@@ -141,13 +129,13 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                     solver.getAssignment().add(-mx0);
 
                     Result<Boolean> hasSolution = solver.hasSolution();
-                    if (Result.of(false).equals(hasSolution)) {
-                    } else if (Result.empty().equals(hasSolution)) {
-                        for (int j = i + 1; j < xModel0.length; j++) {
-                            done[j] = 0;
-                        }
-                        // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
-                    } else if (Result.of(true).equals(hasSolution)) {
+                    if (hasSolution.isEmpty()) {
+                    	// return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
+                    } else if (hasSolution.valueEquals(Boolean.FALSE)) {
+                    	for (int j = i + 1; j < xModel0.length; j++) {
+                    		done[j] = 0;
+                    	}
+                    } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                         xModel0 = solver.getInternalSolution();
                     }
 
@@ -157,18 +145,17 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                             if (my0 != 0) {
                                 solver.getAssignment().add(-my0);
 
-                                Result<Boolean> solution = solver.hasSolution();
-                                if (Result.of(false).equals(solution)) {
+                                if (hasSolution.valueEquals(Boolean.FALSE)) {
                                     done[j] = 2;
                                     solver.getAssignment().replaceLast(my0);
-                                } else if (Result.empty().equals(solution)) {
+                                } else if (hasSolution.isEmpty()) {
                                     done[j] = 0;
                                     solver.getAssignment().remove();
                                     // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout
                                     // or continue?
-                                } else if (Result.of(true).equals(solution)) {
+                                } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                                     done[j] = 0;
-                                    BooleanSolution.removeConflicts(xModel0, solver.getInternalSolution());
+                                    BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
                                     solver.shuffleOrder(random);
                                     solver.getAssignment().remove();
                                 }

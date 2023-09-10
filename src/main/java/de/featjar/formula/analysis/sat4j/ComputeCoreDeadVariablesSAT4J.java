@@ -92,7 +92,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
                         solver.getAssignment().remove();
                     } else if (hasSolution.valueEquals(true)) {
                         solver.getAssignment().remove();
-                        model1 = BooleanSolution.removeConflicts(model1, solver.getInternalSolution());
+                        BooleanSolution.removeConflictsInplace(model1, solver.getInternalSolution());
                         solver.shuffleOrder(random);
                     }
                 }

@@ -53,7 +53,6 @@ public class CNFTransformTest {
                 .cast(BooleanClauseList.class)
                 .map(ComputeAtomicSetsSAT4J::new));
 
-        // TODO correct? replace with better test
-        assertEquals(2, atomicSets.size());
+        assertEquals(5, atomicSets.size());
     }
 }
