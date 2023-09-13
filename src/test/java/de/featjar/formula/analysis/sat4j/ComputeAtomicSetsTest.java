@@ -18,32 +18,25 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import de.featjar.Common;
 import de.featjar.base.computation.Computations;
-import de.featjar.base.io.IO;
 import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
-import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
-import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
-public class CNFTransformTest {
+public class ComputeAtomicSetsTest extends Common {
 
     @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-
-        BooleanAssignmentList atomicSets = IO.load(modelFile, new KConfigReaderFormat())
-                .toComputation()
+    public void gplHas27AtomicSets() {
+        BooleanAssignmentList atomicSets = Computations.of(load("GPL/model.xml"))
                 .cast(IFormula.class)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
@@ -53,6 +46,6 @@ public class CNFTransformTest {
                 .map(ComputeAtomicSetsSAT4J::new)
                 .compute();
 
-        assertEquals(5, atomicSets.size());
+        assertEquals(27, atomicSets.size());
     }
 }

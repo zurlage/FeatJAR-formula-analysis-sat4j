@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2022 Sebastian Krieter
+ * Copyright (C) 2023 FeatJAR-Development-Team
  *
- * This file is part of formula-analysis-sat4j.
+ * This file is part of FeatJAR-formula-analysis-sat4j.
  *
  * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -18,35 +18,26 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.todo.formula.analysis.mig.io;
+package de.featjar;
 
-import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.analysis.mig.solver.ModalImplicationGraph;
+import de.featjar.base.FeatJAR;
+import de.featjar.base.io.IO;
+import de.featjar.formula.io.FormulaFormats;
+import de.featjar.formula.structure.formula.IFormula;
+import java.nio.file.Paths;
 
-/**
- * Reads / Writes a MIG.
- *
- * @author Sebastian Krieter
- */
-public class MIGFormat implements IFormat<ModalImplicationGraph> {
+public class Common {
 
-    @Override
-    public boolean supportsParse() {
-        return true;
+    static {
+        FeatJAR.initialize();
     }
 
-    @Override
-    public boolean supportsSerialize() {
-        return true;
+    public static IFormula loadModel(String modelPath) {
+        return IO.load(Paths.get("src/test/resources/" + modelPath), FormulaFormats.getInstance())
+                .orElseThrow();
     }
 
-    @Override
-    public String getName() {
-        return "ModalImplicationGraph";
-    }
-
-    @Override
-    public String getFileExtension() {
-        return "mig";
+    public IFormula load(String modelPath) {
+        return loadModel(modelPath);
     }
 }

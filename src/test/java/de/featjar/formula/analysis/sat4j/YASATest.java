@@ -25,10 +25,10 @@ import static de.featjar.formula.structure.Expressions.literal;
 import static de.featjar.formula.structure.Expressions.or;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import de.featjar.Common;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.IO;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
@@ -39,21 +39,13 @@ import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
 import de.featjar.formula.analysis.sat4j.twise.TWiseCoverageComputation;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.formula.analysis.sat4j.twise.YASA;
-import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class YASATest {
-
-    @BeforeAll
-    public static void init() {
-        FeatJAR.initialize();
-    }
+public class YASATest extends Common {
 
     @Test
     void formulaHas1WiseCoverage() {
@@ -176,11 +168,6 @@ public class YASATest {
                 .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
                 .compute();
         return sample;
-    }
-
-    private IFormula loadModel(String modelPath) {
-        return IO.load(Paths.get("src/test/resources/" + modelPath), FormulaFormats.getInstance())
-                .orElseThrow();
     }
 
     public void assertFullCoverageWithAllAlgorithms(IFormula formula, int t) {

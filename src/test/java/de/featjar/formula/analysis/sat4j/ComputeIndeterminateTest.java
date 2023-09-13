@@ -18,41 +18,46 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.formula.analysis.sat4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.featjar.base.computation.Computations;
-import de.featjar.base.io.IO;
-import de.featjar.formula.analysis.bool.BooleanAssignmentList;
+import de.featjar.base.computation.IComputation;
+import de.featjar.formula.analysis.VariableMap;
+import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
-import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
-import de.featjar.formula.io.KConfigReaderFormat;
+import de.featjar.formula.analysis.bool.IBooleanRepresentation;
+import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
-public class CNFTransformTest {
+public class ComputeIndeterminateTest {
 
     @Test
-    public void testDistributiveBug() {
-        final Path modelFile = Paths.get("src/test/resources/kconfigreader/distrib-bug.model");
-
-        BooleanAssignmentList atomicSets = IO.load(modelFile, new KConfigReaderFormat())
-                .toComputation()
-                .cast(IFormula.class)
+    void formulaHas2Indeterminate() {
+        IFormula formula = Expressions.and(
+                Expressions.or(Expressions.literal("a"), Expressions.literal("b")),
+                Expressions.biImplies(Expressions.literal("x"), Expressions.literal("y")));
+        BooleanRepresentationComputation<IFormula, IBooleanRepresentation> cnf = Computations.of(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(BooleanRepresentationComputation::new)
-                .map(Computations::getKey)
-                .cast(BooleanClauseList.class)
-                .map(ComputeAtomicSetsSAT4J::new)
+                .map(BooleanRepresentationComputation::new);
+        IComputation<IBooleanRepresentation> clauses = cnf.map(Computations::getKey);
+        VariableMap variables = cnf.map(Computations::getValue).compute();
+        BooleanAssignment compute = clauses.cast(BooleanClauseList.class)
+                .map(ComputeIndeterminate::new)
                 .compute();
-
-        assertEquals(5, atomicSets.size());
+        List<String> indeterminate = compute.streamValues()
+                .map(v -> (v.getValue() ? "+" : "-") + variables.get(v.getKey()).get())
+                .collect(Collectors.toCollection(ArrayList::new));
+        assertEquals(new ArrayList<>(Arrays.asList("+a", "+b")), indeterminate);
     }
 }

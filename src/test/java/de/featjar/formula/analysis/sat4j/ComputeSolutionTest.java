@@ -20,11 +20,14 @@
  */
 package de.featjar.formula.analysis.sat4j;
 
-import static de.featjar.base.computation.Computations.async;
-import static de.featjar.base.computation.Computations.await;
-import static de.featjar.formula.structure.Expressions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static de.featjar.formula.structure.Expressions.and;
+import static de.featjar.formula.structure.Expressions.biImplies;
+import static de.featjar.formula.structure.Expressions.literal;
+import static de.featjar.formula.structure.Expressions.not;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.featjar.Common;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.ComputePresence;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
@@ -35,9 +38,9 @@ import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
 import org.junit.jupiter.api.Test;
 
-public class AnalyzeHasSolutionSAT4JTest {
+public class ComputeSolutionTest extends Common {
     public boolean hasSolution(IFormula formula) {
-        return await(async(formula)
+        return Computations.of(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .set(ComputeCNFFormula.IS_PLAISTED_GREENBAUM, Boolean.TRUE)
@@ -45,11 +48,10 @@ public class AnalyzeHasSolutionSAT4JTest {
                 .map(Computations::getKey)
                 .cast(BooleanClauseList.class)
                 .map(ComputeSolutionSAT4J::new)
-                .map(ComputePresence<BooleanSolution>::new));
+                .map(ComputePresence<BooleanSolution>::new)
+                .compute();
     }
 
-    // TODO: all tests below only work when the formula is wrapped in and(...) as an auxiliary root. fix this, it is a
-    // big potential bug source
     @Test
     void satisfiableFormulaInCNFHasSolution() {
         assertTrue(hasSolution(and(literal("x"), literal(false, "y"))));
@@ -67,6 +69,11 @@ public class AnalyzeHasSolutionSAT4JTest {
 
     @Test
     void unsatisfiableArbitraryFormulaHasNoSolution() {
-        assertFalse(hasSolution(and(biImplies(literal("a"), not(literal("a"))))));
+        assertFalse(hasSolution(biImplies(literal("a"), not(literal("a")))));
+    }
+
+    @Test
+    void gplIsSatisfiable() {
+        assertTrue(hasSolution(load("GPL/model.xml")));
     }
 }

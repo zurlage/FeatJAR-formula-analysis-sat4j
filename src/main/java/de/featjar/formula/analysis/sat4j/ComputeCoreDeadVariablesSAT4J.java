@@ -48,10 +48,6 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
         super(other);
     }
 
-    public Dependency<BooleanAssignment> getVariablesOfInterest() {
-        return VARIABLES_OF_INTEREST;
-    }
-
     @Override
     public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);

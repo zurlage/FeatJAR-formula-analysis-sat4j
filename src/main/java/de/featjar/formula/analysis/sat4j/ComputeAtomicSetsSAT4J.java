@@ -81,10 +81,10 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                     solver.getAssignment().add(-varX);
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (hasSolution.isEmpty()) {
-                    	solver.getAssignment().remove();
+                        solver.getAssignment().remove();
                     } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                    	done[i] = 2;
-                    	solver.getAssignment().replaceLast(varX);
+                        done[i] = 2;
+                        solver.getAssignment().replaceLast(varX);
                     } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                         solver.getAssignment().remove();
                         BooleanSolution.removeConflictsInplace(model1Copy, solver.getInternalSolution());
@@ -116,7 +116,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
 
                             if (hasSolution.isEmpty()) {
                             } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                            	done[j] = 1;
+                                done[j] = 1;
                             } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                                 BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
                                 solver.shuffleOrder(random);
@@ -130,11 +130,11 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
 
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (hasSolution.isEmpty()) {
-                    	// return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
+                        // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
                     } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                    	for (int j = i + 1; j < xModel0.length; j++) {
-                    		done[j] = 0;
-                    	}
+                        for (int j = i + 1; j < xModel0.length; j++) {
+                            done[j] = 0;
+                        }
                     } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                         xModel0 = solver.getInternalSolution();
                     }
