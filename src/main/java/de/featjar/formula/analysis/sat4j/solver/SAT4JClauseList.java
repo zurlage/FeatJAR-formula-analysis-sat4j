@@ -30,9 +30,9 @@ import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.IConstr;
 
 /**
- * ...
- * This class breaks the Liskov principle, as it only allows appending clauses at the end (i.e., implementing
- * an assumption stack) and does not allow for meaningful cloning due to being tied to a solver instance.
+ * ... This class breaks the Liskov principle, as it only allows appending
+ * clauses at the end (i.e., implementing an assumption stack) and does not
+ * allow for meaningful cloning due to being tied to a solver instance.
  *
  * @author Sebastian Krieter
  * @author Elias Kuiter

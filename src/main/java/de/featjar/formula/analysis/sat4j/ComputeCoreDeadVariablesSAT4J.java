@@ -80,6 +80,7 @@ public class ComputeCoreDeadVariablesSAT4J extends ASAT4JAnalysis.Solution<Boole
             for (int i = 0; i < model1.length; i++) {
                 final int varX = model1[i];
                 if (varX != 0) {
+                    checkCancel();
                     solver.getAssignment().add(-varX);
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (hasSolution.valueEquals(false)) {

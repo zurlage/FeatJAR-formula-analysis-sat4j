@@ -40,7 +40,6 @@ import java.util.Random;
  * @author Sebastian Krieter
  */
 public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
-    // TODO: here, a BooleanAssignmentList would be better
 
     public ComputeAtomicSetsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
@@ -106,7 +105,6 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                     final int mx0 = xModel0[i];
                     solver.getAssignment().add(mx0);
 
-                    inner:
                     for (int j = i + 1; j < xModel0.length; j++) {
                         final int my0 = xModel0[j];
                         if ((my0 != 0) && (done[j] == 0)) {

@@ -285,7 +285,7 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
     }
 
     protected final boolean isRedundant(SAT4JSolutionSolver solver, BooleanClause clause) {
-        return solver.hasSolution(clause.getNegatedValues()).valueEquals(Boolean.FALSE);
+        return solver.hasSolution(clause.negate()).valueEquals(Boolean.FALSE);
     }
 
     protected void detectRedundancy(DirtyFeature nextFeature) {

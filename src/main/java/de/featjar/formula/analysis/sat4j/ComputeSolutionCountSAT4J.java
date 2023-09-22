@@ -47,7 +47,7 @@ public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigIntege
             solutionCount = solutionCount.add(BigInteger.ONE);
             progress.incrementCurrentStep();
             BooleanSolution solution = solver.getSolution();
-            solver.getClauseList().add(solution.toClause().getNegatedValues());
+            solver.getClauseList().add(solution.toClause().negate());
             hasSolution = solver.hasSolution();
         }
         return solver.createResult(solutionCount, "result is a lower bound");
