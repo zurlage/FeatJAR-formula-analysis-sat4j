@@ -25,13 +25,13 @@ import java.util.Random;
 public interface ISelectionStrategy {
 
     enum Strategy {
-        Original,
-        Negative,
-        Positive,
-        Fixed,
-        InverseFixed,
-        FastRandom,
-        UniformRandom,
+        ORIGINAL,
+        NEGATIVE,
+        POSITIVE,
+        FIXED,
+        INVERSE_FIXED,
+        FAST_RANDOM,
+        UNIFORM_RANDOM,
     }
 
     Strategy strategy();
@@ -39,21 +39,21 @@ public interface ISelectionStrategy {
     class OriginalStrategy implements ISelectionStrategy {
         @Override
         public Strategy strategy() {
-            return Strategy.Original;
+            return Strategy.ORIGINAL;
         }
     }
 
     class NegativeStrategy implements ISelectionStrategy {
         @Override
         public Strategy strategy() {
-            return Strategy.Negative;
+            return Strategy.NEGATIVE;
         }
     }
 
     class PositiveStrategy implements ISelectionStrategy {
         @Override
         public Strategy strategy() {
-            return Strategy.Positive;
+            return Strategy.POSITIVE;
         }
     }
 
@@ -66,7 +66,7 @@ public interface ISelectionStrategy {
 
         @Override
         public Strategy strategy() {
-            return Strategy.Fixed;
+            return Strategy.FIXED;
         }
 
         public int[] getModel() {
@@ -83,7 +83,7 @@ public interface ISelectionStrategy {
 
         @Override
         public Strategy strategy() {
-            return Strategy.InverseFixed;
+            return Strategy.INVERSE_FIXED;
         }
 
         public int[] getModel() {
@@ -100,7 +100,7 @@ public interface ISelectionStrategy {
 
         @Override
         public Strategy strategy() {
-            return Strategy.FastRandom;
+            return Strategy.FAST_RANDOM;
         }
 
         public Random getRandom() {
@@ -117,7 +117,7 @@ public interface ISelectionStrategy {
 
         @Override
         public Strategy strategy() {
-            return Strategy.UniformRandom;
+            return Strategy.UNIFORM_RANDOM;
         }
 
         public ALiteralDistribution getDist() {

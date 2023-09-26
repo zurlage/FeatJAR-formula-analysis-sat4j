@@ -100,31 +100,31 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
     public void setSelectionStrategy(ISelectionStrategy strategy) {
         this.strategy = strategy;
         switch (strategy.strategy()) {
-            case FastRandom:
+            case FAST_RANDOM:
                 setSelectionStrategy(new FixedOrderHeap(new RandomSelectionStrategy(), order));
                 break;
-            case Fixed:
+            case FIXED:
                 setSelectionStrategy(
                         new FixedOrderHeap( //
                                 new FixedLiteralSelectionStrategy(((FixedStrategy) strategy).getModel()), //
                                 order));
                 break;
-            case InverseFixed:
+            case INVERSE_FIXED:
                 setSelectionStrategy(
                         new FixedOrderHeap( //
                                 new FixedLiteralSelectionStrategy(((InverseFixedStrategy) strategy).getModel()), //
                                 order));
                 break;
-            case Negative:
+            case NEGATIVE:
                 setSelectionStrategy(new FixedOrderHeap(new NegativeLiteralSelectionStrategy(), order));
                 break;
-            case Original:
+            case ORIGINAL:
                 setSelectionStrategy(new VarOrderHeap(new RSATPhaseSelectionStrategy()));
                 break;
-            case Positive:
+            case POSITIVE:
                 setSelectionStrategy(new FixedOrderHeap(new PositiveLiteralSelectionStrategy(), order));
                 break;
-            case UniformRandom:
+            case UNIFORM_RANDOM:
                 setSelectionStrategy(new FixedOrderHeap2(
                         new UniformRandomSelectionStrategy(((UniformRandomStrategy) strategy).getDist()), order));
                 break;

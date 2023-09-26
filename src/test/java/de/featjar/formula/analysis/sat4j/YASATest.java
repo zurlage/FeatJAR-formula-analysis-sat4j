@@ -163,7 +163,7 @@ public class YASATest extends Common {
 
     private BooleanSolutionList computeRandomSample(IComputation<BooleanClauseList> clauses, int size) {
         BooleanSolutionList sample = clauses.map(ComputeSolutionsSAT4J::new)
-                .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FastRandom)
+                .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FAST_RANDOM)
                 .set(ComputeSolutionsSAT4J.LIMIT, size)
                 .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
                 .compute();

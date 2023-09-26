@@ -43,7 +43,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
     public ComputeSolutionsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(
                 booleanClauseList,
-                Computations.of(ISelectionStrategy.Strategy.Original),
+                Computations.of(ISelectionStrategy.Strategy.ORIGINAL),
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(true));
     }
@@ -60,16 +60,16 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
         final Strategy strategy = SELECTION_STRATEGY.get(dependencyList);
         Random random = null;
         switch (strategy) {
-            case FastRandom:
+            case FAST_RANDOM:
                 random = new Random(RANDOM_SEED.get(dependencyList));
                 solver.setSelectionStrategy(ISelectionStrategy.random(random));
                 break;
-            case Negative:
+            case NEGATIVE:
                 solver.setSelectionStrategy(ISelectionStrategy.negative());
                 break;
-            case Original:
+            case ORIGINAL:
                 break;
-            case Positive:
+            case POSITIVE:
                 solver.setSelectionStrategy(ISelectionStrategy.positive());
                 break;
             default:
@@ -85,7 +85,7 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
             if (forbid) {
                 solver.getClauseList().add(solution.get().toClause().inverse());
             }
-            if (strategy == Strategy.FastRandom) {
+            if (strategy == Strategy.FAST_RANDOM) {
                 solver.shuffleOrder(random);
             }
         }

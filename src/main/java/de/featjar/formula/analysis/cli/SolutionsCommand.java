@@ -40,11 +40,11 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
             .setDefaultValue(1);
 
     public static final Option<ISelectionStrategy.Strategy> SELECTION_STRATEGY_OPTION = new Option<>(
-                    "strategy", ISelectionStrategy.Strategy::valueOf) //
+                    "strategy", Option.valueOf(ISelectionStrategy.Strategy.class)) //
             .setDescription(String.format(
                     "Strategy to use for generating each configuration (%s)",
                     Option.possibleValues(ISelectionStrategy.Strategy.class))) //
-            .setDefaultValue(ISelectionStrategy.Strategy.Original);
+            .setDefaultValue(ISelectionStrategy.Strategy.ORIGINAL);
 
     public static final Option<Boolean> FORBID_DUPLICATES_OPTION = new Flag("no-dublicates") //
             .setDescription("Forbid dublicate configurations to be generated");
