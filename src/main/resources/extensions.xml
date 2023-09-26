@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <extensions>
 	<point id="de.featjar.base.cli.Commands">
-		<extension id="de.featjar.formula.cli.CoreCommand" />
+		<extension id="de.featjar.formula.analysis.cli.CoreCommand" />
+		<extension id="de.featjar.formula.analysis.cli.AtomicSetsCommand" />
+		<extension id="de.featjar.formula.analysis.cli.SolutionsCommand" />
+		<extension id="de.featjar.formula.analysis.cli.SolutionCountCommand" />
+		<extension id="de.featjar.formula.analysis.cli.TWiseCommand" />
 	</point>
 </extensions>
