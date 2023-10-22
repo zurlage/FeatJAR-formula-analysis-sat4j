@@ -58,7 +58,7 @@ public class ComputeCoreDead extends ASAT4JMIGAnalysis<BooleanAssignment> {
     public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = new Random(RANDOM_SEED.get(dependencyList));
-        BooleanAssignment assignment = ASSUMED_ASSIGNMENT.get(dependencyList);
+        ABooleanAssignment assignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         ABooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
         ModalImplicationGraph mig = MIG.get(dependencyList);
 

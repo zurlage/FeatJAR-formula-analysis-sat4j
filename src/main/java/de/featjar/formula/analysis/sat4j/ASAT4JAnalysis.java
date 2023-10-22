@@ -39,13 +39,13 @@ import java.time.Duration;
 import java.util.List;
 
 public abstract class ASAT4JAnalysis<T> extends AComputation<T>
-        implements IAssumedAssignmentDependency<BooleanAssignment>,
+        implements IAssumedAssignmentDependency<ABooleanAssignment>,
                 IAssumedClauseListDependency<BooleanClauseList>,
                 ITimeoutDependency {
     public static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
-    public static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
-            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<ABooleanAssignment> ASSUMED_ASSIGNMENT =
+            Dependency.newDependency(ABooleanAssignment.class);
     public static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
     public static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
@@ -71,7 +71,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
     }
 
     @Override
-    public Dependency<BooleanAssignment> getAssumedAssignmentDependency() {
+    public Dependency<ABooleanAssignment> getAssumedAssignmentDependency() {
         return ASSUMED_ASSIGNMENT;
     }
 
