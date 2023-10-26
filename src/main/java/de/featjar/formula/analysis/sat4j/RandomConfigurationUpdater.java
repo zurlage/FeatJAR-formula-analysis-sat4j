@@ -28,15 +28,20 @@ import de.featjar.formula.analysis.bool.BooleanClause;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.combinations.ConfigurationUpdater;
+import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.formula.analysis.sat4j.solver.SAT4JSolutionSolver;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 
 public class RandomConfigurationUpdater implements ConfigurationUpdater {
     private final BooleanClauseList model;
-    private final Long randomSeed;
+    private final Random random;
 
     public RandomConfigurationUpdater(BooleanClauseList cnf, Long randomSeed) {
         this.model = cnf;
-        this.randomSeed = randomSeed;
+        random = new Random(randomSeed);
     }
 
     @Override
@@ -53,7 +58,8 @@ public class RandomConfigurationUpdater implements ConfigurationUpdater {
             Collection<int[]> include, Collection<int[]> exclude, Collection<int[]> choose) {
         final int orgVariableCount = model.getVariableCount();
 
-        BooleanClauseList ll = new BooleanClauseList(orgVariableCount);
+        List<BooleanClause> ll = new ArrayList<>();
+        ll.addAll(model.getAll());
 
         int newVariableCount = orgVariableCount;
         if (choose != null) {
@@ -82,11 +88,10 @@ public class RandomConfigurationUpdater implements ConfigurationUpdater {
                 ll.add(new BooleanClause(clause).inverse());
             }
         }
-        return Computations.of(new BooleanClauseList(model.getAll(), newVariableCount))
-                .map(ComputeSolutionSAT4J::new)
-                .set(ComputeSolutionSAT4J.ASSUMED_CLAUSE_LIST, ll)
-                .set(ComputeSolutionSAT4J.RANDOM_SEED, randomSeed)
-                .computeResult()
-                .map(a -> a.toSolution());
+
+        SAT4JSolutionSolver solver = new SAT4JSolutionSolver(new BooleanClauseList(ll, newVariableCount));
+        solver.setSelectionStrategy(ISelectionStrategy.random(random));
+        solver.shuffleOrder(random);
+        return solver.findSolution();
     }
 }
