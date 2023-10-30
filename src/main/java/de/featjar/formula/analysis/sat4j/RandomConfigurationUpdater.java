@@ -21,7 +21,7 @@
 package de.featjar.formula.analysis.sat4j;
 
 import de.featjar.base.computation.Computations;
-import de.featjar.base.data.IIntegerList;
+import de.featjar.base.data.IntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.ABooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClause;
@@ -74,11 +74,11 @@ public class RandomConfigurationUpdater implements ConfigurationUpdater {
             }
 
             ll.add(new BooleanClause(newNegativeLiterals));
-            ll.add(new BooleanClause(IIntegerList.mergeInt(choose)).inverse());
+            ll.add(new BooleanClause(IntegerList.mergeInt(choose)).inverse());
             newVariableCount += i;
         }
         if (include != null) {
-            int[] includeMerge = IIntegerList.mergeInt(include);
+            int[] includeMerge = IntegerList.mergeInt(include);
             for (int literal : includeMerge) {
                 ll.add(new BooleanClause(literal));
             }
