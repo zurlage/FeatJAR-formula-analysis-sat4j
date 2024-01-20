@@ -76,7 +76,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
                         ComputeSolutionsSAT4J.RANDOM_SEED,
                         optionParser.get(RANDOM_SEED_OPTION).get())
                 .set(
-                        ComputeSolutionsSAT4J.TIMEOUT,
+                        ComputeSolutionsSAT4J.SAT_TIMEOUT,
                         optionParser.get(TIMEOUT_OPTION).get());
     }
 

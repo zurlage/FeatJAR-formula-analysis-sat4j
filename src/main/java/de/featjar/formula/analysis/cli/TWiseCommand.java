@@ -61,10 +61,10 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
         return formula.map(Computations::getKey)
                 .map(YASA::new)
                 .set(YASA.T, optionParser.get(LIMIT_OPTION).get())
-                .set(YASA.LIMIT, optionParser.get(LIMIT_OPTION).get())
+                .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION).get())
                 .set(YASA.ITERATIONS, optionParser.get(LIMIT_OPTION).get())
                 .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION).get())
-                .set(YASA.TIMEOUT, optionParser.get(TIMEOUT_OPTION).get());
+                .set(YASA.SAT_TIMEOUT, optionParser.get(TIMEOUT_OPTION).get());
     }
 
     @Override

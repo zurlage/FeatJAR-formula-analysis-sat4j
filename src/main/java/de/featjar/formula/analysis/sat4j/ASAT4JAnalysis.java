@@ -47,7 +47,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
             Dependency.newDependency(ABooleanAssignment.class);
     public static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
-    public static final Dependency<Duration> TIMEOUT = Dependency.newDependency(Duration.class);
+    public static final Dependency<Duration> SAT_TIMEOUT = Dependency.newDependency(Duration.class);
     public static final Dependency<Long> RANDOM_SEED = Dependency.newDependency(Long.class);
 
     public ASAT4JAnalysis(IComputation<BooleanClauseList> booleanClauseList, Object... computations) {
@@ -66,7 +66,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
 
     @Override
     public Dependency<Duration> getTimeoutDependency() {
-        return TIMEOUT;
+        return SAT_TIMEOUT;
     }
 
     @Override
@@ -86,7 +86,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
         BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
         ABooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         BooleanClauseList assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
-        Duration timeout = TIMEOUT.get(dependencyList);
+        Duration timeout = SAT_TIMEOUT.get(dependencyList);
         //        FeatJAR.log().debug("initializing SAT4J");
         //        FeatJAR.log().debug(clauseList);
         //        FeatJAR.log().debug("assuming " + assumedAssignment);
