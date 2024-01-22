@@ -24,8 +24,6 @@ import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.computation.IRandomDependency;
-import de.featjar.base.computation.ITimeoutDependency;
 import de.featjar.formula.analysis.IAssumedAssignmentDependency;
 import de.featjar.formula.analysis.IAssumedClauseListDependency;
 import de.featjar.formula.analysis.bool.ABooleanAssignment;
@@ -38,9 +36,7 @@ import java.time.Duration;
 import java.util.List;
 
 public abstract class ASAT4JAnalysis<T> extends AComputation<T>
-        implements IAssumedAssignmentDependency<ABooleanAssignment>,
-                IAssumedClauseListDependency<BooleanClauseList>,
-                ITimeoutDependency {
+        implements IAssumedAssignmentDependency<ABooleanAssignment>, IAssumedClauseListDependency<BooleanClauseList> {
     public static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
     public static final Dependency<ABooleanAssignment> ASSUMED_ASSIGNMENT =
@@ -55,18 +51,13 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T>
                 booleanClauseList,
                 Computations.of(new BooleanAssignment()),
                 Computations.of(new BooleanClauseList(-1)),
-                Computations.of(ITimeoutDependency.DEFAULT_TIMEOUT),
-                Computations.of(IRandomDependency.DEFAULT_RANDOM_SEED),
+                Computations.of(Duration.ZERO),
+                Computations.of(1L),
                 computations);
     }
 
     protected ASAT4JAnalysis(ASAT4JAnalysis<T> other) {
         super(other);
-    }
-
-    @Override
-    public Dependency<Duration> getTimeoutDependency() {
-        return SAT_TIMEOUT;
     }
 
     @Override

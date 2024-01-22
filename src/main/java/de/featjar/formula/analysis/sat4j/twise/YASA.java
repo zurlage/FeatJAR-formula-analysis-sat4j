@@ -218,6 +218,9 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
         }
         maxSampleSize = CONFIGURATION_LIMIT.get(dependencyList);
         iterations = ITERATIONS.get(dependencyList);
+        if (iterations < 0) {
+            iterations = Integer.MAX_VALUE;
+        }
         random = new Random(RANDOM_SEED.get(dependencyList));
 
         solver = initializeSolver(dependencyList);
