@@ -36,7 +36,7 @@ public class ComputeAtomicSetsTest extends Common {
 
     @Test
     public void gplHas27AtomicSets() {
-        BooleanAssignmentList atomicSets = Computations.of(load("GPL/model.xml"))
+        BooleanAssignmentList atomicSets = Computations.of(loadFormula("GPL/model.xml"))
                 .cast(IFormula.class)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)

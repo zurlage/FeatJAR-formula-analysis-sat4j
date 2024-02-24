@@ -74,6 +74,6 @@ public class ComputeSolutionTest extends Common {
 
     @Test
     void gplIsSatisfiable() {
-        assertTrue(hasSolution(load("GPL/model.xml")));
+        assertTrue(hasSolution(loadFormula("GPL/model.xml")));
     }
 }
