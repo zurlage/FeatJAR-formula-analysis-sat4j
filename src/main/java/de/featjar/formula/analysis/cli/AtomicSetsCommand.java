@@ -24,8 +24,8 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
+import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
 import de.featjar.formula.structure.formula.IFormula;
 
@@ -38,7 +38,7 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
-            BooleanRepresentationComputation<IFormula, BooleanClauseList> formula) {
+            ComputeBooleanRepresentation<IFormula, BooleanClauseList> formula) {
         return formula.map(Computations::getKey).map(ComputeAtomicSetsSAT4J::new);
     }
 

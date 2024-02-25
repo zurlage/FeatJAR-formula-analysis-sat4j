@@ -31,8 +31,8 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
+import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
@@ -327,10 +327,10 @@ public class YASATest extends Common {
     }
 
     private IComputation<BooleanClauseList> getClauses(IFormula formula) {
-        BooleanRepresentationComputation<IFormula, BooleanClauseList> cnf = async(formula)
+        ComputeBooleanRepresentation<IFormula, BooleanClauseList> cnf = async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(BooleanRepresentationComputation::new);
+                .map(ComputeBooleanRepresentation::new);
         return cnf.map(Computations::getKey);
     }
 }

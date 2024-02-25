@@ -31,8 +31,8 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.BooleanRepresentationComputation;
 import de.featjar.formula.analysis.bool.BooleanSolution;
+import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
@@ -41,10 +41,10 @@ import org.junit.jupiter.api.Test;
 public class Sat4JAnalysesTest {
 
     public void getTWiseSample(IFormula formula, int t) {
-        BooleanRepresentationComputation<IFormula, BooleanClauseList> cnf = async(formula)
+        ComputeBooleanRepresentation<IFormula, BooleanClauseList> cnf = async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(BooleanRepresentationComputation::new);
+                .map(ComputeBooleanRepresentation::new);
         IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
 
         BooleanSolution solution = await((IComputation<BooleanSolution>) clauses.map(ComputeSolutionSAT4J::new));
