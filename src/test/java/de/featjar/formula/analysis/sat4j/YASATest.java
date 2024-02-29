@@ -292,7 +292,7 @@ public class YASATest extends Common {
     }
 
     private void computeCoverageVariants(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        BooleanAssignment core = clauses.map(ComputeCoreDeadVariablesSAT4J::new).compute();
+        BooleanAssignment core = clauses.map(ComputeCoreSAT4J::new).compute();
         BooleanAssignment atomic = new BooleanAssignment(clauses.map(ComputeAtomicSetsSAT4J::new).compute().stream()
                 .skip(1)
                 .flatMapToInt(l -> Arrays.stream(l.get(), 1, l.get().length))

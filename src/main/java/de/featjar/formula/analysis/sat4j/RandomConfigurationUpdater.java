@@ -47,8 +47,8 @@ public class RandomConfigurationUpdater implements ConfigurationUpdater {
     @Override
     public Result<BooleanSolution> update(ABooleanAssignment partialSolution) {
         return Computations.of(model)
-                .map(ComputeCoreDeadVariablesSAT4J::new)
-                .set(ComputeCoreDeadVariablesSAT4J.ASSUMED_ASSIGNMENT, partialSolution)
+                .map(ComputeCoreSAT4J::new)
+                .set(ComputeCoreSAT4J.ASSUMED_ASSIGNMENT, partialSolution)
                 .computeResult()
                 .map(a -> a.toSolution());
     }
