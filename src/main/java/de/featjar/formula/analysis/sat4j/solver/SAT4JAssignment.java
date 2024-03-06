@@ -182,4 +182,9 @@ public class SAT4JAssignment implements IAssignment<Integer, Boolean>, Supplier<
     public BooleanSolution toSolution() {
         return new BooleanSolution(get());
     }
+
+    @Override
+    public String print() {
+        return Arrays.toString(integers.toArray());
+    }
 }

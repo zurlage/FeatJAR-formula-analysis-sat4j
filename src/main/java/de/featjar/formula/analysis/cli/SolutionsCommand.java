@@ -25,7 +25,6 @@ import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.ComputeSolutionsSAT4J;
@@ -61,8 +60,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(
-            ComputeBooleanRepresentation<IFormula, BooleanClauseList> formula) {
+    public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanRepresentation<IFormula> formula) {
         return formula.map(Computations::getKey)
                 .map(ComputeSolutionsSAT4J::new)
                 .set(

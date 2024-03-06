@@ -18,29 +18,26 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.formula.analysis.cli;
+package de.featjar.formula.analysis.sat4j;
 
-import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.analysis.bool.BooleanAssignment;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
-import de.featjar.formula.analysis.mig.ComputeCoreDead;
-import de.featjar.formula.structure.formula.IFormula;
+import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Result;
+import de.featjar.formula.analysis.bool.BooleanClauseList;
+import java.util.List;
 
-public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, BooleanAssignment> {
+public class ComputeSatisfiableSAT4J extends ASAT4JAnalysis.Solution<Boolean> {
 
-    @Override
-    public String getDescription() {
-        return "Computes core and dead variables for a given formula using SAT4J";
+    public ComputeSatisfiableSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
+    }
+
+    protected ComputeSatisfiableSAT4J(ComputeSatisfiableSAT4J other) {
+        super(other);
     }
 
     @Override
-    public IComputation<BooleanAssignment> newAnalysis(ComputeBooleanRepresentation<IFormula> formula) {
-        return formula.map(Computations::getKey).map(ComputeCoreDead::new);
-    }
-
-    @Override
-    public String serializeResult(BooleanAssignment assignment) {
-        return assignment.print();
+    public Result<Boolean> compute(List<Object> dependencyList, Progress progress) {
+        return initializeSolver(dependencyList).hasSolution();
     }
 }

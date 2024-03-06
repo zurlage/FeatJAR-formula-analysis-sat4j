@@ -28,7 +28,6 @@ import de.featjar.formula.analysis.VariableMap;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
-import de.featjar.formula.analysis.bool.IBooleanRepresentation;
 import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
@@ -46,17 +45,15 @@ public class ComputeIndeterminateTest {
         IFormula formula = Expressions.and(
                 Expressions.or(Expressions.literal("a"), Expressions.literal("b")),
                 Expressions.biImplies(Expressions.literal("x"), Expressions.literal("y")));
-        ComputeBooleanRepresentation<IFormula, IBooleanRepresentation> cnf = Computations.of(formula)
+        ComputeBooleanRepresentation<IFormula> cnf = Computations.of(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanRepresentation::new);
-        IComputation<IBooleanRepresentation> clauses = cnf.map(Computations::getKey);
+        IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
         VariableMap variables = cnf.map(Computations::getValue).compute();
-        BooleanAssignment compute = clauses.cast(BooleanClauseList.class)
-                .map(ComputeIndeterminate::new)
-                .compute();
-        List<String> indeterminate = compute.streamValues()
-                .map(v -> (v.getValue() ? "+" : "-") + variables.get(v.getKey()).get())
+        BooleanAssignment compute = clauses.map(ComputeIndeterminate::new).compute();
+        List<String> indeterminate = Arrays.stream(compute.get())
+                .mapToObj(v -> (v > 0 ? "+" : "-") + variables.get((int) v).get())
                 .collect(Collectors.toCollection(ArrayList::new));
         assertEquals(new ArrayList<>(Arrays.asList("+a", "+b")), indeterminate);
     }

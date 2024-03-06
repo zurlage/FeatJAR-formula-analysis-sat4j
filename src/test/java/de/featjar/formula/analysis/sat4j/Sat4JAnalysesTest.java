@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 public class Sat4JAnalysesTest extends AnalysisTest {
 
     public void getTWiseSample(IFormula formula, int t) {
-        ComputeBooleanRepresentation<IFormula, BooleanClauseList> cnf = async(formula)
+        ComputeBooleanRepresentation<IFormula> cnf = async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanRepresentation::new);

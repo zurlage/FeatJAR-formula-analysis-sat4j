@@ -327,7 +327,7 @@ public class YASATest extends Common {
     }
 
     private IComputation<BooleanClauseList> getClauses(IFormula formula) {
-        ComputeBooleanRepresentation<IFormula, BooleanClauseList> cnf = async(formula)
+        ComputeBooleanRepresentation<IFormula> cnf = async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanRepresentation::new);

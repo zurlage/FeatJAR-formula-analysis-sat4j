@@ -27,8 +27,7 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
 import de.featjar.formula.analysis.VariableMap;
-import de.featjar.formula.analysis.bool.BooleanAssignmentSpace;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
+import de.featjar.formula.analysis.bool.BooleanAssignmentGroups;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
@@ -64,8 +63,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(
-            ComputeBooleanRepresentation<IFormula, BooleanClauseList> formula) {
+    public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanRepresentation<IFormula> formula) {
         return formula.map(Computations::getKey)
                 .map(YASA::new)
                 .set(YASA.T, optionParser.get(T_OPTION))
@@ -79,7 +77,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     protected boolean writeToOutputFile(BooleanSolutionList list, Path outputPath) {
         try {
             IO.save(
-                    new BooleanAssignmentSpace(VariableMap.of(inputFormula), List.of(list.getAll())),
+                    new BooleanAssignmentGroups(VariableMap.of(inputFormula), List.of(list.getAll())),
                     outputPath,
                     new BooleanSolutionListCSVFormat());
             return true;
