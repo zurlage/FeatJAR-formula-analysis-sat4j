@@ -38,18 +38,33 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Computes solutions for a given formula using SAT4J.
+ *
+ * @author Sebastian Krieter
+ * @author Andreas Gerasimow
+ */
 public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
 
+    /**
+     * Maximum number of configurations to be generated.
+     */
     public static final Option<Integer> LIMIT_OPTION = new Option<>("n", Option.IntegerParser) //
-            .setDescription("Maximum number of configurations to be generated") //
+            .setDescription("Maximum number of configurations to be generated.") //
             .setDefaultValue(Integer.MAX_VALUE);
 
+    /**
+     * Value of t.
+     */
     public static final Option<Integer> T_OPTION = new Option<>("t", Option.IntegerParser) //
-            .setDescription("Value of t") //
+            .setDescription("Value of t.") //
             .setDefaultValue(2);
 
+    /**
+     * Number of iterations.
+     */
     public static final Option<Integer> ITERATIONS_OPTION = new Option<>("i", Option.IntegerParser) //
-            .setDescription("Number of iterations") //
+            .setDescription("Number of iterations.") //
             .setDefaultValue(1);
 
     @Override
@@ -98,5 +113,10 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("t-wise-sat4j");
     }
 }

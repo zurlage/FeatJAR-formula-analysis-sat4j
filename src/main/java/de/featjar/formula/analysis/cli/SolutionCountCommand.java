@@ -27,11 +27,18 @@ import de.featjar.formula.analysis.sat4j.ComputeSolutionCountSAT4J;
 import java.math.BigInteger;
 import java.util.Optional;
 
+/**
+ * Computes number of solutions for a given formula using SAT4J.
+ *
+ * @author Sebastian Krieter
+ * @author Elias Kuiter
+ * @author Andreas Gerasimow
+ */
 public class SolutionCountCommand extends ASAT4JAnalysisCommand<BigInteger, BigInteger> {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes number of solutions for a given formula using SAT4J");
+        return Optional.of("Computes number of solutions for a given formula using SAT4J.");
     }
 
     @Override
@@ -42,5 +49,10 @@ public class SolutionCountCommand extends ASAT4JAnalysisCommand<BigInteger, BigI
     @Override
     public String serializeResult(BigInteger count) {
         return count.toString();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("solution-count-sat4j");
     }
 }

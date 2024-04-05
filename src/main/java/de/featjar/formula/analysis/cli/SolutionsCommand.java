@@ -32,21 +32,36 @@ import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Computes solutions for a given formula using SAT4J.
+ *
+ * @author Sebastian Krieter
+ * @author Andreas Gerasimow
+ */
 public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
 
+    /**
+     * Maximum number of configurations to be generated.
+     */
     public static final Option<Integer> LIMIT_OPTION = new Option<>("n", Option.IntegerParser) //
-            .setDescription("Maximum number of configurations to be generated") //
+            .setDescription("Maximum number of configurations to be generated.") //
             .setDefaultValue(1);
 
+    /**
+     * Strategy to use for generating each configuration (%s).
+     */
     public static final Option<ISelectionStrategy.Strategy> SELECTION_STRATEGY_OPTION = new Option<>(
                     "strategy", Option.valueOf(ISelectionStrategy.Strategy.class)) //
             .setDescription(String.format(
-                    "Strategy to use for generating each configuration (%s)",
+                    "Strategy to use for generating each configuration (%s).",
                     Option.possibleValues(ISelectionStrategy.Strategy.class))) //
             .setDefaultValue(ISelectionStrategy.Strategy.ORIGINAL);
 
+    /**
+     * Forbid dublicate configurations to be generated.
+     */
     public static final Option<Boolean> FORBID_DUPLICATES_OPTION = new Flag("no-dublicates") //
-            .setDescription("Forbid dublicate configurations to be generated");
+            .setDescription("Forbid dublicate configurations to be generated.");
 
     @Override
     public List<Option<?>> getOptions() {
@@ -56,7 +71,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes solutions for a given formula using SAT4J");
+        return Optional.of("Computes solutions for a given formula using SAT4J.");
     }
 
     @Override
@@ -83,5 +98,10 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     @Override
     public String serializeResult(BooleanSolutionList list) {
         return list.print();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("solutions-sat4j");
     }
 }

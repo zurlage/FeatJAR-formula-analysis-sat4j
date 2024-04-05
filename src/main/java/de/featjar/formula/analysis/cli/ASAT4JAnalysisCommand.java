@@ -29,8 +29,8 @@ import de.featjar.formula.analysis.AAnalysisCommand;
 import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.formula.IFormula;
-import de.featjar.formula.transformer.ComputeCNFFormula;
-import de.featjar.formula.transformer.ComputeNNFFormula;
+import de.featjar.formula.transform.ComputeCNFFormula;
+import de.featjar.formula.transform.ComputeNNFFormula;
 import java.time.Duration;
 import java.util.List;
 

@@ -27,11 +27,17 @@ import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.analysis.mig.ComputeCoreDead;
 import java.util.Optional;
 
+/**
+ * Computes core and dead variables for a given formula using SAT4J.
+ *
+ * @author Sebastian Krieter
+ * @author Andreas Gerasimow
+ */
 public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, BooleanAssignment> {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes core and dead variables for a given formula using SAT4J");
+        return Optional.of("Computes core and dead variables for a given formula using SAT4J.");
     }
 
     @Override
@@ -42,5 +48,10 @@ public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, Boolea
     @Override
     public String serializeResult(BooleanAssignment assignment) {
         return assignment.print();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("core-sat4j");
     }
 }

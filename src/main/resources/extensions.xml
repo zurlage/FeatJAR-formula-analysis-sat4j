@@ -6,5 +6,6 @@
 		<extension id="de.featjar.formula.analysis.cli.SolutionsCommand" />
 		<extension id="de.featjar.formula.analysis.cli.SolutionCountCommand" />
 		<extension id="de.featjar.formula.analysis.cli.TWiseCommand" />
+		<extension id="de.featjar.formula.transform.cli.ProjectionCommand" />
 	</point>
 </extensions>

@@ -28,11 +28,18 @@ import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
 import java.util.Optional;
 
+/**
+ * Computes atomic sets for a given formula using SAT4J.
+ *
+ * @author Elias Kuiter
+ * @author Sebastian Krieter
+ * @author Andreas Gerasimow
+ */
 public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanSolutionList> {
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes atomic sets for a given formula using SAT4J");
+        return Optional.of("Computes atomic sets for a given formula using SAT4J.");
     }
 
     @Override
@@ -43,5 +50,10 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
     @Override
     public String serializeResult(BooleanAssignmentList list) {
         return list.print();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("atomic-sets-sat4j");
     }
 }
