@@ -28,7 +28,6 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
-import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.combinations.LexicographicIterator;
@@ -43,11 +42,11 @@ import java.util.List;
  * @author Sebastian Krieter
  */
 public class RelativeTWiseCoverageComputation extends AComputation<CoverageStatistic> {
+    public static final Dependency<BooleanSolutionList> REFERENCE_SAMPLE =
+            Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
     public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<BooleanAssignment> FILTER = Dependency.newDependency(BooleanAssignment.class);
-    public static final Dependency<BooleanSolutionList> REFERENCE_SAMPLE =
-            Dependency.newDependency(BooleanSolutionList.class);
 
     public class Environment {
         private final CoverageStatistic statistic = new CoverageStatistic(t);
@@ -59,12 +58,12 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
         }
     }
 
-    public RelativeTWiseCoverageComputation(IComputation<BooleanClauseList> booleanClauseList) {
+    public RelativeTWiseCoverageComputation(IComputation<BooleanSolutionList> reference) {
         super(
+                reference,
                 Computations.of(2), //
                 Computations.of(new BooleanSolutionList()), //
-                Computations.of(new BooleanAssignment()), //
-                Computations.of(new BooleanSolutionList()));
+                Computations.of(new BooleanAssignment()));
     }
 
     public RelativeTWiseCoverageComputation(RelativeTWiseCoverageComputation other) {
