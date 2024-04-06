@@ -84,7 +84,7 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
             t = T.get(dependencyList);
             assert referenceSample.isEmpty()
                     || sample.get(0).get().size()
-                            == referenceSample.get(0).get().size();
+                            >= referenceSample.get(0).get().size();
             final int size = sample.get(0).get().size();
             initIndexedLists(sample, referenceSample, size);
             final int[] literals = TWiseCoverageComputationUtils.getFilteredLiterals(size, FILTER.get(dependencyList));
