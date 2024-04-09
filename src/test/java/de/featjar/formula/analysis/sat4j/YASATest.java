@@ -271,7 +271,8 @@ public class YASATest extends Common {
 
     private CoverageStatistic computeCoverageRel(
             int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        CoverageStatistic statistic = clauses.map(RelativeTWiseCoverageComputation::new)
+        CoverageStatistic statistic = Computations.of(sample)
+                .map(RelativeTWiseCoverageComputation::new)
                 .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
                 .setDependencyComputation(
                         RelativeTWiseCoverageComputation.REFERENCE_SAMPLE, clauses.map(ComputeSolutionsSAT4J::new))
