@@ -36,6 +36,7 @@ import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
+import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation2;
 import de.featjar.formula.analysis.sat4j.twise.TWiseCoverageComputation;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.formula.analysis.sat4j.twise.YASA;
@@ -213,6 +214,7 @@ public class YASATest extends Common {
         CoverageStatistic statistic1 = computeCoverageNew(t, clauses, sample);
         CoverageStatistic statistic2 = computeCoverageRel(t, clauses, sample);
         CoverageStatistic statistic3 = computeCoverageOld(t, clauses, sample);
+        CoverageStatistic statistic4 = computeCoverageRel2(t, clauses, sample);
 
         FeatJAR.log().info("total     %d | %d | %d", statistic1.total(), statistic2.total(), statistic3.total());
         FeatJAR.log().info("covered   %d | %d | %d", statistic1.covered(), statistic2.covered(), statistic3.covered());
@@ -223,6 +225,7 @@ public class YASATest extends Common {
         assertEquals(1.0, statistic1.coverage());
         assertEquals(1.0, statistic2.coverage());
         assertEquals(1.0, statistic3.coverage());
+        assertEquals(1.0, statistic4.coverage());
 
         assertEquals(statistic1.covered(), statistic2.covered());
         assertEquals(statistic1.uncovered(), statistic2.uncovered());
@@ -230,6 +233,9 @@ public class YASATest extends Common {
         assertEquals(statistic1.covered(), statistic3.covered());
         assertEquals(statistic1.uncovered(), statistic3.uncovered());
         assertEquals(statistic1.invalid(), statistic3.invalid());
+        assertEquals(statistic1.covered(), statistic4.covered());
+        assertEquals(statistic1.uncovered(), statistic4.uncovered());
+        assertEquals(statistic1.invalid(), statistic4.invalid());
     }
 
     private BooleanSolutionList computeSample(int t, IComputation<BooleanClauseList> clauses) {
@@ -279,6 +285,19 @@ public class YASATest extends Common {
                 .set(RelativeTWiseCoverageComputation.T, t)
                 .compute();
         FeatJAR.log().info("Computed Coverage (RelativeTWiseCoverageComputation)");
+        return statistic;
+    }
+
+    private CoverageStatistic computeCoverageRel2(
+            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+        CoverageStatistic statistic = Computations.of(sample)
+                .map(RelativeTWiseCoverageComputation2::new)
+                .set(RelativeTWiseCoverageComputation2.SAMPLE, sample)
+                .setDependencyComputation(
+                        RelativeTWiseCoverageComputation2.REFERENCE_SAMPLE, clauses.map(ComputeSolutionsSAT4J::new))
+                .set(RelativeTWiseCoverageComputation2.T, t)
+                .compute();
+        FeatJAR.log().info("Computed Coverage (RelativeTWiseCoverageComputation2)");
         return statistic;
     }
 
