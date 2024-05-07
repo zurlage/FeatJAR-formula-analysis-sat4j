@@ -36,7 +36,6 @@ import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
-import de.featjar.formula.analysis.sat4j.twise.RelativeTWiseCoverageComputation2;
 import de.featjar.formula.analysis.sat4j.twise.TWiseCoverageComputation;
 import de.featjar.formula.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.formula.analysis.sat4j.twise.YASA;
@@ -94,31 +93,19 @@ public class YASATest extends Common {
         assertFullCoverageWithAllAlgorithms(loadFormula("testFeatureModels/model_with_free_variables.dimacs"), 3);
     }
 
-    //	@Test
-    void embToolkitHas2WiseCoverage() {
-        assertFullCoverage(loadFormula("EMBToolkit/model.xml"), 2);
-    }
-
-    //	@Test
-    void financial_servicesHas2WiseCoverage() {
-        assertFullCoverage(loadFormula("financial_services/model.xml"), 2);
-    }
-
-    //	@Test
+    @Test
     public void testBothCoverageRandom() {
         bothRandom(loadFormula("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs"));
     }
 
-    //	@Test
+    @Test
     public void benchmark() {
         benchmarkCompareSample("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs", 2);
-        benchmarkCompareSample("EMBToolkit/model.xml", 2);
     }
 
-    //	@Test
+    @Test
     public void variants() {
         compareVariants(loadFormula("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs"));
-        compareVariants(loadFormula("EMBToolkit/model.xml"));
     }
 
     @Test
@@ -246,24 +233,6 @@ public class YASATest extends Common {
         return sample;
     }
 
-    public void assertFullCoverage(IFormula formula, int t) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeSample(t, clauses);
-
-        long time = System.currentTimeMillis();
-        CoverageStatistic statistic1 = computeCoverageNew(t, clauses, sample);
-        assertEquals(1.0, statistic1.coverage());
-        FeatJAR.log().info((System.currentTimeMillis() - time) / 1000.0);
-
-        time = System.currentTimeMillis();
-        CoverageStatistic statistic3 = computeCoverageOld(t, clauses, sample);
-        assertEquals(1.0, statistic3.coverage());
-        FeatJAR.log().info((System.currentTimeMillis() - time) / 1000.0);
-        assertEquals(statistic1.covered(), statistic3.covered());
-        assertEquals(statistic1.uncovered(), statistic3.uncovered());
-        assertEquals(statistic1.invalid(), statistic3.invalid());
-    }
-
     private CoverageStatistic computeCoverageOld(
             int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
         CoverageStatistic statistic = clauses.map(TWiseStatisticGenerator::new)
@@ -277,11 +246,9 @@ public class YASATest extends Common {
 
     private CoverageStatistic computeCoverageRel(
             int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        CoverageStatistic statistic = Computations.of(sample)
+        CoverageStatistic statistic = clauses.map(ComputeSolutionsSAT4J::new)
                 .map(RelativeTWiseCoverageComputation::new)
                 .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
-                .setDependencyComputation(
-                        RelativeTWiseCoverageComputation.REFERENCE_SAMPLE, clauses.map(ComputeSolutionsSAT4J::new))
                 .set(RelativeTWiseCoverageComputation.T, t)
                 .compute();
         FeatJAR.log().info("Computed Coverage (RelativeTWiseCoverageComputation)");
@@ -290,12 +257,10 @@ public class YASATest extends Common {
 
     private CoverageStatistic computeCoverageRel2(
             int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        CoverageStatistic statistic = Computations.of(sample)
-                .map(RelativeTWiseCoverageComputation2::new)
-                .set(RelativeTWiseCoverageComputation2.SAMPLE, sample)
-                .setDependencyComputation(
-                        RelativeTWiseCoverageComputation2.REFERENCE_SAMPLE, clauses.map(ComputeSolutionsSAT4J::new))
-                .set(RelativeTWiseCoverageComputation2.T, t)
+        CoverageStatistic statistic = clauses.map(ComputeSolutionsSAT4J::new)
+                .map(RelativeTWiseCoverageComputation::new)
+                .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
+                .set(RelativeTWiseCoverageComputation.T, t)
                 .compute();
         FeatJAR.log().info("Computed Coverage (RelativeTWiseCoverageComputation2)");
         return statistic;
