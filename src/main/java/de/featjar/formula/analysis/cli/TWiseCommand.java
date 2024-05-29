@@ -37,6 +37,7 @@ import de.featjar.formula.structure.formula.IFormula;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
 
@@ -58,8 +59,8 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public String getDescription() {
-        return "Computes solutions for a given formula using SAT4J";
+    public Optional<String> getDescription() {
+        return Optional.of("Computes solutions for a given formula using SAT4J");
     }
 
     @Override

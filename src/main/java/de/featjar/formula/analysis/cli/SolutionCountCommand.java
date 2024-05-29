@@ -26,12 +26,13 @@ import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.ComputeSolutionCountSAT4J;
 import de.featjar.formula.structure.formula.IFormula;
 import java.math.BigInteger;
+import java.util.Optional;
 
 public class SolutionCountCommand extends ASAT4JAnalysisCommand<BigInteger, BigInteger> {
 
     @Override
-    public String getDescription() {
-        return "Computes number of solutions for a given formula using SAT4J";
+    public Optional<String> getDescription() {
+        return Optional.of("Computes number of solutions for a given formula using SAT4J");
     }
 
     @Override

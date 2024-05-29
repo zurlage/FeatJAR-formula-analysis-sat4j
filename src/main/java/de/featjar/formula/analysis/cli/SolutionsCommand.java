@@ -31,6 +31,7 @@ import de.featjar.formula.analysis.sat4j.ComputeSolutionsSAT4J;
 import de.featjar.formula.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.formula.structure.formula.IFormula;
 import java.util.List;
+import java.util.Optional;
 
 public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
 
@@ -55,8 +56,8 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     }
 
     @Override
-    public String getDescription() {
-        return "Computes solutions for a given formula using SAT4J";
+    public Optional<String> getDescription() {
+        return Optional.of("Computes solutions for a given formula using SAT4J");
     }
 
     @Override

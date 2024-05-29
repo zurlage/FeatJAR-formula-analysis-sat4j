@@ -26,12 +26,13 @@ import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.mig.ComputeCoreDead;
 import de.featjar.formula.structure.formula.IFormula;
+import java.util.Optional;
 
 public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, BooleanAssignment> {
 
     @Override
-    public String getDescription() {
-        return "Computes core and dead variables for a given formula using SAT4J";
+    public Optional<String> getDescription() {
+        return Optional.of("Computes core and dead variables for a given formula using SAT4J");
     }
 
     @Override

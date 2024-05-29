@@ -27,12 +27,13 @@ import de.featjar.formula.analysis.bool.BooleanSolutionList;
 import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
 import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
 import de.featjar.formula.structure.formula.IFormula;
+import java.util.Optional;
 
 public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanSolutionList> {
 
     @Override
-    public String getDescription() {
-        return "Computes atomic sets for a given formula using SAT4J";
+    public Optional<String> getDescription() {
+        return Optional.of("Computes atomic sets for a given formula using SAT4J");
     }
 
     @Override
