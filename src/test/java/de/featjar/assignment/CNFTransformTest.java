@@ -26,7 +26,7 @@ import de.featjar.Common;
 import de.featjar.base.computation.Computations;
 import de.featjar.formula.analysis.bool.BooleanAssignmentList;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
+import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.analysis.sat4j.ComputeAtomicSetsSAT4J;
 import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.formula.IFormula;
@@ -43,7 +43,7 @@ public class CNFTransformTest extends Common {
                 .cast(IFormula.class)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanRepresentation::new)
+                .map(ComputeBooleanClauseList::new)
                 .map(Computations::getKey)
                 .cast(BooleanClauseList.class)
                 .map(ComputeAtomicSetsSAT4J::new)

@@ -23,9 +23,8 @@ package de.featjar.formula.analysis.cli;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
+import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.analysis.mig.ComputeCoreDead;
-import de.featjar.formula.structure.formula.IFormula;
 import java.util.Optional;
 
 public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, BooleanAssignment> {
@@ -36,7 +35,7 @@ public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, Boolea
     }
 
     @Override
-    public IComputation<BooleanAssignment> newAnalysis(ComputeBooleanRepresentation<IFormula> formula) {
+    public IComputation<BooleanAssignment> newAnalysis(ComputeBooleanClauseList formula) {
         return formula.map(Computations::getKey).map(ComputeCoreDead::new);
     }
 

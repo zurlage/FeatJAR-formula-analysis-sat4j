@@ -30,10 +30,9 @@ import de.featjar.formula.analysis.VariableMap;
 import de.featjar.formula.analysis.bool.BooleanAssignmentGroups;
 import de.featjar.formula.analysis.bool.BooleanSolution;
 import de.featjar.formula.analysis.bool.BooleanSolutionList;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
+import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.analysis.sat4j.twise.YASA;
 import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
-import de.featjar.formula.structure.formula.IFormula;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -64,7 +63,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanRepresentation<IFormula> formula) {
+    public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanClauseList formula) {
         return formula.map(Computations::getKey)
                 .map(YASA::new)
                 .set(YASA.T, optionParser.get(T_OPTION))

@@ -27,7 +27,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.formula.analysis.VariableMap;
 import de.featjar.formula.analysis.bool.BooleanAssignment;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
+import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.structure.Expressions;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
@@ -45,10 +45,10 @@ public class ComputeIndeterminateTest {
         IFormula formula = Expressions.and(
                 Expressions.or(Expressions.literal("a"), Expressions.literal("b")),
                 Expressions.biImplies(Expressions.literal("x"), Expressions.literal("y")));
-        ComputeBooleanRepresentation<IFormula> cnf = Computations.of(formula)
+        ComputeBooleanClauseList cnf = Computations.of(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanRepresentation::new);
+                .map(ComputeBooleanClauseList::new);
         IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
         VariableMap variables = cnf.map(Computations::getValue).compute();
         BooleanAssignment compute = clauses.map(ComputeIndeterminate::new).compute();

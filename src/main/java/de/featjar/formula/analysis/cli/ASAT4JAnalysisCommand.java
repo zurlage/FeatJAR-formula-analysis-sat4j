@@ -26,7 +26,7 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
 import de.featjar.formula.analysis.AAnalysisCommand;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
+import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
@@ -68,8 +68,8 @@ public abstract class ASAT4JAnalysisCommand<T, U> extends AAnalysisCommand<T> {
         return newAnalysis(Computations.of(inputFormula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanRepresentation::new));
+                .map(ComputeBooleanClauseList::new));
     }
 
-    protected abstract IComputation<T> newAnalysis(ComputeBooleanRepresentation<IFormula> formula);
+    protected abstract IComputation<T> newAnalysis(ComputeBooleanClauseList formula);
 }

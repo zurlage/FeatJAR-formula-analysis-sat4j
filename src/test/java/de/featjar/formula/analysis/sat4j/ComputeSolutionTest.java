@@ -32,7 +32,7 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.ComputePresence;
 import de.featjar.formula.analysis.bool.BooleanClauseList;
 import de.featjar.formula.analysis.bool.BooleanSolution;
-import de.featjar.formula.analysis.bool.ComputeBooleanRepresentation;
+import de.featjar.formula.analysis.bool.ComputeBooleanClauseList;
 import de.featjar.formula.structure.formula.IFormula;
 import de.featjar.formula.transformer.ComputeCNFFormula;
 import de.featjar.formula.transformer.ComputeNNFFormula;
@@ -44,7 +44,7 @@ public class ComputeSolutionTest extends Common {
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .set(ComputeCNFFormula.IS_PLAISTED_GREENBAUM, Boolean.TRUE)
-                .map(ComputeBooleanRepresentation::new)
+                .map(ComputeBooleanClauseList::new)
                 .map(Computations::getKey)
                 .cast(BooleanClauseList.class)
                 .map(ComputeSolutionSAT4J::new)
