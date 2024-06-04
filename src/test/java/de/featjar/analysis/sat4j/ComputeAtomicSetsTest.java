@@ -18,7 +18,7 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.analysis.sat4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -30,16 +30,14 @@ import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
-import de.featjar.formula.io.KConfigReaderFormat;
 import de.featjar.formula.structure.IFormula;
 import org.junit.jupiter.api.Test;
 
-public class CNFTransformTest extends Common {
+public class ComputeAtomicSetsTest extends Common {
 
     @Test
-    public void testDistributiveBug() {
-        BooleanAssignmentList atomicSets = Computations.of(
-                        load("kconfigreader/distrib-bug.model", new KConfigReaderFormat()))
+    public void gplHas27AtomicSets() {
+        BooleanAssignmentList atomicSets = Computations.of(loadFormula("GPL/model.xml"))
                 .cast(IFormula.class)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
@@ -49,6 +47,6 @@ public class CNFTransformTest extends Common {
                 .map(ComputeAtomicSetsSAT4J::new)
                 .compute();
 
-        assertEquals(5, atomicSets.size());
+        assertEquals(27, atomicSets.size());
     }
 }

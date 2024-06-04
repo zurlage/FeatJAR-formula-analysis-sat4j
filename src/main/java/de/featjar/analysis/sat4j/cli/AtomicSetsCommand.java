@@ -18,37 +18,42 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.assignment;
+package de.featjar.analysis.sat4j.cli;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import de.featjar.Common;
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
 import de.featjar.base.computation.Computations;
+import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanSolutionList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
-import de.featjar.formula.computation.ComputeCNFFormula;
-import de.featjar.formula.computation.ComputeNNFFormula;
-import de.featjar.formula.io.KConfigReaderFormat;
-import de.featjar.formula.structure.IFormula;
-import org.junit.jupiter.api.Test;
+import java.util.Optional;
 
-public class CNFTransformTest extends Common {
+/**
+ * Computes atomic sets for a given formula using SAT4J.
+ *
+ * @author Elias Kuiter
+ * @author Sebastian Krieter
+ * @author Andreas Gerasimow
+ */
+public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanSolutionList> {
 
-    @Test
-    public void testDistributiveBug() {
-        BooleanAssignmentList atomicSets = Computations.of(
-                        load("kconfigreader/distrib-bug.model", new KConfigReaderFormat()))
-                .cast(IFormula.class)
-                .map(ComputeNNFFormula::new)
-                .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanClauseList::new)
-                .map(Computations::getKey)
-                .cast(BooleanClauseList.class)
-                .map(ComputeAtomicSetsSAT4J::new)
-                .compute();
+    @Override
+    public Optional<String> getDescription() {
+        return Optional.of("Computes atomic sets for a given formula using SAT4J.");
+    }
 
-        assertEquals(5, atomicSets.size());
+    @Override
+    public IComputation<BooleanAssignmentList> newAnalysis(ComputeBooleanClauseList formula) {
+        return formula.map(Computations::getKey).map(ComputeAtomicSetsSAT4J::new);
+    }
+
+    @Override
+    public String serializeResult(BooleanAssignmentList list) {
+        return list.print();
+    }
+
+    @Override
+    public Optional<String> getShortName() {
+        return Optional.of("atomic-sets-sat4j");
     }
 }
