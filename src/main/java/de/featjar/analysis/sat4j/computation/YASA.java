@@ -18,12 +18,10 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.analysis.sat4j.twise;
+package de.featjar.analysis.sat4j.computation;
 
 import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.analysis.RuntimeTimeoutException;
-import de.featjar.analysis.sat4j.computation.ASAT4JAnalysis;
-import de.featjar.analysis.sat4j.computation.MIGBuilder;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph.Visitor;

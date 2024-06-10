@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.cli;
 
-import de.featjar.analysis.sat4j.twise.YASA;
+import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.Option;

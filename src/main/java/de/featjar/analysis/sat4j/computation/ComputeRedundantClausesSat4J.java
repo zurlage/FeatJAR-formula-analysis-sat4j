@@ -39,13 +39,13 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class ComputeRedundantClauses extends ASAT4JAnalysis.Solution<BooleanClauseList> {
+public class ComputeRedundantClausesSat4J extends ASAT4JAnalysis.Solution<BooleanClauseList> {
 
-    public ComputeRedundantClauses(IComputation<BooleanClauseList> booleanClauseList) {
+    public ComputeRedundantClausesSat4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList);
     }
 
-    protected ComputeRedundantClauses(ComputeRedundantClauses other) {
+    protected ComputeRedundantClausesSat4J(ComputeRedundantClausesSat4J other) {
         super(other);
     }
 

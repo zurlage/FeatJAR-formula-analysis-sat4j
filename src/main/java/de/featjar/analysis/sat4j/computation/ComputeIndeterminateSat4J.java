@@ -39,16 +39,16 @@ import java.util.stream.IntStream;
  *
  * @author Sebastian Krieter
  */
-public class ComputeIndeterminate extends ASAT4JAnalysis.Solution<BooleanAssignment> {
+public class ComputeIndeterminateSat4J extends ASAT4JAnalysis.Solution<BooleanAssignment> {
 
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeIndeterminate(IComputation<BooleanClauseList> booleanClauseList) {
+    public ComputeIndeterminateSat4J(IComputation<BooleanClauseList> booleanClauseList) {
         super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
-    protected ComputeIndeterminate(ComputeIndeterminate other) {
+    protected ComputeIndeterminateSat4J(ComputeIndeterminateSat4J other) {
         super(other);
     }
 
