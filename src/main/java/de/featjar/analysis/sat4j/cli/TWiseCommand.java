@@ -21,20 +21,17 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.YASA;
-import de.featjar.base.FeatJAR;
+import de.featjar.analysis.sat4j.computation.YASAIncremental;
 import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.IO;
+import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanSolution;
 import de.featjar.formula.assignment.BooleanSolutionList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,7 +54,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
      * Value of t.
      */
     public static final Option<Integer> T_OPTION = new Option<>("t", Option.IntegerParser) //
-            .setDescription("Value of t.") //
+            .setDescription("Value of parameter t.") //
             .setDefaultValue(2);
 
     /**
@@ -66,6 +63,13 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     public static final Option<Integer> ITERATIONS_OPTION = new Option<>("i", Option.IntegerParser) //
             .setDescription("Number of iterations.") //
             .setDefaultValue(1);
+
+    /**
+     * Incremental flag.
+     */
+    public static final Option<Boolean> INCREMENTAL_OPTION = new Option<>("incremental", Option.BooleanParser) //
+            .setDescription("Use incremental version of YASA.") //
+            .setDefaultValue(false);
 
     @Override
     public List<Option<?>> getOptions() {
@@ -79,40 +83,38 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
 
     @Override
     public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanClauseList formula) {
-        return formula.map(Computations::getKey)
-                .map(YASA::new)
-                .set(YASA.T, optionParser.get(T_OPTION))
-                .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
-                .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
-                .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+        if (optionParser.get(INCREMENTAL_OPTION)) {
+            return formula.map(Computations::getKey)
+                    .map(YASAIncremental::new)
+                    .set(YASAIncremental.T, optionParser.get(T_OPTION))
+                    .set(YASAIncremental.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                    .set(YASAIncremental.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                    .set(YASAIncremental.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                    .set(YASAIncremental.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+        } else {
+            return formula.map(Computations::getKey)
+                    .map(YASA::new)
+                    .set(YASA.T, optionParser.get(T_OPTION))
+                    .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                    .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                    .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                    .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+        }
     }
 
     @Override
-    protected boolean writeToOutputFile(BooleanSolutionList list, Path outputPath) {
-        try {
-            IO.save(
-                    new BooleanAssignmentGroups(VariableMap.of(inputFormula), List.of(list.getAll())),
-                    outputPath,
-                    new BooleanSolutionListCSVFormat());
-            return true;
-        } catch (IOException e) {
-            FeatJAR.log().error(e);
-        }
-        return false;
+    protected Object getOuputObject(BooleanSolutionList list) {
+        return new BooleanAssignmentGroups(VariableMap.of(inputFormula), List.of(list.getAll()));
     }
 
     @Override
-    public String serializeResult(BooleanSolutionList list) {
-        StringBuilder sb = new StringBuilder();
-        for (BooleanSolution booleanSolution : list) {
-            sb.append(booleanSolution.print());
-            sb.append("\n");
-        }
-        if (sb.length() > 0) {
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        return sb.toString();
+    protected IFormat<?> getOuputFormat() {
+        return new BooleanSolutionListCSVFormat();
+    }
+
+    @Override
+    public String serializeResult(BooleanSolutionList assignments) {
+        return assignments.serialize();
     }
 
     @Override
