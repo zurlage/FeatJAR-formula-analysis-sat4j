@@ -332,6 +332,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
             newConfiguration(combinationLiterals);
         });
         setBestSolutionList();
+        newConfiguration = null;
     }
 
     private void rebuildCombinations(Progress monitor) {
