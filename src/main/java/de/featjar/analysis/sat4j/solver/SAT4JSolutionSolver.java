@@ -26,6 +26,7 @@ import de.featjar.analysis.sat4j.solver.ISelectionStrategy.UniformRandomStrategy
 import de.featjar.analysis.sat4j.solver.strategy.FixedLiteralSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap;
 import de.featjar.analysis.sat4j.solver.strategy.FixedOrderHeap2;
+import de.featjar.analysis.sat4j.solver.strategy.InverseFixedLiteralSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.base.computation.ResourcePool;
@@ -148,7 +149,8 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
             case INVERSE_FIXED:
                 setSelectionStrategy(
                         new FixedOrderHeap( //
-                                new FixedLiteralSelectionStrategy(((InverseFixedStrategy) strategy).getModel()), //
+                                new InverseFixedLiteralSelectionStrategy(
+                                        ((InverseFixedStrategy) strategy).getModel()), //
                                 order));
                 break;
             case NEGATIVE:
