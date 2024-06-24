@@ -71,6 +71,13 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
             .setDescription("Use incremental version of YASA.") //
             .setDefaultValue(false);
 
+    /**
+     * Reduce flag.
+     */
+    public static final Option<Boolean> REDUCE_OPTION = new Option<>("reduce", Option.BooleanParser) //
+            .setDescription("Use reduce function of YASA.") //
+            .setDefaultValue(true);
+
     @Override
     public List<Option<?>> getOptions() {
         return ICommand.addOptions(super.getOptions(), LIMIT_OPTION, T_OPTION, ITERATIONS_OPTION);
@@ -90,7 +97,8 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
                     .set(YASAIncremental.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                     .set(YASAIncremental.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
                     .set(YASAIncremental.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                    .set(YASAIncremental.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+                    .set(YASAIncremental.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
+                    .set(YASAIncremental.REDUCE_FINAL_SAMPLE, optionParser.get(REDUCE_OPTION));
         } else {
             return formula.map(Computations::getKey)
                     .map(YASA::new)
@@ -98,7 +106,8 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
                     .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                     .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
                     .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                    .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+                    .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
+                    .set(YASA.REDUCE_FINAL_SAMPLE, optionParser.get(REDUCE_OPTION));
         }
     }
 

@@ -79,6 +79,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
     public static final Dependency<Boolean> ALLOW_CHANGE_TO_INITIAL_SAMPLE = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT =
             Dependency.newDependency(Boolean.class);
+    public static final Dependency<Boolean> REDUCE_FINAL_SAMPLE = Dependency.newDependency(Boolean.class);
 
     public YASAIncremental(IComputation<BooleanClauseList> booleanClauseList) {
         super(
@@ -90,6 +91,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
                 Computations.of(100_000),
                 new MIGBuilder(booleanClauseList),
                 Computations.of(new BooleanAssignmentList()),
+                Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE));
     }
@@ -191,7 +193,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
     }
 
     private int n, tmax, t, maxSampleSize, iterations, numberOfVariableLiterals, internalConfigurationLimit;
-    private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit;
+    private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit, reduceFinalSample;
 
     private SAT4JSolutionSolver solver;
     private ModalImplicationGraph mig;
@@ -226,6 +228,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         allowChangeToInitialSample = ALLOW_CHANGE_TO_INITIAL_SAMPLE.get(dependencyList);
         initialSampleCountsTowardsConfigurationLimit =
                 INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT.get(dependencyList);
+        reduceFinalSample = REDUCE_FINAL_SAMPLE.get(dependencyList);
 
         randomSample = new ArrayDeque<>(internalConfigurationLimit);
 
@@ -302,10 +305,12 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
 
     private Result<BooleanSolutionList> finalizeResult() {
         if (bestSample != null) {
-            bestSample = reduce(bestSample);
             BooleanSolutionList result = new BooleanSolutionList(bestSample.size());
             for (int j = bestSample.size() - 1; j >= 0; j--) {
                 result.add(autoComplete(bestSample.get(j)));
+            }
+            if (reduceFinalSample) {
+                bestSample = reduce(bestSample);
             }
             return Result.of(result);
         } else {
@@ -847,7 +852,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         final Function<Combination<int[]>, int[]> environmentCreator = c -> new int[t2];
 
         for (int i = 0; i < nonUniqueIndex; i++) {
-            PartialConfiguration config = solutionList.get(i);
+            BooleanSolution config = solutionList.get(i);
             int finalNonUniqueIndex = nonUniqueIndex;
 
             boolean hasUnique = LexicographicIterator.parallelStream(t2, n, environmentCreator)

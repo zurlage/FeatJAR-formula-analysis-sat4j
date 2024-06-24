@@ -80,6 +80,8 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
 
     public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
 
+    public static final Dependency<Boolean> REDUCE_FINAL_SAMPLE = Dependency.newDependency(Boolean.class);
+
     public YASA(IComputation<BooleanClauseList> booleanClauseList) {
         super(
                 booleanClauseList,
@@ -88,7 +90,8 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(1),
                 Computations.of(new BooleanAssignmentList()),
-                new MIGBuilder(booleanClauseList));
+                new MIGBuilder(booleanClauseList),
+                Computations.of(Boolean.TRUE));
     }
 
     protected YASA(YASA other) {
@@ -187,6 +190,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     public static final int GLOBAL_SOLUTION_LIMIT = 100_000;
 
     private int t, maxSampleSize, iterations, numberOfVariableLiterals;
+    private boolean reduceFinalSample;
 
     private SAT4JSolutionSolver solver;
     private BooleanClauseList cnf;
@@ -220,6 +224,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
             iterations = Integer.MAX_VALUE;
         }
         random = new Random(RANDOM_SEED.get(dependencyList));
+        reduceFinalSample = REDUCE_FINAL_SAMPLE.get(dependencyList);
 
         solver = initializeSolver(dependencyList);
         mig = MIG.get(dependencyList);
@@ -284,10 +289,12 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
 
     private Result<BooleanSolutionList> finalizeResult() {
         if (bestSolutionList != null) {
-            List<PartialConfiguration> solution = reduce(bestSolutionList);
-            BooleanSolutionList result = new BooleanSolutionList(cnf.getVariableCount());
-            for (int j = solution.size() - 1; j >= 0; j--) {
-                result.add(autoComplete(solution.get(j)));
+            BooleanSolutionList result = new BooleanSolutionList(bestSolutionList.size());
+            for (int j = bestSolutionList.size() - 1; j >= 0; j--) {
+                result.add(autoComplete(bestSolutionList.get(j)));
+            }
+            if (reduceFinalSample) {
+                bestSolutionList = reduce(bestSolutionList);
             }
             return Result.of(result);
         } else {
