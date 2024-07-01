@@ -246,6 +246,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
             nodes = convertLiterals(variables);
         }
         numberOfVariableLiterals = nodes.size() - core.countNegatives() - core.countPositives();
+        t = Math.min(t, Math.min(numberOfVariableLiterals, 1));
 
         expressionLoop:
         for (final List<BooleanClause> clauses : nodes) {
