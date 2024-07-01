@@ -254,7 +254,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             nodes = convertLiterals(variables);
         }
         numberOfVariableLiterals = nodes.size() - core.countNegatives() - core.countPositives();
-        tmax = Math.min(t, Math.min(numberOfVariableLiterals, 1));
+        tmax = Math.min(t, Math.max(numberOfVariableLiterals, 1));
 
         presenceConditions = new ArrayList<>();
         expressionLoop:
