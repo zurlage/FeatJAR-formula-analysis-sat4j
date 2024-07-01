@@ -22,7 +22,6 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.analysis.sat4j.computation.YASAIncremental;
-import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
@@ -46,42 +45,35 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     /**
      * Maximum number of configurations to be generated.
      */
-    public static final Option<Integer> LIMIT_OPTION = new Option<>("n", Option.IntegerParser) //
+    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
             .setDescription("Maximum number of configurations to be generated.") //
             .setDefaultValue(Integer.MAX_VALUE);
 
     /**
      * Value of t.
      */
-    public static final Option<Integer> T_OPTION = new Option<>("t", Option.IntegerParser) //
+    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
             .setDescription("Value of parameter t.") //
             .setDefaultValue(2);
 
     /**
      * Number of iterations.
      */
-    public static final Option<Integer> ITERATIONS_OPTION = new Option<>("i", Option.IntegerParser) //
+    public static final Option<Integer> ITERATIONS_OPTION = Option.newOption("i", Option.IntegerParser) //
             .setDescription("Number of iterations.") //
             .setDefaultValue(1);
 
     /**
      * Incremental flag.
      */
-    public static final Option<Boolean> INCREMENTAL_OPTION = new Option<>("incremental", Option.BooleanParser) //
-            .setDescription("Use incremental version of YASA.") //
-            .setDefaultValue(false);
+    public static final Option<Boolean> INCREMENTAL_OPTION = Option.newFlag("incremental") //
+            .setDescription("Use incremental version of YASA.");
 
     /**
-     * Reduce flag.
+     * No-reduce flag.
      */
-    public static final Option<Boolean> REDUCE_OPTION = new Option<>("reduce", Option.BooleanParser) //
-            .setDescription("Use reduce function of YASA.") //
-            .setDefaultValue(true);
-
-    @Override
-    public List<Option<?>> getOptions() {
-        return ICommand.addOptions(super.getOptions(), LIMIT_OPTION, T_OPTION, ITERATIONS_OPTION);
-    }
+    public static final Option<Boolean> REDUCE_OPTION = Option.newFlag("no-reduce") //
+            .setDescription("Do not use the reduce function of YASA.");
 
     @Override
     public Optional<String> getDescription() {

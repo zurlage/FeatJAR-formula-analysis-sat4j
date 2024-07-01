@@ -22,14 +22,11 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.base.cli.Flag;
-import de.featjar.base.cli.ICommand;
 import de.featjar.base.cli.Option;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanSolutionList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -43,14 +40,14 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     /**
      * Maximum number of configurations to be generated.
      */
-    public static final Option<Integer> LIMIT_OPTION = new Option<>("n", Option.IntegerParser) //
+    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
             .setDescription("Maximum number of configurations to be generated.") //
             .setDefaultValue(1);
 
     /**
      * Strategy to use for generating each configuration (%s).
      */
-    public static final Option<ISelectionStrategy.Strategy> SELECTION_STRATEGY_OPTION = new Option<>(
+    public static final Option<ISelectionStrategy.Strategy> SELECTION_STRATEGY_OPTION = Option.newOption(
                     "strategy", Option.valueOf(ISelectionStrategy.Strategy.class)) //
             .setDescription(String.format(
                     "Strategy to use for generating each configuration (%s).",
@@ -58,16 +55,10 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
             .setDefaultValue(ISelectionStrategy.Strategy.ORIGINAL);
 
     /**
-     * Forbid dublicate configurations to be generated.
+     * Forbid duplicate configurations to be generated.
      */
-    public static final Option<Boolean> FORBID_DUPLICATES_OPTION = new Flag("no-dublicates") //
+    public static final Option<Boolean> FORBID_DUPLICATES_OPTION = Option.newFlag("no-dublicates") //
             .setDescription("Forbid dublicate configurations to be generated.");
-
-    @Override
-    public List<Option<?>> getOptions() {
-        return ICommand.addOptions(
-                super.getOptions(), LIMIT_OPTION, SELECTION_STRATEGY_OPTION, FORBID_DUPLICATES_OPTION);
-    }
 
     @Override
     public Optional<String> getDescription() {

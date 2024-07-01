@@ -52,18 +52,18 @@ import java.util.Set;
  *
  * @author Andreas Gerasimow
  */
-public class ProjectionCommand implements ICommand {
+public class ProjectionCommand extends ACommand {
 
     /**
      * Literals to be removed.;
      */
     public static final ListOption<String> LITERALS_SLICE_OPTION =
-            (ListOption<String>) new ListOption<>("slice", Option.StringParser)
+            (ListOption<String>) Option.newListOption("slice", Option.StringParser)
                     .setDescription("Literals to be removed.")
                     .setRequired(false);
 
     public static final ListOption<String> LITERALS_PROJECT_OPTION =
-            (ListOption<String>) new ListOption<>("project", Option.StringParser)
+            (ListOption<String>) Option.newListOption("project", Option.StringParser)
                     .setDescription(
                             "Literals to be projected. If not set, all features will be projected. The slice option has a higher priority, i.e. if both the project and slice option contain the same literal, it will be removed.")
                     .setRequired(false);
@@ -71,16 +71,11 @@ public class ProjectionCommand implements ICommand {
     /**
      * Timeout in seconds.
      */
-    public static final Option<Duration> TIMEOUT_OPTION = new Option<>(
+    public static final Option<Duration> TIMEOUT_OPTION = Option.newOption(
                     "timeout", s -> Duration.ofSeconds(Long.parseLong(s)))
             .setDescription("Timeout in seconds.")
             .setValidator(timeout -> !timeout.isNegative())
             .setDefaultValue(Duration.ZERO);
-
-    @Override
-    public List<Option<?>> getOptions() {
-        return List.of(LITERALS_SLICE_OPTION, LITERALS_PROJECT_OPTION, TIMEOUT_OPTION, INPUT_OPTION, OUTPUT_OPTION);
-    }
 
     @Override
     public void run(OptionList optionParser) {
