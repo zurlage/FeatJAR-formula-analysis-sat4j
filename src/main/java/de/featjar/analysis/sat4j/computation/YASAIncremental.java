@@ -217,26 +217,43 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
     public Result<BooleanSolutionList> compute(List<Object> dependencyList, Progress progress) {
         tmax = T.get(dependencyList);
         if (tmax < 1) {
-            throw new IllegalArgumentException(String.valueOf(t));
+            throw new IllegalArgumentException("Value for t must be grater than 0. Value was " + tmax);
         }
+
         iterations = ITERATIONS.get(dependencyList);
+        if (iterations == 0) {
+            throw new IllegalArgumentException("Iterations must not equal 0.");
+        }
         if (iterations < 0) {
             iterations = Integer.MAX_VALUE;
         }
-        random = new Random(RANDOM_SEED.get(dependencyList));
+
         internalConfigurationLimit = INTERNAL_SOLUTION_LIMIT.get(dependencyList);
+        if (internalConfigurationLimit < 0) {
+            throw new IllegalArgumentException(
+                    "Internal solution limit must be greater than 0. Value was " + internalConfigurationLimit);
+        }
+
+        maxSampleSize = CONFIGURATION_LIMIT.get(dependencyList);
+        if (maxSampleSize < 0) {
+            throw new IllegalArgumentException(
+                    "Configuration limit must be greater than 0. Value was " + maxSampleSize);
+        }
+
+        initialSample = INITIAL_SAMPLE.get(dependencyList);
+
+        random = new Random(RANDOM_SEED.get(dependencyList));
+
         allowChangeToInitialSample = ALLOW_CHANGE_TO_INITIAL_SAMPLE.get(dependencyList);
         initialSampleCountsTowardsConfigurationLimit =
                 INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT.get(dependencyList);
         reduceFinalSample = REDUCE_FINAL_SAMPLE.get(dependencyList);
 
         randomSample = new ArrayDeque<>(internalConfigurationLimit);
-
         solver = initializeSolver(dependencyList);
         mig = MIG.get(dependencyList);
-        initialSample = INITIAL_SAMPLE.get(dependencyList);
         n = mig.size();
-        maxSampleSize = CONFIGURATION_LIMIT.get(dependencyList);
+
         if (initialSampleCountsTowardsConfigurationLimit) {
             maxSampleSize = Math.max(maxSampleSize, maxSampleSize + initialSample.size());
         }
@@ -254,7 +271,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             nodes = convertLiterals(variables);
         }
         numberOfVariableLiterals = nodes.size() - core.countNegatives() - core.countPositives();
-        tmax = Math.min(t, Math.max(numberOfVariableLiterals, 1));
+        tmax = Math.min(tmax, Math.max(numberOfVariableLiterals, 1));
 
         presenceConditions = new ArrayList<>();
         expressionLoop:
@@ -284,10 +301,9 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         totalSteps += iterations * (int) (BinomialCalculator.computeBinomial(presenceConditions.size(), tmax));
         progress.setTotalSteps(totalSteps);
 
-        initSolutionList();
         buildCombinations(progress);
 
-        if (!overLimit) {
+        if (!overLimit && iterations > 1) {
             rebuildCombinations(progress);
         }
 
@@ -320,6 +336,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
     }
 
     private void buildCombinations(Progress monitor) {
+        initSample();
         final int[] literals = initliterals(false);
 
         for (int ti = 1; ti <= tmax; ti++) {
@@ -340,24 +357,28 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
                     return;
                 }
 
-                if (isCombinationValidSample(combinationLiterals)) {
-                    if (firstCover(combinationLiterals)) {
-                        return;
+                try {
+                    if (isCombinationValidSample(combinationLiterals)) {
+                        if (tryCover(combinationLiterals)) {
+                            return;
+                        }
+                    } else {
+                        if (isCombinationInvalidSAT(combinationLiterals)) {
+                            return;
+                        }
                     }
-                } else {
-                    if (isCombinationInvalidSAT(combinationLiterals)) {
-                        return;
-                    }
-                }
 
-                if (coverSat(combinationLiterals)) {
-                    return;
+                    if (tryCoverWithSat(combinationLiterals)) {
+                        return;
+                    }
+                    newConfiguration(combinationLiterals);
+                } finally {
+                    candidateConfiguration.clear();
+                    newConfiguration = null;
                 }
-                newConfiguration(combinationLiterals);
             });
-            setBestSolutionList();
-            newConfiguration = null;
         }
+        setBestSolutionList();
     }
 
     private void rebuildCombinations(Progress monitor) {
@@ -383,13 +404,14 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             }
         }
 
-        final int[] combinationLiterals = new int[t];
+        final int[] combinationLiterals = new int[tmax];
 
         for (int j = 1; j < iterations; j++) {
             checkCancel();
             final int[] literals = initliterals(true);
-            initSolutionList();
-            LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
+            initSample();
+            initRun();
+            LexicographicIterator.stream(tmax, presenceConditions.size()).forEach(combo -> {
                 combo.select(literals, combinationLiterals);
 
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
@@ -398,13 +420,18 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
                 if (!isCovered(combinationLiterals, bestSampleIndices)) {
                     return;
                 }
-                if (firstCover(combinationLiterals)) {
-                    return;
+                try {
+                    if (tryCoverWithoutMIG(combinationLiterals)) {
+                        return;
+                    }
+                    if (tryCoverWithSat(combinationLiterals)) {
+                        return;
+                    }
+                    newConfiguration(combinationLiterals);
+                } finally {
+                    candidateConfiguration.clear();
+                    newConfiguration = null;
                 }
-                if (coverSat(combinationLiterals)) {
-                    return;
-                }
-                newConfiguration(combinationLiterals);
             });
             setBestSolutionList();
         }
@@ -416,7 +443,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         }
     }
 
-    private void initSolutionList() {
+    private void initSample() {
         curSolutionId = 0;
         overLimit = false;
         currentSample = new ArrayList<>();
@@ -445,7 +472,6 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
                 overLimit = true;
             }
         }
-        initRun();
     }
 
     private void initRun() {
@@ -544,52 +570,55 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         solution.updateSolutionList(lastIndex);
     }
 
-    private boolean firstCover(int[] literals) {
-        candidateConfiguration.clear();
-        if (newConfiguration != null) {
-            configLoop:
-            for (final PartialConfiguration configuration : currentSample) {
-                if (configuration.allowChange && !configuration.isComplete()) {
-                    final int[] literals2 = configuration.get();
-                    for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
-                        final int l = newConfiguration.visitor.getAddedLiterals()[i];
-                        if (literals2[Math.abs(l) - 1] == -l) {
-                            continue configLoop;
-                        }
+    private boolean tryCover(int[] literals) {
+        return newConfiguration == null ? tryCoverWithoutMIG(literals) : tryCoverWithMIG(literals);
+    }
+
+    private boolean tryCoverWithoutMIG(int[] literals) {
+        configLoop:
+        for (final PartialConfiguration configuration : currentSample) {
+            if (configuration.allowChange && !configuration.isComplete()) {
+                final int[] literals2 = configuration.get();
+                for (int i = 0; i < literals.length; i++) {
+                    final int l = literals[i];
+                    if (literals2[Math.abs(l) - 1] == -l) {
+                        continue configLoop;
                     }
-                    if (isSelectionPossibleSol(configuration, literals)) {
-                        select(configuration, literals);
-                        change(configuration);
-                        return true;
-                    }
-                    candidateConfiguration.add(configuration);
                 }
+                if (isSelectionPossibleSol(configuration, literals)) {
+                    select(configuration, literals);
+                    change(configuration);
+                    return true;
+                }
+                candidateConfiguration.add(configuration);
             }
-        } else {
-            configLoop:
-            for (final PartialConfiguration configuration : currentSample) {
-                if (configuration.allowChange && !configuration.isComplete()) {
-                    final int[] literals2 = configuration.get();
-                    for (int i = 0; i < literals.length; i++) {
-                        final int l = literals[i];
-                        if (literals2[Math.abs(l) - 1] == -l) {
-                            continue configLoop;
-                        }
+        }
+        return false;
+    }
+
+    private boolean tryCoverWithMIG(int[] literals) {
+        configLoop:
+        for (final PartialConfiguration configuration : currentSample) {
+            if (configuration.allowChange && !configuration.isComplete()) {
+                final int[] literals2 = configuration.get();
+                for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
+                    final int l = newConfiguration.visitor.getAddedLiterals()[i];
+                    if (literals2[Math.abs(l) - 1] == -l) {
+                        continue configLoop;
                     }
-                    if (isSelectionPossibleSol(configuration, literals)) {
-                        select(configuration, literals);
-                        change(configuration);
-                        return true;
-                    }
-                    candidateConfiguration.add(configuration);
                 }
+                if (isSelectionPossibleSol(configuration, literals)) {
+                    select(configuration, literals);
+                    change(configuration);
+                    return true;
+                }
+                candidateConfiguration.add(configuration);
             }
         }
         return false;
     }
 
     private void addToCandidateList(int[] literals) {
-        candidateConfiguration.clear();
         if (newConfiguration != null) {
             configLoop:
             for (final PartialConfiguration configuration : currentSample) {
@@ -629,20 +658,10 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
     }
 
     private boolean isCombinationInvalidMIG(int[] literals) {
-        if (newConfiguration != null) {
-            newConfiguration.visitor.reset();
-            try {
-                newConfiguration.visitor.propagate(literals);
-            } catch (RuntimeContradictionException e) {
-                newConfiguration.visitor.reset();
-                return true;
-            }
-        } else {
-            try {
-                newConfiguration = new PartialConfiguration(curSolutionId++, true, mig, literals);
-            } catch (RuntimeContradictionException e) {
-                return true;
-            }
+        try {
+            newConfiguration = new PartialConfiguration(curSolutionId++, true, mig, literals);
+        } catch (RuntimeContradictionException e) {
+            return true;
         }
         return false;
     }
@@ -702,7 +721,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         }
     }
 
-    private boolean coverSat(int[] literals) {
+    private boolean tryCoverWithSat(int[] literals) {
         for (PartialConfiguration configuration : candidateConfiguration) {
             if (trySelectSat(configuration, literals)) {
                 change(configuration);
@@ -728,7 +747,6 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         } else {
             overLimit = true;
         }
-        newConfiguration = null;
     }
 
     private BooleanSolution autoComplete(PartialConfiguration configuration) {
