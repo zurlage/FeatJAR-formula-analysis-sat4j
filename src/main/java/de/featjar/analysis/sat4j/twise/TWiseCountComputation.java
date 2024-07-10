@@ -43,16 +43,32 @@ import java.util.stream.IntStream;
  * @author Sebastian Krieter
  */
 public class TWiseCountComputation extends AComputation<Long> {
+
+    public static class CombinationList {
+        private List<int[]> set;
+
+        private CombinationList(List<int[]> set) {
+            this.set = set;
+        }
+
+        public static CombinationList of(List<int[]> set) {
+            return new CombinationList(set);
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     public static final Dependency<ABooleanAssignmentList> SAMPLE =
             Dependency.newDependency(ABooleanAssignmentList.class);
 
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanAssignment> FILTER = Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<BooleanAssignment> VARIABLE_FILTER =
+            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<CombinationList> COMBINATION_FILTER =
+            Dependency.newDependency(CombinationList.class);
 
     public class Environment {
         private long statistic = 0;
-        private final ExpandableIntegerList[] selectedIndexedSolutions = new ExpandableIntegerList[t];
+        private final CoverageChecker coverageChecker = new CoverageChecker(indexedSolutions, t);
         private final int[] literals = new int[t];
 
         public long getStatistic() {
@@ -60,11 +76,12 @@ public class TWiseCountComputation extends AComputation<Long> {
         }
     }
 
-    public TWiseCountComputation(@SuppressWarnings("rawtypes") IComputation<ABooleanAssignmentList> sample) {
+    public TWiseCountComputation(@SuppressWarnings("rawtypes") IComputation<? extends ABooleanAssignmentList> sample) {
         super(
                 sample,
                 Computations.of(2), //
-                Computations.of(new BooleanAssignment()));
+                Computations.of(new BooleanAssignment()), //
+                Computations.of(new CombinationList(List.of())));
     }
 
     public TWiseCountComputation(TWiseCountComputation other) {
@@ -81,15 +98,18 @@ public class TWiseCountComputation extends AComputation<Long> {
         List<? extends ABooleanAssignment> sample = SAMPLE.get(dependencyList).getAll();
 
         if (sample.isEmpty()) {
-            return Result.empty();
+            return Result.of(0L);
         }
+
+        List<int[]> filterCombinations = COMBINATION_FILTER.get(dependencyList).set;
 
         final int size = sample.get(0).size();
         indexedSolutions = initIndexedLists(sample, size);
 
         t = T.get(dependencyList);
 
-        final int[] literals = TWiseCoverageComputationUtils.getFilteredLiterals(size, FILTER.get(dependencyList));
+        final int[] literals =
+                TWiseCoverageComputationUtils.getFilteredLiterals(size, VARIABLE_FILTER.get(dependencyList));
         final int[] gray = IntStream.rangeClosed(1, 1 << t)
                 .map(Integer::numberOfTrailingZeros)
                 .toArray();
@@ -101,20 +121,21 @@ public class TWiseCountComputation extends AComputation<Long> {
                         combo.environment.literals[k] = literals[combo.elementIndices[k]];
                     }
                     for (int i = 0; i < gray.length; i++) {
-                        if (TWiseCoverageComputationUtils.isCovered(
-                                indexedSolutions,
-                                t,
-                                combo.environment.literals,
-                                combo.environment.selectedIndexedSolutions)) {
+                        if (combo.environment.coverageChecker.test(combo.environment.literals)) {
                             combo.environment.statistic++;
                         }
                         int g = gray[i];
                         combo.environment.literals[g] = -combo.environment.literals[g];
                     }
                 });
+
+        CoverageChecker coverageChecker = new CoverageChecker(indexedSolutions, t);
+        long filterCombinationsCount =
+                filterCombinations.stream().filter(coverageChecker).count();
         return Result.ofOptional(statisticList.stream() //
                 .map(Environment::getStatistic) //
-                .reduce((s1, s2) -> s1 + s2));
+                .reduce((s1, s2) -> s1 + s2)
+                .map(s -> s - filterCombinationsCount));
     }
 
     private ArrayList<ExpandableIntegerList> initIndexedLists(List<? extends ABooleanAssignment> list, final int size) {
