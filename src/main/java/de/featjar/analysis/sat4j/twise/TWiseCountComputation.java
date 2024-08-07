@@ -34,7 +34,6 @@ import de.featjar.formula.assignment.ABooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * Calculates statistics regarding t-wise feature coverage of a set of
@@ -110,16 +109,11 @@ public class TWiseCountComputation extends AComputation<Long> {
 
         final int[] literals =
                 TWiseCoverageComputationUtils.getFilteredLiterals(size, VARIABLE_FILTER.get(dependencyList));
-        final int[] gray = IntStream.rangeClosed(1, 1 << t)
-                .map(Integer::numberOfTrailingZeros)
-                .toArray();
-        gray[gray.length - 1] = 0;
+        final int[] gray = LexicographicIterator.grayCode(t);
 
         LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                 .forEach(combo -> {
-                    for (int k = 0; k < t; k++) {
-                        combo.environment.literals[k] = literals[combo.elementIndices[k]];
-                    }
+                    combo.select(literals, combo.environment.literals);
                     for (int i = 0; i < gray.length; i++) {
                         if (combo.environment.coverageChecker.test(combo.environment.literals)) {
                             combo.environment.statistic++;
