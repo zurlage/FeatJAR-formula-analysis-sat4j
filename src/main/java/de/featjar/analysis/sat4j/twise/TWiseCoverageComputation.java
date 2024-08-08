@@ -31,7 +31,6 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
-import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.LexicographicIterator.Combination;
 import de.featjar.base.data.Result;
@@ -60,7 +59,8 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         private final SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         private final ModalImplicationGraph.Visitor visitor =
                 MIG.get(dependencyList).getVisitor();
-        private final ExpandableIntegerList[] selectedIndexedSolutions = new ExpandableIntegerList[t];
+        private SampleListIndex sampleIndex = new SampleListIndex(sample, size, t);
+        private SampleListIndex randomIndex = new SampleListIndex(randomSample, size, t);
         private final int[] literals = new int[t];
 
         public CoverageStatistic getStatistic() {
@@ -81,52 +81,43 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         super(other);
     }
 
-    private ArrayList<ExpandableIntegerList> indexedSolutions;
-    private ArrayList<ExpandableIntegerList> indexedRandomSolutions;
     private ArrayList<Environment> statisticList = new ArrayList<>();
 
     private List<Object> dependencyList;
-    private int t;
+    private List<BooleanSolution> sample, randomSample;
+    private int t, size;
 
     @Override
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
         this.dependencyList = dependencyList;
-        BooleanSolutionList sample = SAMPLE.get(dependencyList);
+        sample = SAMPLE.get(dependencyList).getAll();
         t = T.get(dependencyList);
 
         if (!sample.isEmpty()) {
-            final int size = sample.get(0).get().size();
-            initIndexedLists(sample, size);
-            final int[] literals = TWiseCoverageComputationUtils.getFilteredLiterals(size, FILTER.get(dependencyList));
-            final boolean[][] masks = TWiseCoverageComputationUtils.getMasks(t);
+            size = sample.get(0).size();
 
-            LexicographicIterator.stream(t, literals.length, this::createStatistic)
+            createRandomSample(dependencyList);
+
+            final int[] literals = LexicographicIterator.filteredList(size, FILTER.get(dependencyList));
+            final int[] gray = LexicographicIterator.grayCode(t);
+
+            LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                     .forEach(combo -> {
-                        for (boolean[] mask : masks) {
-                            for (int k = 0; k < mask.length; k++) {
-                                combo.environment.literals[k] = mask[k]
-                                        ? literals[combo.elementIndices[k]]
-                                        : -literals[combo.elementIndices[k]];
-                            }
-                            if (TWiseCoverageComputationUtils.isCovered(
-                                    indexedSolutions,
-                                    t,
-                                    combo.environment.literals,
-                                    combo.environment.selectedIndexedSolutions)) {
+                        combo.select(literals, combo.environment.literals);
+                        for (int i = 0; i < gray.length; i++) {
+                            if (combo.environment.sampleIndex.test(combo.environment.literals)) {
                                 combo.environment.statistic.incNumberOfCoveredConditions();
                             } else if (isCombinationInvalidMIG(combo.environment)) {
                                 combo.environment.statistic.incNumberOfInvalidConditions();
-                            } else if (TWiseCoverageComputationUtils.isCovered(
-                                    indexedRandomSolutions,
-                                    t,
-                                    combo.environment.literals,
-                                    combo.environment.selectedIndexedSolutions)) {
+                            } else if (combo.environment.randomIndex.test(combo.environment.literals)) {
                                 combo.environment.statistic.incNumberOfUncoveredConditions();
                             } else if (isCombinationInvalidSAT(combo.environment)) {
                                 combo.environment.statistic.incNumberOfInvalidConditions();
                             } else {
                                 combo.environment.statistic.incNumberOfUncoveredConditions();
                             }
+                            int g = gray[i];
+                            combo.environment.literals[g] = -combo.environment.literals[g];
                         }
                     });
         }
@@ -135,34 +126,15 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
                 .reduce((s1, s2) -> s1.merge(s2)));
     }
 
-    private void initIndexedLists(BooleanSolutionList sample, final int size) {
-        final int indexedListSize = 2 * size;
-        indexedSolutions = new ArrayList<>(indexedListSize);
-        indexedRandomSolutions = new ArrayList<>(indexedListSize);
-        for (int i = indexedListSize; i >= 0; --i) {
-            indexedSolutions.add(new ExpandableIntegerList());
-            indexedRandomSolutions.add(new ExpandableIntegerList());
-        }
-        addConfigurations(sample, indexedSolutions);
-        addRandomConfigurations(initializeSolver(dependencyList), new Random(RANDOM_SEED.get(dependencyList)), (int)
-                Math.ceil(30 * Math.log(size)));
-    }
-
-    private void addConfigurations(
-            BooleanSolutionList sample, final ArrayList<ExpandableIntegerList> indexedSolutions) {
-        int configurationIndex = 0;
-        for (BooleanSolution configuration : sample) {
-            TWiseCoverageComputationUtils.addConfigurations(
-                    indexedSolutions, configuration.get(), configurationIndex++);
-        }
-    }
-
-    private void addRandomConfigurations(SAT4JSolutionSolver solver, Random random, int limit) {
+    private void createRandomSample(List<Object> dependencyList) {
+        randomSample = new ArrayList<>();
+        SAT4JSolutionSolver solver = initializeSolver(dependencyList);
+        Random random = new Random(RANDOM_SEED.get(dependencyList));
+        int limit = (int) Math.ceil(30 * Math.log(size));
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
         for (int j = 0; j < limit; j++) {
             if (solver.hasSolution().valueEquals(Boolean.TRUE)) {
-                TWiseCoverageComputationUtils.addConfigurations(
-                        indexedRandomSolutions, solver.getInternalSolution(), j);
+                randomSample.add(new BooleanSolution(solver.getInternalSolution(), false));
                 solver.shuffleOrder(random);
             } else {
                 break;

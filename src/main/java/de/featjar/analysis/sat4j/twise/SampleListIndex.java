@@ -22,28 +22,45 @@ package de.featjar.analysis.sat4j.twise;
 
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.base.data.ExpandableIntegerList;
+import de.featjar.formula.assignment.ABooleanAssignment;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * Tests whether a given literal combination is covered within a set of solutions.
+ * Calculates statistics regarding t-wise feature coverage of a set of
+ * solutions.
  *
  * @author Sebastian Krieter
  */
-public class CoverageChecker implements Predicate<int[]> {
+public class SampleListIndex implements Predicate<int[]> {
 
     private final ArrayList<ExpandableIntegerList> indexedSolutions;
     private final ExpandableIntegerList[] selectedIndexedSolutions;
 
-    public CoverageChecker(ArrayList<ExpandableIntegerList> indexedSolutions, int t) {
-        this.indexedSolutions = indexedSolutions;
-        this.selectedIndexedSolutions = new ExpandableIntegerList[t];
+    public SampleListIndex(List<? extends ABooleanAssignment> sample, final int size, final int t) {
+        indexedSolutions = new ArrayList<>(2 * size);
+        for (int i = 2 * size; i >= 0; --i) {
+            indexedSolutions.add(new ExpandableIntegerList());
+        }
+        int configurationIndex = 0;
+        for (ABooleanAssignment configuration : sample) {
+            final int[] literals = configuration.get();
+            for (int i = 0; i < literals.length; i++) {
+                final int literal = literals[i];
+                if (literal != 0) {
+                    indexedSolutions
+                            .get(ModalImplicationGraph.getVertexIndex(literal))
+                            .add(configurationIndex++);
+                }
+            }
+        }
+        selectedIndexedSolutions = new ExpandableIntegerList[t];
     }
 
     @Override
     public boolean test(int[] literals) {
-        assert literals.length == selectedIndexedSolutions.length;
         if (literals.length < 2) {
             return !indexedSolutions
                     .get(ModalImplicationGraph.getVertexIndex(literals[0]))

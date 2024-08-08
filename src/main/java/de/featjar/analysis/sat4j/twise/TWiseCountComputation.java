@@ -25,7 +25,6 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
-import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.LexicographicIterator.Combination;
 import de.featjar.base.data.Result;
@@ -66,9 +65,8 @@ public class TWiseCountComputation extends AComputation<Long> {
             Dependency.newDependency(CombinationList.class);
 
     public class Environment {
-        private long statistic = 0;
-        private final CoverageChecker coverageChecker = new CoverageChecker(indexedSolutions, t);
         private final int[] literals = new int[t];
+        private long statistic = 0;
 
         public long getStatistic() {
             return statistic;
@@ -87,13 +85,12 @@ public class TWiseCountComputation extends AComputation<Long> {
         super(other);
     }
 
-    private ArrayList<ExpandableIntegerList> indexedSolutions;
     private ArrayList<Environment> statisticList = new ArrayList<>();
     private int t;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Result<Long> compute(List<Object> dependencyList, Progress progress) {
-        @SuppressWarnings("unchecked")
         List<? extends ABooleanAssignment> sample = SAMPLE.get(dependencyList).getAll();
 
         if (sample.isEmpty()) {
@@ -103,19 +100,19 @@ public class TWiseCountComputation extends AComputation<Long> {
         List<int[]> filterCombinations = COMBINATION_FILTER.get(dependencyList).set;
 
         final int size = sample.get(0).size();
-        indexedSolutions = initIndexedLists(sample, size);
 
         t = T.get(dependencyList);
 
-        final int[] literals =
-                TWiseCoverageComputationUtils.getFilteredLiterals(size, VARIABLE_FILTER.get(dependencyList));
+        final int[] literals = LexicographicIterator.filteredList(size, VARIABLE_FILTER.get(dependencyList));
         final int[] gray = LexicographicIterator.grayCode(t);
+
+        SampleBitIndex coverageChecker = new SampleBitIndex(sample, size);
 
         LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                 .forEach(combo -> {
                     combo.select(literals, combo.environment.literals);
                     for (int i = 0; i < gray.length; i++) {
-                        if (combo.environment.coverageChecker.test(combo.environment.literals)) {
+                        if (coverageChecker.test(combo.environment.literals)) {
                             combo.environment.statistic++;
                         }
                         int g = gray[i];
@@ -123,26 +120,12 @@ public class TWiseCountComputation extends AComputation<Long> {
                     }
                 });
 
-        CoverageChecker coverageChecker = new CoverageChecker(indexedSolutions, t);
         long filterCombinationsCount =
-                filterCombinations.stream().filter(coverageChecker).count();
+                filterCombinations.parallelStream().filter(coverageChecker).count();
         return Result.ofOptional(statisticList.stream() //
                 .map(Environment::getStatistic) //
                 .reduce((s1, s2) -> s1 + s2)
                 .map(s -> s - filterCombinationsCount));
-    }
-
-    private ArrayList<ExpandableIntegerList> initIndexedLists(List<? extends ABooleanAssignment> list, final int size) {
-        ArrayList<ExpandableIntegerList> indexedSolutions = new ArrayList<>(2 * size);
-        for (int i = 2 * size; i >= 0; --i) {
-            indexedSolutions.add(new ExpandableIntegerList());
-        }
-        int configurationIndex = 0;
-        for (ABooleanAssignment configuration : list) {
-            TWiseCoverageComputationUtils.addConfigurations(
-                    indexedSolutions, configuration.get(), configurationIndex++);
-        }
-        return indexedSolutions;
     }
 
     private Environment createStatistic(Combination<Environment> combo) {
