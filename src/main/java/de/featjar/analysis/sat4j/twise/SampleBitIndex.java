@@ -40,10 +40,11 @@ public class SampleBitIndex implements Predicate<int[]> {
         this.size = size;
         bitSetReference = new BitSet[2 * size + 1];
 
+        final int sampleSize = sample.size();
         for (int j = 1; j <= size; j++) {
-            BitSet negIndices = new BitSet(sample.size());
-            BitSet posIndices = new BitSet(sample.size());
-            for (int i = 0; i < sample.size(); i++) {
+            BitSet negIndices = new BitSet(sampleSize);
+            BitSet posIndices = new BitSet(sampleSize);
+            for (int i = 0; i < sampleSize; i++) {
                 ABooleanAssignment config = sample.get(i);
                 if (config.get(j - 1) < 0) {
                     negIndices.set(i);
@@ -56,14 +57,26 @@ public class SampleBitIndex implements Predicate<int[]> {
         }
     }
 
-    @Override
-    public boolean test(int[] literals) {
+    private BitSet getBitSet(int[] literals) {
         BitSet first = bitSetReference[literals[0] + size];
         BitSet bitSet = new BitSet(first.size());
         bitSet.xor(first);
         for (int k = 1; k < literals.length; k++) {
             bitSet.and(bitSetReference[literals[k] + size]);
         }
-        return !bitSet.isEmpty();
+        return bitSet;
+    }
+
+    @Override
+    public boolean test(int[] literals) {
+        return !getBitSet(literals).isEmpty();
+    }
+
+    public int index(int[] literals) {
+        return getBitSet(literals).length();
+    }
+
+    public int size(int[] literals) {
+        return getBitSet(literals).cardinality();
     }
 }
