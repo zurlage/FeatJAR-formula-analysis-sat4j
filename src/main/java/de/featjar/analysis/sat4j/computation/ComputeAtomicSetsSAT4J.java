@@ -143,6 +143,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                             if (my0 != 0) {
                                 solver.getAssignment().add(-my0);
 
+                                hasSolution = solver.hasSolution();
                                 if (hasSolution.valueEquals(Boolean.FALSE)) {
                                     done[j] = 2;
                                     solver.getAssignment().replaceLast(my0);
