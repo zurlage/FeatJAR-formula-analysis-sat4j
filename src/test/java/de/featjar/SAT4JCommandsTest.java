@@ -31,7 +31,6 @@ public class SAT4JCommandsTest {
 
     @Test
     void testProjectionCommand() throws IOException {
-        System.out.println("Testing ProjectionCommand");
         ProcessOutput output = ProcessOutput.runProcess(
                 sat4jstring
                         + " projection-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --slice DirectedWithEdges,DirectedWithNeighbors");
@@ -70,7 +69,6 @@ public class SAT4JCommandsTest {
 
     @Test
     void testCoreCommand() throws IOException {
-        System.out.println("Testing CoreCommand:");
         ProcessOutput noOptions = ProcessOutput.runProcess(
                 sat4jstring + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertTrue(noOptions.getErrorString().isBlank());
@@ -98,7 +96,6 @@ public class SAT4JCommandsTest {
 
     @Test
     void testAtomicSetsCommand() throws IOException {
-        System.out.println("Testing AtomicSetsCommand:");
         ProcessOutput noOptions = ProcessOutput.runProcess(
                 sat4jstring + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertTrue(noOptions.getErrorString().isBlank());
@@ -127,7 +124,6 @@ public class SAT4JCommandsTest {
 
     @Test
     void testSolutionCountCommand() throws IOException {
-        System.out.println("Testing SolutionCountCommand:");
         ProcessOutput noOptions = ProcessOutput.runProcess(
                 sat4jstring + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertTrue(noOptions.getErrorString().isBlank());
@@ -155,7 +151,6 @@ public class SAT4JCommandsTest {
 
     @Test
     void testSolutionsCommand() throws IOException {
-        System.out.println("Testing SolutionsCommand:");
         ProcessOutput noOptions = ProcessOutput.runProcess(
                 sat4jstring + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertTrue(noOptions.getErrorString().isBlank());
@@ -195,7 +190,6 @@ public class SAT4JCommandsTest {
 
     @Test
     void testTWiseCommand() throws IOException {
-        System.out.println("Testing TWiseCommand:");
         ProcessOutput noOptions = ProcessOutput.runProcess(
                 sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertTrue(noOptions.getErrorString().isBlank());
