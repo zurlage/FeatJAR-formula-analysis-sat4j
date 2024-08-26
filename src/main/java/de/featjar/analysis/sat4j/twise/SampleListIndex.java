@@ -52,9 +52,10 @@ public class SampleListIndex implements Predicate<int[]> {
                 if (literal != 0) {
                     indexedSolutions
                             .get(ModalImplicationGraph.getVertexIndex(literal))
-                            .add(configurationIndex++);
+                            .add(configurationIndex);
                 }
             }
+            configurationIndex++;
         }
         selectedIndexedSolutions = new ExpandableIntegerList[t];
     }
