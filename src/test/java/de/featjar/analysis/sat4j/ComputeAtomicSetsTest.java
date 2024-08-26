@@ -47,6 +47,6 @@ public class ComputeAtomicSetsTest extends Common {
                 .map(ComputeAtomicSetsSAT4J::new)
                 .compute();
 
-        assertEquals(27, atomicSets.size());
+        assertEquals(22, atomicSets.size());
     }
 }

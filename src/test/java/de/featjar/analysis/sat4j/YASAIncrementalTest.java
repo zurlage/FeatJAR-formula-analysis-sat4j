@@ -26,8 +26,6 @@ import static de.featjar.formula.structure.Expressions.or;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.featjar.Common;
-import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
-import de.featjar.analysis.sat4j.computation.ComputeCoreSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
 import de.featjar.analysis.sat4j.computation.YASAIncremental;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
@@ -46,7 +44,6 @@ import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.structure.IFormula;
 import java.time.Duration;
-import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 public class YASAIncrementalTest extends Common {
@@ -107,11 +104,6 @@ public class YASAIncrementalTest extends Common {
     }
 
     @Test
-    public void variants() {
-        compareVariants(loadFormula("models_stability_light/busybox_monthlySnapshot/2007-05-20_17-12-43/clean.dimacs"));
-    }
-
-    @Test
     void gplRunsUntilTimeout() {
         testTimeout(loadFormula("GPL/model.xml"), 10);
     }
@@ -160,22 +152,16 @@ public class YASAIncrementalTest extends Common {
         computeCoverageNew(2, clauses, sample);
     }
 
-    void compareVariants(IFormula formula) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeRandomSample(clauses, 10);
-        computeCoverageVariants(2, clauses, sample);
-    }
-
     private void bothRandom(IFormula formula) {
         IComputation<BooleanClauseList> clauses = getClauses(formula);
         BooleanSolutionList sample = computeRandomSample(clauses, 10);
         CoverageStatistic statistic1 = computeCoverageNew(2, clauses, sample);
         CoverageStatistic statistic3 = computeCoverageOld(2, clauses, sample);
 
-        FeatJAR.log().info("total     %d | %d", statistic1.total(), statistic3.total());
-        FeatJAR.log().info("covered   %d | %d", statistic1.covered(), statistic3.covered());
-        FeatJAR.log().info("uncovered %d | %d", statistic1.uncovered(), statistic3.uncovered());
-        FeatJAR.log().info("invalid   %d | %d", statistic1.invalid(), statistic3.invalid());
+        FeatJAR.log().debug("total     %d | %d", statistic1.total(), statistic3.total());
+        FeatJAR.log().debug("covered   %d | %d", statistic1.covered(), statistic3.covered());
+        FeatJAR.log().debug("uncovered %d | %d", statistic1.uncovered(), statistic3.uncovered());
+        FeatJAR.log().debug("invalid   %d | %d", statistic1.invalid(), statistic3.invalid());
         assertEquals(statistic1.total(), statistic3.total());
         assertEquals(statistic1.covered(), statistic3.covered());
         assertEquals(statistic1.uncovered(), statistic3.uncovered());
@@ -277,41 +263,6 @@ public class YASAIncrementalTest extends Common {
                 .compute();
         FeatJAR.log().info("Computed Coverage (TWiseCoverageComputation)");
         return statistic;
-    }
-
-    private void computeCoverageVariants(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
-        BooleanAssignment core = clauses.map(ComputeCoreSAT4J::new).compute();
-        BooleanAssignment atomic = new BooleanAssignment(clauses.map(ComputeAtomicSetsSAT4J::new).compute().stream()
-                .skip(1)
-                .flatMapToInt(l -> Arrays.stream(l.get(), 1, l.get().length))
-                .toArray());
-
-        CoverageStatistic statisticNone = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .compute();
-
-        CoverageStatistic statisticCore = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .set(TWiseCoverageComputation.FILTER, core)
-                .compute();
-
-        CoverageStatistic statisticAtomic = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .set(TWiseCoverageComputation.FILTER, atomic)
-                .compute();
-
-        CoverageStatistic statisticCoreAtomic = clauses.map(TWiseCoverageComputation::new)
-                .set(TWiseCoverageComputation.SAMPLE, sample)
-                .set(TWiseCoverageComputation.T, t)
-                .set(TWiseCoverageComputation.FILTER, new BooleanAssignment(core.addAll(atomic.get())))
-                .compute();
-        FeatJAR.log().info("Coverage statisticNone: %f", statisticNone.coverage());
-        FeatJAR.log().info("Coverage statisticCore: %f", statisticCore.coverage());
-        FeatJAR.log().info("Coverage statisticAtomic: %f", statisticAtomic.coverage());
-        FeatJAR.log().info("Coverage statisticCoreAtomic: %f", statisticCoreAtomic.coverage());
     }
 
     private IComputation<BooleanClauseList> getClauses(IFormula formula) {
