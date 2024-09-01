@@ -21,6 +21,7 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeSolutionCountSAT4J;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
@@ -42,7 +43,7 @@ public class SolutionCountCommand extends ASAT4JAnalysisCommand<BigInteger, BigI
     }
 
     @Override
-    public IComputation<BigInteger> newAnalysis(ComputeBooleanClauseList formula) {
+    public IComputation<BigInteger> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
         return formula.map(Computations::getKey).map(ComputeSolutionCountSAT4J::new);
     }
 

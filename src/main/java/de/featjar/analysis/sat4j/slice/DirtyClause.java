@@ -30,6 +30,8 @@ import java.util.HashSet;
  */
 public class DirtyClause extends BooleanClause {
 
+    private static final long serialVersionUID = -760584268217603444L;
+
     private int relevance;
 
     public static DirtyClause createClause(int[] newLiterals, int curFeature) {
@@ -168,5 +170,15 @@ public class DirtyClause extends BooleanClause {
 
     public int getRelevance() {
         return relevance;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }

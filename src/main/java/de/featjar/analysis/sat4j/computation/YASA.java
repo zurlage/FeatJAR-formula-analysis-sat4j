@@ -116,6 +116,8 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     }
 
     private class PartialConfiguration extends BooleanSolution {
+        private static final long serialVersionUID = -26321918624780361L;
+
         private final int id;
 
         private Visitor visitor;
@@ -184,6 +186,16 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
 
         public int countLiterals() {
             return visitor.getAddedLiteralCount();
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return super.equals(obj);
         }
     }
 

@@ -21,6 +21,7 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -43,7 +44,7 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(ComputeBooleanClauseList formula) {
+    public IComputation<BooleanAssignmentList> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
         return formula.map(Computations::getKey).map(ComputeAtomicSetsSAT4J::new);
     }
 

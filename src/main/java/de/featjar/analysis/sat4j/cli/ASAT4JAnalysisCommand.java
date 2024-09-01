@@ -22,6 +22,7 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.AAnalysisCommand;
 import de.featjar.base.cli.Option;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
@@ -53,16 +54,18 @@ public abstract class ASAT4JAnalysisCommand<T, U> extends AAnalysisCommand<T> {
     protected IFormula inputFormula;
 
     @Override
-    protected IComputation<T> newComputation() {
+    protected IComputation<T> newComputation(OptionList optionParser) {
         inputFormula = optionParser
                 .getResult(INPUT_OPTION)
                 .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
                 .orElseThrow();
-        return newAnalysis(Computations.of(inputFormula)
-                .map(ComputeNNFFormula::new)
-                .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanClauseList::new));
+        return newAnalysis(
+                optionParser,
+                Computations.of(inputFormula)
+                        .map(ComputeNNFFormula::new)
+                        .map(ComputeCNFFormula::new)
+                        .map(ComputeBooleanClauseList::new));
     }
 
-    protected abstract IComputation<T> newAnalysis(ComputeBooleanClauseList formula);
+    protected abstract IComputation<T> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula);
 }

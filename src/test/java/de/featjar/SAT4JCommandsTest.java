@@ -20,210 +20,202 @@
  */
 package de.featjar;
 
-import de.featjar.base.ProcessOutput;
-import java.io.*;
+import de.featjar.base.FeatJAR;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class SAT4JCommandsTest {
 
-    private static final String sat4jstring = "java -jar build/libs/formula-analysis-sat4j-0.1.1-SNAPSHOT-all.jar";
-
     @Test
     void testProjectionCommand() throws IOException {
-        ProcessOutput output = ProcessOutput.runProcess(
-                sat4jstring
-                        + " projection-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --slice DirectedWithEdges,DirectedWithNeighbors");
-        Assertions.assertTrue(output.getErrorString().isBlank());
-        Assertions.assertFalse(output.getOutputString().contains("DirectedWithEdges"));
-        Assertions.assertFalse(output.getOutputString().contains("DirectedWithNeighbors"));
-        Assertions.assertTrue(output.getOutputString().contains("DirectedOnlyVertices"));
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.run(
+                "projection-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--slice",
+                "DirectedWithEdges,DirectedWithNeighbors",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(0, exitCode);
+        String output = Files.readString(tempFile);
+        Assertions.assertFalse(output.contains("DirectedWithEdges"));
+        Assertions.assertFalse(output.contains("DirectedWithNeighbors"));
+        Assertions.assertTrue(output.contains("DirectedOnlyVertices"));
+    }
 
-        output = ProcessOutput.runProcess(
-                sat4jstring + " projection-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml "
-                        + "--project DirectedWithEdges,DirectedWithNeighbors,DirectedOnlyVertices,UndirectedWithEdges,UndirectedWithNeighbors,UndirectedOnlyVertices "
-                        + "--slice DirectedWithEdges,DirectedWithNeighbors");
-        Assertions.assertTrue(output.getErrorString().isBlank());
-        Assertions.assertTrue(output.getOutputString().contains("DirectedOnlyVertices"));
-        Assertions.assertTrue(output.getOutputString().contains("UndirectedWithEdges"));
-        Assertions.assertTrue(output.getOutputString().contains("UndirectedWithNeighbors"));
-        Assertions.assertTrue(output.getOutputString().contains("UndirectedOnlyVertices"));
-        Assertions.assertFalse(output.getOutputString().contains("DirectedWithEdges"));
-        Assertions.assertFalse(output.getOutputString().contains("DirectedWithNeighbors"));
-        Assertions.assertTrue(output.getOutputString().split("\n").length > 0);
-        Assertions.assertEquals(6, output.getOutputString().split("\n")[0].split(";").length);
+    @Test
+    void testProjectionCommand2() throws IOException {
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.run(
+                "projection-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--project",
+                "DirectedOnlyVertices,UndirectedWithEdges,UndirectedWithNeighbors,UndirectedOnlyVertices",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(0, exitCode);
+        String output = Files.readString(tempFile);
+        Assertions.assertFalse(output.contains("DirectedWithEdges"));
+        Assertions.assertFalse(output.contains("DirectedWithNeighbors"));
+        Assertions.assertTrue(output.contains("DirectedOnlyVertices"));
+        Assertions.assertTrue(output.contains("UndirectedWithEdges"));
+        Assertions.assertTrue(output.contains("UndirectedWithNeighbors"));
+        Assertions.assertTrue(output.contains("UndirectedOnlyVertices"));
+        Assertions.assertTrue(output.split("\n").length > 0);
+        Assertions.assertEquals(6, output.split("\n")[0].split(";").length);
+    }
 
-        output = ProcessOutput.runProcess(
-                sat4jstring + " projection-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml "
-                        + "--project DirectedOnlyVertices,UndirectedWithEdges,UndirectedWithNeighbors,UndirectedOnlyVertices");
-        Assertions.assertTrue(output.getErrorString().isBlank());
-        Assertions.assertTrue(output.getOutputString().contains("DirectedOnlyVertices"));
-        Assertions.assertTrue(output.getOutputString().contains("UndirectedWithEdges"));
-        Assertions.assertTrue(output.getOutputString().contains("UndirectedWithNeighbors"));
-        Assertions.assertTrue(output.getOutputString().contains("UndirectedOnlyVertices"));
-        Assertions.assertFalse(output.getOutputString().contains("DirectedWithEdges"));
-        Assertions.assertFalse(output.getOutputString().contains("DirectedWithNeighbors"));
-        Assertions.assertTrue(output.getOutputString().split("\n").length > 0);
-        Assertions.assertEquals(6, output.getOutputString().split("\n")[0].split(";").length);
+    @Test
+    void testProjectionCommand3() throws IOException {
+        Path tempFile = Files.createTempFile("featJarTest", ".txt");
+        int exitCode = FeatJAR.run(
+                "projection-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--project",
+                "DirectedWithEdges,DirectedWithNeighbors,DirectedOnlyVertices,UndirectedWithEdges,UndirectedWithNeighbors,UndirectedOnlyVertices",
+                "--slice",
+                "DirectedWithEdges,DirectedWithNeighbors",
+                "--output",
+                tempFile.toString());
+        Assertions.assertEquals(0, exitCode);
+        String output = Files.readString(tempFile);
+        Assertions.assertFalse(output.contains("DirectedWithEdges"));
+        Assertions.assertFalse(output.contains("DirectedWithNeighbors"));
+        Assertions.assertTrue(output.contains("DirectedOnlyVertices"));
+        Assertions.assertTrue(output.contains("UndirectedWithEdges"));
+        Assertions.assertTrue(output.contains("UndirectedWithNeighbors"));
+        Assertions.assertTrue(output.contains("UndirectedOnlyVertices"));
+        Assertions.assertTrue(output.contains("DirectedOnlyVertices"));
+        Assertions.assertTrue(output.split("\n").length > 0);
+        Assertions.assertEquals(6, output.split("\n")[0].split(";").length);
     }
 
     @Test
     void testCoreCommand() throws IOException {
-        ProcessOutput noOptions = ProcessOutput.runProcess(
-                sat4jstring + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
-        Assertions.assertTrue(noOptions.getErrorString().isBlank());
+        int exitCode = FeatJAR.run("core-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        Assertions.assertEquals(0, exitCode);
 
-        ProcessOutput seedOption = ProcessOutput.runProcess(
-                sat4jstring + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --seed 0");
-        Assertions.assertTrue(seedOption.getErrorString().isBlank());
-
-        ProcessOutput solverTimeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --solver_timeout 10");
-        Assertions.assertTrue(solverTimeoutOption.getErrorString().isBlank());
-
-        ProcessOutput browserCacheOption = ProcessOutput.runProcess(sat4jstring
-                + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --browser-cache true");
-        Assertions.assertTrue(browserCacheOption.getErrorString().isBlank());
-
-        ProcessOutput nonParallelOption = ProcessOutput.runProcess(sat4jstring
-                + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --non-parallel true");
-        Assertions.assertTrue(nonParallelOption.getErrorString().isBlank());
-
-        ProcessOutput timeoutOption = ProcessOutput.runProcess(
-                sat4jstring + " core-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --timeout 10");
-        Assertions.assertTrue(timeoutOption.getErrorString().isBlank());
+        exitCode = FeatJAR.run(
+                "core-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--seed",
+                "0",
+                "--solver_timeout",
+                "10",
+                "--browser-cache",
+                "true",
+                "--non-parallel",
+                "true",
+                "--timeout",
+                "10");
+        Assertions.assertEquals(0, exitCode);
     }
 
     @Test
     void testAtomicSetsCommand() throws IOException {
-        ProcessOutput noOptions = ProcessOutput.runProcess(
-                sat4jstring + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
-        Assertions.assertTrue(noOptions.getErrorString().isBlank());
+        int exitCode =
+                FeatJAR.run("atomic-sets-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        Assertions.assertEquals(0, exitCode);
 
-        ProcessOutput seedOption = ProcessOutput.runProcess(sat4jstring
-                + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --seed 0");
-        Assertions.assertTrue(seedOption.getErrorString().isBlank());
-
-        ProcessOutput solverTimeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --solver_timeout 10");
-        Assertions.assertTrue(solverTimeoutOption.getErrorString().isBlank());
-
-        ProcessOutput browserCacheOption = ProcessOutput.runProcess(
-                sat4jstring
-                        + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --browser-cache true");
-        Assertions.assertTrue(browserCacheOption.getErrorString().isBlank());
-
-        ProcessOutput nonParallelOption = ProcessOutput.runProcess(sat4jstring
-                + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --non-parallel true");
-        Assertions.assertTrue(nonParallelOption.getErrorString().isBlank());
-
-        ProcessOutput timeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " atomic-sets-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --timeout 10");
-        Assertions.assertTrue(timeoutOption.getErrorString().isBlank());
+        exitCode = FeatJAR.run(
+                "atomic-sets-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--seed",
+                "0",
+                "--solver_timeout",
+                "10",
+                "--browser-cache",
+                "true",
+                "--non-parallel",
+                "true",
+                "--timeout",
+                "10");
+        Assertions.assertEquals(0, exitCode);
     }
 
     @Test
     void testSolutionCountCommand() throws IOException {
-        ProcessOutput noOptions = ProcessOutput.runProcess(
-                sat4jstring + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
-        Assertions.assertTrue(noOptions.getErrorString().isBlank());
+        int exitCode = FeatJAR.run("count-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        Assertions.assertEquals(0, exitCode);
 
-        ProcessOutput seedOption = ProcessOutput.runProcess(
-                sat4jstring + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --seed 0");
-        Assertions.assertTrue(seedOption.getErrorString().isBlank());
-
-        ProcessOutput solverTimeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --solver_timeout 10");
-        Assertions.assertTrue(solverTimeoutOption.getErrorString().isBlank());
-
-        ProcessOutput browserCacheOption = ProcessOutput.runProcess(sat4jstring
-                + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --browser-cache true");
-        Assertions.assertTrue(browserCacheOption.getErrorString().isBlank());
-
-        ProcessOutput nonParallelOption = ProcessOutput.runProcess(sat4jstring
-                + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --non-parallel true");
-        Assertions.assertTrue(nonParallelOption.getErrorString().isBlank());
-
-        ProcessOutput timeoutOption = ProcessOutput.runProcess(
-                sat4jstring + " count-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --timeout 10");
-        Assertions.assertTrue(timeoutOption.getErrorString().isBlank());
+        exitCode = FeatJAR.run(
+                "count-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--seed",
+                "0",
+                "--solver_timeout",
+                "10",
+                "--browser-cache",
+                "true",
+                "--non-parallel",
+                "true",
+                "--timeout",
+                "10");
+        Assertions.assertEquals(0, exitCode);
     }
 
     @Test
     void testSolutionsCommand() throws IOException {
-        ProcessOutput noOptions = ProcessOutput.runProcess(
-                sat4jstring + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
-        Assertions.assertTrue(noOptions.getErrorString().isBlank());
+        int exitCode = FeatJAR.run("solutions-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        Assertions.assertEquals(0, exitCode);
 
-        ProcessOutput seedOption = ProcessOutput.runProcess(
-                sat4jstring + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --seed 0");
-        Assertions.assertTrue(seedOption.getErrorString().isBlank());
-
-        ProcessOutput solverTimeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --solver_timeout 10");
-        Assertions.assertTrue(solverTimeoutOption.getErrorString().isBlank());
-
-        ProcessOutput limitOption = ProcessOutput.runProcess(
-                sat4jstring + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --n 10");
-        Assertions.assertTrue(limitOption.getErrorString().isBlank());
-
-        ProcessOutput strategyOption = ProcessOutput.runProcess(sat4jstring
-                + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --strategy negative");
-        Assertions.assertTrue(strategyOption.getErrorString().isBlank());
-
-        ProcessOutput noDuplicatesOption = ProcessOutput.runProcess(sat4jstring
-                + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --no-duplicates true");
-        Assertions.assertTrue(noDuplicatesOption.getErrorString().isBlank());
-
-        ProcessOutput browserCacheOption = ProcessOutput.runProcess(sat4jstring
-                + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --browser-cache true");
-        Assertions.assertTrue(browserCacheOption.getErrorString().isBlank());
-
-        ProcessOutput nonParallelOption = ProcessOutput.runProcess(sat4jstring
-                + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --non-parallel true");
-        Assertions.assertTrue(nonParallelOption.getErrorString().isBlank());
-
-        ProcessOutput timeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " solutions-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --timeout 10");
-        Assertions.assertTrue(timeoutOption.getErrorString().isBlank());
+        exitCode = FeatJAR.run(
+                "solutions-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--seed",
+                "0",
+                "--solver_timeout",
+                "10",
+                "--n",
+                "10",
+                "--strategy",
+                "negative",
+                "--no-duplicates",
+                "true",
+                "--browser-cache",
+                "true",
+                "--non-parallel",
+                "true",
+                "--timeout",
+                "10");
+        Assertions.assertEquals(0, exitCode);
     }
 
     @Test
     void testTWiseCommand() throws IOException {
-        ProcessOutput noOptions = ProcessOutput.runProcess(
-                sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml");
-        Assertions.assertTrue(noOptions.getErrorString().isBlank());
+        int exitCode = FeatJAR.run("t-wise-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        Assertions.assertEquals(0, exitCode);
 
-        ProcessOutput seedOption = ProcessOutput.runProcess(
-                sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --seed 0");
-        Assertions.assertTrue(seedOption.getErrorString().isBlank());
-
-        ProcessOutput solverTimeoutOption = ProcessOutput.runProcess(sat4jstring
-                + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --solver_timeout 10");
-        Assertions.assertTrue(solverTimeoutOption.getErrorString().isBlank());
-
-        ProcessOutput limitOption = ProcessOutput.runProcess(
-                sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --n 10");
-        Assertions.assertTrue(limitOption.getErrorString().isBlank());
-
-        ProcessOutput tOption = ProcessOutput.runProcess(
-                sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --t 5");
-        Assertions.assertTrue(tOption.getErrorString().isBlank());
-
-        ProcessOutput iterationsOption = ProcessOutput.runProcess(
-                sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --i 10");
-        Assertions.assertTrue(iterationsOption.getErrorString().isBlank());
-
-        ProcessOutput browserCacheOption = ProcessOutput.runProcess(sat4jstring
-                + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --browser-cache true");
-        Assertions.assertTrue(browserCacheOption.getErrorString().isBlank());
-
-        ProcessOutput nonParallelOption = ProcessOutput.runProcess(sat4jstring
-                + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --non-parallel true");
-        Assertions.assertTrue(nonParallelOption.getErrorString().isBlank());
-
-        ProcessOutput timeoutOption = ProcessOutput.runProcess(
-                sat4jstring + " t-wise-sat4j --input ../formula/src/testFixtures/resources/GPL/model.xml --timeout 10");
-        Assertions.assertTrue(timeoutOption.getErrorString().isBlank());
+        exitCode = FeatJAR.run(
+                "t-wise-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--seed",
+                "0",
+                "--solver_timeout",
+                "10",
+                "--n",
+                "10",
+                "--t",
+                "5",
+                "--i",
+                "10",
+                "--browser-cache",
+                "true",
+                "--non-parallel",
+                "true",
+                "--timeout",
+                "10");
+        Assertions.assertEquals(0, exitCode);
     }
 }

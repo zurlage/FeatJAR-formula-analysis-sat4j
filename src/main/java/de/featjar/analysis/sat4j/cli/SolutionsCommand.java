@@ -23,6 +23,7 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanSolutionList;
@@ -66,7 +67,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanClauseList formula) {
+    public IComputation<BooleanSolutionList> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
         return formula.map(Computations::getKey)
                 .map(ComputeSolutionsSAT4J::new)
                 .set(

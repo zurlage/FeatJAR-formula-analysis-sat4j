@@ -23,6 +23,7 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.analysis.sat4j.computation.YASAIncremental;
 import de.featjar.base.cli.Option;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
@@ -81,7 +82,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(ComputeBooleanClauseList formula) {
+    public IComputation<BooleanSolutionList> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
         if (optionParser.get(INCREMENTAL_OPTION)) {
             return formula.map(Computations::getKey)
                     .map(YASAIncremental::new)
