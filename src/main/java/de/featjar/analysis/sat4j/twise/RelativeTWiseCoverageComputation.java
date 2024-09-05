@@ -48,7 +48,7 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
 
     public class Environment {
         private SampleListIndex sampleIndex = new SampleListIndex(sample.getAll(), size, t);
-        private final CoverageStatistic statistic = new CoverageStatistic(t);
+        private final CoverageStatistic statistic = new CoverageStatistic();
         private final int[] literals = new int[t];
 
         public CoverageStatistic getStatistic() {

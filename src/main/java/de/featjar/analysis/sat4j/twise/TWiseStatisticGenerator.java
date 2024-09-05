@@ -253,7 +253,7 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
             long coveredSum = LongStream.of(covered).sum();
             long uncoveredSum = LongStream.of(uncovered).sum();
 
-            CoverageStatistic statistic = new CoverageStatistic(t);
+            CoverageStatistic statistic = new CoverageStatistic();
             statistic.setNumberOfCoveredConditions(coveredSum);
             statistic.setNumberOfInvalidConditions(invalidSum);
             statistic.setNumberOfUncoveredConditions(uncoveredSum);
@@ -261,7 +261,7 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
             return Result.of(statistic);
         }
 
-        CoverageStatistic statistic = new CoverageStatistic(t);
+        CoverageStatistic statistic = new CoverageStatistic();
         statistic.setNumberOfCoveredConditions(0);
         statistic.setNumberOfInvalidConditions(0);
         statistic.setNumberOfUncoveredConditions(1);

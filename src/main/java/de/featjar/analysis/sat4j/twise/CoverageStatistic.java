@@ -26,14 +26,9 @@ package de.featjar.analysis.sat4j.twise;
  * @author Sebastian Krieter
  */
 public class CoverageStatistic {
-    final int t;
     long numberOfInvalidConditions;
     long numberOfCoveredConditions;
     long numberOfUncoveredConditions;
-
-    public CoverageStatistic(int t) {
-        this.t = t;
-    }
 
     public void setNumberOfInvalidConditions(long numberOfInvalidConditions) {
         this.numberOfInvalidConditions = numberOfInvalidConditions;

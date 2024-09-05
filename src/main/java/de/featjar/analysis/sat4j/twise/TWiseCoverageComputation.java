@@ -55,7 +55,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
     public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
 
     public class Environment {
-        private final CoverageStatistic statistic = new CoverageStatistic(t);
+        private final CoverageStatistic statistic = new CoverageStatistic();
         private final SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         private final ModalImplicationGraph.Visitor visitor =
                 MIG.get(dependencyList).getVisitor();
