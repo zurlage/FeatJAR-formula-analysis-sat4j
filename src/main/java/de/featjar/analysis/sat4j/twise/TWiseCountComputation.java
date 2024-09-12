@@ -25,8 +25,8 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
-import de.featjar.base.data.LexicographicIterator.Combination;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.ABooleanAssignmentList;
@@ -65,7 +65,6 @@ public class TWiseCountComputation extends AComputation<Long> {
             Dependency.newDependency(CombinationList.class);
 
     public class Environment {
-        private final int[] literals = new int[t];
         private long statistic = 0;
 
         public long getStatistic() {
@@ -103,20 +102,20 @@ public class TWiseCountComputation extends AComputation<Long> {
 
         t = T.get(dependencyList);
 
-        final int[] literals = LexicographicIterator.filteredList(size, VARIABLE_FILTER.get(dependencyList));
-        final int[] gray = LexicographicIterator.grayCode(t);
+        final int[] literals = Ints.filteredList(size, VARIABLE_FILTER.get(dependencyList));
+        final int[] gray = Ints.grayCode(t);
 
         SampleBitIndex coverageChecker = new SampleBitIndex(sample, size);
 
         LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                 .forEach(combo -> {
-                    combo.select(literals, combo.environment.literals);
+                    int[] select = combo.select(literals);
                     for (int i = 0; i < gray.length; i++) {
-                        if (coverageChecker.test(combo.environment.literals)) {
+                        if (coverageChecker.test(select)) {
                             combo.environment.statistic++;
                         }
                         int g = gray[i];
-                        combo.environment.literals[g] = -combo.environment.literals[g];
+                        select[g] = -select[g];
                     }
                 });
 
@@ -128,7 +127,7 @@ public class TWiseCountComputation extends AComputation<Long> {
                 .map(s -> s - filterCombinationsCount));
     }
 
-    private Environment createStatistic(Combination<Environment> combo) {
+    private Environment createStatistic() {
         Environment env = new Environment();
         synchronized (statisticList) {
             statisticList.add(env);

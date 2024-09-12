@@ -25,8 +25,8 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
-import de.featjar.base.data.LexicographicIterator.Combination;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanSolutionList;
@@ -49,7 +49,6 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
     public class Environment {
         private SampleListIndex sampleIndex = new SampleListIndex(sample.getAll(), size, t);
         private final CoverageStatistic statistic = new CoverageStatistic();
-        private final int[] literals = new int[t];
 
         public CoverageStatistic getStatistic() {
             return statistic;
@@ -87,15 +86,15 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
 
             SampleBitIndex referenceIndex = new SampleBitIndex(referenceSample.getAll(), size);
 
-            final int[] literals = LexicographicIterator.filteredList(size, FILTER.get(dependencyList));
-            final int[] gray = LexicographicIterator.grayCode(t);
+            final int[] literals = Ints.filteredList(size, FILTER.get(dependencyList));
+            final int[] gray = Ints.grayCode(t);
 
             LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                     .forEach(combo -> {
-                        combo.select(literals, combo.environment.literals);
+                        int[] select = combo.select(literals);
                         for (int i = 0; i < gray.length; i++) {
-                            if (referenceIndex.test(combo.environment.literals)) {
-                                if (combo.environment.sampleIndex.test(combo.environment.literals)) {
+                            if (referenceIndex.test(select)) {
+                                if (combo.environment.sampleIndex.test(select)) {
                                     combo.environment.statistic.incNumberOfCoveredConditions();
                                 } else {
                                     combo.environment.statistic.incNumberOfUncoveredConditions();
@@ -104,7 +103,7 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
                                 combo.environment.statistic.incNumberOfInvalidConditions();
                             }
                             int g = gray[i];
-                            combo.environment.literals[g] = -combo.environment.literals[g];
+                            select[g] = -select[g];
                         }
                     });
         }
@@ -113,7 +112,7 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
                 .reduce((s1, s2) -> s1.merge(s2)));
     }
 
-    private Environment createStatistic(Combination<Environment> combo) {
+    private Environment createStatistic() {
         Environment env = new Environment();
         synchronized (statisticList) {
             statisticList.add(env);

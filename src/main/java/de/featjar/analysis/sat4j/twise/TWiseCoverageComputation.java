@@ -31,8 +31,8 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
-import de.featjar.base.data.LexicographicIterator.Combination;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClauseList;
@@ -61,7 +61,6 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
                 MIG.get(dependencyList).getVisitor();
         private SampleListIndex sampleIndex = new SampleListIndex(sample, size, t);
         private SampleListIndex randomIndex = new SampleListIndex(randomSample, size, t);
-        private final int[] literals = new int[t];
 
         public CoverageStatistic getStatistic() {
             return statistic;
@@ -98,26 +97,26 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
 
             createRandomSample(dependencyList);
 
-            final int[] literals = LexicographicIterator.filteredList(size, FILTER.get(dependencyList));
-            final int[] gray = LexicographicIterator.grayCode(t);
+            final int[] literals = Ints.filteredList(size, FILTER.get(dependencyList));
+            final int[] gray = Ints.grayCode(t);
 
             LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                     .forEach(combo -> {
-                        combo.select(literals, combo.environment.literals);
+                        int[] select = combo.select(literals);
                         for (int i = 0; i < gray.length; i++) {
-                            if (combo.environment.sampleIndex.test(combo.environment.literals)) {
+                            if (combo.environment.sampleIndex.test(select)) {
                                 combo.environment.statistic.incNumberOfCoveredConditions();
-                            } else if (isCombinationInvalidMIG(combo.environment)) {
+                            } else if (isCombinationInvalidMIG(combo.environment, select)) {
                                 combo.environment.statistic.incNumberOfInvalidConditions();
-                            } else if (combo.environment.randomIndex.test(combo.environment.literals)) {
+                            } else if (combo.environment.randomIndex.test(select)) {
                                 combo.environment.statistic.incNumberOfUncoveredConditions();
-                            } else if (isCombinationInvalidSAT(combo.environment)) {
+                            } else if (isCombinationInvalidSAT(combo.environment, select)) {
                                 combo.environment.statistic.incNumberOfInvalidConditions();
                             } else {
                                 combo.environment.statistic.incNumberOfUncoveredConditions();
                             }
                             int g = gray[i];
-                            combo.environment.literals[g] = -combo.environment.literals[g];
+                            select[g] = -select[g];
                         }
                     });
         }
@@ -142,7 +141,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         }
     }
 
-    private Environment createStatistic(Combination<Environment> combo) {
+    private Environment createStatistic() {
         Environment env = new Environment();
         synchronized (statisticList) {
             statisticList.add(env);
@@ -150,9 +149,9 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         return env;
     }
 
-    private boolean isCombinationInvalidMIG(Environment env) {
+    private boolean isCombinationInvalidMIG(Environment env, int[] select) {
         try {
-            env.visitor.propagate(env.literals);
+            env.visitor.propagate(select);
         } catch (RuntimeContradictionException e) {
             return true;
         } finally {
@@ -161,10 +160,10 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         return false;
     }
 
-    private boolean isCombinationInvalidSAT(Environment env) {
+    private boolean isCombinationInvalidSAT(Environment env, int[] select) {
         final int orgAssignmentLength = env.solver.getAssignment().size();
         try {
-            env.solver.getAssignment().addAll(env.literals);
+            env.solver.getAssignment().addAll(select);
             return env.solver.hasSolution().valueEquals(Boolean.FALSE);
         } finally {
             env.solver.getAssignment().clear(orgAssignmentLength);

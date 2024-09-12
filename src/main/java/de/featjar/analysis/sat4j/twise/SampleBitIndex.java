@@ -34,35 +34,62 @@ import java.util.function.Predicate;
 public class SampleBitIndex implements Predicate<int[]> {
 
     private final BitSet[] bitSetReference;
-    private final int size;
+    private final int numberOfVariables;
+    private int sampleSize;
 
-    public SampleBitIndex(List<? extends ABooleanAssignment> sample, final int size) {
-        this.size = size;
-        bitSetReference = new BitSet[2 * size + 1];
+    public SampleBitIndex(final int numberOfVariables) {
+        this.numberOfVariables = numberOfVariables;
+        bitSetReference = new BitSet[2 * numberOfVariables + 1];
 
-        final int sampleSize = sample.size();
-        for (int j = 1; j <= size; j++) {
-            BitSet negIndices = new BitSet(sampleSize);
-            BitSet posIndices = new BitSet(sampleSize);
-            for (int i = 0; i < sampleSize; i++) {
-                ABooleanAssignment config = sample.get(i);
-                if (config.get(j - 1) < 0) {
-                    negIndices.set(i);
-                } else {
-                    posIndices.set(i);
-                }
+        sampleSize = 0;
+        for (int j = 1; j <= numberOfVariables; j++) {
+            bitSetReference[numberOfVariables - j] = new BitSet();
+            bitSetReference[numberOfVariables + j] = new BitSet();
+        }
+    }
+
+    public SampleBitIndex(List<? extends ABooleanAssignment> sample, final int numberOfVariables) {
+        this(numberOfVariables);
+        sample.forEach(this::addConfiguration);
+    }
+
+    public void addConfiguration(ABooleanAssignment config) {
+        int i = sampleSize++;
+
+        for (int j = 1; j <= numberOfVariables; j++) {
+            int l = config.get(j - 1);
+            if (l != 0) {
+                ((l < 0) ? bitSetReference[numberOfVariables - j] : bitSetReference[numberOfVariables + j]).set(i);
             }
-            bitSetReference[size - j] = negIndices;
-            bitSetReference[j + size] = posIndices;
+        }
+    }
+
+    public void updateConfiguration(int index, ABooleanAssignment config) {
+        for (int j = 1; j <= numberOfVariables; j++) {
+            int l = config.get(j - 1);
+            if (l == 0) {
+                bitSetReference[numberOfVariables - j].clear(index);
+                bitSetReference[numberOfVariables + j].clear(index);
+            } else {
+                bitSetReference[numberOfVariables - j].set(index);
+                bitSetReference[numberOfVariables + j].clear(index);
+            }
+        }
+    }
+
+    public void updateConfiguration(int index, int literal) {
+        if (literal != 0) {
+            bitSetReference[numberOfVariables - literal].clear(index);
+            bitSetReference[numberOfVariables + literal].set(index);
         }
     }
 
     private BitSet getBitSet(int[] literals) {
-        BitSet first = bitSetReference[literals[0] + size];
+        BitSet first = bitSetReference[numberOfVariables + literals[0]];
         BitSet bitSet = new BitSet(first.size());
         bitSet.xor(first);
         for (int k = 1; k < literals.length; k++) {
-            bitSet.and(bitSetReference[literals[k] + size]);
+            bitSet.and(bitSetReference[numberOfVariables + literals[k]]);
         }
         return bitSet;
     }

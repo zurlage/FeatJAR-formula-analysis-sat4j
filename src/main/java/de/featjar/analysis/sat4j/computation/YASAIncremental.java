@@ -34,7 +34,6 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.BinomialCalculator;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.LexicographicIterator;
-import de.featjar.base.data.LexicographicIterator.Combination;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.ABooleanAssignmentList;
@@ -52,7 +51,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -355,12 +353,11 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             checkCancel();
             t = ti;
             selectedSampleIndices = new ExpandableIntegerList[t];
-            final int[] combinationLiterals = new int[t];
             initRun();
             LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
                 checkCancel();
                 monitor.incrementCurrentStep();
-                combo.select(literals, combinationLiterals);
+                int[] combinationLiterals = combo.select(literals);
 
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
@@ -416,15 +413,13 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             }
         }
 
-        final int[] combinationLiterals = new int[tmax];
-
         for (int j = 1; j < iterations; j++) {
             checkCancel();
             final int[] literals = initliterals(true);
             initSample();
             initRun();
             LexicographicIterator.stream(tmax, presenceConditions.size()).forEach(combo -> {
-                combo.select(literals, combinationLiterals);
+                int[] combinationLiterals = combo.select(literals);
 
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
@@ -880,27 +875,21 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         final int n = solutionList.get(0).size();
         int t2 = (n < t) ? n : t;
         int nonUniqueIndex = solutionList.size();
-        final Function<Combination<int[]>, int[]> environmentCreator = c -> new int[t2];
 
         for (int i = 0; i < nonUniqueIndex; i++) {
             BooleanSolution config = solutionList.get(i);
             int finalNonUniqueIndex = nonUniqueIndex;
 
-            boolean hasUnique = LexicographicIterator.parallelStream(t2, n, environmentCreator)
-                    .anyMatch(combo -> {
-                        final int[] configLiterals = config.get();
-                        int[] literals = combo.environment;
-                        for (int k = 0; k < literals.length; k++) {
-                            literals[k] = configLiterals[combo.elementIndices[k]];
-                        }
-                        for (int j = 0; j < finalNonUniqueIndex; j++) {
-                            PartialConfiguration config2 = solutionList.get(j);
-                            if (config != config2 && config2.containsAll(literals)) {
-                                return false;
-                            }
-                        }
-                        return true;
-                    });
+            boolean hasUnique = LexicographicIterator.parallelStream(t2, n).anyMatch(combo -> {
+                int[] literals = combo.select(config.get());
+                for (int j = 0; j < finalNonUniqueIndex; j++) {
+                    PartialConfiguration config2 = solutionList.get(j);
+                    if (config != config2 && config2.containsAll(literals)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
             if (!hasUnique) {
                 Collections.swap(solutionList, i--, --nonUniqueIndex);
             }

@@ -21,7 +21,6 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.YASA;
-import de.featjar.analysis.sat4j.computation.YASAIncremental;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
@@ -64,18 +63,6 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
             .setDescription("Number of iterations.") //
             .setDefaultValue(1);
 
-    /**
-     * Incremental flag.
-     */
-    public static final Option<Boolean> INCREMENTAL_OPTION = Option.newFlag("incremental") //
-            .setDescription("Use incremental version of YASA.");
-
-    /**
-     * No-reduce flag.
-     */
-    public static final Option<Boolean> REDUCE_OPTION = Option.newFlag("no-reduce") //
-            .setDescription("Do not use the reduce function of YASA.");
-
     @Override
     public Optional<String> getDescription() {
         return Optional.of("Computes solutions for a given formula using SAT4J");
@@ -83,25 +70,13 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
 
     @Override
     public IComputation<BooleanSolutionList> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
-        if (optionParser.get(INCREMENTAL_OPTION)) {
-            return formula.map(Computations::getKey)
-                    .map(YASAIncremental::new)
-                    .set(YASAIncremental.T, optionParser.get(T_OPTION))
-                    .set(YASAIncremental.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
-                    .set(YASAIncremental.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
-                    .set(YASAIncremental.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                    .set(YASAIncremental.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
-                    .set(YASAIncremental.REDUCE_FINAL_SAMPLE, optionParser.get(REDUCE_OPTION));
-        } else {
-            return formula.map(Computations::getKey)
-                    .map(YASA::new)
-                    .set(YASA.T, optionParser.get(T_OPTION))
-                    .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
-                    .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
-                    .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                    .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
-                    .set(YASA.REDUCE_FINAL_SAMPLE, optionParser.get(REDUCE_OPTION));
-        }
+        return formula.map(Computations::getKey)
+                .map(YASA::new)
+                .set(YASA.T, optionParser.get(T_OPTION))
+                .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
     }
 
     @Override
