@@ -357,7 +357,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
                 checkCancel();
                 monitor.incrementCurrentStep();
-                int[] combinationLiterals = combo.select(literals);
+                int[] combinationLiterals = combo.getSelection(literals);
 
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
@@ -419,7 +419,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             initSample();
             initRun();
             LexicographicIterator.stream(tmax, presenceConditions.size()).forEach(combo -> {
-                int[] combinationLiterals = combo.select(literals);
+                int[] combinationLiterals = combo.getSelection(literals);
 
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
@@ -881,7 +881,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
             int finalNonUniqueIndex = nonUniqueIndex;
 
             boolean hasUnique = LexicographicIterator.parallelStream(t2, n).anyMatch(combo -> {
-                int[] literals = combo.select(config.get());
+                int[] literals = combo.getSelection(config.get());
                 for (int j = 0; j < finalNonUniqueIndex; j++) {
                     PartialConfiguration config2 = solutionList.get(j);
                     if (config != config2 && config2.containsAll(literals)) {

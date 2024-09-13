@@ -91,7 +91,7 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
 
             LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                     .forEach(combo -> {
-                        int[] select = combo.select(literals);
+                        int[] select = combo.getSelection(literals);
                         for (int i = 0; i < gray.length; i++) {
                             if (referenceIndex.test(select)) {
                                 if (combo.environment.sampleIndex.test(select)) {

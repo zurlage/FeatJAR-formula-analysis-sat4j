@@ -102,7 +102,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
 
             LexicographicIterator.parallelStream(t, literals.length, this::createStatistic)
                     .forEach(combo -> {
-                        int[] select = combo.select(literals);
+                        int[] select = combo.getSelection(literals);
                         for (int i = 0; i < gray.length; i++) {
                             if (combo.environment.sampleIndex.test(select)) {
                                 combo.environment.statistic.incNumberOfCoveredConditions();
