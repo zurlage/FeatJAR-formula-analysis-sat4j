@@ -42,9 +42,8 @@ public class SampleBitIndex implements Predicate<int[]> {
         bitSetReference = new BitSet[2 * numberOfVariables + 1];
 
         sampleSize = 0;
-        for (int j = 1; j <= numberOfVariables; j++) {
-            bitSetReference[numberOfVariables - j] = new BitSet();
-            bitSetReference[numberOfVariables + j] = new BitSet();
+        for (int j = 0; j < bitSetReference.length; j++) {
+            bitSetReference[j] = new BitSet();
         }
     }
 
@@ -56,28 +55,26 @@ public class SampleBitIndex implements Predicate<int[]> {
     public void addConfiguration(ABooleanAssignment config) {
         int i = sampleSize++;
 
-        for (int j = 1; j <= numberOfVariables; j++) {
-            int l = config.get(j - 1);
+        for (int l : config.get()) {
             if (l != 0) {
-                ((l < 0) ? bitSetReference[numberOfVariables - j] : bitSetReference[numberOfVariables + j]).set(i);
+                bitSetReference[numberOfVariables + l].set(i);
             }
         }
     }
 
-    public void updateConfiguration(int index, ABooleanAssignment config) {
-        for (int j = 1; j <= numberOfVariables; j++) {
-            int l = config.get(j - 1);
-            if (l == 0) {
-                bitSetReference[numberOfVariables - j].clear(index);
-                bitSetReference[numberOfVariables + j].clear(index);
-            } else {
-                bitSetReference[numberOfVariables - j].set(index);
-                bitSetReference[numberOfVariables + j].clear(index);
-            }
+    public void clear(int index) {
+        for (int l = 1; l <= numberOfVariables; l++) {
+            bitSetReference[numberOfVariables + l].clear(index);
         }
     }
 
-    public void updateConfiguration(int index, int literal) {
+    public void set(int index, ABooleanAssignment config) {
+        for (int l : config.get()) {
+            set(index, l);
+        }
+    }
+
+    public void set(int index, int literal) {
         if (literal != 0) {
             bitSetReference[numberOfVariables - literal].clear(index);
             bitSetReference[numberOfVariables + literal].set(index);
