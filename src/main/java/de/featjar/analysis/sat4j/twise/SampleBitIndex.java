@@ -63,8 +63,8 @@ public class SampleBitIndex implements Predicate<int[]> {
     }
 
     public void clear(int index) {
-        for (int l = 1; l <= numberOfVariables; l++) {
-            bitSetReference[numberOfVariables + l].clear(index);
+    	for (int j = 0; j < bitSetReference.length; j++) {
+            bitSetReference[j].clear(index);
         }
     }
 
