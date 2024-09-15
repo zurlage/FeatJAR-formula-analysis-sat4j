@@ -47,8 +47,18 @@ public class SampleBitIndex implements Predicate<int[]> {
         }
     }
 
+    public SampleBitIndex(final int numberOfVariables, int numberOfInitialConfigs) {
+        this.numberOfVariables = numberOfVariables;
+        bitSetReference = new BitSet[2 * numberOfVariables + 1];
+
+        sampleSize = 0;
+        for (int j = 0; j < bitSetReference.length; j++) {
+            bitSetReference[j] = new BitSet(numberOfInitialConfigs);
+        }
+    }
+
     public SampleBitIndex(List<? extends ABooleanAssignment> sample, final int numberOfVariables) {
-        this(numberOfVariables);
+        this(numberOfVariables, sample.size());
         sample.forEach(this::addConfiguration);
     }
 
@@ -63,7 +73,7 @@ public class SampleBitIndex implements Predicate<int[]> {
     }
 
     public void clear(int index) {
-    	for (int j = 0; j < bitSetReference.length; j++) {
+        for (int j = 0; j < bitSetReference.length; j++) {
             bitSetReference[j].clear(index);
         }
     }
