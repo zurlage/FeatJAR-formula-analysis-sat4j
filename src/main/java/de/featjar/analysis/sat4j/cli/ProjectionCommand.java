@@ -78,7 +78,7 @@ public class ProjectionCommand extends ACommand {
             .setDefaultValue(Duration.ZERO);
 
     @Override
-    public void run(OptionList optionParser) {
+    public int run(OptionList optionParser) {
         Path outputPath = optionParser.getResult(OUTPUT_OPTION).orElse(null);
         List<String> projectLiterals =
                 optionParser.getResult(LITERALS_PROJECT_OPTION).orElse(List.of());
@@ -141,9 +141,7 @@ public class ProjectionCommand extends ACommand {
         }
 
         if (result.isPresent()) {
-
             BooleanClauseList clauseList = result.get().adapt(variableMapClone, variableMap);
-
             try {
                 if (outputPath == null || outputPath.toString().equals("results")) {
                     String string = format.serialize(
@@ -155,10 +153,14 @@ public class ProjectionCommand extends ACommand {
                 }
             } catch (IOException | RuntimeException e) {
                 FeatJAR.log().error(e);
+                return FeatJAR.ERROR_WRITING_RESULT;
             }
         } else {
-            FeatJAR.log().error("Couldn't compute result:\n" + result.printProblems());
+            FeatJAR.log().problems(result.getProblems());
+            FeatJAR.log().error("Couldn't compute result.");
+            return FeatJAR.ERROR_COMPUTING_RESULT;
         }
+        return 0;
     }
 
     @Override
