@@ -31,6 +31,7 @@ import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
@@ -92,6 +93,9 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
         SAT4JSolutionSolver solver = new SAT4JSolutionSolver(new BooleanClauseList(ll, newVariableCount));
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
         solver.shuffleOrder(random);
-        return solver.findSolution();
+        return solver.hasSolution()
+                .filter(hasSolution -> hasSolution)
+                .map(hasSolution ->
+                        new BooleanSolution(Arrays.copyOfRange(solver.getInternalSolution(), 0, orgVariableCount)));
     }
 }
