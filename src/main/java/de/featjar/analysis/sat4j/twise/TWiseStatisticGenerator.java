@@ -51,15 +51,15 @@ import java.util.stream.LongStream;
  */
 public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanAssignment> CORE = Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
+    public static final Dependency<BooleanAssignment> CORE = Dependency.newDependency(BooleanAssignment.class);
 
     public TWiseStatisticGenerator(IComputation<BooleanClauseList> booleanClauseList) {
         super(
                 booleanClauseList,
                 Computations.of(2),
-                new ComputeCoreSAT4J(booleanClauseList),
-                Computations.of(new BooleanSolutionList()));
+                Computations.of(new BooleanSolutionList(null, 0)),
+                new ComputeCoreSAT4J(booleanClauseList));
     }
 
     public TWiseStatisticGenerator(TWiseStatisticGenerator other) {

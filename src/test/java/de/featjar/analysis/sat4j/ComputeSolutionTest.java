@@ -31,7 +31,6 @@ import de.featjar.Common;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionSAT4J;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.ComputePresence;
-import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
@@ -46,8 +45,6 @@ public class ComputeSolutionTest extends Common {
                 .map(ComputeCNFFormula::new)
                 .set(ComputeCNFFormula.IS_PLAISTED_GREENBAUM, Boolean.TRUE)
                 .map(ComputeBooleanClauseList::new)
-                .map(Computations::getKey)
-                .cast(BooleanClauseList.class)
                 .map(ComputeSolutionSAT4J::new)
                 .map(ComputePresence<BooleanSolution>::new)
                 .compute();

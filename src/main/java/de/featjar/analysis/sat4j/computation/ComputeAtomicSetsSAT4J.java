@@ -54,7 +54,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = new Random(RANDOM_SEED.get(dependencyList));
         final BooleanAssignmentList result = new BooleanAssignmentList(
-                BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableCount());
+                BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap());
         //		if (variables == null) {
         //			variables = LiteralList.getVariables(solver.getVariables());
         //		}

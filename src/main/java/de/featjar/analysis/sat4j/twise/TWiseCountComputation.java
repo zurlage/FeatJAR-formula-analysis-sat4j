@@ -28,7 +28,6 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.ABooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ public class TWiseCountComputation extends AComputation<Long> {
     @SuppressWarnings("unchecked")
     @Override
     public Result<Long> compute(List<Object> dependencyList, Progress progress) {
-        List<? extends ABooleanAssignment> sample = SAMPLE.get(dependencyList).getAll();
+        List<? extends BooleanAssignment> sample = SAMPLE.get(dependencyList).getAll();
 
         if (sample.isEmpty()) {
             return Result.of(0L);

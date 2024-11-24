@@ -26,7 +26,8 @@ import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.data.IntegerList;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
+import de.featjar.formula.VariableMap;
+import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
@@ -46,7 +47,7 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
     }
 
     @Override
-    public Result<BooleanSolution> update(ABooleanAssignment partialSolution) {
+    public Result<BooleanSolution> update(BooleanAssignment partialSolution) {
         return Computations.of(model)
                 .map(ComputeCoreSAT4J::new)
                 .set(ComputeCoreSAT4J.ASSUMED_ASSIGNMENT, partialSolution)
@@ -57,17 +58,18 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
     @Override
     public Result<BooleanSolution> complete(
             Collection<int[]> include, Collection<int[]> exclude, Collection<int[]> choose) {
-        final int orgVariableCount = model.getVariableCount();
+        final VariableMap orgVariableMap = model.getVariableMap();
 
         List<BooleanClause> ll = new ArrayList<>();
         ll.addAll(model.getAll());
 
-        int newVariableCount = orgVariableCount;
+        VariableMap newVariableMap = orgVariableMap.clone();
         if (choose != null) {
             int[] newNegativeLiterals = new int[choose.size()];
             int i = 0;
             for (int[] clause : choose) {
-                int newVar = orgVariableCount + i + 1;
+                int newVar = newVariableMap.maxIndex() + 1;
+                newVariableMap.add(newVar, String.valueOf(newVar));
                 newNegativeLiterals[i++] = -newVar;
                 for (int l : clause) {
                     ll.add(new BooleanClause(new int[] {l, newVar}));
@@ -76,7 +78,6 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
 
             ll.add(new BooleanClause(newNegativeLiterals));
             ll.add(new BooleanClause(IntegerList.mergeInt(choose)).inverse());
-            newVariableCount += i;
         }
         if (include != null) {
             int[] includeMerge = IntegerList.mergeInt(include);
@@ -90,12 +91,12 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
             }
         }
 
-        SAT4JSolutionSolver solver = new SAT4JSolutionSolver(new BooleanClauseList(ll, newVariableCount));
+        SAT4JSolutionSolver solver = new SAT4JSolutionSolver(new BooleanClauseList(newVariableMap, ll));
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
         solver.shuffleOrder(random);
         return solver.hasSolution()
                 .filter(hasSolution -> hasSolution)
-                .map(hasSolution ->
-                        new BooleanSolution(Arrays.copyOfRange(solver.getInternalSolution(), 0, orgVariableCount)));
+                .map(hasSolution -> new BooleanSolution(
+                        Arrays.copyOfRange(solver.getInternalSolution(), 0, orgVariableMap.getVariableCount())));
     }
 }

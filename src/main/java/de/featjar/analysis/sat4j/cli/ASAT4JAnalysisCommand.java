@@ -26,11 +26,15 @@ import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
+import de.featjar.formula.assignment.BooleanAssignmentGroups;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
+import de.featjar.formula.io.BooleanAssignmentGroupsFormats;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.structure.IFormula;
+import java.nio.file.Path;
 import java.time.Duration;
 
 public abstract class ASAT4JAnalysisCommand<T, U> extends AAnalysisCommand<T> {
@@ -51,21 +55,23 @@ public abstract class ASAT4JAnalysisCommand<T, U> extends AAnalysisCommand<T> {
             .setValidator(timeout -> !timeout.isNegative())
             .setDefaultValue(Duration.ZERO);
 
-    protected IFormula inputFormula;
-
     @Override
     protected IComputation<T> newComputation(OptionList optionParser) {
-        inputFormula = optionParser
-                .getResult(INPUT_OPTION)
-                .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
-                .orElseThrow();
-        return newAnalysis(
-                optionParser,
-                Computations.of(inputFormula)
-                        .map(ComputeNNFFormula::new)
-                        .map(ComputeCNFFormula::new)
-                        .map(ComputeBooleanClauseList::new));
+        Path inputPath = optionParser.getResult(INPUT_OPTION).orElseThrow();
+        IComputation<BooleanClauseList> computation;
+        BooleanAssignmentGroups cnf =
+                IO.load(inputPath, BooleanAssignmentGroupsFormats.getInstance()).orElse(null);
+        if (cnf != null) {
+            computation = Computations.of(cnf.getFirstGroup().toClauseList());
+        } else {
+            IFormula formula = IO.load(inputPath, FormulaFormats.getInstance()).orElseThrow();
+            computation = Computations.of(formula)
+                    .map(ComputeNNFFormula::new)
+                    .map(ComputeCNFFormula::new)
+                    .map(ComputeBooleanClauseList::new);
+        }
+        return newAnalysis(optionParser, computation);
     }
 
-    protected abstract IComputation<T> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula);
+    protected abstract IComputation<T> newAnalysis(OptionList optionParser, IComputation<BooleanClauseList> formula);
 }

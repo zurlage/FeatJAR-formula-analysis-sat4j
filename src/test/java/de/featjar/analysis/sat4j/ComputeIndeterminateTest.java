@@ -24,10 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.featjar.analysis.sat4j.computation.ComputeIndeterminateSat4J;
 import de.featjar.base.computation.Computations;
-import de.featjar.base.computation.IComputation;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
@@ -50,9 +48,8 @@ public class ComputeIndeterminateTest {
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanClauseList::new);
-        IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
-        VariableMap variables = cnf.map(Computations::getValue).compute();
-        BooleanAssignment compute = clauses.map(ComputeIndeterminateSat4J::new).compute();
+        VariableMap variables = cnf.compute().getVariableMap();
+        BooleanAssignment compute = cnf.map(ComputeIndeterminateSat4J::new).compute();
         List<String> indeterminate = Arrays.stream(compute.get())
                 .mapToObj(v -> (v > 0 ? "+" : "-") + variables.get((int) v).get())
                 .collect(Collectors.toCollection(ArrayList::new));

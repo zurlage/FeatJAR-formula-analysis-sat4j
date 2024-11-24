@@ -67,7 +67,7 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
             throw new RuntimeContradictionException("CNF is not satisfiable!");
         }
 
-        final int size = cnfFormula.getVariableCount();
+        final int size = cnfFormula.getVariableMap().getVariableCount();
 
         progress.incrementCurrentStep();
 

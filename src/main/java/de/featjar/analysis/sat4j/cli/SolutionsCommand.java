@@ -24,10 +24,9 @@ import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolutionList;
-import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import java.util.Optional;
 
 /**
@@ -58,7 +57,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     /**
      * Forbid duplicate configurations to be generated.
      */
-    public static final Option<Boolean> FORBID_DUPLICATES_OPTION = Option.newFlag("no-dublicates") //
+    public static final Option<Boolean> FORBID_DUPLICATES_OPTION = Option.newFlag("no-duplicates") //
             .setDescription("Forbid dublicate configurations to be generated.");
 
     @Override
@@ -67,9 +66,9 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
-        return formula.map(Computations::getKey)
-                .map(ComputeSolutionsSAT4J::new)
+    public IComputation<BooleanSolutionList> newAnalysis(
+            OptionList optionParser, IComputation<BooleanClauseList> formula) {
+        return formula.map(ComputeSolutionsSAT4J::new)
                 .set(
                         ComputeSolutionsSAT4J.FORBID_DUPLICATES,
                         optionParser.getResult(FORBID_DUPLICATES_OPTION).get())

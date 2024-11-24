@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.twise;
 
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.base.data.ExpandableIntegerList;
-import de.featjar.formula.assignment.ABooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,13 +39,13 @@ public class SampleListIndex implements Predicate<int[]> {
     private final ArrayList<ExpandableIntegerList> indexedSolutions;
     private final ExpandableIntegerList[] selectedIndexedSolutions;
 
-    public SampleListIndex(List<? extends ABooleanAssignment> sample, final int size, final int t) {
+    public SampleListIndex(List<? extends BooleanAssignment> sample, final int size, final int t) {
         indexedSolutions = new ArrayList<>(2 * size);
         for (int i = 2 * size; i >= 0; --i) {
             indexedSolutions.add(new ExpandableIntegerList());
         }
         int configurationIndex = 0;
-        for (ABooleanAssignment configuration : sample) {
+        for (BooleanAssignment configuration : sample) {
             final int[] literals = configuration.get();
             for (int i = 0; i < literals.length; i++) {
                 final int literal = literals[i];

@@ -27,7 +27,6 @@ import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanClauseList;
@@ -50,8 +49,8 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
     public static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    protected static final Comparator<ABooleanAssignment> lengthComparator =
-            Comparator.comparing(ABooleanAssignment::size);
+    protected static final Comparator<BooleanAssignment> lengthComparator =
+            Comparator.comparing(BooleanAssignment::size);
 
     protected BooleanClauseList orgCNF;
     protected BooleanClauseList cnfCopy;
@@ -90,9 +89,9 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
         orgCNF = CNF.get(dependencyList);
         dirtyVariables = VARIABLES_OF_INTEREST.get(dependencyList);
 
-        cnfCopy = new BooleanClauseList(orgCNF.getVariableCount());
+        cnfCopy = new BooleanClauseList(orgCNF.getVariableMap());
 
-        map = new DirtyFeature[orgCNF.getVariableCount() + 1];
+        map = new DirtyFeature[orgCNF.getVariableMap().getVariableCount() + 1];
         numberOfDirtyFeatures = 0;
         for (final int curFeature : dirtyVariables.get()) {
             map[curFeature] = new DirtyFeature(curFeature);
@@ -154,7 +153,7 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
                 //                        clause.adapt(orgCNF.getVariableMap(), slicedTermMap).get())
                 .collect(Collectors.toList());
 
-        return Result.of(new BooleanClauseList(slicedLiteralListIndexList, orgCNF.getVariableCount()));
+        return Result.of(new BooleanClauseList(orgCNF.getVariableMap(), slicedLiteralListIndexList));
     }
 
     private void addNewClause(final DirtyClause curClause) {

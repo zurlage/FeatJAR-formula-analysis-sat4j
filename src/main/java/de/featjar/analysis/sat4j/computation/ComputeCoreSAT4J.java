@@ -22,9 +22,11 @@ package de.featjar.analysis.sat4j.computation;
 
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.base.computation.*;
+import de.featjar.base.computation.ComputeConstant;
+import de.featjar.base.computation.Dependency;
+import de.featjar.base.computation.IComputation;
+import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
@@ -52,7 +54,7 @@ public class ComputeCoreSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = new Random(RANDOM_SEED.get(dependencyList));
-        ABooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
+        BooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();

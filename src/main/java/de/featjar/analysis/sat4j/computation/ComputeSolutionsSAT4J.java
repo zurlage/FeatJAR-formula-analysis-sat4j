@@ -28,6 +28,7 @@ import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import de.featjar.formula.assignment.BooleanSolutionList;
@@ -75,7 +76,8 @@ public class ComputeSolutionsSAT4J extends ASAT4JAnalysis.Solution<BooleanSoluti
             default:
                 break;
         }
-        BooleanSolutionList solutionList = new BooleanSolutionList();
+        VariableMap variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
+        BooleanSolutionList solutionList = new BooleanSolutionList(variableMap);
         while (solutionList.size() < limit) {
             Result<BooleanSolution> solution = solver.findSolution();
             if (solution.isEmpty()) {

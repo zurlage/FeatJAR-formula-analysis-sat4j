@@ -22,10 +22,12 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.slice.CNFSlicer;
 import de.featjar.base.FeatJAR;
-import de.featjar.base.cli.*;
+import de.featjar.base.cli.ACommand;
+import de.featjar.base.cli.ListOption;
+import de.featjar.base.cli.Option;
+import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.Computations;
-import de.featjar.base.data.Pair;
 import de.featjar.base.data.Result;
 import de.featjar.base.io.IO;
 import de.featjar.formula.VariableMap;
@@ -33,8 +35,6 @@ import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
-import de.featjar.formula.computation.ComputeCNFFormula;
-import de.featjar.formula.computation.ComputeNNFFormula;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
 import de.featjar.formula.structure.IFormula;
@@ -92,15 +92,12 @@ public class ProjectionCommand extends ACommand {
                 .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
                 .orElseThrow();
 
-        Pair<BooleanClauseList, VariableMap> pair = Computations.of(inputFormula)
-                .map(ComputeNNFFormula::new)
-                .map(ComputeCNFFormula::new)
-                .map(ComputeBooleanClauseList::new)
-                .compute();
+        BooleanClauseList cnf =
+                ComputeBooleanClauseList.toBooleanClauseList(inputFormula).get();
 
-        VariableMap variableMap = pair.getValue();
+        VariableMap variableMap = cnf.getVariableMap();
 
-        VariableMap variableMapClone = variableMap.clone();
+        VariableMap slicedVariableMap = variableMap.clone();
 
         if (!projectLiterals.isEmpty()) {
             List<String> inverseProjectLiterals = new ArrayList<>(inputFormula.getVariableNames());
@@ -110,22 +107,22 @@ public class ProjectionCommand extends ACommand {
         }
 
         sliceLiterals.forEach((literal) -> {
-            if (variableMap.get(literal).isEmpty()) { // check if feature name exists
+            if (slicedVariableMap.get(literal).isEmpty()) { // check if feature name exists
                 FeatJAR.log().warning("Feature " + literal + " does not exist in feature model.");
             } else {
-                variableMap.remove(literal);
+                slicedVariableMap.remove(literal);
             }
         });
 
-        variableMap.normalize();
+        slicedVariableMap.normalize();
 
         int[] array = sliceLiterals.stream()
-                .map(variableMapClone::get)
+                .map(variableMap::get)
                 .filter(Result::isPresent)
                 .mapToInt(Result::get)
                 .toArray();
 
-        AComputation<BooleanClauseList> computation = Computations.of(pair.getKey())
+        AComputation<BooleanClauseList> computation = Computations.of(cnf)
                 .map(CNFSlicer::new)
                 .set(CNFSlicer.VARIABLES_OF_INTEREST, new BooleanAssignment(array));
 
@@ -141,15 +138,14 @@ public class ProjectionCommand extends ACommand {
         }
 
         if (result.isPresent()) {
-            BooleanClauseList clauseList = result.get().adapt(variableMapClone, variableMap);
+            BooleanClauseList clauseList = result.get().adapt(slicedVariableMap);
             try {
                 if (outputPath == null || outputPath.toString().equals("results")) {
-                    String string = format.serialize(
-                                    new BooleanAssignmentGroups(variableMap, List.of(clauseList.getAll())))
+                    String string = format.serialize(new BooleanAssignmentGroups(slicedVariableMap, clauseList))
                             .orElseThrow();
                     FeatJAR.log().message(string);
                 } else {
-                    IO.save(new BooleanAssignmentGroups(variableMap, List.of(clauseList.getAll())), outputPath, format);
+                    IO.save(new BooleanAssignmentGroups(slicedVariableMap, clauseList), outputPath, format);
                 }
             } catch (IOException | RuntimeException e) {
                 FeatJAR.log().error(e);

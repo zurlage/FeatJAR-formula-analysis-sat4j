@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.twise;
 
-import de.featjar.formula.assignment.ABooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.BitSet;
 import java.util.List;
 import java.util.function.Predicate;
@@ -57,12 +57,12 @@ public class SampleBitIndex implements Predicate<int[]> {
         }
     }
 
-    public SampleBitIndex(List<? extends ABooleanAssignment> sample, final int numberOfVariables) {
+    public SampleBitIndex(List<? extends BooleanAssignment> sample, final int numberOfVariables) {
         this(numberOfVariables, sample.size());
         sample.forEach(this::addConfiguration);
     }
 
-    public void addConfiguration(ABooleanAssignment config) {
+    public void addConfiguration(BooleanAssignment config) {
         int i = sampleSize++;
 
         for (int l : config.get()) {
@@ -78,7 +78,7 @@ public class SampleBitIndex implements Predicate<int[]> {
         }
     }
 
-    public void set(int index, ABooleanAssignment config) {
+    public void set(int index, BooleanAssignment config) {
         for (int l : config.get()) {
             set(index, l);
         }

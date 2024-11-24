@@ -23,15 +23,12 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolutionList;
-import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -69,9 +66,9 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
-        return formula.map(Computations::getKey)
-                .map(YASA::new)
+    public IComputation<BooleanSolutionList> newAnalysis(
+            OptionList optionParser, IComputation<BooleanClauseList> formula) {
+        return formula.map(YASA::new)
                 .set(YASA.T, optionParser.get(T_OPTION))
                 .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                 .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
@@ -81,7 +78,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
 
     @Override
     protected Object getOuputObject(BooleanSolutionList list) {
-        return new BooleanAssignmentGroups(VariableMap.of(inputFormula), List.of(list.getAll()));
+        return new BooleanAssignmentGroups(list);
     }
 
     @Override

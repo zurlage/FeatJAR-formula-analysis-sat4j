@@ -68,6 +68,6 @@ public class ComputeContradictingClauses extends ASAT4JAnalysis.Solution<Boolean
             }
         }
 
-        return Result.of(new BooleanClauseList(result, clauseList.size()));
+        return Result.of(new BooleanClauseList(clauseList.getVariableMap(), result));
     }
 }

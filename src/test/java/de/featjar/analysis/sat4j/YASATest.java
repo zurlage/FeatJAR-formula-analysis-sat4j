@@ -36,7 +36,6 @@ import de.featjar.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
 import de.featjar.analysis.sat4j.twise.TWiseCoverageComputation;
 import de.featjar.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.base.FeatJAR;
-import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClauseList;
@@ -315,10 +314,9 @@ public class YASATest extends Common {
     }
 
     private IComputation<BooleanClauseList> getClauses(IFormula formula) {
-        ComputeBooleanClauseList cnf = async(formula)
+        return async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanClauseList::new);
-        return cnf.map(Computations::getKey);
     }
 }

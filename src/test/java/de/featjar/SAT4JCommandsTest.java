@@ -57,7 +57,8 @@ public class SAT4JCommandsTest {
                 "--project",
                 "DirectedOnlyVertices,UndirectedWithEdges,UndirectedWithNeighbors,UndirectedOnlyVertices",
                 "--output",
-                tempFile.toString());
+                tempFile.toString(),
+                "--print-stacktrace");
         Assertions.assertEquals(0, exitCode);
         String output = Files.readString(tempFile);
         Assertions.assertFalse(output.contains("DirectedWithEdges"));
@@ -82,7 +83,8 @@ public class SAT4JCommandsTest {
                 "--slice",
                 "DirectedWithEdges,DirectedWithNeighbors",
                 "--output",
-                tempFile.toString());
+                tempFile.toString(),
+                "--print-stacktrace");
         Assertions.assertEquals(0, exitCode);
         String output = Files.readString(tempFile);
         Assertions.assertFalse(output.contains("DirectedWithEdges"));
@@ -109,8 +111,6 @@ public class SAT4JCommandsTest {
                 "0",
                 "--solver_timeout",
                 "10",
-                "--browser-cache",
-                "true",
                 "--non-parallel",
                 "true",
                 "--timeout",
@@ -132,8 +132,6 @@ public class SAT4JCommandsTest {
                 "0",
                 "--solver_timeout",
                 "10",
-                "--browser-cache",
-                "true",
                 "--non-parallel",
                 "true",
                 "--timeout",
@@ -154,8 +152,6 @@ public class SAT4JCommandsTest {
                 "0",
                 "--solver_timeout",
                 "10",
-                "--browser-cache",
-                "true",
                 "--non-parallel",
                 "true",
                 "--timeout",
@@ -182,8 +178,6 @@ public class SAT4JCommandsTest {
                 "negative",
                 "--no-duplicates",
                 "true",
-                "--browser-cache",
-                "true",
                 "--non-parallel",
                 "true",
                 "--timeout",
@@ -205,17 +199,33 @@ public class SAT4JCommandsTest {
                 "--solver_timeout",
                 "10",
                 "--n",
+                "2",
+                "--t",
+                "4",
+                "--i",
+                "2",
+                "--non-parallel",
+                "true",
+                "--timeout",
+                "100");
+        Assertions.assertEquals(0, exitCode);
+
+        exitCode = FeatJAR.run(
+                "t-wise-sat4j",
+                "--input",
+                "../formula/src/testFixtures/resources/GPL/model.xml",
+                "--seed",
+                "0",
+                "--solver_timeout",
+                "10",
+                "--n",
                 "10",
                 "--t",
                 "5",
                 "--i",
                 "10",
-                "--browser-cache",
-                "true",
-                "--non-parallel",
-                "true",
                 "--timeout",
-                "10");
-        Assertions.assertEquals(0, exitCode);
+                "1");
+        Assertions.assertEquals(1, exitCode);
     }
 }

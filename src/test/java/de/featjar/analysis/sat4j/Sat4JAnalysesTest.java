@@ -31,11 +31,8 @@ import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeCoreSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeSatisfiableSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionSAT4J;
-import de.featjar.base.computation.Computations;
-import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
@@ -50,11 +47,10 @@ public class Sat4JAnalysesTest extends AnalysisTest {
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanClauseList::new);
-        IComputation<BooleanClauseList> clauses = cnf.map(Computations::getKey);
 
-        BooleanSolution solution = await(clauses.map(ComputeSolutionSAT4J::new));
-        BooleanAssignment core = await(clauses.map(ComputeCoreSAT4J::new));
-        BooleanAssignmentList atomicSets = await(clauses.map(ComputeAtomicSetsSAT4J::new));
+        BooleanSolution solution = await(cnf.map(ComputeSolutionSAT4J::new));
+        BooleanAssignment core = await(cnf.map(ComputeCoreSAT4J::new));
+        BooleanAssignmentList atomicSets = await(cnf.map(ComputeAtomicSetsSAT4J::new));
         assertNotNull(solution);
         assertNotNull(core);
         assertNotNull(atomicSets);

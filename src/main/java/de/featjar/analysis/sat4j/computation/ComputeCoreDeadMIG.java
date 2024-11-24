@@ -29,7 +29,6 @@ import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
@@ -61,8 +60,8 @@ public class ComputeCoreDeadMIG extends ASAT4JAnalysis.Solution<BooleanAssignmen
     public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = new Random(RANDOM_SEED.get(dependencyList));
-        ABooleanAssignment assignment = ASSUMED_ASSIGNMENT.get(dependencyList);
-        ABooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
+        BooleanAssignment assignment = ASSUMED_ASSIGNMENT.get(dependencyList);
+        BooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
         ModalImplicationGraph mig = MIG.get(dependencyList);
 
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db

@@ -26,7 +26,6 @@ import de.featjar.Common;
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
 import de.featjar.base.computation.Computations;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
@@ -42,8 +41,6 @@ public class ComputeAtomicSetsTest extends Common {
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)
                 .map(ComputeBooleanClauseList::new)
-                .map(Computations::getKey)
-                .cast(BooleanClauseList.class)
                 .map(ComputeAtomicSetsSAT4J::new)
                 .compute();
 

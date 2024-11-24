@@ -22,10 +22,9 @@ package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeCoreDeadMIG;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.ComputeBooleanClauseList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.Optional;
 
 /**
@@ -42,8 +41,9 @@ public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, Boolea
     }
 
     @Override
-    public IComputation<BooleanAssignment> newAnalysis(OptionList optionParser, ComputeBooleanClauseList formula) {
-        return formula.map(Computations::getKey).map(ComputeCoreDeadMIG::new);
+    public IComputation<BooleanAssignment> newAnalysis(
+            OptionList optionParser, IComputation<BooleanClauseList> formula) {
+        return formula.map(ComputeCoreDeadMIG::new);
     }
 
     @Override

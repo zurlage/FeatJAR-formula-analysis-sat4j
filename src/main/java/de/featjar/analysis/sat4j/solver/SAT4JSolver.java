@@ -22,7 +22,7 @@ package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.time.Duration;
@@ -73,7 +73,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
         internalSolver.setVerbose(false);
         this.clauseList = new SAT4JClauseList(this, clauseList);
 
-        final int size = clauseList.getVariableCount();
+        final int size = clauseList.getVariableMap().getVariableCount();
         try {
             if (!clauseList.isEmpty()) {
                 internalSolver.setExpectedNumberOfClauses(clauseList.size() + 1);
@@ -175,7 +175,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
      * Does only consider the given {@code assignment} and <b>not</b> the global
      * assignment variable of the solver.
      */
-    public Result<Boolean> hasSolution(ABooleanAssignment assignment) {
+    public Result<Boolean> hasSolution(BooleanAssignment assignment) {
         return hasSolution(new VecInt(assignment.get()));
     }
 

@@ -59,7 +59,7 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
         super(
                 reference,
                 Computations.of(2), //
-                Computations.of(new BooleanSolutionList()), //
+                Computations.of(new BooleanSolutionList(null, 0)), //
                 Computations.of(new BooleanAssignment()));
     }
 

@@ -28,7 +28,6 @@ import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClauseList;
 import java.time.Duration;
@@ -37,8 +36,8 @@ import java.util.List;
 public abstract class ASAT4JAnalysis<T> extends AComputation<T> {
     public static final Dependency<BooleanClauseList> BOOLEAN_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
-    public static final Dependency<ABooleanAssignment> ASSUMED_ASSIGNMENT =
-            Dependency.newDependency(ABooleanAssignment.class);
+    public static final Dependency<BooleanAssignment> ASSUMED_ASSIGNMENT =
+            Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<BooleanClauseList> ASSUMED_CLAUSE_LIST =
             Dependency.newDependency(BooleanClauseList.class);
     public static final Dependency<Duration> SAT_TIMEOUT = Dependency.newDependency(Duration.class);
@@ -48,7 +47,7 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> {
         super(
                 booleanClauseList,
                 Computations.of(new BooleanAssignment()),
-                Computations.of(new BooleanClauseList(-1)),
+                Computations.of(new BooleanClauseList(null, 0)),
                 Computations.of(Duration.ZERO),
                 Computations.of(1L),
                 computations);
@@ -63,14 +62,14 @@ public abstract class ASAT4JAnalysis<T> extends AComputation<T> {
     @SuppressWarnings("unchecked")
     public <U extends SAT4JSolver> U initializeSolver(List<Object> dependencyList, boolean empty) {
         BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
-        ABooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
+        BooleanAssignment assumedAssignment = ASSUMED_ASSIGNMENT.get(dependencyList);
         BooleanClauseList assumedClauseList = ASSUMED_CLAUSE_LIST.get(dependencyList);
         Duration timeout = SAT_TIMEOUT.get(dependencyList);
         FeatJAR.log().debug("initializing SAT4J");
         FeatJAR.log().debug("clauses %s", clauseList);
         FeatJAR.log().debug("assuming %s", assumedAssignment);
         FeatJAR.log().debug("assuming %s", assumedClauseList);
-        U solver = (U) newSolver(empty ? new BooleanClauseList(clauseList.getVariableCount()) : clauseList);
+        U solver = (U) newSolver(empty ? new BooleanClauseList(clauseList.getVariableMap()) : clauseList);
         solver.getClauseList().addAll(assumedClauseList);
         solver.getAssignment().addAll(assumedAssignment);
         solver.setTimeout(timeout);

@@ -71,6 +71,6 @@ public class ComputeRedundantClausesSat4J extends ASAT4JAnalysis.Solution<Boolea
             }
         }
 
-        return Result.of(new BooleanClauseList(result, clauseList.size()));
+        return Result.of(new BooleanClauseList(clauseList.getVariableMap(), result));
     }
 }

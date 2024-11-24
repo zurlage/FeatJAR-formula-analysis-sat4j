@@ -22,7 +22,6 @@ package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.base.data.Maps;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanSolution;
@@ -45,7 +44,7 @@ public class SAT4JAssignment implements IAssignment<Integer, Boolean>, Supplier<
         this.integers = new VecInt();
     }
 
-    public SAT4JAssignment(ABooleanAssignment assignment) {
+    public SAT4JAssignment(BooleanAssignment assignment) {
         this.integers = new VecInt(assignment.get());
     }
 
@@ -83,7 +82,7 @@ public class SAT4JAssignment implements IAssignment<Integer, Boolean>, Supplier<
         integers.pushAll(new VecInt(vars));
     }
 
-    public void addAll(ABooleanAssignment assignment) {
+    public void addAll(BooleanAssignment assignment) {
         addAll(assignment.get());
     }
 

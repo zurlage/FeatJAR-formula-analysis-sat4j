@@ -35,7 +35,7 @@ import de.featjar.base.data.BinomialCalculator;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.ABooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -88,7 +88,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
                 Computations.of(2),
                 Computations.of(100_000),
                 new MIGBuilder(booleanClauseList),
-                Computations.of(new BooleanAssignmentList()),
+                Computations.of(new BooleanAssignmentList(null)),
                 Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE));
@@ -206,6 +206,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
     private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit, reduceFinalSample;
 
     private SAT4JSolutionSolver solver;
+    private VariableMap variableMap;
     private ModalImplicationGraph mig;
     private Random random;
     private List<List<BooleanClause>> presenceConditions;
@@ -260,6 +261,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         reduceFinalSample = REDUCE_FINAL_SAMPLE.get(dependencyList);
 
         randomSample = new ArrayDeque<>(internalConfigurationLimit);
+        variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
         solver = initializeSolver(dependencyList);
         mig = MIG.get(dependencyList);
         n = mig.size();
@@ -332,7 +334,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
 
     private Result<BooleanSolutionList> finalizeResult() {
         if (bestSample != null) {
-            BooleanSolutionList result = new BooleanSolutionList(bestSample.size());
+            BooleanSolutionList result = new BooleanSolutionList(variableMap, bestSample.size());
             for (int j = bestSample.size() - 1; j >= 0; j--) {
                 result.add(autoComplete(bestSample.get(j)));
             }
@@ -459,7 +461,7 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
         for (int i = 0; i < indexSize; i++) {
             currentSampleIndices.add(new ExpandableIntegerList());
         }
-        for (ABooleanAssignment config : initialSample) {
+        for (BooleanAssignment config : initialSample) {
             if (currentSample.size() < maxSampleSize) {
                 PartialConfiguration initialConfiguration =
                         new PartialConfiguration(curSolutionId++, allowChangeToInitialSample, mig, config.get());

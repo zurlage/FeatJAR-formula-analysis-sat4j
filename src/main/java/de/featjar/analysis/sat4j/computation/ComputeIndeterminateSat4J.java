@@ -27,7 +27,6 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.ABooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanClauseList;
@@ -55,17 +54,18 @@ public class ComputeIndeterminateSat4J extends ASAT4JAnalysis.Solution<BooleanAs
     @Override
     public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
         BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
-        ABooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
+        BooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
 
-        ABooleanAssignment variables = variablesOfInterest.isEmpty()
+        BooleanAssignment variables = variablesOfInterest.isEmpty()
                 ? new BooleanAssignment(
-                        IntStream.rangeClosed(1, clauseList.getVariableCount()).toArray())
+                        IntStream.rangeClosed(1, clauseList.getVariableMap().getVariableCount())
+                                .toArray())
                 : variablesOfInterest;
 
         final ExpandableIntegerList resultList = new ExpandableIntegerList();
         variableLoop:
         for (final int variable : variables.get()) {
-            BooleanClauseList modClauseList = new BooleanClauseList(clauseList.getVariableCount());
+            BooleanClauseList modClauseList = new BooleanClauseList(clauseList.getVariableMap());
             for (final BooleanClause clause : clauseList.getAll()) {
                 final int[] newLiterals = clause.removeAllVariables(variable);
                 if (newLiterals.length > 0) {

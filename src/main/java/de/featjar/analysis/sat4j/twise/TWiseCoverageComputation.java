@@ -50,9 +50,9 @@ import java.util.Random;
  */
 public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> {
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
+    public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
     public static final Dependency<BooleanAssignment> FILTER = Dependency.newDependency(BooleanAssignment.class);
-    public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
 
     public class Environment {
         private final CoverageStatistic statistic = new CoverageStatistic();
@@ -71,9 +71,9 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         super(
                 booleanClauseList, //
                 Computations.of(2), //
+                Computations.of(new BooleanSolutionList(null, 0)), //
                 new MIGBuilder(booleanClauseList), //
-                Computations.of(new BooleanAssignment()), //
-                Computations.of(new BooleanSolutionList()));
+                Computations.of(new BooleanAssignment()));
     }
 
     public TWiseCoverageComputation(TWiseCoverageComputation other) {
