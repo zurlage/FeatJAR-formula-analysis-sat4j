@@ -21,10 +21,13 @@
 package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
+import de.featjar.formula.assignment.BooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.BooleanClauseList;
-import de.featjar.formula.assignment.IAssignmentList;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
 import org.sat4j.core.VecInt;
 import org.sat4j.specs.ContradictionException;
 import org.sat4j.specs.IConstr;
@@ -37,29 +40,29 @@ import org.sat4j.specs.IConstr;
  * @author Sebastian Krieter
  * @author Elias Kuiter
  */
-public class SAT4JClauseList extends BooleanClauseList {
+public class SAT4JClauseList extends BooleanAssignmentList {
     protected final SAT4JSolver solver;
     protected final LinkedList<IConstr> addedConstraints = new LinkedList<>();
 
-    public SAT4JClauseList(SAT4JSolver solver, BooleanClauseList other) {
+    public SAT4JClauseList(SAT4JSolver solver, BooleanAssignmentList other) {
         super(other);
         this.solver = solver;
         assignments.forEach(this::addConstraint);
     }
 
     @Override
-    public void add(int index, BooleanClause clause) {
+    public void add(int index, BooleanAssignment clause) {
         if (index != assignments.size()) throw new UnsupportedOperationException();
         super.add(index, clause);
     }
 
     @Override
-    public Result<BooleanClause> remove(int index) {
+    public Result<BooleanAssignment> remove(int index) {
         if (index != assignments.size()) throw new UnsupportedOperationException();
         return super.remove(index);
     }
 
-    protected void addConstraint(BooleanClause booleanClause) {
+    protected void addConstraint(BooleanAssignment booleanClause) {
         addConstraint(booleanClause.get());
     }
 
@@ -72,7 +75,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public void add(BooleanClause clause) {
+    public void add(BooleanAssignment clause) {
         addConstraint(clause.get());
         super.add(clause);
     }
@@ -82,9 +85,9 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public void addAll(Collection<? extends BooleanClause> clauses) {
+    public void addAll(Collection<? extends BooleanAssignment> clauses) {
         final ArrayList<IConstr> constraints = new ArrayList<>();
-        for (final BooleanClause clause : clauses) {
+        for (final BooleanAssignment clause : clauses) {
             try {
                 constraints.add(
                         solver.internalSolver.addClause(new VecInt(Arrays.copyOf(clause.get(), clause.size()))));
@@ -100,12 +103,7 @@ public class SAT4JClauseList extends BooleanClauseList {
     }
 
     @Override
-    public void addAll(IAssignmentList<? extends BooleanClause> clauseList) {
-        addAll(clauseList.getAll());
-    }
-
-    @Override
-    public Result<BooleanClause> remove() {
+    public Result<BooleanAssignment> remove() {
         if (addedConstraints.size() > 0) {
             final IConstr lastConstraint = addedConstraints.pop();
             solver.internalSolver.removeConstr(lastConstraint);

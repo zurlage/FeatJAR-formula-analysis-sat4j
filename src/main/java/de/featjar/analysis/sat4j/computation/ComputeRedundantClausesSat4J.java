@@ -24,14 +24,14 @@ import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Finds redundant clauses with respect to a given CNF. This
- * analysis works by iteratively adding each clause of the given {@link BooleanClauseList} to a solver. If a clause
+ * analysis works by iteratively adding each clause of the given {@link BooleanAssignmentList} to a solver. If a clause
  * is implied by the current formula, it is marked as redundant and is removed
  * from it. Otherwise it is kept as part of the formula for the
  * remaining analysis. Clauses are added in the same order a they appear in the
@@ -39,10 +39,10 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class ComputeRedundantClausesSat4J extends ASAT4JAnalysis.Solution<BooleanClauseList> {
+public class ComputeRedundantClausesSat4J extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
 
-    public ComputeRedundantClausesSat4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+    public ComputeRedundantClausesSat4J(IComputation<BooleanAssignmentList> clauseList) {
+        super(clauseList);
     }
 
     protected ComputeRedundantClausesSat4J(ComputeRedundantClausesSat4J other) {
@@ -50,12 +50,12 @@ public class ComputeRedundantClausesSat4J extends ASAT4JAnalysis.Solution<Boolea
     }
 
     @Override
-    public Result<BooleanClauseList> compute(List<Object> dependencyList, Progress progress) {
-        BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
+    public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
+        BooleanAssignmentList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
         SAT4JSolutionSolver solver = initializeSolver(dependencyList, true);
-        final ArrayList<BooleanClause> result = new ArrayList<>();
+        final ArrayList<BooleanAssignment> result = new ArrayList<>();
 
-        for (BooleanClause clause : clauseList) {
+        for (BooleanAssignment clause : clauseList) {
             checkCancel();
 
             solver.getClauseList().add(clause.inverse());
@@ -71,6 +71,6 @@ public class ComputeRedundantClausesSat4J extends ASAT4JAnalysis.Solution<Boolea
             }
         }
 
-        return Result.of(new BooleanClauseList(clauseList.getVariableMap(), result));
+        return Result.of(new BooleanAssignmentList(clauseList.getVariableMap(), result));
     }
 }

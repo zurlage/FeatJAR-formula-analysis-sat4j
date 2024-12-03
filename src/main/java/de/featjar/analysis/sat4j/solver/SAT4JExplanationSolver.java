@@ -21,8 +21,8 @@
 package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +52,7 @@ import org.sat4j.tools.xplain.Xplain;
  * @author Sebastian Krieter
  */
 public class SAT4JExplanationSolver extends SAT4JSolver {
-    public SAT4JExplanationSolver(BooleanClauseList clauseList) {
+    public SAT4JExplanationSolver(BooleanAssignmentList clauseList) {
         super(clauseList);
     }
 
@@ -61,20 +61,20 @@ public class SAT4JExplanationSolver extends SAT4JSolver {
         return new Xplain<>(SolverFactory.newDefault());
     }
 
-    public Result<List<BooleanClause>> getMinimalUnsatisfiableSubset() {
+    public Result<List<BooleanAssignment>> getMinimalUnsatisfiableSubset() {
         if (hasSolution().equals(Result.of(true))) {
             return Result.empty(new IllegalStateException("Problem is satisfiable"));
         }
         try {
             return Result.of(IntStream.of(((Xplain<?>) internalSolver).minimalExplanation()) //
-                    .mapToObj(index -> getClauseList().get(index).orElse(null)) //
+                    .mapToObj(index -> getClauseList().get(index)) //
                     .collect(Collectors.toList()));
         } catch (final TimeoutException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public Result<List<List<BooleanClause>>> getAllMinimalUnsatisfiableSubsets() {
+    public Result<List<List<BooleanAssignment>>> getAllMinimalUnsatisfiableSubsets() {
         return Result.of(
                 Collections.singletonList(getMinimalUnsatisfiableSubset().get()));
     }

@@ -26,8 +26,7 @@ import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.format.IFormat;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanClauseList;
-import de.featjar.formula.assignment.BooleanSolutionList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
 import java.util.Optional;
 
@@ -37,7 +36,7 @@ import java.util.Optional;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
+public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
 
     /**
      * Maximum number of configurations to be generated.
@@ -66,8 +65,8 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanClauseList> formula) {
+    public IComputation<BooleanAssignmentList> newAnalysis(
+            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(YASA::new)
                 .set(YASA.T, optionParser.get(T_OPTION))
                 .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
@@ -77,7 +76,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    protected Object getOuputObject(BooleanSolutionList list) {
+    protected Object getOuputObject(BooleanAssignmentList list) {
         return new BooleanAssignmentGroups(list);
     }
 
@@ -87,7 +86,7 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, Boo
     }
 
     @Override
-    public String serializeResult(BooleanSolutionList assignments) {
+    public String serializeResult(BooleanAssignmentList assignments) {
         return assignments.serialize();
     }
 

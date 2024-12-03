@@ -33,7 +33,7 @@ import de.featjar.base.io.IO;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
@@ -92,8 +92,8 @@ public class ProjectionCommand extends ACommand {
                 .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
                 .orElseThrow();
 
-        BooleanClauseList cnf =
-                ComputeBooleanClauseList.toBooleanClauseList(inputFormula).get();
+        BooleanAssignmentList cnf =
+                ComputeBooleanClauseList.toBooleanAssignmentList(inputFormula).get();
 
         VariableMap variableMap = cnf.getVariableMap();
 
@@ -122,11 +122,11 @@ public class ProjectionCommand extends ACommand {
                 .mapToInt(Result::get)
                 .toArray();
 
-        AComputation<BooleanClauseList> computation = Computations.of(cnf)
+        AComputation<BooleanAssignmentList> computation = Computations.of(cnf)
                 .map(CNFSlicer::new)
                 .set(CNFSlicer.VARIABLES_OF_INTEREST, new BooleanAssignment(array));
 
-        Result<BooleanClauseList> result;
+        Result<BooleanAssignmentList> result;
 
         if (!timeout.isZero()) {
             result = computation.computeResult(true, true, timeout);
@@ -138,7 +138,7 @@ public class ProjectionCommand extends ACommand {
         }
 
         if (result.isPresent()) {
-            BooleanClauseList clauseList = result.get().adapt(slicedVariableMap);
+            BooleanAssignmentList clauseList = result.get().adapt(slicedVariableMap);
             try {
                 if (outputPath == null || outputPath.toString().equals("results")) {
                     String string = format.serialize(new BooleanAssignmentGroups(slicedVariableMap, clauseList))

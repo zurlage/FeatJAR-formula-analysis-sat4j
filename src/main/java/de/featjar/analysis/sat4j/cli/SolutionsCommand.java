@@ -25,8 +25,7 @@ import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.assignment.BooleanClauseList;
-import de.featjar.formula.assignment.BooleanSolutionList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.Optional;
 
 /**
@@ -35,7 +34,7 @@ import java.util.Optional;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
+public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
 
     /**
      * Maximum number of configurations to be generated.
@@ -66,8 +65,8 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     }
 
     @Override
-    public IComputation<BooleanSolutionList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanClauseList> formula) {
+    public IComputation<BooleanAssignmentList> newAnalysis(
+            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
         return formula.map(ComputeSolutionsSAT4J::new)
                 .set(
                         ComputeSolutionsSAT4J.FORBID_DUPLICATES,
@@ -87,7 +86,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList,
     }
 
     @Override
-    public String serializeResult(BooleanSolutionList list) {
+    public String serializeResult(BooleanAssignmentList list) {
         return list.print();
     }
 

@@ -23,13 +23,13 @@ package de.featjar.analysis.sat4j.computation;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.List;
 
 public class ComputeSatisfiableSAT4J extends ASAT4JAnalysis.Solution<Boolean> {
 
-    public ComputeSatisfiableSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+    public ComputeSatisfiableSAT4J(IComputation<BooleanAssignmentList> clauseList) {
+        super(clauseList);
     }
 
     protected ComputeSatisfiableSAT4J(ComputeSatisfiableSAT4J other) {

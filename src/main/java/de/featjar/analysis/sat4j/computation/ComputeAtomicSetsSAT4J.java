@@ -28,7 +28,6 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.Arrays;
 import java.util.List;
@@ -41,8 +40,8 @@ import java.util.Random;
  */
 public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
 
-    public ComputeAtomicSetsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+    public ComputeAtomicSetsSAT4J(IComputation<BooleanAssignmentList> clauseList) {
+        super(clauseList);
     }
 
     protected ComputeAtomicSetsSAT4J(ComputeAtomicSetsSAT4J other) {

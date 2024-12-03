@@ -28,7 +28,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.List;
 import java.util.Random;
@@ -42,8 +42,8 @@ public class ComputeCoreSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeCoreSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
+    public ComputeCoreSAT4J(IComputation<BooleanAssignmentList> clauseList) {
+        super(clauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
     protected ComputeCoreSAT4J(ComputeCoreSAT4J other) {

@@ -38,8 +38,7 @@ import de.featjar.analysis.sat4j.twise.TWiseStatisticGenerator;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanClauseList;
-import de.featjar.formula.assignment.BooleanSolutionList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
@@ -116,8 +115,8 @@ public class YASATest extends Common {
     }
 
     private void testTimeout(IFormula formula, int timeoutSeconds) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = clauses.map(YASA::new)
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
+        BooleanAssignmentList sample = clauses.map(YASA::new)
                 .set(YASA.T, 3)
                 .set(YASA.ITERATIONS, Integer.MAX_VALUE)
                 .computeResult(Duration.ofSeconds(timeoutSeconds))
@@ -132,7 +131,7 @@ public class YASATest extends Common {
 
     private void benchmarkCompareSample(String modelPath, int t) {
         IFormula formula = loadFormula(modelPath);
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
 
         FeatJAR.log().info("Comparing random sample (10) for %s with t = %d", modelPath, t);
         benchmarkCompare(clauses, computeRandomSample(clauses, 10), t);
@@ -142,7 +141,7 @@ public class YASATest extends Common {
         benchmarkCompare(clauses, computeSample(t, clauses), t);
     }
 
-    private void benchmarkCompare(IComputation<BooleanClauseList> clauses, BooleanSolutionList sample, int t) {
+    private void benchmarkCompare(IComputation<BooleanAssignmentList> clauses, BooleanAssignmentList sample, int t) {
         long time;
         time = System.currentTimeMillis();
         computeCoverageNew(t, clauses, sample);
@@ -154,20 +153,20 @@ public class YASATest extends Common {
     }
 
     void onlyNew(IFormula formula) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeSample(2, clauses);
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
+        BooleanAssignmentList sample = computeSample(2, clauses);
         computeCoverageNew(2, clauses, sample);
     }
 
     void compareVariants(IFormula formula) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeRandomSample(clauses, 10);
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
+        BooleanAssignmentList sample = computeRandomSample(clauses, 10);
         computeCoverageVariants(2, clauses, sample);
     }
 
     private void bothRandom(IFormula formula) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeRandomSample(clauses, 10);
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
+        BooleanAssignmentList sample = computeRandomSample(clauses, 10);
         CoverageStatistic statistic1 = computeCoverageNew(2, clauses, sample);
         CoverageStatistic statistic3 = computeCoverageOld(2, clauses, sample);
 
@@ -182,13 +181,13 @@ public class YASATest extends Common {
     }
 
     void onlyNewRandom(IFormula formula) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeRandomSample(clauses, 10);
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
+        BooleanAssignmentList sample = computeRandomSample(clauses, 10);
         computeCoverageNew(2, clauses, sample);
     }
 
-    private BooleanSolutionList computeRandomSample(IComputation<BooleanClauseList> clauses, int size) {
-        BooleanSolutionList sample = clauses.map(ComputeSolutionsSAT4J::new)
+    private BooleanAssignmentList computeRandomSample(IComputation<BooleanAssignmentList> clauses, int size) {
+        BooleanAssignmentList sample = clauses.map(ComputeSolutionsSAT4J::new)
                 .set(ComputeSolutionsSAT4J.SELECTION_STRATEGY, ISelectionStrategy.Strategy.FAST_RANDOM)
                 .set(ComputeSolutionsSAT4J.LIMIT, size)
                 .set(ComputeSolutionsSAT4J.RANDOM_SEED, 1L)
@@ -197,8 +196,8 @@ public class YASATest extends Common {
     }
 
     public void assertFullCoverageWithAllAlgorithms(IFormula formula, int t) {
-        IComputation<BooleanClauseList> clauses = getClauses(formula);
-        BooleanSolutionList sample = computeSample(t, clauses);
+        IComputation<BooleanAssignmentList> clauses = getClauses(formula);
+        BooleanAssignmentList sample = computeSample(t, clauses);
 
         CoverageStatistic statistic1 = computeCoverageNew(t, clauses, sample);
         CoverageStatistic statistic2 = computeCoverageRel(t, clauses, sample);
@@ -227,8 +226,8 @@ public class YASATest extends Common {
         assertEquals(statistic1.invalid(), statistic4.invalid());
     }
 
-    private BooleanSolutionList computeSample(int t, IComputation<BooleanClauseList> clauses) {
-        BooleanSolutionList sample = clauses.map(YASA::new)
+    private BooleanAssignmentList computeSample(int t, IComputation<BooleanAssignmentList> clauses) {
+        BooleanAssignmentList sample = clauses.map(YASA::new)
                 .setDependencyComputation(YASA.T, async(t))
                 .compute();
         FeatJAR.log().info("Sample Size: %d", sample.size());
@@ -236,7 +235,7 @@ public class YASATest extends Common {
     }
 
     private CoverageStatistic computeCoverageOld(
-            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+            int t, IComputation<BooleanAssignmentList> clauses, BooleanAssignmentList sample) {
         CoverageStatistic statistic = clauses.map(TWiseStatisticGenerator::new)
                 .set(TWiseStatisticGenerator.SAMPLE, sample)
                 .set(TWiseStatisticGenerator.CORE, new BooleanAssignment())
@@ -247,7 +246,7 @@ public class YASATest extends Common {
     }
 
     private CoverageStatistic computeCoverageRel(
-            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+            int t, IComputation<BooleanAssignmentList> clauses, BooleanAssignmentList sample) {
         CoverageStatistic statistic = clauses.map(ComputeSolutionsSAT4J::new)
                 .map(RelativeTWiseCoverageComputation::new)
                 .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
@@ -258,7 +257,7 @@ public class YASATest extends Common {
     }
 
     private CoverageStatistic computeCoverageRel2(
-            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+            int t, IComputation<BooleanAssignmentList> clauses, BooleanAssignmentList sample) {
         CoverageStatistic statistic = clauses.map(ComputeSolutionsSAT4J::new)
                 .map(RelativeTWiseCoverageComputation::new)
                 .set(RelativeTWiseCoverageComputation.SAMPLE, sample)
@@ -269,7 +268,7 @@ public class YASATest extends Common {
     }
 
     private CoverageStatistic computeCoverageNew(
-            int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+            int t, IComputation<BooleanAssignmentList> clauses, BooleanAssignmentList sample) {
         CoverageStatistic statistic = clauses.map(TWiseCoverageComputation::new)
                 .set(TWiseCoverageComputation.SAMPLE, sample)
                 .set(TWiseCoverageComputation.T, t)
@@ -278,7 +277,8 @@ public class YASATest extends Common {
         return statistic;
     }
 
-    private void computeCoverageVariants(int t, IComputation<BooleanClauseList> clauses, BooleanSolutionList sample) {
+    private void computeCoverageVariants(
+            int t, IComputation<BooleanAssignmentList> clauses, BooleanAssignmentList sample) {
         BooleanAssignment core = clauses.map(ComputeCoreSAT4J::new).compute();
         BooleanAssignment atomic = new BooleanAssignment(clauses.map(ComputeAtomicSetsSAT4J::new).compute().stream()
                 .skip(1)
@@ -313,7 +313,7 @@ public class YASATest extends Common {
         FeatJAR.log().info("Coverage statisticCoreAtomic: %f", statisticCoreAtomic.coverage());
     }
 
-    private IComputation<BooleanClauseList> getClauses(IFormula formula) {
+    private IComputation<BooleanAssignmentList> getClauses(IFormula formula) {
         return async(formula)
                 .map(ComputeNNFFormula::new)
                 .map(ComputeCNFFormula::new)

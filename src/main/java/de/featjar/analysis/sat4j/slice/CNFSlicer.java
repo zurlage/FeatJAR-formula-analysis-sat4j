@@ -28,8 +28,8 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,16 +44,17 @@ import java.util.stream.Collectors;
  *
  * @author Sebastian Krieter
  */
-public class CNFSlicer extends AComputation<BooleanClauseList> {
-    protected static final Dependency<BooleanClauseList> CNF = Dependency.newDependency(BooleanClauseList.class);
+public class CNFSlicer extends AComputation<BooleanAssignmentList> {
+    protected static final Dependency<BooleanAssignmentList> CNF =
+            Dependency.newDependency(BooleanAssignmentList.class);
     public static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
     protected static final Comparator<BooleanAssignment> lengthComparator =
             Comparator.comparing(BooleanAssignment::size);
 
-    protected BooleanClauseList orgCNF;
-    protected BooleanClauseList cnfCopy;
+    protected BooleanAssignmentList orgCNF;
+    protected BooleanAssignmentList cnfCopy;
 
     protected final List<DirtyClause> newDirtyClauseList = new ArrayList<>();
     protected final List<DirtyClause> newCleanClauseList = new ArrayList<>();
@@ -78,18 +79,18 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
     protected int dirtyListNegIndex = 0;
     protected int newDirtyListDelIndex = 0;
 
-    public CNFSlicer(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
+    public CNFSlicer(IComputation<BooleanAssignmentList> clauseList) {
+        super(clauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
     int cr = 0, cnr = 0, dr = 0, dnr = 0;
 
     @Override
-    public Result<BooleanClauseList> compute(List<Object> dependencyList, Progress progress) {
+    public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         orgCNF = CNF.get(dependencyList);
         dirtyVariables = VARIABLES_OF_INTEREST.get(dependencyList);
 
-        cnfCopy = new BooleanClauseList(orgCNF.getVariableMap());
+        cnfCopy = new BooleanAssignmentList(orgCNF.getVariableMap());
 
         map = new DirtyFeature[orgCNF.getVariableMap().getVariableCount() + 1];
         numberOfDirtyFeatures = 0;
@@ -103,7 +104,7 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
         createClauseLists();
 
         if (!prepareHeuristics()) {
-            return Result.of(new BooleanClauseList(orgCNF));
+            return Result.of(new BooleanAssignmentList(orgCNF));
         }
 
         progress.setTotalSteps(heuristic.size());
@@ -153,7 +154,7 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
                 //                        clause.adapt(orgCNF.getVariableMap(), slicedTermMap).get())
                 .collect(Collectors.toList());
 
-        return Result.of(new BooleanClauseList(orgCNF.getVariableMap(), slicedLiteralListIndexList));
+        return Result.of(new BooleanAssignmentList(orgCNF.getVariableMap(), slicedLiteralListIndexList));
     }
 
     private void addNewClause(final DirtyClause curClause) {
@@ -178,7 +179,7 @@ public class CNFSlicer extends AComputation<BooleanClauseList> {
     }
 
     private void createClauseLists() {
-        for (final BooleanClause sortedIntegerList : orgCNF) {
+        for (final BooleanAssignment sortedIntegerList : orgCNF) {
             addNewClause(DirtyClause.createClause(sortedIntegerList.get()));
         }
 

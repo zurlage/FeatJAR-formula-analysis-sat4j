@@ -23,15 +23,15 @@ package de.featjar.analysis.sat4j.computation;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.List;
 
 public class ComputeSolutionSAT4J extends ASAT4JAnalysis.Solution<BooleanSolution> {
     // TODO Add dependency of selection strategy
 
-    public ComputeSolutionSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
-        super(booleanClauseList);
+    public ComputeSolutionSAT4J(IComputation<BooleanAssignmentList> clauseList) {
+        super(clauseList);
     }
 
     protected ComputeSolutionSAT4J(ComputeSolutionSAT4J other) {

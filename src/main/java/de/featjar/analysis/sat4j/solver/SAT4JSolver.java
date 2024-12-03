@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j.solver;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.time.Duration;
 import java.util.Arrays;
@@ -67,7 +67,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
         }
     }
 
-    public SAT4JSolver(BooleanClauseList clauseList) {
+    public SAT4JSolver(BooleanAssignmentList clauseList) {
         internalSolver.setDBSimplificationAllowed(true);
         internalSolver.setKeepSolverHot(true);
         internalSolver.setVerbose(false);

@@ -34,13 +34,10 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
-import de.featjar.formula.assignment.ABooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
-import de.featjar.formula.assignment.BooleanSolutionList;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +53,7 @@ import java.util.stream.IntStream;
  *
  * @author Sebastian Krieter
  */
-public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
+public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
 
     public static final Dependency<ICombinationSpecification> LITERALS =
             Dependency.newDependency(ICombinationSpecification.class);
@@ -67,24 +64,23 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
 
     public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
 
-    @SuppressWarnings("rawtypes")
-    public static final Dependency<ABooleanAssignmentList> INITIAL_SAMPLE =
-            Dependency.newDependency(ABooleanAssignmentList.class);
+    public static final Dependency<BooleanAssignmentList> INITIAL_SAMPLE =
+            Dependency.newDependency(BooleanAssignmentList.class);
 
     public static final Dependency<Boolean> ALLOW_CHANGE_TO_INITIAL_SAMPLE = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT =
             Dependency.newDependency(Boolean.class);
 
-    public YASA(IComputation<BooleanClauseList> booleanClauseList) {
+    public YASA(IComputation<BooleanAssignmentList> clauseList) {
         super(
-                booleanClauseList,
+                clauseList,
                 Computations.of(new NoneCombinationSpecification()),
                 Computations.of(2),
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(2),
                 Computations.of(100_000),
-                new MIGBuilder(booleanClauseList),
-                Computations.of(new BooleanAssignmentList(null)),
+                new MIGBuilder(clauseList),
+                Computations.of(new BooleanAssignmentList((VariableMap) null)),
                 Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE));
     }
@@ -206,7 +202,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     private ModalImplicationGraph mig;
     private Random random;
 
-    private ABooleanAssignmentList<?> initialSample;
+    private BooleanAssignmentList initialSample;
     private ArrayDeque<BooleanSolution> randomSample;
     private List<PartialConfiguration> bestSample;
     private List<PartialConfiguration> currentSample;
@@ -220,7 +216,7 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     private boolean overLimit;
 
     @Override
-    public Result<BooleanSolutionList> compute(List<Object> dependencyList, Progress progress) {
+    public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         tmax = T.get(dependencyList);
         if (tmax < 1) {
             throw new IllegalArgumentException("Value for t must be grater than 0. Value was " + tmax);
@@ -292,18 +288,18 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     }
 
     @Override
-    protected SAT4JSolver newSolver(BooleanClauseList clauseList) {
+    protected SAT4JSolver newSolver(BooleanAssignmentList clauseList) {
         return new SAT4JSolutionSolver(clauseList);
     }
 
     @Override
-    public Result<BooleanSolutionList> getIntermediateResult() {
+    public Result<BooleanAssignmentList> getIntermediateResult() {
         return finalizeResult();
     }
 
-    private Result<BooleanSolutionList> finalizeResult() {
+    private Result<BooleanAssignmentList> finalizeResult() {
         if (bestSample != null) {
-            BooleanSolutionList result = new BooleanSolutionList(variableMap, bestSample.size());
+            BooleanAssignmentList result = new BooleanAssignmentList(variableMap, bestSample.size());
             for (int j = bestSample.size() - 1; j >= 0; j--) {
                 result.add(autoComplete(bestSample.get(j)));
             }

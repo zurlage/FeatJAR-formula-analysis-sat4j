@@ -31,8 +31,8 @@ import de.featjar.analysis.sat4j.solver.strategy.RandomSelectionStrategy;
 import de.featjar.analysis.sat4j.solver.strategy.UniformRandomSelectionStrategy;
 import de.featjar.base.computation.ResourcePool;
 import de.featjar.base.data.Result;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
-import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -84,7 +84,7 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
                 .collect(Collectors.toList());
     }
 
-    public SAT4JSolutionSolver(BooleanClauseList clauseList) {
+    public SAT4JSolutionSolver(BooleanAssignmentList clauseList) {
         super(clauseList);
         strategy = ISelectionStrategy.original();
         order = new int[clauseList.getVariableMap().getVariableCount()];

@@ -35,9 +35,8 @@ import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
-import de.featjar.formula.assignment.BooleanSolutionList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -50,7 +49,8 @@ import java.util.Random;
  */
 public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> {
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
+    public static final Dependency<BooleanAssignmentList> SAMPLE =
+            Dependency.newDependency(BooleanAssignmentList.class);
     public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
     public static final Dependency<BooleanAssignment> FILTER = Dependency.newDependency(BooleanAssignment.class);
 
@@ -67,12 +67,12 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         }
     }
 
-    public TWiseCoverageComputation(IComputation<BooleanClauseList> booleanClauseList) {
+    public TWiseCoverageComputation(IComputation<BooleanAssignmentList> clauseList) {
         super(
-                booleanClauseList, //
+                clauseList, //
                 Computations.of(2), //
-                Computations.of(new BooleanSolutionList(null, 0)), //
-                new MIGBuilder(booleanClauseList), //
+                Computations.of(new BooleanAssignmentList(null, 0)), //
+                new MIGBuilder(clauseList), //
                 Computations.of(new BooleanAssignment()));
     }
 
@@ -83,7 +83,8 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
     private ArrayList<Environment> statisticList = new ArrayList<>();
 
     private List<Object> dependencyList;
-    private List<BooleanSolution> sample, randomSample;
+    List<BooleanAssignment> sample;
+    private List<BooleanSolution> randomSample;
     private int t, size;
 
     @Override
@@ -171,7 +172,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
     }
 
     @Override
-    protected SAT4JSolver newSolver(BooleanClauseList clauseList) {
+    protected SAT4JSolver newSolver(BooleanAssignmentList clauseList) {
         return new SAT4JSolutionSolver(clauseList);
     }
 }
