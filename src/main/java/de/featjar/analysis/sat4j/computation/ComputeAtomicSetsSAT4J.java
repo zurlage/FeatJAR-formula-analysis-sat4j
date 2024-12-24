@@ -23,9 +23,12 @@ package de.featjar.analysis.sat4j.computation;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.analysis.sat4j.solver.SAT4JAssignment;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
+import de.featjar.base.computation.Computations;
+import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
+import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
@@ -40,8 +43,17 @@ import java.util.Random;
  */
 public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
 
+    public static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
+            Dependency.newDependency(BooleanAssignment.class);
+    public static final Dependency<Boolean> OMIT_SINGLE_SETS = Dependency.newDependency(Boolean.class);
+    public static final Dependency<Boolean> OMIT_CORE = Dependency.newDependency(Boolean.class);
+
     public ComputeAtomicSetsSAT4J(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList);
+        super(
+                clauseList,
+                Computations.of(new BooleanAssignment()),
+                Computations.of(Boolean.FALSE),
+                Computations.of(Boolean.FALSE));
     }
 
     protected ComputeAtomicSetsSAT4J(ComputeAtomicSetsSAT4J other) {
@@ -52,29 +64,44 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
         Random random = new Random(RANDOM_SEED.get(dependencyList));
-        final BooleanAssignmentList result = new BooleanAssignmentList(
-                BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap());
-        //		if (variables == null) {
-        //			variables = LiteralList.getVariables(solver.getVariables());
-        //		}
-        // for all variables not in this.variables, set done[...] to 2
+        VariableMap variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
+
+        final BooleanAssignment ignoredVariables;
+        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
+        if (variables.isEmpty()) {
+            ignoredVariables = new BooleanAssignment();
+        } else {
+            ignoredVariables = variableMap.getVariables().removeAll(variables);
+        }
+        boolean omitCore = OMIT_CORE.get(dependencyList);
+        boolean omitSingles = OMIT_SINGLE_SETS.get(dependencyList);
+
+        final BooleanAssignmentList atomicSets = new BooleanAssignmentList(variableMap);
 
         solver.setSelectionStrategy(ISelectionStrategy.positive());
-        final int[] model1 = solver.findSolution().get().get();
+        Result<BooleanSolution> findSolution = solver.findSolution();
+        if (findSolution.isEmpty()) {
+            return findSolution.merge(Result.empty());
+        }
 
+        final int[] model1 = findSolution.get().get();
         if (model1 != null) {
             // initial atomic set consists of core and dead features
-            solver.setSelectionStrategy(ISelectionStrategy.negative());
-            final int[] model2 = solver.findSolution().get().get();
-            solver.setSelectionStrategy(ISelectionStrategy.positive());
+            solver.setSelectionStrategy(ISelectionStrategy.inverse(model1));
+            final int[] model2 = findSolution.get().get();
 
             final byte[] done = new byte[model1.length];
 
             final int[] model1Copy = Arrays.copyOf(model1, model1.length);
+            for (int var : ignoredVariables.get()) {
+                model1Copy[var - 1] = 0;
+                done[var - 1] = 2;
+            }
 
             BooleanSolution.removeConflictsInplace(model1Copy, model2);
             for (int i = 0; i < model1Copy.length; i++) {
                 final int varX = model1Copy[i];
+
                 if (varX != 0) {
                     solver.getAssignment().add(-varX);
                     Result<Boolean> hasSolution = solver.hasSolution();
@@ -91,7 +118,9 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                 }
             }
             final int fixedSize = solver.getAssignment().size();
-            result.add(new BooleanAssignment(solver.getAssignment().copy(0, fixedSize)));
+            if (!omitCore) {
+                atomicSets.add(new BooleanAssignment(solver.getAssignment().copy(0, fixedSize)));
+            }
 
             solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
@@ -127,7 +156,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
 
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (hasSolution.isEmpty()) {
-                        // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
+                        return findSolution.merge(Result.empty());
                     } else if (hasSolution.valueEquals(Boolean.FALSE)) {
                         for (int j = i + 1; j < xModel0.length; j++) {
                             done[j] = 0;
@@ -147,10 +176,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                                     done[j] = 2;
                                     solver.getAssignment().replaceLast(my0);
                                 } else if (hasSolution.isEmpty()) {
-                                    done[j] = 0;
-                                    solver.getAssignment().remove();
-                                    // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout
-                                    // or continue?
+                                    return findSolution.merge(Result.empty());
                                 } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                                     done[j] = 0;
                                     BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
@@ -163,12 +189,14 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
                         }
                     }
                     SAT4JAssignment assignment = solver.getAssignment();
-                    result.add(new BooleanAssignment(
-                            assignment.copy(fixedSize, solver.getAssignment().size())));
+                    int assignmentSize = solver.getAssignment().size();
+                    if (!omitSingles || assignmentSize - fixedSize > 1) {
+                        atomicSets.add(new BooleanAssignment(assignment.copy(fixedSize, assignmentSize)));
+                    }
                     solver.getAssignment().clear(fixedSize);
                 }
             }
         }
-        return solver.createResult(result);
+        return Result.of(atomicSets);
     }
 }

@@ -21,6 +21,7 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
+import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -35,6 +36,12 @@ import java.util.Optional;
  */
 public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
 
+    public static final Option<Boolean> OMIT_SINGLE_SETS = Option.newFlag("omit-singles")
+            .setDefaultValue(Boolean.FALSE)
+            .setDescription("Omits sets with only one element");
+    public static final Option<Boolean> OMIT_CORE =
+            Option.newFlag("omit-core").setDefaultValue(Boolean.FALSE).setDescription("Omits set containing core");
+
     @Override
     public Optional<String> getDescription() {
         return Optional.of("Computes atomic sets for a given formula using SAT4J.");
@@ -43,7 +50,9 @@ public class AtomicSetsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLi
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(ComputeAtomicSetsSAT4J::new);
+        return formula.map(ComputeAtomicSetsSAT4J::new)
+                .set(ComputeAtomicSetsSAT4J.OMIT_CORE, optionParser.get(OMIT_CORE))
+                .set(ComputeAtomicSetsSAT4J.OMIT_SINGLE_SETS, optionParser.get(OMIT_SINGLE_SETS));
     }
 
     @Override
