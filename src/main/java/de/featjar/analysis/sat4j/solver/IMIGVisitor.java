@@ -18,37 +18,27 @@
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
-package de.featjar.analysis.sat4j.computation;
+package de.featjar.analysis.sat4j.solver;
 
-import de.featjar.base.data.ICombination;
-import java.util.Random;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import de.featjar.analysis.RuntimeContradictionException;
 
-public class NoneCombinationSpecification implements ICombinationSpecification {
+public interface IMIGVisitor {
 
-    @Override
-    public Stream<int[]> stream() {
-        throw new UnsupportedOperationException();
-    }
+    int[] getAddedLiterals();
 
-    @Override
-    public <V> Stream<ICombination<V, int[]>> parallelStream(Supplier<V> environment) {
-        throw new UnsupportedOperationException();
-    }
+    int getAddedLiteralCount();
 
-    @Override
-    public NoneCombinationSpecification forOtherT(int otherT) {
-        return new NoneCombinationSpecification();
-    }
+    void propagate(int... literals) throws RuntimeContradictionException;
 
-    @Override
-    public int getTotalSteps() {
-        throw new UnsupportedOperationException();
-    }
+    void setLiterals(int... literals) throws RuntimeContradictionException;
 
-    @Override
-    public void shuffle(Random random) {
-        throw new UnsupportedOperationException();
-    }
+    boolean isContradiction(int... literals);
+
+    void reset();
+
+    void reset(int keep);
+
+    boolean isUndefined(int literal);
+
+    int countUndefined(int[] literals);
 }

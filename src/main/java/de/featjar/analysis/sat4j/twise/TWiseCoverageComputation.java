@@ -23,7 +23,9 @@ package de.featjar.analysis.sat4j.twise;
 import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.analysis.sat4j.computation.ASAT4JAnalysis;
 import de.featjar.analysis.sat4j.computation.MIGBuilder;
+import de.featjar.analysis.sat4j.solver.IMIGVisitor;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.analysis.sat4j.solver.MIGVisitorByte;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
@@ -57,8 +59,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
     public class Environment {
         private final CoverageStatistic statistic = new CoverageStatistic();
         private final SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        private final ModalImplicationGraph.Visitor visitor =
-                MIG.get(dependencyList).getVisitor();
+        private final IMIGVisitor visitor = new MIGVisitorByte(MIG.get(dependencyList));
         private SampleListIndex sampleIndex = new SampleListIndex(sample, size, t);
         private SampleListIndex randomIndex = new SampleListIndex(randomSample, size, t);
 

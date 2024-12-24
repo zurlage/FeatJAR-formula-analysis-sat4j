@@ -21,8 +21,10 @@
 package de.featjar.analysis.sat4j.computation;
 
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
+import de.featjar.base.data.ICombination;
 import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.Random;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface ICombinationSpecification {
@@ -31,9 +33,13 @@ public interface ICombinationSpecification {
         return variables.removeAllVariables(new BooleanAssignment(mig.getCore()));
     }
 
+    ICombinationSpecification forOtherT(int otherT);
+
     Stream<int[]> stream();
 
     void shuffle(Random random);
 
     int getTotalSteps();
+
+    <V> Stream<ICombination<V, int[]>> parallelStream(Supplier<V> environment);
 }

@@ -23,32 +23,29 @@ package de.featjar.analysis.sat4j.computation;
 import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.analysis.RuntimeTimeoutException;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.analysis.sat4j.solver.MIGVisitorByte;
+import de.featjar.analysis.sat4j.solver.MIGVisitorLight;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
-import de.featjar.analysis.sat4j.solver.ModalImplicationGraph.Visitor;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
+import de.featjar.analysis.sat4j.twise.SampleBitIndex;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
-import de.featjar.base.data.BinomialCalculator;
-import de.featjar.base.data.ExpandableIntegerList;
-import de.featjar.base.data.LexicographicIterator;
+import de.featjar.base.data.Ints;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.assignment.BooleanClause;
 import de.featjar.formula.assignment.BooleanSolution;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -59,7 +56,37 @@ import java.util.stream.IntStream;
  */
 public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
 
-    public static final Dependency<BooleanAssignment> LITERALS = Dependency.newDependency(BooleanAssignment.class);
+    private static class PartialConfiguration {
+        private final int id;
+        private final boolean allowChange;
+        private final MIGVisitorLight visitor;
+
+        private int randomCount;
+
+        public PartialConfiguration(int id, boolean allowChange, ModalImplicationGraph mig, int... newliterals) {
+            this.id = id;
+            this.allowChange = allowChange;
+            visitor = new MIGVisitorLight(mig);
+            if (allowChange) {
+                visitor.propagate(newliterals);
+            } else {
+                visitor.setLiterals(newliterals);
+            }
+        }
+
+        public int setLiteral(int... literals) {
+            final int oldModelCount = visitor.getAddedLiteralCount();
+            visitor.propagate(literals);
+            return oldModelCount;
+        }
+
+        public int countLiterals() {
+            return visitor.getAddedLiteralCount();
+        }
+    }
+
+    public static final Dependency<ICombinationSpecification> LITERALS =
+            Dependency.newDependency(ICombinationSpecification.class);
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
     public static final Dependency<Integer> CONFIGURATION_LIMIT = Dependency.newDependency(Integer.class);
     public static final Dependency<Integer> ITERATIONS = Dependency.newDependency(Integer.class);
@@ -73,16 +100,16 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
     public static final Dependency<Boolean> ALLOW_CHANGE_TO_INITIAL_SAMPLE = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT =
             Dependency.newDependency(Boolean.class);
-    public static final Dependency<Boolean> REDUCE_FINAL_SAMPLE = Dependency.newDependency(Boolean.class);
+    public static final Dependency<Boolean> INCREMENTAL_T = Dependency.newDependency(Boolean.class);
 
     public YASAIncremental(IComputation<BooleanAssignmentList> clauseList) {
         super(
                 clauseList,
-                Computations.of(new BooleanAssignment()),
+                Computations.of(new NoneCombinationSpecification()),
                 Computations.of(2),
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(2),
-                Computations.of(100_000),
+                Computations.of(65_536),
                 new MIGBuilder(clauseList),
                 Computations.of(new BooleanAssignmentList((VariableMap) null)),
                 Computations.of(Boolean.TRUE),
@@ -90,141 +117,31 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
                 Computations.of(Boolean.TRUE));
     }
 
-    protected YASAIncremental(YASAIncremental other) {
-        super(other);
-    }
+    private int minT,
+            maxT,
+            maxSampleSize,
+            iterations,
+            randomConfigurationLimit,
+            variableCount,
+            curSolutionId,
+            randomSampleIdsIndex;
+    private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit;
 
-    /**
-     * Converts a set of single literals into a grouped expression list.
-     *
-     * @param literalSet the literal set
-     * @return a grouped expression list (can be used as an input for the
-     *         configuration generator).
-     */
-    public static List<List<BooleanClause>> convertLiterals(BooleanAssignment literalSet) {
-        final List<List<BooleanClause>> arrayList = new ArrayList<>(literalSet.size());
-        for (final Integer literal : literalSet.get()) {
-            final List<BooleanClause> clauseList = new ArrayList<>(1);
-            clauseList.add(new BooleanClause(literal));
-            arrayList.add(clauseList);
-        }
-        return arrayList;
-    }
-
-    private class PartialConfiguration extends BooleanSolution {
-        private static final long serialVersionUID = 1464084516529934929L;
-
-        private final int id;
-        private final boolean allowChange;
-
-        private Visitor visitor;
-        private ArrayList<BooleanSolution> solverSolutions;
-
-        public PartialConfiguration(PartialConfiguration config) {
-            super(config);
-            id = config.id;
-            allowChange = config.allowChange;
-            visitor = config.visitor.getVisitorProvider().new Visitor(config.visitor, elements);
-            solverSolutions = config.solverSolutions != null ? new ArrayList<>(config.solverSolutions) : null;
-        }
-
-        public PartialConfiguration(int id, boolean allowChange, ModalImplicationGraph mig, int... newliterals) {
-            super(new int[n], false);
-            this.id = id;
-            this.allowChange = allowChange;
-            visitor = mig.getVisitor(this.elements);
-            solverSolutions = new ArrayList<>();
-            visitor.propagate(newliterals);
-        }
-
-        public void initSolutionList() {
-            solutionLoop:
-            for (BooleanSolution solution : randomSample) {
-                final int[] solverSolutionLiterals = solution.get();
-                for (int j = 0; j < visitor.getAddedLiteralCount(); j++) {
-                    final int l = visitor.getAddedLiterals()[j];
-                    if (solverSolutionLiterals[Math.abs(l) - 1] != l) {
-                        continue solutionLoop;
-                    }
-                }
-                solverSolutions.add(solution);
-            }
-        }
-
-        public void updateSolutionList(int lastIndex) {
-            if (!isComplete()) {
-                for (int i = lastIndex; i < visitor.getAddedLiteralCount(); i++) {
-                    final int newLiteral = visitor.getAddedLiterals()[i];
-                    final int k = Math.abs(newLiteral) - 1;
-                    for (int j = solverSolutions.size() - 1; j >= 0; j--) {
-                        final int[] solverSolutionLiterals =
-                                solverSolutions.get(j).get();
-                        if (solverSolutionLiterals[k] != newLiteral) {
-                            final int last = solverSolutions.size() - 1;
-                            Collections.swap(solverSolutions, j, last);
-                            solverSolutions.remove(last);
-                        }
-                    }
-                }
-            }
-        }
-
-        public int setLiteral(int... literals) {
-            final int oldModelCount = visitor.getAddedLiteralCount();
-            visitor.propagate(literals);
-            return oldModelCount;
-        }
-
-        public void clear() {
-            solverSolutions = null;
-        }
-
-        public boolean isComplete() {
-            return visitor.getAddedLiteralCount() == numberOfVariableLiterals;
-        }
-
-        public int countLiterals() {
-            return visitor.getAddedLiteralCount();
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return super.equals(obj);
-        }
-    }
-
-    private int n, tmax, t, maxSampleSize, iterations, numberOfVariableLiterals, internalConfigurationLimit;
-    private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit, reduceFinalSample;
-
+    private ICombinationSpecification variables;
     private SAT4JSolutionSolver solver;
     private VariableMap variableMap;
     private ModalImplicationGraph mig;
     private Random random;
-    private List<List<BooleanClause>> presenceConditions;
-
     private BooleanAssignmentList initialSample;
-    private ArrayDeque<BooleanSolution> randomSample;
-    private List<PartialConfiguration> bestSample;
-    private List<PartialConfiguration> currentSample;
 
-    private ArrayList<PartialConfiguration> candidateConfiguration;
-    private ArrayList<ExpandableIntegerList> currentSampleIndices;
-    private ExpandableIntegerList[] selectedSampleIndices;
-    private BitSet[] bestSampleIndices;
-    private PartialConfiguration newConfiguration;
-    private int curSolutionId;
-    private boolean overLimit;
+    private List<PartialConfiguration> currentSample, selectionCandidates;
+    private SampleBitIndex bestSampleIndex, currentSampleIndex, randomSampleIndex;
 
     @Override
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
-        tmax = T.get(dependencyList);
-        if (tmax < 1) {
-            throw new IllegalArgumentException("Value for t must be grater than 0. Value was " + tmax);
+        maxT = T.get(dependencyList);
+        if (maxT < 1) {
+            throw new IllegalArgumentException("Value for t must be grater than 0. Value was " + maxT);
         }
 
         iterations = ITERATIONS.get(dependencyList);
@@ -235,10 +152,10 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
             iterations = Integer.MAX_VALUE;
         }
 
-        internalConfigurationLimit = INTERNAL_SOLUTION_LIMIT.get(dependencyList);
-        if (internalConfigurationLimit < 0) {
+        randomConfigurationLimit = INTERNAL_SOLUTION_LIMIT.get(dependencyList);
+        if (randomConfigurationLimit < 0) {
             throw new IllegalArgumentException(
-                    "Internal solution limit must be greater than 0. Value was " + internalConfigurationLimit);
+                    "Internal solution limit must be greater than 0. Value was " + randomConfigurationLimit);
         }
 
         maxSampleSize = CONFIGURATION_LIMIT.get(dependencyList);
@@ -254,66 +171,43 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
         allowChangeToInitialSample = ALLOW_CHANGE_TO_INITIAL_SAMPLE.get(dependencyList);
         initialSampleCountsTowardsConfigurationLimit =
                 INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT.get(dependencyList);
-        reduceFinalSample = REDUCE_FINAL_SAMPLE.get(dependencyList);
+        minT = INCREMENTAL_T.get(dependencyList) ? 1 : maxT;
 
-        randomSample = new ArrayDeque<>(internalConfigurationLimit);
         variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
+        variableCount = variableMap.getVariableCount();
+
         solver = initializeSolver(dependencyList);
+        solver.setSelectionStrategy(ISelectionStrategy.random(random));
+
         mig = MIG.get(dependencyList);
-        n = mig.size();
+        randomSampleIndex = new SampleBitIndex(variableCount);
 
         if (initialSampleCountsTowardsConfigurationLimit) {
             maxSampleSize = Math.max(maxSampleSize, maxSampleSize + initialSample.size());
         }
 
-        BooleanAssignment variables = LITERALS.get(dependencyList);
-        BooleanAssignment core = new BooleanAssignment(mig.getCore());
+        variables = LITERALS.get(dependencyList);
+        selectionCandidates = new ArrayList<>();
 
-        solver.setSelectionStrategy(ISelectionStrategy.random(random));
-
-        List<List<BooleanClause>> nodes;
-        if (variables.isEmpty()) {
-            nodes = convertLiterals(new BooleanAssignment(
-                    IntStream.range(-n, n + 1).filter(i -> i != 0).toArray()));
-        } else {
-            nodes = convertLiterals(variables);
-        }
-        numberOfVariableLiterals = nodes.size() - core.countNegatives() - core.countPositives();
-        tmax = Math.min(tmax, Math.max(numberOfVariableLiterals, 1));
-
-        presenceConditions = new ArrayList<>();
-        expressionLoop:
-        for (final List<BooleanClause> clauses : nodes) {
-            final List<BooleanClause> newClauses = new ArrayList<>(clauses.size());
-            for (final BooleanClause clause : clauses) {
-                // If clause can be satisfied
-                if (!core.containsAnyNegated(clause)) {
-                    // If clause is already satisfied
-                    if (core.containsAll(clause)) {
-                        continue expressionLoop;
-                    } else {
-                        newClauses.add(new BooleanClause(clause));
-                    }
-                }
-            }
-            if (!newClauses.isEmpty()) {
-                Collections.sort(newClauses, (o1, o2) -> o1.size() - o2.size());
-                presenceConditions.add(newClauses);
-            }
+        maxT = Math.min(maxT, Math.max(variableCount, 1));
+        if (variables instanceof NoneCombinationSpecification) {
+            variables = new SingleCombinationSpecification(
+                    new BooleanAssignment(new BooleanAssignment(IntStream.range(-variableCount, variableCount + 1)
+                                    .filter(i -> i != 0)
+                                    .toArray())
+                            .removeAllVariables(
+                                    Arrays.stream(mig.getCore()).map(Math::abs).toArray())),
+                    maxT);
         }
 
-        int totalSteps = 0;
-        for (int j = 1; j < tmax; j++) {
-            totalSteps += (int) (BinomialCalculator.computeBinomial(presenceConditions.size(), j));
+        int count = variables.getTotalSteps();
+        for (int t = minT; t <= maxT; t++) {
+            count += (iterations - 1) * (1 << t) * variables.forOtherT(t).getTotalSteps();
         }
-        totalSteps += iterations * (int) (BinomialCalculator.computeBinomial(presenceConditions.size(), tmax));
-        progress.setTotalSteps(totalSteps);
+        progress.setTotalSteps(count);
 
         buildCombinations(progress);
-
-        if (!overLimit && iterations > 1) {
-            rebuildCombinations(progress);
-        }
+        rebuildCombinations(progress);
 
         return finalizeResult();
     }
@@ -329,13 +223,18 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
     }
 
     private Result<BooleanAssignmentList> finalizeResult() {
-        if (bestSample != null) {
-            BooleanAssignmentList result = new BooleanAssignmentList(variableMap, bestSample.size());
-            for (int j = bestSample.size() - 1; j >= 0; j--) {
-                result.add(autoComplete(bestSample.get(j)));
+        currentSample = null;
+        currentSampleIndex = null;
+        if (bestSampleIndex != null) {
+            BooleanAssignmentList result = new BooleanAssignmentList(variableMap, bestSampleIndex.size());
+            int initialSize = initialSample.size();
+            for (int j = 0; j < initialSize; j++) {
+                result.add(new BooleanSolution(bestSampleIndex.getConfiguration(j), false));
             }
-            if (reduceFinalSample) {
-                bestSample = reduce(bestSample);
+            for (int j = bestSampleIndex.size() - 1; j >= initialSize; j--) {
+                result.add(autoComplete(Arrays.stream(bestSampleIndex.getConfiguration(j))
+                        .filter(l -> l != 0)
+                        .toArray()));
             }
             return Result.of(result);
         } else {
@@ -344,457 +243,190 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
     }
 
     private void buildCombinations(Progress monitor) {
-        initSample();
-        final int[] literals = initliterals(false);
-
-        for (int ti = 1; ti <= tmax; ti++) {
-            checkCancel();
-            t = ti;
-            selectedSampleIndices = new ExpandableIntegerList[t];
-            initRun();
-            LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
-                checkCancel();
-                monitor.incrementCurrentStep();
-                int[] combinationLiterals = combo.getSelection(literals);
-
-                if (isCovered(combinationLiterals, currentSampleIndices)) {
-                    return;
-                }
-                if (isCombinationInvalidMIG(combinationLiterals)) {
-                    return;
-                }
-
-                try {
-                    if (isCombinationValidSample(combinationLiterals)) {
-                        if (tryCover(combinationLiterals)) {
-                            return;
-                        }
-                    } else {
-                        if (isCombinationInvalidSAT(combinationLiterals)) {
-                            return;
-                        }
-                    }
-
-                    if (tryCoverWithSat(combinationLiterals)) {
-                        return;
-                    }
-                    newConfiguration(combinationLiterals);
-                } finally {
-                    candidateConfiguration.clear();
-                    newConfiguration = null;
-                }
-            });
+        curSolutionId = 0;
+        currentSample = new ArrayList<>();
+        currentSampleIndex = new SampleBitIndex(variableCount);
+        for (BooleanAssignment config : initialSample) {
+            currentSampleIndex.addConfiguration(config);
         }
+
+        variables.shuffle(random);
+        variables.stream().forEach(combinationLiterals -> {
+            checkCancel();
+            monitor.incrementCurrentStep();
+
+            if (currentSampleIndex.test(combinationLiterals)) {
+                return;
+            }
+            if (isCombinationInvalidMIG(combinationLiterals)) {
+                return;
+            }
+            newRandomConfiguration(combinationLiterals);
+        });
         setBestSolutionList();
     }
 
-    private void rebuildCombinations(Progress monitor) {
-        if (iterations > 1) {
-            int solutionCount = bestSample.size();
-            bestSampleIndices = new BitSet[2 * n + 1];
-            for (int j = 1; j <= n; j++) {
-                BitSet negIndices = new BitSet(solutionCount);
-                BitSet posIndices = new BitSet(solutionCount);
-                for (int i = 0; i < solutionCount; i++) {
-                    BooleanSolution config = bestSample.get(i);
-                    int l = config.get(j - 1);
-                    if (l != 0) {
-                        if (l < 0) {
-                            negIndices.set(i);
-                        } else {
-                            posIndices.set(i);
-                        }
+    private void newRandomConfiguration(final int[] fixedLiterals) {
+        int orgAssignmentSize = solver.getAssignment().size();
+        try {
+            solver.getAssignment().addAll(fixedLiterals);
+            Result<Boolean> hasSolution = solver.hasSolution();
+            if (hasSolution.isPresent()) {
+                if (hasSolution.get()) {
+                    int[] solution = solver.getInternalSolution();
+                    currentSampleIndex.addConfiguration(solution);
+                    if (randomSampleIndex.size() < randomConfigurationLimit) {
+                        randomSampleIndex.addConfiguration(solution);
                     }
+                    solver.shuffleOrder(random);
                 }
-                bestSampleIndices[n - j] = negIndices;
-                bestSampleIndices[j + n] = posIndices;
+            } else {
+                throw new RuntimeTimeoutException();
             }
+        } finally {
+            solver.getAssignment().clear(orgAssignmentSize);
         }
+    }
 
+    private void rebuildCombinations(Progress monitor) {
         for (int j = 1; j < iterations; j++) {
-            checkCancel();
-            final int[] literals = initliterals(true);
-            initSample();
-            initRun();
-            LexicographicIterator.stream(tmax, presenceConditions.size()).forEach(combo -> {
-                int[] combinationLiterals = combo.getSelection(literals);
-
-                if (isCovered(combinationLiterals, currentSampleIndices)) {
-                    return;
-                }
-                if (!isCovered(combinationLiterals, bestSampleIndices)) {
-                    return;
-                }
-                try {
-                    if (tryCoverWithoutMIG(combinationLiterals)) {
-                        return;
+            curSolutionId = 0;
+            currentSample = new ArrayList<>();
+            currentSampleIndex = new SampleBitIndex(variableCount);
+            for (BooleanAssignment config : initialSample) {
+                newConfiguration(config.get(), allowChangeToInitialSample);
+            }
+            for (int t = minT; t <= maxT; t++) {
+                final int[] gray = Ints.grayCode(t);
+                variables = variables.forOtherT(t);
+                variables.shuffle(random);
+                variables.stream().forEach(combinationLiterals -> {
+                    for (int g : gray) {
+                        checkCancel();
+                        monitor.incrementCurrentStep();
+                        if (!currentSampleIndex.test(combinationLiterals)
+                                && bestSampleIndex.test(combinationLiterals)) {
+                            getSelectionCandidates(combinationLiterals);
+                            if (selectionCandidates.isEmpty()
+                                    || (!tryCoverWithRandomSolutions(combinationLiterals)
+                                            && !tryCoverWithSat(combinationLiterals))) {
+                                newConfiguration(combinationLiterals, true);
+                            }
+                            selectionCandidates.clear();
+                        }
+                        combinationLiterals[g] = -combinationLiterals[g];
                     }
-                    if (tryCoverWithSat(combinationLiterals)) {
-                        return;
-                    }
-                    newConfiguration(combinationLiterals);
-                } finally {
-                    candidateConfiguration.clear();
-                    newConfiguration = null;
-                }
-            });
+                });
+            }
             setBestSolutionList();
         }
     }
 
     private void setBestSolutionList() {
-        if (bestSample == null || bestSample.size() > currentSample.size()) {
-            bestSample = currentSample;
+        if (bestSampleIndex == null || bestSampleIndex.size() > currentSampleIndex.size()) {
+            bestSampleIndex = currentSampleIndex;
         }
     }
 
-    private void initSample() {
-        curSolutionId = 0;
-        overLimit = false;
-        currentSample = new ArrayList<>();
-        final int indexSize = 2 * n;
-        currentSampleIndices = new ArrayList<>(indexSize);
-        for (int i = 0; i < indexSize; i++) {
-            currentSampleIndices.add(new ExpandableIntegerList());
-        }
-        for (BooleanAssignment config : initialSample) {
-            if (currentSample.size() < maxSampleSize) {
-                PartialConfiguration initialConfiguration =
-                        new PartialConfiguration(curSolutionId++, allowChangeToInitialSample, mig, config.get());
-                if (allowChangeToInitialSample) {
-                    initialConfiguration.initSolutionList();
-                }
-                if (initialConfiguration.isComplete()) {
-                    initialConfiguration.clear();
-                }
-                currentSample.add(initialConfiguration);
-                for (int i = 0; i < initialConfiguration.visitor.getAddedLiteralCount(); i++) {
-                    ExpandableIntegerList indexList = currentSampleIndices.get(ModalImplicationGraph.getVertexIndex(
-                            initialConfiguration.visitor.getAddedLiterals()[i]));
-                    indexList.add(initialConfiguration.id);
-                }
-            } else {
-                overLimit = true;
-            }
+    private void updateIndex(PartialConfiguration solution, int firstLiteralToConsider) {
+        int addedLiteralCount = solution.visitor.getAddedLiteralCount();
+        int[] addedLiterals = solution.visitor.getAddedLiterals();
+        for (int i = firstLiteralToConsider; i < addedLiteralCount; i++) {
+            currentSampleIndex.set(solution.id, addedLiterals[i]);
         }
     }
 
-    private void initRun() {
-        newConfiguration = null;
-        candidateConfiguration = new ArrayList<>();
-        Collections.sort(currentSample, (a, b) -> b.countLiterals() - a.countLiterals());
-    }
-
-    private int[] initliterals(boolean shuffle) {
-        if (shuffle) {
-            final Map<Integer, List<List<BooleanClause>>> groupedPCs =
-                    presenceConditions.stream().collect(Collectors.groupingBy(List::size));
-            for (final List<List<BooleanClause>> pcList : groupedPCs.values()) {
-                Collections.shuffle(pcList, random);
+    private boolean getSelectionCandidates(int[] literals) {
+        BitSet negatedBitSet = currentSampleIndex.getNegatedBitSet(literals);
+        int nextBit = negatedBitSet.nextClearBit(0);
+        while (nextBit < currentSampleIndex.size()) {
+            PartialConfiguration configuration = currentSample.get(nextBit);
+            if (canBeModified(configuration)) {
+                selectionCandidates.add(configuration);
             }
-            final List<Map.Entry<Integer, List<List<BooleanClause>>>> shuffledPCs =
-                    new ArrayList<>(groupedPCs.entrySet());
-            Collections.sort(shuffledPCs, (a, b) -> a.getKey() - b.getKey());
-            presenceConditions.clear();
-            for (final Map.Entry<Integer, List<List<BooleanClause>>> entry : shuffledPCs) {
-                presenceConditions.addAll(entry.getValue());
-            }
-        }
-        final int[] literals = new int[presenceConditions.size()];
-        for (int i1 = 0; i1 < literals.length; i1++) {
-            literals[i1] = presenceConditions.get(i1).get(0).get()[0];
-        }
-        return literals;
-    }
-
-    private boolean isCovered(int[] literals, ArrayList<ExpandableIntegerList> indexedSolutions) {
-        if (t < 2) {
-            return !indexedSolutions
-                    .get(ModalImplicationGraph.getVertexIndex(literals[0]))
-                    .isEmpty();
-        }
-        for (int i = 0; i < t; i++) {
-            final ExpandableIntegerList indexedSolution =
-                    indexedSolutions.get(ModalImplicationGraph.getVertexIndex(literals[i]));
-            if (indexedSolution.size() == 0) {
-                return false;
-            }
-            selectedSampleIndices[i] = indexedSolution;
-        }
-        Arrays.sort(selectedSampleIndices, (a, b) -> a.size() - b.size());
-        final int[] ix = new int[t - 1];
-
-        final ExpandableIntegerList i0 = selectedSampleIndices[0];
-        final int[] ia0 = i0.toArray();
-        loop:
-        for (int i = 0; i < i0.size(); i++) {
-            int id0 = ia0[i];
-            for (int j = 1; j < t; j++) {
-                final ExpandableIntegerList i1 = selectedSampleIndices[j];
-                int binarySearch = Arrays.binarySearch(i1.toArray(), ix[j - 1], i1.size(), id0);
-                if (binarySearch < 0) {
-                    ix[j - 1] = -binarySearch - 1;
-                    continue loop;
-                } else {
-                    ix[j - 1] = binarySearch;
-                }
-            }
-            return true;
+            nextBit = negatedBitSet.nextClearBit(nextBit + 1);
         }
         return false;
     }
 
-    private BitSet combinedIndex(final int size, int[] literals, BitSet[] bitSets) {
-        BitSet first = bitSets[literals[0] + size];
-        BitSet bitSet = new BitSet(first.size());
-        bitSet.xor(first);
-        for (int k = 1; k < literals.length; k++) {
-            bitSet.and(bitSets[literals[k] + size]);
-        }
-        return bitSet;
-    }
-
-    private boolean isCovered(int[] literals, BitSet[] indexedSolutions) {
-        if (t == 1) {
-            return !indexedSolutions[literals[0] + n].isEmpty();
-        }
-
-        return !combinedIndex(n, literals, indexedSolutions).isEmpty();
-    }
-
-    private void select(PartialConfiguration solution, int[] literals) {
-        final int lastIndex = solution.setLiteral(literals);
-        for (int i = lastIndex; i < solution.visitor.getAddedLiteralCount(); i++) {
-            ExpandableIntegerList indexList = currentSampleIndices.get(
-                    ModalImplicationGraph.getVertexIndex(solution.visitor.getAddedLiterals()[i]));
-            final int idIndex = Arrays.binarySearch(indexList.toArray(), 0, indexList.size(), solution.id);
-            if (idIndex < 0) {
-                indexList.add(solution.id, -(idIndex + 1));
-            }
-        }
-        solution.updateSolutionList(lastIndex);
-    }
-
-    private boolean tryCover(int[] literals) {
-        return newConfiguration == null ? tryCoverWithoutMIG(literals) : tryCoverWithMIG(literals);
-    }
-
-    private boolean tryCoverWithoutMIG(int[] literals) {
-        configLoop:
-        for (final PartialConfiguration configuration : currentSample) {
-            if (configuration.allowChange && !configuration.isComplete()) {
-                final int[] literals2 = configuration.get();
-                for (int i = 0; i < literals.length; i++) {
-                    final int l = literals[i];
-                    if (literals2[Math.abs(l) - 1] == -l) {
-                        continue configLoop;
-                    }
-                }
-                if (isSelectionPossibleSol(configuration, literals)) {
-                    select(configuration, literals);
-                    change(configuration);
+    private boolean tryCoverWithRandomSolutions(int[] literals) {
+        BitSet literalBitSet = randomSampleIndex.getBitSet(literals);
+        if (!literalBitSet.isEmpty()) {
+            Collections.sort(
+                    selectionCandidates,
+                    Comparator.<PartialConfiguration>comparingInt(c -> c.visitor.countUndefined(literals))
+                            .thenComparingInt(c -> c.countLiterals()));
+            for (PartialConfiguration configuration : selectionCandidates) {
+                BitSet configurationBitSet = randomSampleIndex.getBitSet(
+                        configuration.visitor.getAddedLiterals(), configuration.visitor.getAddedLiteralCount());
+                configuration.randomCount = configurationBitSet.cardinality();
+                configurationBitSet.and(literalBitSet);
+                if (!configurationBitSet.isEmpty()) {
+                    updateIndex(configuration, configuration.setLiteral(literals));
                     return true;
                 }
-                candidateConfiguration.add(configuration);
             }
         }
         return false;
-    }
-
-    private boolean tryCoverWithMIG(int[] literals) {
-        configLoop:
-        for (final PartialConfiguration configuration : currentSample) {
-            if (configuration.allowChange && !configuration.isComplete()) {
-                final int[] literals2 = configuration.get();
-                for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
-                    final int l = newConfiguration.visitor.getAddedLiterals()[i];
-                    if (literals2[Math.abs(l) - 1] == -l) {
-                        continue configLoop;
-                    }
-                }
-                if (isSelectionPossibleSol(configuration, literals)) {
-                    select(configuration, literals);
-                    change(configuration);
-                    return true;
-                }
-                candidateConfiguration.add(configuration);
-            }
-        }
-        return false;
-    }
-
-    private void addToCandidateList(int[] literals) {
-        if (newConfiguration != null) {
-            configLoop:
-            for (final PartialConfiguration configuration : currentSample) {
-                if (configuration.allowChange && !configuration.isComplete()) {
-                    final int[] literals2 = configuration.get();
-                    for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
-                        final int l = newConfiguration.visitor.getAddedLiterals()[i];
-                        if (literals2[Math.abs(l) - 1] == -l) {
-                            continue configLoop;
-                        }
-                    }
-                    candidateConfiguration.add(configuration);
-                }
-            }
-        } else {
-            configLoop:
-            for (final PartialConfiguration configuration : currentSample) {
-                if (configuration.allowChange && !configuration.isComplete()) {
-                    final int[] literals2 = configuration.get();
-                    for (int i = 0; i < literals.length; i++) {
-                        final int l = literals[i];
-                        if (literals2[Math.abs(l) - 1] == -l) {
-                            continue configLoop;
-                        }
-                    }
-                    candidateConfiguration.add(configuration);
-                }
-            }
-        }
-    }
-
-    private void change(final PartialConfiguration configuration) {
-        if (configuration.isComplete()) {
-            configuration.clear();
-        }
-        Collections.sort(currentSample, (a, b) -> b.countLiterals() - a.countLiterals());
     }
 
     private boolean isCombinationInvalidMIG(int[] literals) {
         try {
-            newConfiguration = new PartialConfiguration(curSolutionId++, true, mig, literals);
+            MIGVisitorByte visitor = new MIGVisitorByte(mig);
+            visitor.propagate(literals);
         } catch (RuntimeContradictionException e) {
             return true;
         }
         return false;
     }
 
-    private boolean isCombinationValidSample(int[] literals) {
-        for (final BooleanSolution s : randomSample) {
-            if (!s.containsAnyNegated(literals)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isCombinationInvalidSAT(int[] literals) {
-        final int orgAssignmentLength = solver.getAssignment().size();
-        try {
-            if (newConfiguration != null) {
-                for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
-                    solver.getAssignment().add(newConfiguration.visitor.getAddedLiterals()[i]);
-                }
-            } else {
-                for (int i = 0; i < literals.length; i++) {
-                    solver.getAssignment().add(literals[i]);
-                }
-            }
-            Result<Boolean> hasSolution = solver.hasSolution();
-            if (hasSolution.isPresent()) {
-                if (hasSolution.get()) {
-                    BooleanSolution e = addSolverSolution();
-
-                    addToCandidateList(literals);
-                    PartialConfiguration compatibleConfiguration = null;
-                    for (PartialConfiguration c : candidateConfiguration) {
-                        if (!c.containsAnyNegated(e)) {
-                            if (compatibleConfiguration == null) {
-                                compatibleConfiguration = c;
-                            } else {
-                                c.solverSolutions.add(e);
-                            }
-                        }
-                    }
-                    if (compatibleConfiguration != null) {
-                        select(compatibleConfiguration, literals);
-                        compatibleConfiguration.solverSolutions.add(e);
-                        change(compatibleConfiguration);
-                        return true;
-                    }
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return true;
-            }
-        } finally {
-            solver.getAssignment().clear(orgAssignmentLength);
-        }
-    }
-
     private boolean tryCoverWithSat(int[] literals) {
-        for (PartialConfiguration configuration : candidateConfiguration) {
+        Collections.sort(selectionCandidates, Comparator.comparingInt(c -> c.randomCount));
+        for (PartialConfiguration configuration : selectionCandidates) {
             if (trySelectSat(configuration, literals)) {
-                change(configuration);
                 return true;
             }
         }
         return false;
     }
 
-    private void newConfiguration(int[] literals) {
+    private void newConfiguration(int[] literals, boolean allowChange) {
         if (currentSample.size() < maxSampleSize) {
-            if (newConfiguration == null) {
-                newConfiguration = new PartialConfiguration(curSolutionId++, true, mig, literals);
-            }
-            newConfiguration.initSolutionList();
+            PartialConfiguration newConfiguration =
+                    new PartialConfiguration(curSolutionId++, allowChange, mig, literals);
             currentSample.add(newConfiguration);
-            change(newConfiguration);
-            for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
-                ExpandableIntegerList indexList = currentSampleIndices.get(ModalImplicationGraph.getVertexIndex(
-                        newConfiguration.visitor.getAddedLiterals()[i]));
-                indexList.add(newConfiguration.id);
-            }
+            currentSampleIndex.addEmptyConfiguration();
+            updateIndex(newConfiguration, 0);
+        }
+    }
+
+    private BooleanSolution autoComplete(int[] configuration) {
+        int nextSetBit =
+                randomSampleIndex.getBitSet(configuration, configuration.length).nextSetBit(0);
+        if (nextSetBit > -1) {
+            return new BooleanSolution(randomSampleIndex.getConfiguration(nextSetBit), false);
         } else {
-            overLimit = true;
-        }
-    }
-
-    private BooleanSolution autoComplete(PartialConfiguration configuration) {
-        if (configuration.allowChange && !configuration.isComplete()) {
-            if (configuration.solverSolutions != null && configuration.solverSolutions.size() > 0) {
-                final int[] configuration2 =
-                        configuration.solverSolutions.get(0).get();
-                System.arraycopy(configuration2, 0, configuration.get(), 0, configuration.size());
-                configuration.clear();
-            } else {
-                final int orgAssignmentSize = setUpSolver(configuration);
-                try {
-                    Result<Boolean> hasSolution = solver.hasSolution();
-                    if (hasSolution.isPresent()) {
-                        if (hasSolution.get()) {
-                            final int[] internalSolution = solver.getInternalSolution();
-                            System.arraycopy(internalSolution, 0, configuration.get(), 0, configuration.size());
-                            configuration.clear();
-                        } else {
-                            throw new RuntimeContradictionException();
-                        }
-                    } else {
-                        throw new RuntimeTimeoutException();
-                    }
-                } finally {
-                    solver.getAssignment().clear(orgAssignmentSize);
+            final int orgAssignmentSize = setUpSolver(configuration);
+            try {
+                Result<BooleanSolution> hasSolution = solver.findSolution();
+                if (hasSolution.isPresent()) {
+                    return new BooleanSolution(hasSolution.get());
+                } else {
+                    throw new RuntimeTimeoutException();
                 }
+            } finally {
+                solver.getAssignment().clear(orgAssignmentSize);
             }
         }
-        return new BooleanSolution(configuration.get(), false);
     }
 
-    private boolean isSelectionPossibleSol(PartialConfiguration configuration, int[] literals) {
-        for (BooleanSolution configuration2 : configuration.solverSolutions) {
-            if (!configuration2.containsAnyNegated(literals)) {
-                return true;
-            }
-        }
-        return false;
+    private boolean canBeModified(PartialConfiguration configuration) {
+        return configuration.allowChange && configuration.visitor.getAddedLiteralCount() != variableCount;
     }
 
     private boolean trySelectSat(PartialConfiguration configuration, final int[] literals) {
-        final int oldModelCount = configuration.visitor.getAddedLiteralCount();
+        int addedLiteralCount = configuration.visitor.getAddedLiteralCount();
+        final int oldModelCount = addedLiteralCount;
         try {
             configuration.visitor.propagate(literals);
         } catch (RuntimeException e) {
@@ -804,42 +436,20 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
 
         final int orgAssignmentSize = setUpSolver(configuration);
         try {
-            if (newConfiguration != null) {
-                for (int i = 0; i < newConfiguration.visitor.getAddedLiteralCount(); i++) {
-                    int l = newConfiguration.visitor.getAddedLiterals()[i];
-                    if (configuration.get()[Math.abs(l) - 1] == 0) {
-                        solver.getAssignment().add(l);
-                    }
-                }
-            } else {
-                for (int i = 0; i < literals.length; i++) {
-                    int l = literals[i];
-                    if (configuration.get()[Math.abs(l) - 1] == 0) {
-                        solver.getAssignment().add(l);
-                    }
-                }
-            }
             Result<Boolean> hasSolution = solver.hasSolution();
             if (hasSolution.isPresent()) {
                 if (hasSolution.get()) {
-                    final BooleanSolution e = addSolverSolution();
-                    for (int i = oldModelCount; i < configuration.visitor.getAddedLiteralCount(); i++) {
-                        ExpandableIntegerList indexList = currentSampleIndices.get(ModalImplicationGraph.getVertexIndex(
-                                configuration.visitor.getAddedLiterals()[i]));
-                        final int idIndex =
-                                Arrays.binarySearch(indexList.toArray(), 0, indexList.size(), configuration.id);
-                        if (idIndex < 0) {
-                            indexList.add(configuration.id, -(idIndex + 1));
-                        }
-                    }
-                    configuration.updateSolutionList(oldModelCount);
-                    configuration.solverSolutions.add(e);
+                    updateIndex(configuration, oldModelCount);
+                    randomSampleIdsIndex = (randomSampleIdsIndex + 1) % randomConfigurationLimit;
+                    final int[] solution = solver.getInternalSolution();
+                    randomSampleIndex.set(randomSampleIdsIndex, solution);
+                    solver.shuffleOrder(random);
                     return true;
                 } else {
                     configuration.visitor.reset(oldModelCount);
                 }
             } else {
-                configuration.visitor.reset(oldModelCount);
+                throw new RuntimeTimeoutException();
             }
         } finally {
             solver.getAssignment().clear(orgAssignmentSize);
@@ -847,51 +457,21 @@ public class YASAIncremental extends ASAT4JAnalysis<BooleanAssignmentList> {
         return false;
     }
 
-    private BooleanSolution addSolverSolution() {
-        if (randomSample.size() == internalConfigurationLimit) {
-            randomSample.removeFirst();
-        }
-        final int[] solution = solver.getInternalSolution();
-        final BooleanSolution e = new BooleanSolution(Arrays.copyOf(solution, solution.length), false);
-        randomSample.add(e);
-        solver.shuffleOrder(random);
-        return e;
-    }
-
     private int setUpSolver(PartialConfiguration configuration) {
         final int orgAssignmentSize = solver.getAssignment().size();
-        for (int i = 0; i < configuration.visitor.getAddedLiteralCount(); i++) {
-            solver.getAssignment().add(configuration.visitor.getAddedLiterals()[i]);
+        int addedLiteralCount = configuration.visitor.getAddedLiteralCount();
+        int[] addedLiterals = configuration.visitor.getAddedLiterals();
+        for (int i = 0; i < addedLiteralCount; i++) {
+            solver.getAssignment().add(addedLiterals[i]);
         }
         return orgAssignmentSize;
     }
 
-    private List<PartialConfiguration> reduce(List<PartialConfiguration> solutionList) {
-        if (solutionList.isEmpty()) {
-            return solutionList;
+    private int setUpSolver(int[] configuration) {
+        final int orgAssignmentSize = solver.getAssignment().size();
+        for (int i = 0; i < configuration.length; i++) {
+            solver.getAssignment().add(configuration[i]);
         }
-        final int n = solutionList.get(0).size();
-        int t2 = (n < t) ? n : t;
-        int nonUniqueIndex = solutionList.size();
-
-        for (int i = 0; i < nonUniqueIndex; i++) {
-            BooleanSolution config = solutionList.get(i);
-            int finalNonUniqueIndex = nonUniqueIndex;
-
-            boolean hasUnique = LexicographicIterator.parallelStream(t2, n).anyMatch(combo -> {
-                int[] literals = combo.getSelection(config.get());
-                for (int j = 0; j < finalNonUniqueIndex; j++) {
-                    PartialConfiguration config2 = solutionList.get(j);
-                    if (config != config2 && config2.containsAll(literals)) {
-                        return false;
-                    }
-                }
-                return true;
-            });
-            if (!hasUnique) {
-                Collections.swap(solutionList, i--, --nonUniqueIndex);
-            }
-        }
-        return solutionList.subList(0, nonUniqueIndex);
+        return orgAssignmentSize;
     }
 }

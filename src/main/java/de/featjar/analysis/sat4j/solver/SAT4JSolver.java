@@ -68,8 +68,8 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
     }
 
     public SAT4JSolver(BooleanAssignmentList clauseList) {
-        internalSolver.setDBSimplificationAllowed(true);
-        internalSolver.setKeepSolverHot(true);
+        internalSolver.setDBSimplificationAllowed(false);
+        internalSolver.setKeepSolverHot(false);
         internalSolver.setVerbose(false);
         this.clauseList = new SAT4JClauseList(this, clauseList);
 

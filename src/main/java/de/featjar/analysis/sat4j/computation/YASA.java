@@ -22,9 +22,10 @@ package de.featjar.analysis.sat4j.computation;
 
 import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.analysis.RuntimeTimeoutException;
+import de.featjar.analysis.sat4j.solver.IMIGVisitor;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.analysis.sat4j.solver.MIGVisitorInt;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
-import de.featjar.analysis.sat4j.solver.ModalImplicationGraph.Visitor;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
 import de.featjar.base.computation.Computations;
@@ -33,6 +34,13 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
+import de.featjar.base.log.ActivityMessage;
+import de.featjar.base.log.PassedTimeMessage;
+import de.featjar.base.log.ProgressBar;
+import de.featjar.base.log.ProgressBar.ProgressThread;
+import de.featjar.base.log.ProgressMessage;
+import de.featjar.base.log.RemainingTimeMessage;
+import de.featjar.base.log.UsedMemoryMessage;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
@@ -77,7 +85,7 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
                 Computations.of(new NoneCombinationSpecification()),
                 Computations.of(2),
                 Computations.of(Integer.MAX_VALUE),
-                Computations.of(2),
+                Computations.of(1),
                 Computations.of(100_000),
                 new MIGBuilder(clauseList),
                 Computations.of(new BooleanAssignmentList((VariableMap) null)),
@@ -112,22 +120,14 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
         private final int id;
         private final boolean allowChange;
 
-        private Visitor visitor;
+        private IMIGVisitor visitor;
         private ArrayList<BooleanSolution> solverSolutions;
 
-        public PartialConfiguration(PartialConfiguration config) {
-            super(config);
-            id = config.id;
-            allowChange = config.allowChange;
-            visitor = config.visitor.getVisitorProvider().new Visitor(config.visitor, elements);
-            solverSolutions = config.solverSolutions != null ? new ArrayList<>(config.solverSolutions) : null;
-        }
-
         public PartialConfiguration(int id, boolean allowChange, ModalImplicationGraph mig, int... newliterals) {
-            super(new int[n], false);
+            super(new int[numberOfVariableLiterals], false);
             this.id = id;
             this.allowChange = allowChange;
-            visitor = mig.getVisitor(this.elements);
+            visitor = new MIGVisitorInt(mig, elements);
             solverSolutions = new ArrayList<>();
             visitor.propagate(newliterals);
         }
@@ -193,7 +193,7 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
         }
     }
 
-    private int n, tmax, t, maxSampleSize, iterations, numberOfVariableLiterals, internalConfigurationLimit;
+    private int maxT, maxSampleSize, iterations, numberOfVariableLiterals, internalConfigurationLimit;
     private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit;
     private ICombinationSpecification variables;
 
@@ -217,9 +217,9 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
 
     @Override
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
-        tmax = T.get(dependencyList);
-        if (tmax < 1) {
-            throw new IllegalArgumentException("Value for t must be grater than 0. Value was " + tmax);
+        maxT = T.get(dependencyList);
+        if (maxT < 1) {
+            throw new IllegalArgumentException("Value for t must be grater than 0. Value was " + maxT);
         }
 
         iterations = ITERATIONS.get(dependencyList);
@@ -256,7 +256,6 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
         mig = MIG.get(dependencyList);
-        n = mig.size();
 
         if (initialSampleCountsTowardsConfigurationLimit) {
             maxSampleSize = Math.max(maxSampleSize, maxSampleSize + initialSample.size());
@@ -265,23 +264,36 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
         variables = LITERALS.get(dependencyList);
 
         numberOfVariableLiterals = mig.size();
-        tmax = Math.min(tmax, Math.max(numberOfVariableLiterals, 1));
+        maxT = Math.min(maxT, Math.max(numberOfVariableLiterals, 1));
         if (variables instanceof NoneCombinationSpecification) {
             variables = new SingleCombinationSpecification(
-                    new BooleanAssignment(new BooleanAssignment(IntStream.range(-n, n + 1)
-                                    .filter(i -> i != 0)
-                                    .toArray())
+                    new BooleanAssignment(new BooleanAssignment(
+                                    IntStream.range(-numberOfVariableLiterals, numberOfVariableLiterals + 1)
+                                            .filter(i -> i != 0)
+                                            .toArray())
                             .removeAllVariables(
                                     Arrays.stream(mig.getCore()).map(Math::abs).toArray())),
-                    tmax);
+                    maxT);
         }
 
         progress.setTotalSteps(iterations * variables.getTotalSteps());
 
-        buildCombinations(progress);
+        try (ProgressThread startProgressThread = ProgressBar.startProgressThread(
+                new ActivityMessage(),
+                new ProgressMessage(progress),
+                new PassedTimeMessage(),
+                new RemainingTimeMessage(progress),
+                new UsedMemoryMessage(),
+                () -> "" + currentSample.size())) {
 
-        if (!overLimit && iterations > 1) {
-            rebuildCombinations(progress);
+            buildCombinations(progress);
+
+            if (!overLimit && iterations > 1) {
+                rebuildCombinations(progress);
+            }
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
 
         return finalizeResult();
@@ -312,7 +324,7 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
     private void buildCombinations(Progress monitor) {
         initSample();
 
-        t = tmax;
+        int t = maxT;
         selectedSampleIndices = new ExpandableIntegerList[t];
         initRun();
 
@@ -353,8 +365,8 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
     private void rebuildCombinations(Progress monitor) {
         if (iterations > 1) {
             int solutionCount = bestSample.size();
-            bestSampleIndices = new BitSet[2 * n + 1];
-            for (int j = 1; j <= n; j++) {
+            bestSampleIndices = new BitSet[2 * numberOfVariableLiterals + 1];
+            for (int j = 1; j <= numberOfVariableLiterals; j++) {
                 BitSet negIndices = new BitSet(solutionCount);
                 BitSet posIndices = new BitSet(solutionCount);
                 for (int i = 0; i < solutionCount; i++) {
@@ -368,8 +380,8 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
                         }
                     }
                 }
-                bestSampleIndices[n - j] = negIndices;
-                bestSampleIndices[j + n] = posIndices;
+                bestSampleIndices[numberOfVariableLiterals - j] = negIndices;
+                bestSampleIndices[j + numberOfVariableLiterals] = posIndices;
             }
         }
 
@@ -379,6 +391,8 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
             initSample();
             initRun();
             variables.stream().forEach(combinationLiterals -> {
+                checkCancel();
+                monitor.incrementCurrentStep();
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
                 }
@@ -412,7 +426,7 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
         curSolutionId = 0;
         overLimit = false;
         currentSample = new ArrayList<>();
-        final int indexSize = 2 * n;
+        final int indexSize = 2 * numberOfVariableLiterals;
         currentSampleIndices = new ArrayList<>(indexSize);
         for (int i = 0; i < indexSize; i++) {
             currentSampleIndices.add(new ExpandableIntegerList());
@@ -446,12 +460,12 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
     }
 
     private boolean isCovered(int[] literals, ArrayList<ExpandableIntegerList> indexedSolutions) {
-        if (t < 2) {
+        if (maxT < 2) {
             return !indexedSolutions
                     .get(ModalImplicationGraph.getVertexIndex(literals[0]))
                     .isEmpty();
         }
-        for (int i = 0; i < t; i++) {
+        for (int i = 0; i < maxT; i++) {
             final ExpandableIntegerList indexedSolution =
                     indexedSolutions.get(ModalImplicationGraph.getVertexIndex(literals[i]));
             if (indexedSolution.size() == 0) {
@@ -460,14 +474,14 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
             selectedSampleIndices[i] = indexedSolution;
         }
         Arrays.sort(selectedSampleIndices, (a, b) -> a.size() - b.size());
-        final int[] ix = new int[t - 1];
+        final int[] ix = new int[numberOfVariableLiterals - 1];
 
         final ExpandableIntegerList i0 = selectedSampleIndices[0];
         final int[] ia0 = i0.toArray();
         loop:
         for (int i = 0; i < i0.size(); i++) {
             int id0 = ia0[i];
-            for (int j = 1; j < t; j++) {
+            for (int j = 1; j < maxT; j++) {
                 final ExpandableIntegerList i1 = selectedSampleIndices[j];
                 int binarySearch = Arrays.binarySearch(i1.toArray(), ix[j - 1], i1.size(), id0);
                 if (binarySearch < 0) {
@@ -493,11 +507,12 @@ public class YASA extends ASAT4JAnalysis<BooleanAssignmentList> {
     }
 
     private boolean isCovered(int[] literals, BitSet[] indexedSolutions) {
-        if (t == 1) {
-            return !indexedSolutions[literals[0] + n].isEmpty();
+        if (maxT == 1) {
+            return !indexedSolutions[literals[0] + numberOfVariableLiterals].isEmpty();
         }
 
-        return !combinedIndex(n, literals, indexedSolutions).isEmpty();
+        return !combinedIndex(numberOfVariableLiterals, literals, indexedSolutions)
+                .isEmpty();
     }
 
     private void select(PartialConfiguration solution, int[] literals) {

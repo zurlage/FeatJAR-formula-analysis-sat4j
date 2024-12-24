@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.cli;
 
-import de.featjar.analysis.sat4j.computation.YASAIncremental;
+import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
@@ -34,8 +34,9 @@ import java.util.Optional;
  * Computes solutions for a given formula using SAT4J.
  *
  * @author Sebastian Krieter
+ * @author Andreas Gerasimow
  */
-public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
+public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
 
     /**
      * Maximum number of configurations to be generated.
@@ -58,33 +59,20 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, B
             .setDescription("Number of iterations.") //
             .setDefaultValue(1);
 
-    public static final Option<Integer> INTERNAL_SOLUTION_LIMIT = Option.newOption(
-                    "internal-limit", Option.IntegerParser) //
-            .setDescription("Number of internally cached configurations.")
-            .setDefaultValue(65_536);
-
-    public static final Option<Boolean> INCREMENTAL = Option.newFlag("incremental") //
-            .setDescription("Start with smaller values for t.");
-
-    // TODO handle initial sample
-    // TODO handle other combination specs
-
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes solutions for a given formula using SAT4J. Uses the most recent version of YASA.");
+        return Optional.of("Computes solutions for a given formula using SAT4J. Uses YASA.");
     }
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(YASAIncremental::new)
-                .set(YASAIncremental.T, optionParser.get(T_OPTION))
-                .set(YASAIncremental.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
-                .set(YASAIncremental.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
-                .set(YASAIncremental.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                .set(YASAIncremental.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
-                .set(YASAIncremental.INTERNAL_SOLUTION_LIMIT, optionParser.get(INTERNAL_SOLUTION_LIMIT))
-                .set(YASAIncremental.INCREMENTAL_T, optionParser.get(INCREMENTAL));
+        return formula.map(YASA::new)
+                .set(YASA.T, optionParser.get(T_OPTION))
+                .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
     }
 
     @Override
@@ -104,6 +92,6 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, B
 
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("t-wise-sat4j");
+        return Optional.of("yasa");
     }
 }

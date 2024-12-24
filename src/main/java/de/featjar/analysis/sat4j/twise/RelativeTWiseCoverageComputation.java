@@ -76,7 +76,8 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
         sample = SAMPLE.get(dependencyList).toSolutionList();
         if (!sample.isEmpty()) {
-            BooleanAssignmentList referenceSample = REFERENCE_SAMPLE.get(dependencyList).toSolutionList();
+            BooleanAssignmentList referenceSample =
+                    REFERENCE_SAMPLE.get(dependencyList).toSolutionList();
             assert Objects.equals(referenceSample.getVariableMap(), sample.getVariableMap());
 
             t = T.get(dependencyList);

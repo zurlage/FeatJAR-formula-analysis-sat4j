@@ -20,9 +20,10 @@
  */
 package de.featjar.analysis.sat4j.computation;
 
+import de.featjar.analysis.sat4j.solver.IMIGVisitor;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.analysis.sat4j.solver.MIGVisitorByte;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
-import de.featjar.analysis.sat4j.solver.ModalImplicationGraph.Visitor;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.computation.ComputeConstant;
 import de.featjar.base.computation.Dependency;
@@ -83,7 +84,7 @@ public class ComputeCoreDeadMIG extends ASAT4JAnalysis.Solution<BooleanAssignmen
                 model1 = model3;
             }
 
-            Visitor visitor = mig.getVisitor();
+            IMIGVisitor visitor = new MIGVisitorByte(mig);
             visitor.propagate(assignment.get());
 
             int addedLiteralCount = visitor.getAddedLiteralCount();

@@ -63,13 +63,21 @@ public class SampleBitIndex implements Predicate<int[]> {
     }
 
     public void addConfiguration(BooleanAssignment config) {
+        addConfiguration(config.get());
+    }
+
+    public void addConfiguration(int[] config) {
         int i = sampleSize++;
 
-        for (int l : config.get()) {
+        for (int l : config) {
             if (l != 0) {
                 bitSetReference[numberOfVariables + l].set(i);
             }
         }
+    }
+
+    public int addEmptyConfiguration() {
+        return sampleSize++;
     }
 
     public void clear(int index) {
@@ -79,19 +87,21 @@ public class SampleBitIndex implements Predicate<int[]> {
     }
 
     public void set(int index, BooleanAssignment config) {
-        for (int l : config.get()) {
+        set(index, config.get());
+    }
+
+    public void set(int index, int[] config) {
+        for (int l : config) {
             set(index, l);
         }
     }
 
     public void set(int index, int literal) {
-        if (literal != 0) {
-            bitSetReference[numberOfVariables - literal].clear(index);
-            bitSetReference[numberOfVariables + literal].set(index);
-        }
+        bitSetReference[numberOfVariables - literal].clear(index);
+        bitSetReference[numberOfVariables + literal].set(index, literal != 0);
     }
 
-    private BitSet getBitSet(int[] literals) {
+    public BitSet getBitSet(int[] literals) {
         BitSet first = bitSetReference[numberOfVariables + literals[0]];
         BitSet bitSet = new BitSet(first.size());
         bitSet.xor(first);
@@ -101,8 +111,38 @@ public class SampleBitIndex implements Predicate<int[]> {
         return bitSet;
     }
 
+    public BitSet getNegatedBitSet(int[] literals) {
+        BitSet first = bitSetReference[numberOfVariables - literals[0]];
+        BitSet bitSet = new BitSet(first.size());
+        bitSet.xor(first);
+        for (int k = 1; k < literals.length; k++) {
+            bitSet.or(bitSetReference[numberOfVariables - literals[k]]);
+        }
+        return bitSet;
+    }
+
+    public BitSet getBitSet(int[] literals, int n) {
+        if (n <= 0) {
+            return new BitSet();
+        }
+        BitSet first = bitSetReference[numberOfVariables + literals[0]];
+        BitSet bitSet = new BitSet(first.size());
+        bitSet.xor(first);
+        for (int k = 1; k < n; k++) {
+            bitSet.and(bitSetReference[numberOfVariables + literals[k]]);
+            if (bitSet.isEmpty()) {
+                return bitSet;
+            }
+        }
+        return bitSet;
+    }
+
     @Override
     public boolean test(int[] literals) {
+        if (literals.length == 2) {
+            return bitSetReference[numberOfVariables + literals[0]].intersects(
+                    bitSetReference[numberOfVariables + literals[1]]);
+        }
         return !getBitSet(literals).isEmpty();
     }
 
@@ -112,5 +152,21 @@ public class SampleBitIndex implements Predicate<int[]> {
 
     public int size(int[] literals) {
         return getBitSet(literals).cardinality();
+    }
+
+    public int size() {
+        return sampleSize;
+    }
+
+    public int[] getConfiguration(int configurationID) {
+        int[] model = new int[numberOfVariables];
+        for (int i = 1; i <= numberOfVariables; i++) {
+            if (bitSetReference[numberOfVariables + i].get(configurationID)) {
+                model[i - 1] = i;
+            } else if (bitSetReference[numberOfVariables - i].get(configurationID)) {
+                model[i - 1] = -i;
+            }
+        }
+        return model;
     }
 }
