@@ -20,7 +20,7 @@
  */
 package de.featjar.analysis.sat4j.cli;
 
-import de.featjar.analysis.sat4j.computation.ComputeRandomTWiseSample;
+import de.featjar.analysis.sat4j.computation.YASALegacy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
@@ -34,8 +34,9 @@ import java.util.Optional;
  * Computes solutions for a given formula using SAT4J.
  *
  * @author Sebastian Krieter
+ * @author Andreas Gerasimow
  */
-public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
+public class LegacyYASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
 
     /**
      * Maximum number of configurations to be generated.
@@ -51,22 +52,27 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, B
             .setDescription("Value of parameter t.") //
             .setDefaultValue(2);
 
-    // TODO handle initial sample
-    // TODO handle other combination specs
+    /**
+     * Number of iterations.
+     */
+    public static final Option<Integer> ITERATIONS_OPTION = Option.newOption("i", Option.IntegerParser) //
+            .setDescription("Number of iterations.") //
+            .setDefaultValue(1);
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes solutions for a given formula using SAT4J. Uses a simple greedy algorithm.");
+        return Optional.of("Computes solutions for a given formula using SAT4J. Uses YASA.");
     }
 
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(ComputeRandomTWiseSample::new)
-                .set(ComputeRandomTWiseSample.T, optionParser.get(T_OPTION))
-                .set(ComputeRandomTWiseSample.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
-                .set(ComputeRandomTWiseSample.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                .set(ComputeRandomTWiseSample.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+        return formula.map(YASALegacy::new)
+                .set(YASALegacy.T, optionParser.get(T_OPTION))
+                .set(YASALegacy.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                .set(YASALegacy.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                .set(YASALegacy.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                .set(YASALegacy.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
     }
 
     @Override
@@ -86,6 +92,6 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, B
 
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("t-wise-sat4j");
+        return Optional.of("yasa-legacy");
     }
 }

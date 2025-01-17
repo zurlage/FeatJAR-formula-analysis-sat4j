@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.featjar.Common;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
-import de.featjar.analysis.sat4j.computation.YASAIncremental;
+import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
@@ -108,9 +108,9 @@ public class YASAIncrementalTest extends Common {
 
     private void testTimeout(IFormula formula, int timeoutSeconds) {
         IComputation<BooleanAssignmentList> clauses = getClauses(formula);
-        BooleanAssignmentList sample = clauses.map(YASAIncremental::new)
-                .set(YASAIncremental.T, 3)
-                .set(YASAIncremental.ITERATIONS, Integer.MAX_VALUE)
+        BooleanAssignmentList sample = clauses.map(YASA::new)
+                .set(YASA.T, 3)
+                .set(YASA.ITERATIONS, Integer.MAX_VALUE)
                 .computeResult(Duration.ofSeconds(timeoutSeconds))
                 .orElseThrow();
         FeatJAR.log().info("Sample Size: %d", sample.size());
@@ -213,8 +213,8 @@ public class YASAIncrementalTest extends Common {
     }
 
     private BooleanAssignmentList computeSample(int t, IComputation<BooleanAssignmentList> clauses) {
-        BooleanAssignmentList sample = clauses.map(YASAIncremental::new)
-                .setDependencyComputation(YASAIncremental.T, async(t))
+        BooleanAssignmentList sample = clauses.map(YASA::new)
+                .setDependencyComputation(YASA.T, async(t))
                 .compute();
         FeatJAR.log().info("Sample Size: %d", sample.size());
         return sample;

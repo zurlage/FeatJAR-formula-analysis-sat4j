@@ -29,7 +29,7 @@ import de.featjar.Common;
 import de.featjar.analysis.sat4j.computation.ComputeAtomicSetsSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeCoreSAT4J;
 import de.featjar.analysis.sat4j.computation.ComputeSolutionsSAT4J;
-import de.featjar.analysis.sat4j.computation.YASA;
+import de.featjar.analysis.sat4j.computation.YASALegacy;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.analysis.sat4j.twise.CoverageStatistic;
 import de.featjar.analysis.sat4j.twise.RelativeTWiseCoverageComputation;
@@ -116,9 +116,9 @@ public class YASATest extends Common {
 
     private void testTimeout(IFormula formula, int timeoutSeconds) {
         IComputation<BooleanAssignmentList> clauses = getClauses(formula);
-        BooleanAssignmentList sample = clauses.map(YASA::new)
-                .set(YASA.T, 3)
-                .set(YASA.ITERATIONS, Integer.MAX_VALUE)
+        BooleanAssignmentList sample = clauses.map(YASALegacy::new)
+                .set(YASALegacy.T, 3)
+                .set(YASALegacy.ITERATIONS, Integer.MAX_VALUE)
                 .computeResult(Duration.ofSeconds(timeoutSeconds))
                 .orElseThrow();
         FeatJAR.log().info("Sample Size: %d", sample.size());
@@ -227,8 +227,8 @@ public class YASATest extends Common {
     }
 
     private BooleanAssignmentList computeSample(int t, IComputation<BooleanAssignmentList> clauses) {
-        BooleanAssignmentList sample = clauses.map(YASA::new)
-                .setDependencyComputation(YASA.T, async(t))
+        BooleanAssignmentList sample = clauses.map(YASALegacy::new)
+                .setDependencyComputation(YASALegacy.T, async(t))
                 .compute();
         FeatJAR.log().info("Sample Size: %d", sample.size());
         return sample;

@@ -34,7 +34,6 @@ import java.util.Optional;
  * Computes solutions for a given formula using SAT4J.
  *
  * @author Sebastian Krieter
- * @author Andreas Gerasimow
  */
 public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
 
@@ -59,9 +58,20 @@ public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, Bo
             .setDescription("Number of iterations.") //
             .setDefaultValue(1);
 
+    public static final Option<Integer> INTERNAL_SOLUTION_LIMIT = Option.newOption(
+                    "internal-limit", Option.IntegerParser) //
+            .setDescription("Number of internally cached configurations.")
+            .setDefaultValue(65_536);
+
+    public static final Option<Boolean> INCREMENTAL = Option.newFlag("incremental") //
+            .setDescription("Start with smaller values for t.");
+
+    // TODO handle initial sample
+    // TODO handle other combination specs
+
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes solutions for a given formula using SAT4J. Uses YASA.");
+        return Optional.of("Computes solutions for a given formula using SAT4J. Uses the most recent version of YASA.");
     }
 
     @Override
@@ -72,7 +82,9 @@ public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, Bo
                 .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                 .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
                 .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+                .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
+                .set(YASA.INTERNAL_SOLUTION_LIMIT, optionParser.get(INTERNAL_SOLUTION_LIMIT))
+                .set(YASA.INCREMENTAL_T, optionParser.get(INCREMENTAL));
     }
 
     @Override
@@ -92,6 +104,6 @@ public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, Bo
 
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("yasa");
+        return Optional.of("t-wise-sat4j");
     }
 }
