@@ -116,8 +116,9 @@ public class TWiseCountComputation extends AComputation<Long> {
                     }
                 });
 
-        long filterCombinationsCount =
-                filterCombinations.parallelStream().filter(coverageChecker).count();
+        long filterCombinationsCount = filterCombinations.parallelStream()
+                .filter(coverageChecker::test)
+                .count();
         return Result.ofOptional(statisticList.stream() //
                 .map(Environment::getStatistic) //
                 .reduce((s1, s2) -> s1 + s2)

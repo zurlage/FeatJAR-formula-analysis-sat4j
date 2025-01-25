@@ -23,7 +23,6 @@ package de.featjar.analysis.sat4j.twise;
 import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.BitSet;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * Calculates statistics regarding t-wise feature coverage of a set of
@@ -31,7 +30,7 @@ import java.util.function.Predicate;
  *
  * @author Sebastian Krieter
  */
-public class SampleBitIndex implements Predicate<int[]> {
+public class SampleBitIndex {
 
     private final BitSet[] bitSetReference;
     private final int numberOfVariables;
@@ -101,7 +100,7 @@ public class SampleBitIndex implements Predicate<int[]> {
         bitSetReference[numberOfVariables + literal].set(index, literal != 0);
     }
 
-    public BitSet getBitSet(int[] literals) {
+    public BitSet getBitSet(int... literals) {
         BitSet first = bitSetReference[numberOfVariables + literals[0]];
         BitSet bitSet = new BitSet(first.size());
         bitSet.xor(first);
@@ -111,7 +110,7 @@ public class SampleBitIndex implements Predicate<int[]> {
         return bitSet;
     }
 
-    public BitSet getNegatedBitSet(int[] literals) {
+    public BitSet getNegatedBitSet(int... literals) {
         BitSet first = bitSetReference[numberOfVariables - literals[0]];
         BitSet bitSet = new BitSet(first.size());
         bitSet.xor(first);
@@ -137,8 +136,7 @@ public class SampleBitIndex implements Predicate<int[]> {
         return bitSet;
     }
 
-    @Override
-    public boolean test(int[] literals) {
+    public boolean test(int... literals) {
         if (literals.length == 2) {
             return bitSetReference[numberOfVariables + literals[0]].intersects(
                     bitSetReference[numberOfVariables + literals[1]]);
@@ -146,11 +144,11 @@ public class SampleBitIndex implements Predicate<int[]> {
         return !getBitSet(literals).isEmpty();
     }
 
-    public int index(int[] literals) {
+    public int index(int... literals) {
         return getBitSet(literals).length();
     }
 
-    public int size(int[] literals) {
+    public int size(int... literals) {
         return getBitSet(literals).cardinality();
     }
 
