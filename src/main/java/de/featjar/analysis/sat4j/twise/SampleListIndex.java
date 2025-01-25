@@ -79,13 +79,13 @@ public class SampleListIndex implements Predicate<int[]> {
         final int[] ix = new int[literals.length - 1];
 
         final ExpandableIntegerList i0 = selectedIndexedSolutions[0];
-        final int[] ia0 = i0.toArray();
+        final int[] ia0 = i0.getInternalArray();
         loop:
         for (int i = 0; i < i0.size(); i++) {
             int id0 = ia0[i];
             for (int j = 1; j < literals.length; j++) {
                 final ExpandableIntegerList i1 = selectedIndexedSolutions[j];
-                int binarySearch = Arrays.binarySearch(i1.toArray(), ix[j - 1], i1.size(), id0);
+                int binarySearch = Arrays.binarySearch(i1.getInternalArray(), ix[j - 1], i1.size(), id0);
                 if (binarySearch < 0) {
                     ix[j - 1] = -binarySearch - 1;
                     continue loop;

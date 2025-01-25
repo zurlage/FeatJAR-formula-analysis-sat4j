@@ -43,7 +43,7 @@ public class MIGVisitorByte implements IMIGVisitor {
 
     @Override
     public int[] getAddedLiterals() {
-        return addedLiterals.toArray();
+        return addedLiterals.getInternalArray();
     }
 
     @Override

@@ -51,7 +51,7 @@ public class MIGVisitorInt implements IMIGVisitor {
 
     @Override
     public int[] getAddedLiterals() {
-        return addedLiterals.toArray();
+        return addedLiterals.getInternalArray();
     }
 
     @Override

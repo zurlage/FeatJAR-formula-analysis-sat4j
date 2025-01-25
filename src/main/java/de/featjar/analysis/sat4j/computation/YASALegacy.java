@@ -389,13 +389,13 @@ public class YASALegacy extends ATWiseSampleComputation {
         final int[] ix = new int[variableCount - 1];
 
         final ExpandableIntegerList i0 = selectedSampleIndices[0];
-        final int[] ia0 = i0.toArray();
+        final int[] ia0 = i0.getInternalArray();
         loop:
         for (int i = 0; i < i0.size(); i++) {
             int id0 = ia0[i];
             for (int j = 1; j < maxT; j++) {
                 final ExpandableIntegerList i1 = selectedSampleIndices[j];
-                int binarySearch = Arrays.binarySearch(i1.toArray(), ix[j - 1], i1.size(), id0);
+                int binarySearch = Arrays.binarySearch(i1.getInternalArray(), ix[j - 1], i1.size(), id0);
                 if (binarySearch < 0) {
                     ix[j - 1] = -binarySearch - 1;
                     continue loop;
@@ -431,7 +431,7 @@ public class YASALegacy extends ATWiseSampleComputation {
         for (int i = lastIndex; i < solution.visitor.getAddedLiteralCount(); i++) {
             ExpandableIntegerList indexList = currentSampleIndices.get(
                     ModalImplicationGraph.getVertexIndex(solution.visitor.getAddedLiterals()[i]));
-            final int idIndex = Arrays.binarySearch(indexList.toArray(), 0, indexList.size(), solution.id);
+            final int idIndex = Arrays.binarySearch(indexList.getInternalArray(), 0, indexList.size(), solution.id);
             if (idIndex < 0) {
                 indexList.add(solution.id, -(idIndex + 1));
             }
@@ -690,8 +690,8 @@ public class YASALegacy extends ATWiseSampleComputation {
                     for (int i = oldModelCount; i < configuration.visitor.getAddedLiteralCount(); i++) {
                         ExpandableIntegerList indexList = currentSampleIndices.get(ModalImplicationGraph.getVertexIndex(
                                 configuration.visitor.getAddedLiterals()[i]));
-                        final int idIndex =
-                                Arrays.binarySearch(indexList.toArray(), 0, indexList.size(), configuration.id);
+                        final int idIndex = Arrays.binarySearch(
+                                indexList.getInternalArray(), 0, indexList.size(), configuration.id);
                         if (idIndex < 0) {
                             indexList.add(configuration.id, -(idIndex + 1));
                         }

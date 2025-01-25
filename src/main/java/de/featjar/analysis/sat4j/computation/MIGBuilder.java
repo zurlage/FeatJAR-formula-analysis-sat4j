@@ -177,7 +177,7 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
                         }
                     });
         }
-        strong[vertexIndex] = Arrays.copyOf(temp.toArray(), temp.size());
+        strong[vertexIndex] = temp.toArray();
     }
 
     private BooleanClause cleanClause(BooleanAssignment clause, BooleanAssignment core) {
