@@ -20,19 +20,23 @@
  */
 package de.featjar.analysis.sat4j.computation;
 
+import de.featjar.analysis.RuntimeTimeoutException;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.analysis.sat4j.solver.SAT4JAssignment;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
+import de.featjar.analysis.sat4j.twise.SampleBitIndex;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanSolution;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
@@ -47,6 +51,12 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
             Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<Boolean> OMIT_SINGLE_SETS = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> OMIT_CORE = Dependency.newDependency(Boolean.class);
+
+    private List<BitSet> solutions;
+    private SampleBitIndex solutionIndex;
+    private int variableCount;
+
+    private Random random;
 
     public ComputeAtomicSetsSAT4J(IComputation<BooleanAssignmentList> clauseList) {
         super(
@@ -63,20 +73,29 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
     @Override
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        Random random = new Random(RANDOM_SEED.get(dependencyList));
+        random = new Random(RANDOM_SEED.get(dependencyList));
         VariableMap variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
 
-        final BooleanAssignment ignoredVariables;
-        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
-        if (variables.isEmpty()) {
-            ignoredVariables = new BooleanAssignment();
-        } else {
-            ignoredVariables = variableMap.getVariables().removeAll(variables);
-        }
         boolean omitCore = OMIT_CORE.get(dependencyList);
         boolean omitSingles = OMIT_SINGLE_SETS.get(dependencyList);
 
         final BooleanAssignmentList atomicSets = new BooleanAssignmentList(variableMap);
+        variableCount = variableMap.getVariableCount();
+        solutions = new ArrayList<>();
+        solutionIndex = new SampleBitIndex(variableCount);
+
+        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
+        final boolean[] decided = new boolean[variableCount];
+        if (!variables.isEmpty()) {
+            BooleanAssignment ignoredVariables = variableMap.getVariables().removeAll(variables);
+            for (int var : ignoredVariables.get()) {
+                decided[var - 1] = true;
+            }
+            progress.setTotalSteps(2 * variables.size() + 2);
+        } else {
+            progress.setTotalSteps(2 * variableCount + 2);
+        }
+        checkCancel();
 
         solver.setSelectionStrategy(ISelectionStrategy.positive());
         Result<BooleanSolution> findSolution = solver.findSolution();
@@ -84,119 +103,140 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
             return findSolution.merge(Result.empty());
         }
 
-        final int[] model1 = findSolution.get().get();
-        if (model1 != null) {
-            // initial atomic set consists of core and dead features
-            solver.setSelectionStrategy(ISelectionStrategy.inverse(model1));
-            final int[] model2 = findSolution.get().get();
+        final int[] firstSolution = findSolution.get().get();
+        addSolution(firstSolution);
+        solver.setSelectionStrategy(ISelectionStrategy.inverse(firstSolution));
+        progress.incrementCurrentStep();
+        checkCancel();
 
-            final byte[] done = new byte[model1.length];
+        final int[] secondSolution = solver.findSolution().get().get();
+        addSolution(secondSolution);
+        final int[] undecided = Arrays.copyOf(firstSolution, firstSolution.length);
+        BooleanSolution.removeConflictsInplace(undecided, secondSolution);
+        progress.incrementCurrentStep();
+        checkCancel();
 
-            final int[] model1Copy = Arrays.copyOf(model1, model1.length);
-            for (int var : ignoredVariables.get()) {
-                model1Copy[var - 1] = 0;
-                done[var - 1] = 2;
-            }
+        solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
-            BooleanSolution.removeConflictsInplace(model1Copy, model2);
-            for (int i = 0; i < model1Copy.length; i++) {
-                final int varX = model1Copy[i];
-
-                if (varX != 0) {
-                    solver.getAssignment().add(-varX);
+        ExpandableIntegerList core = new ExpandableIntegerList();
+        for (int i = 0; i < variableCount; i++) {
+            progress.incrementCurrentStep();
+            checkCancel();
+            if (!decided[i]) {
+                int potentialCoreLiteral = undecided[i];
+                if (potentialCoreLiteral != 0) {
+                    solver.getAssignment().add(-potentialCoreLiteral);
                     Result<Boolean> hasSolution = solver.hasSolution();
                     if (hasSolution.isEmpty()) {
                         solver.getAssignment().remove();
+                        throw new RuntimeTimeoutException();
                     } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                        done[i] = 2;
-                        solver.getAssignment().replaceLast(varX);
+                        decided[i] = true;
+                        core.add(potentialCoreLiteral);
+                        solver.getAssignment().replaceLast(potentialCoreLiteral);
                     } else if (hasSolution.valueEquals(Boolean.TRUE)) {
                         solver.getAssignment().remove();
-                        BooleanSolution.removeConflictsInplace(model1Copy, solver.getInternalSolution());
+                        int[] internalSolution = solver.getInternalSolution();
+                        addSolution(internalSolution);
+                        BooleanSolution.removeConflictsInplace(undecided, internalSolution);
                         solver.shuffleOrder(random);
                     }
                 }
             }
-            final int fixedSize = solver.getAssignment().size();
-            if (!omitCore) {
-                atomicSets.add(new BooleanAssignment(solver.getAssignment().copy(0, fixedSize)));
-            }
+        }
+        if (!omitCore) {
+            atomicSets.add(new BooleanAssignment(core.toArray()));
+        }
 
-            solver.setSelectionStrategy(ISelectionStrategy.random(random));
+        for (int vi = 0; vi < variableCount; vi++) {
+            progress.incrementCurrentStep();
+            checkCancel();
+            if (!decided[vi]) {
+                decided[vi] = true;
+                int v = vi + 1;
 
-            for (int i = 0; i < model1.length; i++) {
-                if (done[i] == 0) {
-                    done[i] = 2;
+                ExpandableIntegerList atomicSet = new ExpandableIntegerList();
+                atomicSet.add(v);
 
-                    int[] xModel0 = Arrays.copyOf(model1, model1.length);
+                BitSet commonPositiveLiterals = new BitSet(variableCount);
+                BitSet commonNegativeLiterals = new BitSet(variableCount);
+                commonPositiveLiterals.flip(0, variableCount);
+                commonNegativeLiterals.flip(0, variableCount);
+                findCommenLiterals(v, commonPositiveLiterals, commonNegativeLiterals);
+                findCommenLiterals(-v, commonNegativeLiterals, commonPositiveLiterals);
 
-                    final int mx0 = xModel0[i];
-                    solver.getAssignment().add(mx0);
-
-                    for (int j = i + 1; j < xModel0.length; j++) {
-                        final int my0 = xModel0[j];
-                        if ((my0 != 0) && (done[j] == 0)) {
-                            solver.getAssignment().add(-my0);
-
-                            Result<Boolean> hasSolution = solver.hasSolution();
-
-                            if (hasSolution.isEmpty()) {
-                            } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                                done[j] = 1;
-                            } else if (hasSolution.valueEquals(Boolean.TRUE)) {
-                                BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
-                                solver.shuffleOrder(random);
-                            }
-                            solver.getAssignment().remove();
+                int ui = commonPositiveLiterals.nextSetBit(vi + 1);
+                while (ui >= 0) {
+                    if (!decided[ui]) {
+                        int u = ui + 1;
+                        if (unsat(solver, -v, u) && unsat(solver, v, -u)) {
+                            atomicSet.add(u);
+                            decided[ui] = true;
                         }
                     }
+                    ui = commonPositiveLiterals.nextSetBit(ui + 1);
+                }
 
-                    solver.getAssignment().remove();
-                    solver.getAssignment().add(-mx0);
-
-                    Result<Boolean> hasSolution = solver.hasSolution();
-                    if (hasSolution.isEmpty()) {
-                        return findSolution.merge(Result.empty());
-                    } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                        for (int j = i + 1; j < xModel0.length; j++) {
-                            done[j] = 0;
-                        }
-                    } else if (hasSolution.valueEquals(Boolean.TRUE)) {
-                        xModel0 = solver.getInternalSolution();
-                    }
-
-                    for (int j = i + 1; j < xModel0.length; j++) {
-                        if (done[j] == 1) {
-                            final int my0 = xModel0[j];
-                            if (my0 != 0) {
-                                solver.getAssignment().add(-my0);
-
-                                hasSolution = solver.hasSolution();
-                                if (hasSolution.valueEquals(Boolean.FALSE)) {
-                                    done[j] = 2;
-                                    solver.getAssignment().replaceLast(my0);
-                                } else if (hasSolution.isEmpty()) {
-                                    return findSolution.merge(Result.empty());
-                                } else if (hasSolution.valueEquals(Boolean.TRUE)) {
-                                    done[j] = 0;
-                                    BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
-                                    solver.shuffleOrder(random);
-                                    solver.getAssignment().remove();
-                                }
-                            } else {
-                                done[j] = 0;
-                            }
+                ui = commonNegativeLiterals.nextSetBit(vi + 1);
+                while (ui >= 0) {
+                    if (!decided[ui]) {
+                        int u = -(ui + 1);
+                        if (unsat(solver, -v, u) && unsat(solver, v, -u)) {
+                            atomicSet.add(u);
+                            decided[ui] = true;
                         }
                     }
-                    SAT4JAssignment assignment = solver.getAssignment();
-                    int assignmentSize = solver.getAssignment().size();
-                    if (!omitSingles || assignmentSize - fixedSize > 1) {
-                        atomicSets.add(new BooleanAssignment(assignment.copy(fixedSize, assignmentSize)));
-                    }
-                    solver.getAssignment().clear(fixedSize);
+                    ui = commonNegativeLiterals.nextSetBit(ui + 1);
+                }
+                if (!omitSingles || atomicSet.size() > 1) {
+                    atomicSets.add(new BooleanAssignment(atomicSet.toArray()));
                 }
             }
         }
+
+        solutions = null;
+        solutionIndex = null;
+        random = null;
         return Result.of(atomicSets);
+    }
+
+    private boolean unsat(SAT4JSolutionSolver solver, final int v, int u) {
+        solver.getAssignment().add(v);
+        solver.getAssignment().add(u);
+        try {
+            Result<Boolean> hasSolution = solver.hasSolution();
+            if (hasSolution.isEmpty()) {
+                return false;
+            } else if (hasSolution.valueEquals(Boolean.TRUE)) {
+                int[] internalSolution = solver.getInternalSolution();
+                addSolution(internalSolution);
+                solver.shuffleOrder(random);
+                return false;
+            }
+            return true;
+        } finally {
+            solver.getAssignment().remove();
+            solver.getAssignment().remove();
+        }
+    }
+
+    private void findCommenLiterals(final int v, BitSet commonPositiveLiterals, BitSet commonNegativeLiterals) {
+        BitSet positiveBitSet = solutionIndex.getBitSet(v);
+        int nextSetBit = positiveBitSet.nextSetBit(0);
+        while (nextSetBit >= 0) {
+            BitSet bitSet = solutions.get(nextSetBit);
+            commonPositiveLiterals.and(bitSet);
+            commonNegativeLiterals.andNot(bitSet);
+            nextSetBit = positiveBitSet.nextSetBit(nextSetBit + 1);
+        }
+    }
+
+    private void addSolution(final int[] firstSolution) {
+        solutionIndex.addConfiguration(firstSolution);
+        BitSet bitSet = new BitSet(variableCount);
+        solutions.add(bitSet);
+        for (int i = 0; i < variableCount; i++) {
+            bitSet.set(i, firstSolution[i] > 0);
+        }
     }
 }
