@@ -23,7 +23,6 @@ package de.featjar.analysis.sat4j.computation;
 import de.featjar.analysis.RuntimeTimeoutException;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.analysis.sat4j.twise.SampleBitIndex;
 import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
@@ -53,7 +52,6 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
     public static final Dependency<Boolean> OMIT_CORE = Dependency.newDependency(Boolean.class);
 
     private List<BitSet> solutions;
-    private SampleBitIndex solutionIndex;
     private int variableCount;
 
     private Random random;
@@ -82,7 +80,6 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
         final BooleanAssignmentList atomicSets = new BooleanAssignmentList(variableMap);
         variableCount = variableMap.getVariableCount();
         solutions = new ArrayList<>();
-        solutionIndex = new SampleBitIndex(variableCount);
 
         BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
         final boolean[] decided = new boolean[variableCount];
@@ -152,18 +149,27 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
             progress.incrementCurrentStep();
             checkCancel();
             if (!decided[vi]) {
-                decided[vi] = true;
                 int v = vi + 1;
 
                 ExpandableIntegerList atomicSet = new ExpandableIntegerList();
                 atomicSet.add(v);
+                decided[vi] = true;
 
                 BitSet commonPositiveLiterals = new BitSet(variableCount);
                 BitSet commonNegativeLiterals = new BitSet(variableCount);
                 commonPositiveLiterals.flip(0, variableCount);
                 commonNegativeLiterals.flip(0, variableCount);
-                findCommenLiterals(v, commonPositiveLiterals, commonNegativeLiterals);
-                findCommenLiterals(-v, commonNegativeLiterals, commonPositiveLiterals);
+                commonPositiveLiterals.clear(vi);
+
+                for (BitSet solution : solutions) {
+                    if (solution.get(vi)) {
+                        commonPositiveLiterals.and(solution);
+                        commonNegativeLiterals.andNot(solution);
+                    } else {
+                        commonPositiveLiterals.andNot(solution);
+                        commonNegativeLiterals.and(solution);
+                    }
+                }
 
                 int ui = commonPositiveLiterals.nextSetBit(vi + 1);
                 while (ui >= 0) {
@@ -195,7 +201,6 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
         }
 
         solutions = null;
-        solutionIndex = null;
         random = null;
         return Result.of(atomicSets);
     }
@@ -208,8 +213,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
             if (hasSolution.isEmpty()) {
                 return false;
             } else if (hasSolution.valueEquals(Boolean.TRUE)) {
-                int[] internalSolution = solver.getInternalSolution();
-                addSolution(internalSolution);
+                addSolution(solver.getInternalSolution());
                 solver.shuffleOrder(random);
                 return false;
             }
@@ -220,19 +224,7 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
         }
     }
 
-    private void findCommenLiterals(final int v, BitSet commonPositiveLiterals, BitSet commonNegativeLiterals) {
-        BitSet positiveBitSet = solutionIndex.getBitSet(v);
-        int nextSetBit = positiveBitSet.nextSetBit(0);
-        while (nextSetBit >= 0) {
-            BitSet bitSet = solutions.get(nextSetBit);
-            commonPositiveLiterals.and(bitSet);
-            commonNegativeLiterals.andNot(bitSet);
-            nextSetBit = positiveBitSet.nextSetBit(nextSetBit + 1);
-        }
-    }
-
     private void addSolution(final int[] firstSolution) {
-        solutionIndex.addConfiguration(firstSolution);
         BitSet bitSet = new BitSet(variableCount);
         solutions.add(bitSet);
         for (int i = 0; i < variableCount; i++) {
