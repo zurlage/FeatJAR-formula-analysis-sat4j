@@ -85,7 +85,11 @@ public class SAT4JSolutionSolver extends SAT4JSolver {
     }
 
     public SAT4JSolutionSolver(BooleanAssignmentList clauseList) {
-        super(clauseList);
+        this(clauseList, false);
+    }
+
+    public SAT4JSolutionSolver(BooleanAssignmentList clauseList, boolean allowSimplification) {
+        super(clauseList, allowSimplification);
         strategy = ISelectionStrategy.original();
         order = new int[clauseList.getVariableMap().getVariableCount()];
         setOrderFix();

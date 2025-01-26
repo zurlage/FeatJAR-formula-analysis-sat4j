@@ -53,7 +53,7 @@ import org.sat4j.tools.xplain.Xplain;
  */
 public class SAT4JExplanationSolver extends SAT4JSolver {
     public SAT4JExplanationSolver(BooleanAssignmentList clauseList) {
-        super(clauseList);
+        super(clauseList, false);
     }
 
     @Override
