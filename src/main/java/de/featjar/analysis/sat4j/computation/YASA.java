@@ -84,21 +84,11 @@ public class YASA extends ATWiseSampleComputation {
     public static final Dependency<Integer> INTERNAL_SOLUTION_LIMIT = Dependency.newDependency(Integer.class);
     public static final Dependency<Boolean> INCREMENTAL_T = Dependency.newDependency(Boolean.class);
 
-    public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
-
     public YASA(IComputation<BooleanAssignmentList> clauseList) {
-        super(
-                clauseList,
-                Computations.of(2),
-                Computations.of(65_536),
-                Computations.of(Boolean.TRUE),
-                new MIGBuilder(clauseList));
+        super(clauseList, Computations.of(2), Computations.of(65_536), Computations.of(Boolean.TRUE));
     }
 
     private int minT, iterations, randomConfigurationLimit, curSolutionId, randomSampleIdsIndex;
-
-    private ModalImplicationGraph mig;
-
     private List<PartialConfiguration> currentSample, selectionCandidates;
     private SampleBitIndex bestSampleIndex, currentSampleIndex, randomSampleIndex;
 

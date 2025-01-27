@@ -53,10 +53,9 @@ public class YASALegacy extends ATWiseSampleComputation {
 
     public static final Dependency<Integer> ITERATIONS = Dependency.newDependency(Integer.class);
     public static final Dependency<Integer> INTERNAL_SOLUTION_LIMIT = Dependency.newDependency(Integer.class);
-    public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
 
     public YASALegacy(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList, Computations.of(1), Computations.of(100_000), new MIGBuilder(clauseList));
+        super(clauseList, Computations.of(1), Computations.of(100_000));
     }
 
     protected YASALegacy(YASALegacy other) {
@@ -160,8 +159,6 @@ public class YASALegacy extends ATWiseSampleComputation {
     }
 
     private int iterations, internalConfigurationLimit;
-
-    private ModalImplicationGraph mig;
 
     private ArrayDeque<BooleanSolution> randomSample;
     private List<PartialConfiguration> bestSample;

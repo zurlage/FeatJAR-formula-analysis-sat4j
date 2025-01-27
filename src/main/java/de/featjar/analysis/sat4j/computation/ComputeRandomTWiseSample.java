@@ -23,9 +23,7 @@ package de.featjar.analysis.sat4j.computation;
 import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.analysis.RuntimeTimeoutException;
 import de.featjar.analysis.sat4j.solver.MIGVisitorByte;
-import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.twise.SampleBitIndex;
-import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
@@ -44,16 +42,9 @@ import java.util.stream.IntStream;
  */
 public class ComputeRandomTWiseSample extends ATWiseSampleComputation {
 
-    public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
-
     public ComputeRandomTWiseSample(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList, new MIGBuilder(clauseList));
+        super(clauseList);
     }
-
-    private int maxT, variableCount;
-
-    private ICombinationSpecification variables;
-    private ModalImplicationGraph mig;
 
     private SampleBitIndex sampleIndex;
 

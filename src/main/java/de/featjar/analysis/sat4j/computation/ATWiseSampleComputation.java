@@ -21,6 +21,7 @@
 package de.featjar.analysis.sat4j.computation;
 
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
 import de.featjar.base.computation.Computations;
@@ -48,6 +49,8 @@ public abstract class ATWiseSampleComputation extends ASAT4JAnalysis<BooleanAssi
     public static final Dependency<BooleanAssignmentList> INITIAL_SAMPLE =
             Dependency.newDependency(BooleanAssignmentList.class);
 
+    public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
+
     public static final Dependency<Boolean> ALLOW_CHANGE_TO_INITIAL_SAMPLE = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT =
             Dependency.newDependency(Boolean.class);
@@ -59,6 +62,7 @@ public abstract class ATWiseSampleComputation extends ASAT4JAnalysis<BooleanAssi
                 Computations.of(1),
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(new BooleanAssignmentList((VariableMap) null)),
+                new MIGBuilder(clauseList),
                 Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE),
                 computations);
@@ -75,6 +79,7 @@ public abstract class ATWiseSampleComputation extends ASAT4JAnalysis<BooleanAssi
     protected SAT4JSolutionSolver solver;
     protected VariableMap variableMap;
     protected Random random;
+    protected ModalImplicationGraph mig;
 
     protected BooleanAssignmentList initialSample;
 
