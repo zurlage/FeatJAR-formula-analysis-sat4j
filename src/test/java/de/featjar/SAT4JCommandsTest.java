@@ -187,11 +187,11 @@ public class SAT4JCommandsTest {
 
     @Test
     void testTWiseCommand() throws IOException {
-        int exitCode = FeatJAR.run("t-wise-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        int exitCode = FeatJAR.run("yasa", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertEquals(0, exitCode);
 
         exitCode = FeatJAR.run(
-                "t-wise-sat4j",
+                "yasa",
                 "--input",
                 "../formula/src/testFixtures/resources/GPL/model.xml",
                 "--seed",
@@ -211,7 +211,7 @@ public class SAT4JCommandsTest {
         Assertions.assertEquals(0, exitCode);
 
         exitCode = FeatJAR.run(
-                "t-wise-sat4j",
+                "yasa",
                 "--input",
                 "../formula/src/testFixtures/resources/GPL/model.xml",
                 "--seed",
@@ -223,7 +223,7 @@ public class SAT4JCommandsTest {
                 "--t",
                 "5",
                 "--i",
-                "10",
+                "100",
                 "--timeout",
                 "1");
         Assertions.assertEquals(1, exitCode);

@@ -23,11 +23,9 @@ package de.featjar.analysis.sat4j.cli;
 import de.featjar.analysis.sat4j.computation.YASA;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
 import java.util.Optional;
 
 /**
@@ -35,21 +33,7 @@ import java.util.Optional;
  *
  * @author Sebastian Krieter
  */
-public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
-
-    /**
-     * Maximum number of configurations to be generated.
-     */
-    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
-            .setDescription("Maximum number of configurations to be generated.") //
-            .setDefaultValue(Integer.MAX_VALUE);
-
-    /**
-     * Value of t.
-     */
-    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
-            .setDescription("Value of parameter t.") //
-            .setDefaultValue(2);
+public class YASACommand extends ATWiseCommand {
 
     /**
      * Number of iterations.
@@ -66,7 +50,6 @@ public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, Bo
     public static final Option<Boolean> INCREMENTAL = Option.newFlag("incremental") //
             .setDescription("Start with smaller values for t.");
 
-    // TODO handle initial sample
     // TODO handle other combination specs
 
     @Override
@@ -77,33 +60,22 @@ public class YASACommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, Bo
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(YASA::new)
+        AComputation<BooleanAssignmentList> analysis = formula.map(YASA::new)
                 .set(YASA.T, optionParser.get(T_OPTION))
                 .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
                 .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                .set(
+                        YASA.INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT,
+                        optionParser.get(INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT))
                 .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
                 .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION))
                 .set(YASA.INTERNAL_SOLUTION_LIMIT, optionParser.get(INTERNAL_SOLUTION_LIMIT))
                 .set(YASA.INCREMENTAL_T, optionParser.get(INCREMENTAL));
-    }
-
-    @Override
-    protected Object getOuputObject(BooleanAssignmentList list) {
-        return new BooleanAssignmentGroups(list);
-    }
-
-    @Override
-    protected IFormat<?> getOuputFormat() {
-        return new BooleanSolutionListCSVFormat();
-    }
-
-    @Override
-    public String serializeResult(BooleanAssignmentList assignments) {
-        return assignments.serialize();
+        return setInitialSample(optionParser, analysis, YASA.INITIAL_SAMPLE);
     }
 
     @Override
     public Optional<String> getShortName() {
-        return Optional.of("t-wise-sat4j");
+        return Optional.of("yasa");
     }
 }

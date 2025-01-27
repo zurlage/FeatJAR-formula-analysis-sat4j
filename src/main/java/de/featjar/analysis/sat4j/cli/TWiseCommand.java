@@ -21,13 +21,10 @@
 package de.featjar.analysis.sat4j.cli;
 
 import de.featjar.analysis.sat4j.computation.ComputeRandomTWiseSample;
-import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
+import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.IComputation;
-import de.featjar.base.io.format.IFormat;
-import de.featjar.formula.assignment.BooleanAssignmentGroups;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
 import java.util.Optional;
 
 /**
@@ -35,24 +32,7 @@ import java.util.Optional;
  *
  * @author Sebastian Krieter
  */
-public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
-
-    /**
-     * Maximum number of configurations to be generated.
-     */
-    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
-            .setDescription("Maximum number of configurations to be generated.") //
-            .setDefaultValue(Integer.MAX_VALUE);
-
-    /**
-     * Value of t.
-     */
-    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
-            .setDescription("Value of parameter t.") //
-            .setDefaultValue(2);
-
-    // TODO handle initial sample
-    // TODO handle other combination specs
+public class TWiseCommand extends ATWiseCommand {
 
     @Override
     public Optional<String> getDescription() {
@@ -62,26 +42,15 @@ public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, B
     @Override
     public IComputation<BooleanAssignmentList> newAnalysis(
             OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        return formula.map(ComputeRandomTWiseSample::new)
+        AComputation<BooleanAssignmentList> analysis = formula.map(ComputeRandomTWiseSample::new)
                 .set(ComputeRandomTWiseSample.T, optionParser.get(T_OPTION))
                 .set(ComputeRandomTWiseSample.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                .set(
+                        ComputeRandomTWiseSample.INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT,
+                        optionParser.get(INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT))
                 .set(ComputeRandomTWiseSample.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
                 .set(ComputeRandomTWiseSample.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
-    }
-
-    @Override
-    protected Object getOuputObject(BooleanAssignmentList list) {
-        return new BooleanAssignmentGroups(list);
-    }
-
-    @Override
-    protected IFormat<?> getOuputFormat() {
-        return new BooleanSolutionListCSVFormat();
-    }
-
-    @Override
-    public String serializeResult(BooleanAssignmentList assignments) {
-        return assignments.serialize();
+        return setInitialSample(optionParser, analysis, ComputeRandomTWiseSample.INITIAL_SAMPLE);
     }
 
     @Override
