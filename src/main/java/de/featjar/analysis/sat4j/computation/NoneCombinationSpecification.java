@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -20,9 +20,7 @@
  */
 package de.featjar.analysis.sat4j.computation;
 
-import de.featjar.base.data.ICombination;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class NoneCombinationSpecification implements ICombinationSpecification {
@@ -30,16 +28,6 @@ public class NoneCombinationSpecification implements ICombinationSpecification {
     @Override
     public Stream<int[]> stream() {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <V> Stream<ICombination<V, int[]>> parallelStream(Supplier<V> environment) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public NoneCombinationSpecification forOtherT(int otherT) {
-        return new NoneCombinationSpecification();
     }
 
     @Override

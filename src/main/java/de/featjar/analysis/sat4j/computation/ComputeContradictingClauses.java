@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -24,14 +24,14 @@ import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Finds contradicting clauses with respect to a given CNF. This
- * analysis works by iteratively adding each clause of the given {@link BooleanAssignmentList} to a solver. If a clause
+ * analysis works by iteratively adding each clause of the given {@link BooleanClauseList} to a solver. If a clause
  * contradicts the current formula, it is marked as a contradiction and is removed
  * from it. Otherwise it is kept as part of the formula for the
  * remaining analysis. Clauses are added in the same order a they appear in the
@@ -39,10 +39,10 @@ import java.util.List;
  *
  * @author Sebastian Krieter
  */
-public class ComputeContradictingClauses extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
+public class ComputeContradictingClauses extends ASAT4JAnalysis.Solution<BooleanClauseList> {
 
-    public ComputeContradictingClauses(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList);
+    public ComputeContradictingClauses(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
     }
 
     protected ComputeContradictingClauses(ComputeContradictingClauses other) {
@@ -50,12 +50,12 @@ public class ComputeContradictingClauses extends ASAT4JAnalysis.Solution<Boolean
     }
 
     @Override
-    public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
-        BooleanAssignmentList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
+    public Result<BooleanClauseList> compute(List<Object> dependencyList, Progress progress) {
+        BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
         SAT4JSolutionSolver solver = initializeSolver(dependencyList, true);
-        final ArrayList<BooleanAssignment> result = new ArrayList<>();
+        final ArrayList<BooleanClause> result = new ArrayList<>();
 
-        for (BooleanAssignment clause : clauseList) {
+        for (BooleanClause clause : clauseList) {
             checkCancel();
 
             solver.getClauseList().add(clause);
@@ -68,6 +68,6 @@ public class ComputeContradictingClauses extends ASAT4JAnalysis.Solution<Boolean
             }
         }
 
-        return Result.of(new BooleanAssignmentList(clauseList.getVariableMap(), result));
+        return Result.of(new BooleanClauseList(clauseList.getVariableMap(), result));
     }
 }

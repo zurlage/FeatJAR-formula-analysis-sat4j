@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -23,9 +23,7 @@ package de.featjar.analysis.sat4j.twise;
 import de.featjar.analysis.RuntimeContradictionException;
 import de.featjar.analysis.sat4j.computation.ASAT4JAnalysis;
 import de.featjar.analysis.sat4j.computation.MIGBuilder;
-import de.featjar.analysis.sat4j.solver.IMIGVisitor;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.analysis.sat4j.solver.MIGVisitorByte;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.analysis.sat4j.solver.SAT4JSolver;
@@ -37,8 +35,9 @@ import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
+import de.featjar.formula.assignment.BooleanSolutionList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -51,15 +50,15 @@ import java.util.Random;
  */
 public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> {
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanAssignmentList> SAMPLE =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<ModalImplicationGraph> MIG = Dependency.newDependency(ModalImplicationGraph.class);
     public static final Dependency<BooleanAssignment> FILTER = Dependency.newDependency(BooleanAssignment.class);
 
     public class Environment {
         private final CoverageStatistic statistic = new CoverageStatistic();
         private final SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        private final IMIGVisitor visitor = new MIGVisitorByte(MIG.get(dependencyList));
+        private final ModalImplicationGraph.Visitor visitor =
+                MIG.get(dependencyList).getVisitor();
         private SampleListIndex sampleIndex = new SampleListIndex(sample, size, t);
         private SampleListIndex randomIndex = new SampleListIndex(randomSample, size, t);
 
@@ -68,12 +67,12 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
         }
     }
 
-    public TWiseCoverageComputation(IComputation<BooleanAssignmentList> clauseList) {
+    public TWiseCoverageComputation(IComputation<BooleanClauseList> booleanClauseList) {
         super(
-                clauseList, //
+                booleanClauseList, //
                 Computations.of(2), //
-                Computations.of(new BooleanAssignmentList(null, 0)), //
-                new MIGBuilder(clauseList), //
+                Computations.of(new BooleanSolutionList(null, 0)), //
+                new MIGBuilder(booleanClauseList), //
                 Computations.of(new BooleanAssignment()));
     }
 
@@ -84,8 +83,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
     private ArrayList<Environment> statisticList = new ArrayList<>();
 
     private List<Object> dependencyList;
-    List<BooleanAssignment> sample;
-    private List<BooleanSolution> randomSample;
+    private List<BooleanSolution> sample, randomSample;
     private int t, size;
 
     @Override
@@ -173,7 +171,7 @@ public class TWiseCoverageComputation extends ASAT4JAnalysis<CoverageStatistic> 
     }
 
     @Override
-    protected SAT4JSolver newSolver(BooleanAssignmentList clauseList) {
+    protected SAT4JSolver newSolver(BooleanClauseList clauseList) {
         return new SAT4JSolutionSolver(clauseList);
     }
 }

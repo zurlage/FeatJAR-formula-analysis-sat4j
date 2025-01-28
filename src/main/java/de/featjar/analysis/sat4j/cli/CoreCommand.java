@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -24,7 +24,7 @@ import de.featjar.analysis.sat4j.computation.ComputeCoreDeadMIG;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.Optional;
 
 /**
@@ -42,7 +42,7 @@ public class CoreCommand extends ASAT4JAnalysisCommand<BooleanAssignment, Boolea
 
     @Override
     public IComputation<BooleanAssignment> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+            OptionList optionParser, IComputation<BooleanClauseList> formula) {
         return formula.map(ComputeCoreDeadMIG::new);
     }
 

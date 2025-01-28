@@ -6,8 +6,6 @@
 		<extension id="de.featjar.analysis.sat4j.cli.SolutionsCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.SolutionCountCommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.TWiseCommand" />
-		<extension id="de.featjar.analysis.sat4j.cli.YASACommand" />
-		<extension id="de.featjar.analysis.sat4j.cli.LegacyYASACommand" />
 		<extension id="de.featjar.analysis.sat4j.cli.ProjectionCommand" />
 	</point>
 </extensions>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -28,8 +28,8 @@ import de.featjar.base.data.IntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,10 +38,10 @@ import java.util.List;
 import java.util.Random;
 
 public class RandomConfigurationUpdater implements IConfigurationUpdater {
-    private final BooleanAssignmentList model;
+    private final BooleanClauseList model;
     private final Random random;
 
-    public RandomConfigurationUpdater(BooleanAssignmentList cnf, Long randomSeed) {
+    public RandomConfigurationUpdater(BooleanClauseList cnf, Long randomSeed) {
         this.model = cnf;
         random = new Random(randomSeed);
     }
@@ -52,7 +52,7 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
                 .map(ComputeCoreSAT4J::new)
                 .set(ComputeCoreSAT4J.ASSUMED_ASSIGNMENT, partialSolution)
                 .computeResult()
-                .map(a -> a.toSolution(model.getVariableMap().getVariableCount()));
+                .map(a -> a.toSolution());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
             Collection<int[]> include, Collection<int[]> exclude, Collection<int[]> choose) {
         final VariableMap orgVariableMap = model.getVariableMap();
 
-        List<BooleanAssignment> ll = new ArrayList<>();
+        List<BooleanClause> ll = new ArrayList<>();
         ll.addAll(model.getAll());
 
         VariableMap newVariableMap = orgVariableMap.clone();
@@ -91,7 +91,7 @@ public class RandomConfigurationUpdater implements IConfigurationUpdater {
             }
         }
 
-        SAT4JSolutionSolver solver = new SAT4JSolutionSolver(new BooleanAssignmentList(newVariableMap, ll));
+        SAT4JSolutionSolver solver = new SAT4JSolutionSolver(new BooleanClauseList(newVariableMap, ll));
         solver.setSelectionStrategy(ISelectionStrategy.random(random));
         solver.shuffleOrder(random);
         return solver.hasSolution()

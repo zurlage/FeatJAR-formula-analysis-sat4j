@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -28,8 +28,8 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
+import de.featjar.formula.assignment.ABooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,8 +53,9 @@ public class TWiseCountComputation extends AComputation<Long> {
         }
     }
 
-    public static final Dependency<BooleanAssignmentList> SAMPLE =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    @SuppressWarnings("rawtypes")
+    public static final Dependency<ABooleanAssignmentList> SAMPLE =
+            Dependency.newDependency(ABooleanAssignmentList.class);
 
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
     public static final Dependency<BooleanAssignment> VARIABLE_FILTER =
@@ -70,7 +71,7 @@ public class TWiseCountComputation extends AComputation<Long> {
         }
     }
 
-    public TWiseCountComputation(IComputation<? extends BooleanAssignmentList> sample) {
+    public TWiseCountComputation(@SuppressWarnings("rawtypes") IComputation<? extends ABooleanAssignmentList> sample) {
         super(
                 sample,
                 Computations.of(2), //
@@ -85,9 +86,10 @@ public class TWiseCountComputation extends AComputation<Long> {
     private ArrayList<Environment> statisticList = new ArrayList<>();
     private int t;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Result<Long> compute(List<Object> dependencyList, Progress progress) {
-        List<BooleanAssignment> sample = SAMPLE.get(dependencyList).getAll();
+        List<? extends BooleanAssignment> sample = SAMPLE.get(dependencyList).getAll();
 
         if (sample.isEmpty()) {
             return Result.of(0L);
@@ -116,9 +118,8 @@ public class TWiseCountComputation extends AComputation<Long> {
                     }
                 });
 
-        long filterCombinationsCount = filterCombinations.parallelStream()
-                .filter(coverageChecker::test)
-                .count();
+        long filterCombinationsCount =
+                filterCombinations.parallelStream().filter(coverageChecker).count();
         return Result.ofOptional(statisticList.stream() //
                 .map(Environment::getStatistic) //
                 .reduce((s1, s2) -> s1 + s2)

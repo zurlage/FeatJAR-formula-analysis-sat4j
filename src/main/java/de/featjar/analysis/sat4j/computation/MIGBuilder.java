@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -29,8 +29,8 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,11 +45,10 @@ import java.util.Objects;
  */
 public class MIGBuilder extends AComputation<ModalImplicationGraph> {
 
-    public static final Dependency<BooleanAssignmentList> CNF_CLAUSES =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<BooleanClauseList> CNF_CLAUSES = Dependency.newDependency(BooleanClauseList.class);
     public static final Dependency<BooleanAssignment> CORE = Dependency.newDependency(BooleanAssignment.class);
 
-    public MIGBuilder(IComputation<BooleanAssignmentList> cnfFormula) {
+    public MIGBuilder(IComputation<BooleanClauseList> cnfFormula) {
         super(cnfFormula, new ComputeCoreSAT4J(cnfFormula));
     }
 
@@ -59,7 +58,7 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
 
     @Override
     public Result<ModalImplicationGraph> compute(List<Object> dependencyList, Progress progress) {
-        BooleanAssignmentList cnfFormula = CNF_CLAUSES.get(dependencyList);
+        BooleanClauseList cnfFormula = CNF_CLAUSES.get(dependencyList);
         BooleanAssignment coreLiterals = CORE.get(dependencyList);
 
         progress.setTotalSteps(8);
@@ -177,10 +176,10 @@ public class MIGBuilder extends AComputation<ModalImplicationGraph> {
                         }
                     });
         }
-        strong[vertexIndex] = temp.toArray();
+        strong[vertexIndex] = Arrays.copyOf(temp.toArray(), temp.size());
     }
 
-    private BooleanClause cleanClause(BooleanAssignment clause, BooleanAssignment core) {
+    private BooleanClause cleanClause(BooleanClause clause, BooleanAssignment core) {
         final int[] literals = clause.get();
         final LinkedHashSet<Integer> literalSet = new LinkedHashSet<>(literals.length << 1);
 

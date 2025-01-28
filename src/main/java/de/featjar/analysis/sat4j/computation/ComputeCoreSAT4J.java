@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -26,9 +26,10 @@ import de.featjar.base.computation.ComputeConstant;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.List;
 import java.util.Random;
@@ -42,8 +43,8 @@ public class ComputeCoreSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeCoreSAT4J(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList, new ComputeConstant<>(new BooleanAssignment()));
+    public ComputeCoreSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
     protected ComputeCoreSAT4J(ComputeCoreSAT4J other) {
@@ -58,7 +59,7 @@ public class ComputeCoreSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();
-        if (solution.isEmpty()) return Result.empty();
+        if (solution.isEmpty()) return Result.empty(new Problem("Ich bin ein Problem", Problem.Severity.ERROR));
         int[] model1 = solution.get().get();
 
         if (model1 != null) {

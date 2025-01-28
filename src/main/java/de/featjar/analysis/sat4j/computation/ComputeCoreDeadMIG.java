@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -20,10 +20,9 @@
  */
 package de.featjar.analysis.sat4j.computation;
 
-import de.featjar.analysis.sat4j.solver.IMIGVisitor;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
-import de.featjar.analysis.sat4j.solver.MIGVisitorByte;
 import de.featjar.analysis.sat4j.solver.ModalImplicationGraph;
+import de.featjar.analysis.sat4j.solver.ModalImplicationGraph.Visitor;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
 import de.featjar.base.computation.ComputeConstant;
 import de.featjar.base.computation.Dependency;
@@ -31,7 +30,7 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.List;
 import java.util.Random;
@@ -49,8 +48,8 @@ public class ComputeCoreDeadMIG extends ASAT4JAnalysis.Solution<BooleanAssignmen
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeCoreDeadMIG(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList, new MIGBuilder(clauseList), new ComputeConstant<>(new BooleanAssignment()));
+    public ComputeCoreDeadMIG(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList, new MIGBuilder(booleanClauseList), new ComputeConstant<>(new BooleanAssignment()));
     }
 
     protected ComputeCoreDeadMIG(ComputeCoreDeadMIG other) {
@@ -84,7 +83,7 @@ public class ComputeCoreDeadMIG extends ASAT4JAnalysis.Solution<BooleanAssignmen
                 model1 = model3;
             }
 
-            IMIGVisitor visitor = new MIGVisitorByte(mig);
+            Visitor visitor = mig.getVisitor();
             visitor.propagate(assignment.get());
 
             int addedLiteralCount = visitor.getAddedLiteralCount();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -28,8 +28,8 @@ import de.featjar.base.computation.Progress;
 import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
 import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -43,8 +43,8 @@ public class ComputeIndeterminateSat4J extends ASAT4JAnalysis.Solution<BooleanAs
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeIndeterminateSat4J(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList, new ComputeConstant<>(new BooleanAssignment()));
+    public ComputeIndeterminateSat4J(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
     protected ComputeIndeterminateSat4J(ComputeIndeterminateSat4J other) {
@@ -53,7 +53,7 @@ public class ComputeIndeterminateSat4J extends ASAT4JAnalysis.Solution<BooleanAs
 
     @Override
     public Result<BooleanAssignment> compute(List<Object> dependencyList, Progress progress) {
-        BooleanAssignmentList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
+        BooleanClauseList clauseList = BOOLEAN_CLAUSE_LIST.get(dependencyList);
         BooleanAssignment variablesOfInterest = VARIABLES_OF_INTEREST.get(dependencyList);
 
         BooleanAssignment variables = variablesOfInterest.isEmpty()
@@ -65,8 +65,8 @@ public class ComputeIndeterminateSat4J extends ASAT4JAnalysis.Solution<BooleanAs
         final ExpandableIntegerList resultList = new ExpandableIntegerList();
         variableLoop:
         for (final int variable : variables.get()) {
-            BooleanAssignmentList modClauseList = new BooleanAssignmentList(clauseList.getVariableMap());
-            for (final BooleanAssignment clause : clauseList) {
+            BooleanClauseList modClauseList = new BooleanClauseList(clauseList.getVariableMap());
+            for (final BooleanClause clause : clauseList.getAll()) {
                 final int[] newLiterals = clause.removeAllVariables(variable);
                 if (newLiterals.length > 0) {
                     modClauseList.add(new BooleanClause(newLiterals));

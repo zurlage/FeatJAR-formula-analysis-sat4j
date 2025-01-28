@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -29,10 +29,9 @@ import de.featjar.base.data.Ints;
 import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanSolutionList;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Calculates statistics regarding t-wise feature coverage of a set of
@@ -41,11 +40,10 @@ import java.util.Objects;
  * @author Sebastian Krieter
  */
 public class RelativeTWiseCoverageComputation extends AComputation<CoverageStatistic> {
-    public static final Dependency<BooleanAssignmentList> REFERENCE_SAMPLE =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<BooleanSolutionList> REFERENCE_SAMPLE =
+            Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanAssignmentList> SAMPLE =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<BooleanAssignment> FILTER = Dependency.newDependency(BooleanAssignment.class);
 
     public class Environment {
@@ -56,11 +54,11 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
         }
     }
 
-    public RelativeTWiseCoverageComputation(IComputation<BooleanAssignmentList> reference) {
+    public RelativeTWiseCoverageComputation(IComputation<BooleanSolutionList> reference) {
         super(
                 reference,
                 Computations.of(2), //
-                Computations.of(new BooleanAssignmentList(null, 0)), //
+                Computations.of(new BooleanSolutionList(null, 0)), //
                 Computations.of(new BooleanAssignment()));
     }
 
@@ -69,19 +67,21 @@ public class RelativeTWiseCoverageComputation extends AComputation<CoverageStati
     }
 
     private ArrayList<Environment> statisticList = new ArrayList<>();
-    private BooleanAssignmentList sample;
+    private BooleanSolutionList sample;
     private int t, size;
 
     @Override
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
-        sample = SAMPLE.get(dependencyList).toSolutionList();
+        sample = SAMPLE.get(dependencyList);
+
         if (!sample.isEmpty()) {
-            BooleanAssignmentList referenceSample =
-                    REFERENCE_SAMPLE.get(dependencyList).toSolutionList();
-            assert Objects.equals(referenceSample.getVariableMap(), sample.getVariableMap());
+            BooleanSolutionList referenceSample = REFERENCE_SAMPLE.get(dependencyList);
+            assert referenceSample.isEmpty()
+                    || sample.get(0).get().size()
+                            >= referenceSample.get(0).get().size();
 
             t = T.get(dependencyList);
-            size = referenceSample.getVariableMap().getVariableCount();
+            size = sample.get(0).get().size();
 
             SampleBitIndex referenceIndex = new SampleBitIndex(referenceSample.getAll(), size);
             SampleBitIndex sampleIndex = new SampleBitIndex(sample.getAll(), size);

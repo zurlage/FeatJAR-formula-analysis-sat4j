@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -31,7 +31,9 @@ import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanSolution;
+import de.featjar.formula.assignment.BooleanSolutionList;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -49,16 +51,15 @@ import java.util.stream.LongStream;
  */
 public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
-    public static final Dependency<BooleanAssignmentList> SAMPLE =
-            Dependency.newDependency(BooleanAssignmentList.class);
+    public static final Dependency<BooleanSolutionList> SAMPLE = Dependency.newDependency(BooleanSolutionList.class);
     public static final Dependency<BooleanAssignment> CORE = Dependency.newDependency(BooleanAssignment.class);
 
-    public TWiseStatisticGenerator(IComputation<BooleanAssignmentList> clauseList) {
+    public TWiseStatisticGenerator(IComputation<BooleanClauseList> booleanClauseList) {
         super(
-                clauseList,
+                booleanClauseList,
                 Computations.of(2),
-                Computations.of(new BooleanAssignmentList(null, 0)),
-                new ComputeCoreSAT4J(clauseList));
+                Computations.of(new BooleanSolutionList(null, 0)),
+                new ComputeCoreSAT4J(booleanClauseList));
     }
 
     public TWiseStatisticGenerator(TWiseStatisticGenerator other) {
@@ -98,8 +99,8 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
 
     long[] covered, uncovered, invalid;
 
-    private static BitSet convertToBitSet(BooleanAssignment configuration) {
-        return convertToBitSet(configuration.toSolution().get());
+    private static BitSet convertToBitSet(BooleanSolution configuration) {
+        return convertToBitSet(configuration.get());
     }
 
     private static BitSet convertToBitSet(int[] configuration) {
@@ -113,15 +114,16 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
     @Override
     public Result<CoverageStatistic> compute(List<Object> dependencyList, Progress progress) {
         random = new Random(RANDOM_SEED.get(dependencyList));
-        BooleanAssignmentList sample = SAMPLE.get(dependencyList);
+        BooleanSolutionList sample = SAMPLE.get(dependencyList);
         BooleanAssignment deadCoreFeatures = CORE.get(dependencyList);
         int t = T.get(dependencyList);
+
         sampleConfigs =
                 sample.stream().map(TWiseStatisticGenerator::convertToBitSet).collect(Collectors.toList());
         randomConfigs = new ArrayList<>();
 
         if (!sampleConfigs.isEmpty()) {
-            final int n = sample.getVariableMap().getVariableCount();
+            final int n = sample.get(0).get().size();
             final int t2 = (n < t) ? n : t;
             final int n2 = n - t2 + 1;
             final int pow = (int) Math.pow(2, t2);
@@ -314,7 +316,7 @@ public class TWiseStatisticGenerator extends ASAT4JAnalysis<CoverageStatistic> {
     }
 
     @Override
-    protected SAT4JSolver newSolver(BooleanAssignmentList clauseList) {
+    protected SAT4JSolver newSolver(BooleanClauseList clauseList) {
         SAT4JSolutionSolver solver = new SAT4JSolutionSolver(clauseList);
         solver.setTimeout(Duration.ofSeconds(100));
         solver.setSelectionStrategy(ISelectionStrategy.random(random));

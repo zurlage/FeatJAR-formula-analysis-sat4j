@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -24,14 +24,14 @@ import de.featjar.analysis.sat4j.solver.SAT4JSolver;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.math.BigInteger;
 import java.util.List;
 
 public class ComputeSolutionCountSAT4J extends ASAT4JAnalysis.Solution<BigInteger> {
-    public ComputeSolutionCountSAT4J(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList);
+    public ComputeSolutionCountSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
     }
 
     protected ComputeSolutionCountSAT4J(ComputeSolutionCountSAT4J other) {

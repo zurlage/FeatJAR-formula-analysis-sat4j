@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -20,37 +20,75 @@
  */
 package de.featjar.analysis.sat4j.cli;
 
-import de.featjar.analysis.sat4j.computation.ComputeRandomTWiseSample;
+import de.featjar.analysis.sat4j.computation.YASA;
+import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
-import de.featjar.base.computation.AComputation;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.base.io.format.IFormat;
+import de.featjar.formula.assignment.BooleanAssignmentGroups;
+import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanSolutionList;
+import de.featjar.formula.io.csv.BooleanSolutionListCSVFormat;
 import java.util.Optional;
 
 /**
  * Computes solutions for a given formula using SAT4J.
  *
  * @author Sebastian Krieter
+ * @author Andreas Gerasimow
  */
-public class TWiseCommand extends ATWiseCommand {
+public class TWiseCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
+
+    /**
+     * Maximum number of configurations to be generated.
+     */
+    public static final Option<Integer> LIMIT_OPTION = Option.newOption("n", Option.IntegerParser) //
+            .setDescription("Maximum number of configurations to be generated.") //
+            .setDefaultValue(Integer.MAX_VALUE);
+
+    /**
+     * Value of t.
+     */
+    public static final Option<Integer> T_OPTION = Option.newOption("t", Option.IntegerParser) //
+            .setDescription("Value of parameter t.") //
+            .setDefaultValue(2);
+
+    /**
+     * Number of iterations.
+     */
+    public static final Option<Integer> ITERATIONS_OPTION = Option.newOption("i", Option.IntegerParser) //
+            .setDescription("Number of iterations.") //
+            .setDefaultValue(1);
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Computes solutions for a given formula using SAT4J. Uses a simple greedy algorithm.");
+        return Optional.of("Computes solutions for a given formula using SAT4J");
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
-        AComputation<BooleanAssignmentList> analysis = formula.map(ComputeRandomTWiseSample::new)
-                .set(ComputeRandomTWiseSample.T, optionParser.get(T_OPTION))
-                .set(ComputeRandomTWiseSample.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
-                .set(
-                        ComputeRandomTWiseSample.INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT,
-                        optionParser.get(INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT))
-                .set(ComputeRandomTWiseSample.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
-                .set(ComputeRandomTWiseSample.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
-        return setInitialSample(optionParser, analysis, ComputeRandomTWiseSample.INITIAL_SAMPLE);
+    public IComputation<BooleanSolutionList> newAnalysis(
+            OptionList optionParser, IComputation<BooleanClauseList> formula) {
+        return formula.map(YASA::new)
+                .set(YASA.T, optionParser.get(T_OPTION))
+                .set(YASA.CONFIGURATION_LIMIT, optionParser.get(LIMIT_OPTION))
+                .set(YASA.ITERATIONS, optionParser.get(ITERATIONS_OPTION))
+                .set(YASA.RANDOM_SEED, optionParser.get(RANDOM_SEED_OPTION))
+                .set(YASA.SAT_TIMEOUT, optionParser.get(SAT_TIMEOUT_OPTION));
+    }
+
+    @Override
+    protected Object getOuputObject(BooleanSolutionList list) {
+        return new BooleanAssignmentGroups(list);
+    }
+
+    @Override
+    protected IFormat<?> getOuputFormat() {
+        return new BooleanSolutionListCSVFormat();
+    }
+
+    @Override
+    public String serializeResult(BooleanSolutionList assignments) {
+        return assignments.serialize();
     }
 
     @Override

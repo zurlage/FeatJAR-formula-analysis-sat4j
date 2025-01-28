@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -20,11 +20,9 @@
  */
 package de.featjar.analysis.sat4j.computation;
 
-import de.featjar.base.data.ICombination;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class CombinationSpecificationList implements ICombinationSpecification {
@@ -35,23 +33,8 @@ public class CombinationSpecificationList implements ICombinationSpecification {
         specifications.add(spec);
     }
 
-    @Override
     public Stream<int[]> stream() {
         return specifications.stream().flatMap(ICombinationSpecification::stream);
-    }
-
-    @Override
-    public <V> Stream<ICombination<V, int[]>> parallelStream(Supplier<V> environment) {
-        return specifications.parallelStream().flatMap(s -> s.parallelStream(environment));
-    }
-
-    @Override
-    public CombinationSpecificationList forOtherT(int otherT) {
-        CombinationSpecificationList combinationSpecificationList = new CombinationSpecificationList();
-        for (ICombinationSpecification spec : specifications) {
-            combinationSpecificationList.addSpecifications(spec.forOtherT(otherT));
-        }
-        return combinationSpecificationList;
     }
 
     public int getTotalSteps() {

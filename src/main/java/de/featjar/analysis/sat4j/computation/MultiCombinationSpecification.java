@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -21,13 +21,11 @@
 package de.featjar.analysis.sat4j.computation;
 
 import de.featjar.base.data.BinomialCalculator;
-import de.featjar.base.data.ICombination;
 import de.featjar.base.data.MultiLexicographicIterator;
 import de.featjar.formula.assignment.BooleanAssignment;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -56,7 +54,7 @@ public class MultiCombinationSpecification implements ICombinationSpecification 
         }
 
         literalSets = new int[tValues.length][];
-        int intermediateTotelSteps = tValues.length > 0 ? 1 : 0;
+        int intermediateTotelSteps = 0;
         for (int i = 0; i < tValues.length; i++) {
             int t = tValues[i];
             int[] literals = variables.get(i).get();
@@ -72,45 +70,9 @@ public class MultiCombinationSpecification implements ICombinationSpecification 
         this.tValues = tValues;
     }
 
-    public MultiCombinationSpecification(int[][] literalSets, int[] tValues) {
-        for (int t : tValues) {
-            if (t < 1) {
-                throw new IllegalArgumentException(
-                        "Values for t must be greater than 0. Values were " + Arrays.toString(tValues));
-            }
-        }
-        this.tValues = tValues;
-        this.literalSets = literalSets;
-        int intermediateTotelSteps = tValues.length > 0 ? 1 : 0;
-        for (int i = 0; i < tValues.length; i++) {
-            int[] literals = literalSets[i];
-            int t = tValues[i];
-            intermediateTotelSteps *= (int) (BinomialCalculator.computeBinomial(literals.length, t));
-            if (literals.length < t) {
-                throw new IllegalArgumentException(
-                        String.format("Value for t must be grater than number of variables", t, literals.length));
-            }
-        }
-        this.totalSteps = intermediateTotelSteps;
-    }
-
-    @Override
-    public MultiCombinationSpecification forOtherT(int otherT) {
-        int[] newTValues = new int[tValues.length];
-        for (int i = 0; i < tValues.length; i++) {
-            newTValues[i] = Math.min(tValues[i], otherT);
-        }
-        return new MultiCombinationSpecification(literalSets, newTValues);
-    }
-
     @Override
     public Stream<int[]> stream() {
         return MultiLexicographicIterator.stream(literalSets, tValues).map(combo -> combo.select());
-    }
-
-    @Override
-    public <V> Stream<ICombination<V, int[]>> parallelStream(Supplier<V> environment) {
-        return MultiLexicographicIterator.parallelStream(literalSets, tValues, environment);
     }
 
     @Override

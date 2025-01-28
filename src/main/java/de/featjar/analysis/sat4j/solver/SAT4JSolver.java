@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -23,7 +23,7 @@ package de.featjar.analysis.sat4j.solver;
 import de.featjar.base.FeatJAR;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.time.Duration;
 import java.util.Arrays;
@@ -67,9 +67,9 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
         }
     }
 
-    public SAT4JSolver(BooleanAssignmentList clauseList, boolean allowSimplification) {
-        internalSolver.setDBSimplificationAllowed(allowSimplification);
-        internalSolver.setKeepSolverHot(false);
+    public SAT4JSolver(BooleanClauseList clauseList) {
+        internalSolver.setDBSimplificationAllowed(true);
+        internalSolver.setKeepSolverHot(true);
         internalSolver.setVerbose(false);
         this.clauseList = new SAT4JClauseList(this, clauseList);
 
@@ -138,7 +138,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
     public Result<BooleanSolution> findSolution() {
         final Result<Boolean> hasSolution = hasSolution();
         return hasSolution.isPresent()
-                ? hasSolution().get() ? Result.of(getSolution()) : Result.empty()
+                ? hasSolution.get() ? Result.of(getSolution()) : Result.empty()
                 : Result.empty(hasSolution.getProblems());
     }
 
@@ -158,6 +158,7 @@ public abstract class SAT4JSolver implements de.featjar.analysis.ISolver {
                 return Result.of(Boolean.TRUE);
             } else {
                 FeatJAR.log().debug("no solution");
+                FeatJAR.log().message(internalSolver.unsatExplanation());
                 return Result.of(Boolean.FALSE);
             }
         } catch (final TimeoutException e) {

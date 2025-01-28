@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 FeatJAR-Development-Team
+ * Copyright (C) 2024 FeatJAR-Development-Team
  *
  * This file is part of FeatJAR-formula-analysis-sat4j.
  *
@@ -187,11 +187,11 @@ public class SAT4JCommandsTest {
 
     @Test
     void testTWiseCommand() throws IOException {
-        int exitCode = FeatJAR.run("yasa", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
+        int exitCode = FeatJAR.run("t-wise-sat4j", "--input", "../formula/src/testFixtures/resources/GPL/model.xml");
         Assertions.assertEquals(0, exitCode);
 
         exitCode = FeatJAR.run(
-                "yasa",
+                "t-wise-sat4j",
                 "--input",
                 "../formula/src/testFixtures/resources/GPL/model.xml",
                 "--seed",
@@ -211,7 +211,7 @@ public class SAT4JCommandsTest {
         Assertions.assertEquals(0, exitCode);
 
         exitCode = FeatJAR.run(
-                "yasa",
+                "t-wise-sat4j",
                 "--input",
                 "../formula/src/testFixtures/resources/GPL/model.xml",
                 "--seed",
@@ -223,7 +223,7 @@ public class SAT4JCommandsTest {
                 "--t",
                 "5",
                 "--i",
-                "100",
+                "10",
                 "--timeout",
                 "1");
         Assertions.assertEquals(1, exitCode);
