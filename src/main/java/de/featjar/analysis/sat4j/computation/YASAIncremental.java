@@ -31,7 +31,9 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.BinomialCalculator;
 import de.featjar.base.data.ExpandableIntegerList;
+import de.featjar.base.data.LexicographicIterator;
 import de.featjar.base.data.Result;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.ABooleanAssignmentList;
@@ -47,7 +49,9 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -56,10 +60,9 @@ import java.util.stream.IntStream;
  *
  * @author Sebastian Krieter
  */
-public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
+public class YASAIncremental extends ASAT4JAnalysis<BooleanSolutionList> {
 
-    public static final Dependency<ICombinationSpecification> LITERALS =
-            Dependency.newDependency(ICombinationSpecification.class);
+    public static final Dependency<BooleanAssignment> LITERALS = Dependency.newDependency(BooleanAssignment.class);
     public static final Dependency<Integer> T = Dependency.newDependency(Integer.class);
     public static final Dependency<Integer> CONFIGURATION_LIMIT = Dependency.newDependency(Integer.class);
     public static final Dependency<Integer> ITERATIONS = Dependency.newDependency(Integer.class);
@@ -74,11 +77,12 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     public static final Dependency<Boolean> ALLOW_CHANGE_TO_INITIAL_SAMPLE = Dependency.newDependency(Boolean.class);
     public static final Dependency<Boolean> INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT =
             Dependency.newDependency(Boolean.class);
+    public static final Dependency<Boolean> REDUCE_FINAL_SAMPLE = Dependency.newDependency(Boolean.class);
 
-    public YASA(IComputation<BooleanClauseList> booleanClauseList) {
+    public YASAIncremental(IComputation<BooleanClauseList> booleanClauseList) {
         super(
                 booleanClauseList,
-                Computations.of(new NoneCombinationSpecification()),
+                Computations.of(new BooleanAssignment()),
                 Computations.of(2),
                 Computations.of(Integer.MAX_VALUE),
                 Computations.of(2),
@@ -86,10 +90,11 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
                 new MIGBuilder(booleanClauseList),
                 Computations.of(new BooleanAssignmentList(null)),
                 Computations.of(Boolean.TRUE),
+                Computations.of(Boolean.TRUE),
                 Computations.of(Boolean.TRUE));
     }
 
-    protected YASA(YASA other) {
+    protected YASAIncremental(YASAIncremental other) {
         super(other);
     }
 
@@ -198,13 +203,13 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
     }
 
     private int n, tmax, t, maxSampleSize, iterations, numberOfVariableLiterals, internalConfigurationLimit;
-    private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit;
-    private ICombinationSpecification variables;
+    private boolean allowChangeToInitialSample, initialSampleCountsTowardsConfigurationLimit, reduceFinalSample;
 
     private SAT4JSolutionSolver solver;
     private VariableMap variableMap;
     private ModalImplicationGraph mig;
     private Random random;
+    private List<List<BooleanClause>> presenceConditions;
 
     private ABooleanAssignmentList<?> initialSample;
     private ArrayDeque<BooleanSolution> randomSample;
@@ -253,12 +258,11 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
         allowChangeToInitialSample = ALLOW_CHANGE_TO_INITIAL_SAMPLE.get(dependencyList);
         initialSampleCountsTowardsConfigurationLimit =
                 INITIAL_SAMPLE_COUNTS_TOWARDS_CONFIGURATION_LIMIT.get(dependencyList);
+        reduceFinalSample = REDUCE_FINAL_SAMPLE.get(dependencyList);
 
         randomSample = new ArrayDeque<>(internalConfigurationLimit);
         variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
         solver = initializeSolver(dependencyList);
-        solver.setSelectionStrategy(ISelectionStrategy.random(random));
-
         mig = MIG.get(dependencyList);
         n = mig.size();
 
@@ -266,21 +270,48 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
             maxSampleSize = Math.max(maxSampleSize, maxSampleSize + initialSample.size());
         }
 
-        variables = LITERALS.get(dependencyList);
+        BooleanAssignment variables = LITERALS.get(dependencyList);
+        BooleanAssignment core = new BooleanAssignment(mig.getCore());
 
-        numberOfVariableLiterals = mig.size();
+        solver.setSelectionStrategy(ISelectionStrategy.random(random));
+
+        List<List<BooleanClause>> nodes;
+        if (variables.isEmpty()) {
+            nodes = convertLiterals(new BooleanAssignment(
+                    IntStream.range(-n, n + 1).filter(i -> i != 0).toArray()));
+        } else {
+            nodes = convertLiterals(variables);
+        }
+        numberOfVariableLiterals = nodes.size() - core.countNegatives() - core.countPositives();
         tmax = Math.min(tmax, Math.max(numberOfVariableLiterals, 1));
-        if (variables instanceof NoneCombinationSpecification) {
-            variables = new SingleCombinationSpecification(
-                    new BooleanAssignment(new BooleanAssignment(IntStream.range(-n, n + 1)
-                                    .filter(i -> i != 0)
-                                    .toArray())
-                            .removeAllVariables(
-                                    Arrays.stream(mig.getCore()).map(Math::abs).toArray())),
-                    tmax);
+
+        presenceConditions = new ArrayList<>();
+        expressionLoop:
+        for (final List<BooleanClause> clauses : nodes) {
+            final List<BooleanClause> newClauses = new ArrayList<>(clauses.size());
+            for (final BooleanClause clause : clauses) {
+                // If clause can be satisfied
+                if (!core.containsAnyNegated(clause)) {
+                    // If clause is already satisfied
+                    if (core.containsAll(clause)) {
+                        continue expressionLoop;
+                    } else {
+                        newClauses.add(new BooleanClause(clause));
+                    }
+                }
+            }
+            if (!newClauses.isEmpty()) {
+                Collections.sort(newClauses, (o1, o2) -> o1.size() - o2.size());
+                presenceConditions.add(newClauses);
+            }
         }
 
-        progress.setTotalSteps(iterations * variables.getTotalSteps());
+        int totalSteps = 0;
+        for (int j = 1; j < tmax; j++) {
+            totalSteps += (int) (BinomialCalculator.computeBinomial(presenceConditions.size(), j));
+        }
+        totalSteps += iterations * (int) (BinomialCalculator.computeBinomial(presenceConditions.size(), tmax));
+        progress.setTotalSteps(totalSteps);
 
         buildCombinations(progress);
 
@@ -307,6 +338,9 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
             for (int j = bestSample.size() - 1; j >= 0; j--) {
                 result.add(autoComplete(bestSample.get(j)));
             }
+            if (reduceFinalSample) {
+                bestSample = reduce(bestSample);
+            }
             return Result.of(result);
         } else {
             return Result.empty();
@@ -315,42 +349,46 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
 
     private void buildCombinations(Progress monitor) {
         initSample();
+        final int[] literals = initliterals(false);
 
-        t = tmax;
-        selectedSampleIndices = new ExpandableIntegerList[t];
-        initRun();
-
-        variables.stream().forEach(combinationLiterals -> {
+        for (int ti = 1; ti <= tmax; ti++) {
             checkCancel();
-            monitor.incrementCurrentStep();
+            t = ti;
+            selectedSampleIndices = new ExpandableIntegerList[t];
+            initRun();
+            LexicographicIterator.stream(t, presenceConditions.size()).forEach(combo -> {
+                checkCancel();
+                monitor.incrementCurrentStep();
+                int[] combinationLiterals = combo.getSelection(literals);
 
-            if (isCovered(combinationLiterals, currentSampleIndices)) {
-                return;
-            }
-            if (isCombinationInvalidMIG(combinationLiterals)) {
-                return;
-            }
-
-            try {
-                if (isCombinationValidSample(combinationLiterals)) {
-                    if (tryCover(combinationLiterals)) {
-                        return;
-                    }
-                } else {
-                    if (isCombinationInvalidSAT(combinationLiterals)) {
-                        return;
-                    }
-                }
-
-                if (tryCoverWithSat(combinationLiterals)) {
+                if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
                 }
-                newConfiguration(combinationLiterals);
-            } finally {
-                candidateConfiguration.clear();
-                newConfiguration = null;
-            }
-        });
+                if (isCombinationInvalidMIG(combinationLiterals)) {
+                    return;
+                }
+
+                try {
+                    if (isCombinationValidSample(combinationLiterals)) {
+                        if (tryCover(combinationLiterals)) {
+                            return;
+                        }
+                    } else {
+                        if (isCombinationInvalidSAT(combinationLiterals)) {
+                            return;
+                        }
+                    }
+
+                    if (tryCoverWithSat(combinationLiterals)) {
+                        return;
+                    }
+                    newConfiguration(combinationLiterals);
+                } finally {
+                    candidateConfiguration.clear();
+                    newConfiguration = null;
+                }
+            });
+        }
         setBestSolutionList();
     }
 
@@ -379,10 +417,12 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
 
         for (int j = 1; j < iterations; j++) {
             checkCancel();
-            variables.shuffle(random);
+            final int[] literals = initliterals(true);
             initSample();
             initRun();
-            variables.stream().forEach(combinationLiterals -> {
+            LexicographicIterator.stream(tmax, presenceConditions.size()).forEach(combo -> {
+                int[] combinationLiterals = combo.getSelection(literals);
+
                 if (isCovered(combinationLiterals, currentSampleIndices)) {
                     return;
                 }
@@ -447,6 +487,28 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
         newConfiguration = null;
         candidateConfiguration = new ArrayList<>();
         Collections.sort(currentSample, (a, b) -> b.countLiterals() - a.countLiterals());
+    }
+
+    private int[] initliterals(boolean shuffle) {
+        if (shuffle) {
+            final Map<Integer, List<List<BooleanClause>>> groupedPCs =
+                    presenceConditions.stream().collect(Collectors.groupingBy(List::size));
+            for (final List<List<BooleanClause>> pcList : groupedPCs.values()) {
+                Collections.shuffle(pcList, random);
+            }
+            final List<Map.Entry<Integer, List<List<BooleanClause>>>> shuffledPCs =
+                    new ArrayList<>(groupedPCs.entrySet());
+            Collections.sort(shuffledPCs, (a, b) -> a.getKey() - b.getKey());
+            presenceConditions.clear();
+            for (final Map.Entry<Integer, List<List<BooleanClause>>> entry : shuffledPCs) {
+                presenceConditions.addAll(entry.getValue());
+            }
+        }
+        final int[] literals = new int[presenceConditions.size()];
+        for (int i1 = 0; i1 < literals.length; i1++) {
+            literals[i1] = presenceConditions.get(i1).get(0).get()[0];
+        }
+        return literals;
     }
 
     private boolean isCovered(int[] literals, ArrayList<ExpandableIntegerList> indexedSolutions) {
@@ -806,5 +868,34 @@ public class YASA extends ASAT4JAnalysis<BooleanSolutionList> {
             solver.getAssignment().add(configuration.visitor.getAddedLiterals()[i]);
         }
         return orgAssignmentSize;
+    }
+
+    private List<PartialConfiguration> reduce(List<PartialConfiguration> solutionList) {
+        if (solutionList.isEmpty()) {
+            return solutionList;
+        }
+        final int n = solutionList.get(0).size();
+        int t2 = (n < t) ? n : t;
+        int nonUniqueIndex = solutionList.size();
+
+        for (int i = 0; i < nonUniqueIndex; i++) {
+            BooleanSolution config = solutionList.get(i);
+            int finalNonUniqueIndex = nonUniqueIndex;
+
+            boolean hasUnique = LexicographicIterator.parallelStream(t2, n).anyMatch(combo -> {
+                int[] literals = combo.getSelection(config.get());
+                for (int j = 0; j < finalNonUniqueIndex; j++) {
+                    PartialConfiguration config2 = solutionList.get(j);
+                    if (config != config2 && config2.containsAll(literals)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+            if (!hasUnique) {
+                Collections.swap(solutionList, i--, --nonUniqueIndex);
+            }
+        }
+        return solutionList.subList(0, nonUniqueIndex);
     }
 }

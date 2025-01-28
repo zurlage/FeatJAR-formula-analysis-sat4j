@@ -1,28 +1,28 @@
 /*
  * Copyright (C) 2025 FeatJAR-Development-Team
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of FeatJAR-FeatJAR-formula-analysis-sat4j.
  *
- * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
+ * FeatJAR-formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3.0 of the License,
  * or (at your option) any later version.
  *
- * formula-analysis-sat4j is distributed in the hope that it will be useful,
+ * FeatJAR-formula-analysis-sat4j is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
+ * along with FeatJAR-formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
 package de.featjar.analysis.sat4j.solver;
 
 import de.featjar.base.data.Result;
-import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClause;
+import de.featjar.formula.assignment.BooleanClauseList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,8 +52,8 @@ import org.sat4j.tools.xplain.Xplain;
  * @author Sebastian Krieter
  */
 public class SAT4JExplanationSolver extends SAT4JSolver {
-    public SAT4JExplanationSolver(BooleanAssignmentList clauseList) {
-        super(clauseList, false);
+    public SAT4JExplanationSolver(BooleanClauseList clauseList) {
+        super(clauseList);
     }
 
     @Override
@@ -61,20 +61,20 @@ public class SAT4JExplanationSolver extends SAT4JSolver {
         return new Xplain<>(SolverFactory.newDefault());
     }
 
-    public Result<List<BooleanAssignment>> getMinimalUnsatisfiableSubset() {
+    public Result<List<BooleanClause>> getMinimalUnsatisfiableSubset() {
         if (hasSolution().equals(Result.of(true))) {
             return Result.empty(new IllegalStateException("Problem is satisfiable"));
         }
         try {
             return Result.of(IntStream.of(((Xplain<?>) internalSolver).minimalExplanation()) //
-                    .mapToObj(index -> getClauseList().get(index)) //
+                    .mapToObj(index -> getClauseList().get(index).orElse(null)) //
                     .collect(Collectors.toList()));
         } catch (final TimeoutException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public Result<List<List<BooleanAssignment>>> getAllMinimalUnsatisfiableSubsets() {
+    public Result<List<List<BooleanClause>>> getAllMinimalUnsatisfiableSubsets() {
         return Result.of(
                 Collections.singletonList(getMinimalUnsatisfiableSubset().get()));
     }

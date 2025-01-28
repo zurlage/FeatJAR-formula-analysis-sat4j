@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2025 FeatJAR-Development-Team
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of FeatJAR-FeatJAR-formula-analysis-sat4j.
  *
- * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
+ * FeatJAR-formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3.0 of the License,
  * or (at your option) any later version.
  *
- * formula-analysis-sat4j is distributed in the hope that it will be useful,
+ * FeatJAR-formula-analysis-sat4j is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
+ * along with FeatJAR-formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
@@ -26,9 +26,10 @@ import de.featjar.base.computation.ComputeConstant;
 import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
+import de.featjar.base.data.Problem;
 import de.featjar.base.data.Result;
 import de.featjar.formula.assignment.BooleanAssignment;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.BooleanSolution;
 import java.util.List;
 import java.util.Random;
@@ -42,8 +43,8 @@ public class ComputeCoreSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
     protected static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
             Dependency.newDependency(BooleanAssignment.class);
 
-    public ComputeCoreSAT4J(IComputation<BooleanAssignmentList> clauseList) {
-        super(clauseList, new ComputeConstant<>(new BooleanAssignment()));
+    public ComputeCoreSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList, new ComputeConstant<>(new BooleanAssignment()));
     }
 
     protected ComputeCoreSAT4J(ComputeCoreSAT4J other) {
@@ -58,7 +59,7 @@ public class ComputeCoreSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignment>
         final int initialAssignmentLength = solver.getAssignment().size();
         solver.setSelectionStrategy(ISelectionStrategy.positive()); // TODO: fails for berkeley db
         Result<BooleanSolution> solution = solver.findSolution();
-        if (solution.isEmpty()) return Result.empty();
+        if (solution.isEmpty()) return Result.empty(new Problem("Ich bin ein Problem", Problem.Severity.ERROR));
         int[] model1 = solution.get().get();
 
         if (model1 != null) {

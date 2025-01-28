@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2025 FeatJAR-Development-Team
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of FeatJAR-FeatJAR-formula-analysis-sat4j.
  *
- * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
+ * FeatJAR-formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3.0 of the License,
  * or (at your option) any later version.
  *
- * formula-analysis-sat4j is distributed in the hope that it will be useful,
+ * FeatJAR-formula-analysis-sat4j is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
+ * along with FeatJAR-formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
@@ -25,7 +25,8 @@ import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
 import de.featjar.base.cli.Option;
 import de.featjar.base.cli.OptionList;
 import de.featjar.base.computation.IComputation;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanSolutionList;
 import java.util.Optional;
 
 /**
@@ -34,7 +35,7 @@ import java.util.Optional;
  * @author Sebastian Krieter
  * @author Andreas Gerasimow
  */
-public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentList, BooleanAssignmentList> {
+public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanSolutionList, BooleanSolutionList> {
 
     /**
      * Maximum number of configurations to be generated.
@@ -65,8 +66,8 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
     }
 
     @Override
-    public IComputation<BooleanAssignmentList> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula) {
+    public IComputation<BooleanSolutionList> newAnalysis(
+            OptionList optionParser, IComputation<BooleanClauseList> formula) {
         return formula.map(ComputeSolutionsSAT4J::new)
                 .set(
                         ComputeSolutionsSAT4J.FORBID_DUPLICATES,
@@ -86,7 +87,7 @@ public class SolutionsCommand extends ASAT4JAnalysisCommand<BooleanAssignmentLis
     }
 
     @Override
-    public String serializeResult(BooleanAssignmentList list) {
+    public String serializeResult(BooleanSolutionList list) {
         return list.print();
     }
 

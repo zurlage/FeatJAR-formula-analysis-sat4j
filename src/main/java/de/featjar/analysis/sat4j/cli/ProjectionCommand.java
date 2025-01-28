@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2025 FeatJAR-Development-Team
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of FeatJAR-FeatJAR-formula-analysis-sat4j.
  *
- * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
+ * FeatJAR-formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3.0 of the License,
  * or (at your option) any later version.
  *
- * formula-analysis-sat4j is distributed in the hope that it will be useful,
+ * FeatJAR-formula-analysis-sat4j is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
+ * along with FeatJAR-formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
@@ -33,7 +33,7 @@ import de.featjar.base.io.IO;
 import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.io.FormulaFormats;
 import de.featjar.formula.io.csv.BooleanAssignmentGroupsCSVFormat;
@@ -92,8 +92,8 @@ public class ProjectionCommand extends ACommand {
                 .flatMap(p -> IO.load(p, FormulaFormats.getInstance()))
                 .orElseThrow();
 
-        BooleanAssignmentList cnf =
-                ComputeBooleanClauseList.toBooleanAssignmentList(inputFormula).get();
+        BooleanClauseList cnf =
+                ComputeBooleanClauseList.toBooleanClauseList(inputFormula).get();
 
         VariableMap variableMap = cnf.getVariableMap();
 
@@ -122,11 +122,11 @@ public class ProjectionCommand extends ACommand {
                 .mapToInt(Result::get)
                 .toArray();
 
-        AComputation<BooleanAssignmentList> computation = Computations.of(cnf)
+        AComputation<BooleanClauseList> computation = Computations.of(cnf)
                 .map(CNFSlicer::new)
                 .set(CNFSlicer.VARIABLES_OF_INTEREST, new BooleanAssignment(array));
 
-        Result<BooleanAssignmentList> result;
+        Result<BooleanClauseList> result;
 
         if (!timeout.isZero()) {
             result = computation.computeResult(true, true, timeout);
@@ -138,7 +138,7 @@ public class ProjectionCommand extends ACommand {
         }
 
         if (result.isPresent()) {
-            BooleanAssignmentList clauseList = result.get().adapt(slicedVariableMap);
+            BooleanClauseList clauseList = result.get().adapt(slicedVariableMap);
             try {
                 if (outputPath == null || outputPath.toString().equals("results")) {
                     String string = format.serialize(new BooleanAssignmentGroups(slicedVariableMap, clauseList))

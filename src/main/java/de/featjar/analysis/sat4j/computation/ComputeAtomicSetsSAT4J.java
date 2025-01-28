@@ -1,40 +1,36 @@
 /*
  * Copyright (C) 2025 FeatJAR-Development-Team
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of FeatJAR-FeatJAR-formula-analysis-sat4j.
  *
- * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
+ * FeatJAR-formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3.0 of the License,
  * or (at your option) any later version.
  *
- * formula-analysis-sat4j is distributed in the hope that it will be useful,
+ * FeatJAR-formula-analysis-sat4j is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
+ * along with FeatJAR-formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
 package de.featjar.analysis.sat4j.computation;
 
-import de.featjar.analysis.RuntimeTimeoutException;
 import de.featjar.analysis.sat4j.solver.ISelectionStrategy;
+import de.featjar.analysis.sat4j.solver.SAT4JAssignment;
 import de.featjar.analysis.sat4j.solver.SAT4JSolutionSolver;
-import de.featjar.base.computation.Computations;
-import de.featjar.base.computation.Dependency;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.computation.Progress;
-import de.featjar.base.data.ExpandableIntegerList;
 import de.featjar.base.data.Result;
-import de.featjar.formula.VariableMap;
 import de.featjar.formula.assignment.BooleanAssignment;
 import de.featjar.formula.assignment.BooleanAssignmentList;
-import java.util.ArrayList;
+import de.featjar.formula.assignment.BooleanClauseList;
+import de.featjar.formula.assignment.BooleanSolution;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
@@ -45,22 +41,8 @@ import java.util.Random;
  */
 public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssignmentList> {
 
-    public static final Dependency<BooleanAssignment> VARIABLES_OF_INTEREST =
-            Dependency.newDependency(BooleanAssignment.class);
-    public static final Dependency<Boolean> OMIT_SINGLE_SETS = Dependency.newDependency(Boolean.class);
-    public static final Dependency<Boolean> OMIT_CORE = Dependency.newDependency(Boolean.class);
-
-    private List<BitSet> solutions;
-    private int variableCount, bitSetSize;
-
-    private Random random;
-
-    public ComputeAtomicSetsSAT4J(IComputation<BooleanAssignmentList> clauseList) {
-        super(
-                clauseList,
-                Computations.of(new BooleanAssignment()),
-                Computations.of(Boolean.FALSE),
-                Computations.of(Boolean.FALSE));
+    public ComputeAtomicSetsSAT4J(IComputation<BooleanClauseList> booleanClauseList) {
+        super(booleanClauseList);
     }
 
     protected ComputeAtomicSetsSAT4J(ComputeAtomicSetsSAT4J other) {
@@ -68,183 +50,126 @@ public class ComputeAtomicSetsSAT4J extends ASAT4JAnalysis.Solution<BooleanAssig
     }
 
     @Override
-    protected SAT4JSolutionSolver newSolver(BooleanAssignmentList clauseList) {
-        return new SAT4JSolutionSolver(clauseList, true);
-    }
-
-    @Override
     public Result<BooleanAssignmentList> compute(List<Object> dependencyList, Progress progress) {
         SAT4JSolutionSolver solver = initializeSolver(dependencyList);
-        random = new Random(RANDOM_SEED.get(dependencyList));
-        VariableMap variableMap = BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap();
-
-        boolean omitCore = OMIT_CORE.get(dependencyList);
-        boolean omitSingles = OMIT_SINGLE_SETS.get(dependencyList);
-
-        final BooleanAssignmentList atomicSets = new BooleanAssignmentList(variableMap);
-        variableCount = variableMap.getVariableCount();
-        bitSetSize = 2 * variableCount;
-        solutions = new ArrayList<>();
-
-        BooleanAssignment variables = VARIABLES_OF_INTEREST.get(dependencyList);
-        final BitSet undecided = new BitSet(bitSetSize);
-        if (variables.isEmpty()) {
-            undecided.flip(0, bitSetSize);
-        } else {
-            for (int var : variables.get()) {
-                undecided.set(var - 1);
-                undecided.set((var - 1) + variableCount);
-            }
-        }
-        checkCancel();
-        progress.setTotalSteps(2 * variableCount + 2);
+        Random random = new Random(RANDOM_SEED.get(dependencyList));
+        final BooleanAssignmentList result = new BooleanAssignmentList(
+                BOOLEAN_CLAUSE_LIST.get(dependencyList).getVariableMap());
+        //		if (variables == null) {
+        //			variables = LiteralList.getVariables(solver.getVariables());
+        //		}
+        // for all variables not in this.variables, set done[...] to 2
 
         solver.setSelectionStrategy(ISelectionStrategy.positive());
-        Result<Boolean> hasSolution = solver.hasSolution();
-        if (hasSolution.isEmpty()) {
-            return hasSolution.merge(Result.empty());
-        }
-        progress.incrementCurrentStep();
-        checkCancel();
+        final int[] model1 = solver.findSolution().get().get();
 
-        BitSet commonLiterals = new BitSet(bitSetSize);
-        commonLiterals.xor(addSolution(solver.getInternalSolution(), 0));
+        if (model1 != null) {
+            // initial atomic set consists of core and dead features
+            solver.setSelectionStrategy(ISelectionStrategy.negative());
+            final int[] model2 = solver.findSolution().get().get();
+            solver.setSelectionStrategy(ISelectionStrategy.positive());
 
-        solver.setSelectionStrategy(
-                ISelectionStrategy.inverse(Arrays.copyOf(solver.getInternalSolution(), variableCount)));
-        if (solver.hasSolution().valueEquals(Boolean.TRUE)) {
-            commonLiterals.and(addSolution(solver.getInternalSolution(), 0));
-            solver.shuffleOrder(random);
-        } else {
-            throw new RuntimeTimeoutException();
-        }
+            final byte[] done = new byte[model1.length];
 
-        progress.incrementCurrentStep();
-        checkCancel();
+            final int[] model1Copy = Arrays.copyOf(model1, model1.length);
 
-        solver.setSelectionStrategy(ISelectionStrategy.random(random));
-        int log = (8 * Integer.BYTES) - Integer.numberOfLeadingZeros(variableCount);
-        for (int i = 0; i < log; i++) {
-            if (solver.hasSolution().valueEquals(Boolean.TRUE)) {
-                commonLiterals.and(addSolution(solver.getInternalSolution(), 0));
-                solver.shuffleOrder(random);
-            } else {
-                throw new RuntimeTimeoutException();
-            }
-        }
-
-        commonLiterals.and(undecided);
-
-        ExpandableIntegerList core = new ExpandableIntegerList();
-        for (int i = 0; i < bitSetSize; i += 2) {
-            progress.incrementCurrentStep();
-            checkCancel();
-            final int potentialCoreLiteral;
-            if (commonLiterals.get(i)) {
-                potentialCoreLiteral = (i >> 1) + 1;
-            } else if (commonLiterals.get(i + 1)) {
-                potentialCoreLiteral = -((i >> 1) + 1);
-            } else {
-                continue;
-            }
-            solver.getAssignment().add(-potentialCoreLiteral);
-            hasSolution = solver.hasSolution();
-            if (hasSolution.isEmpty()) {
-                throw new RuntimeTimeoutException();
-            } else if (hasSolution.valueEquals(Boolean.FALSE)) {
-                undecided.clear(i);
-                undecided.clear(i + 1);
-                core.add(potentialCoreLiteral);
-                solver.getClauseList().add(potentialCoreLiteral);
-            } else if (hasSolution.valueEquals(Boolean.TRUE)) {
-                commonLiterals.and(addSolution(solver.getInternalSolution(), 0));
-                solver.shuffleOrder(random);
-            }
-            solver.getAssignment().remove();
-        }
-        if (!omitCore) {
-            atomicSets.add(new BooleanAssignment(core.toArray()));
-        }
-        for (int vi = 0; vi < bitSetSize; vi += 2) {
-            progress.incrementCurrentStep();
-            checkCancel();
-            if (undecided.get(vi)) {
-                int v = (vi >> 1) + 1;
-
-                ExpandableIntegerList atomicSet = new ExpandableIntegerList();
-                atomicSet.add(v);
-                undecided.clear(vi);
-                undecided.clear(vi + 1);
-
-                commonLiterals = new BitSet(bitSetSize);
-                commonLiterals.xor(undecided);
-
-                for (BitSet solution : solutions) {
-                    if (solution.get(vi)) {
-                        commonLiterals.and(solution);
-                    } else {
-                        commonLiterals.andNot(solution);
-                    }
-                    if (commonLiterals.isEmpty()) {
-                        break;
+            BooleanSolution.removeConflictsInplace(model1Copy, model2);
+            for (int i = 0; i < model1Copy.length; i++) {
+                final int varX = model1Copy[i];
+                if (varX != 0) {
+                    solver.getAssignment().add(-varX);
+                    Result<Boolean> hasSolution = solver.hasSolution();
+                    if (hasSolution.isEmpty()) {
+                        solver.getAssignment().remove();
+                    } else if (hasSolution.valueEquals(Boolean.FALSE)) {
+                        done[i] = 2;
+                        solver.getAssignment().replaceLast(varX);
+                    } else if (hasSolution.valueEquals(Boolean.TRUE)) {
+                        solver.getAssignment().remove();
+                        BooleanSolution.removeConflictsInplace(model1Copy, solver.getInternalSolution());
+                        solver.shuffleOrder(random);
                     }
                 }
+            }
+            final int fixedSize = solver.getAssignment().size();
+            result.add(new BooleanAssignment(solver.getAssignment().copy(0, fixedSize)));
 
-                int ui = commonLiterals.nextSetBit(vi + 2);
-                while (ui >= 0) {
-                    final int u;
-                    if (((ui & 1) == 0)) {
-                        u = (ui >> 1) + 1;
-                    } else {
-                        u = -((ui >> 1) + 1);
-                        ui--;
-                    }
-                    if (unsat(solver, -v, u) && unsat(solver, v, -u)) {
-                        atomicSet.add(u);
-                        undecided.clear(ui);
-                        undecided.clear(ui + 1);
-                    }
-                    ui = commonLiterals.nextSetBit(ui + 2);
-                }
+            solver.setSelectionStrategy(ISelectionStrategy.random(random));
 
-                if (!omitSingles || atomicSet.size() > 1) {
-                    atomicSets.add(new BooleanAssignment(atomicSet.toArray()));
+            for (int i = 0; i < model1.length; i++) {
+                if (done[i] == 0) {
+                    done[i] = 2;
+
+                    int[] xModel0 = Arrays.copyOf(model1, model1.length);
+
+                    final int mx0 = xModel0[i];
+                    solver.getAssignment().add(mx0);
+
+                    for (int j = i + 1; j < xModel0.length; j++) {
+                        final int my0 = xModel0[j];
+                        if ((my0 != 0) && (done[j] == 0)) {
+                            solver.getAssignment().add(-my0);
+
+                            Result<Boolean> hasSolution = solver.hasSolution();
+
+                            if (hasSolution.isEmpty()) {
+                            } else if (hasSolution.valueEquals(Boolean.FALSE)) {
+                                done[j] = 1;
+                            } else if (hasSolution.valueEquals(Boolean.TRUE)) {
+                                BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
+                                solver.shuffleOrder(random);
+                            }
+                            solver.getAssignment().remove();
+                        }
+                    }
+
+                    solver.getAssignment().remove();
+                    solver.getAssignment().add(-mx0);
+
+                    Result<Boolean> hasSolution = solver.hasSolution();
+                    if (hasSolution.isEmpty()) {
+                        // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout or continue?
+                    } else if (hasSolution.valueEquals(Boolean.FALSE)) {
+                        for (int j = i + 1; j < xModel0.length; j++) {
+                            done[j] = 0;
+                        }
+                    } else if (hasSolution.valueEquals(Boolean.TRUE)) {
+                        xModel0 = solver.getInternalSolution();
+                    }
+
+                    for (int j = i + 1; j < xModel0.length; j++) {
+                        if (done[j] == 1) {
+                            final int my0 = xModel0[j];
+                            if (my0 != 0) {
+                                solver.getAssignment().add(-my0);
+
+                                hasSolution = solver.hasSolution();
+                                if (hasSolution.valueEquals(Boolean.FALSE)) {
+                                    done[j] = 2;
+                                    solver.getAssignment().replaceLast(my0);
+                                } else if (hasSolution.isEmpty()) {
+                                    done[j] = 0;
+                                    solver.getAssignment().remove();
+                                    // return Result.empty(new TimeoutException()); // TODO: optionally ignore timeout
+                                    // or continue?
+                                } else if (hasSolution.valueEquals(Boolean.TRUE)) {
+                                    done[j] = 0;
+                                    BooleanSolution.removeConflictsInplace(xModel0, solver.getInternalSolution());
+                                    solver.shuffleOrder(random);
+                                    solver.getAssignment().remove();
+                                }
+                            } else {
+                                done[j] = 0;
+                            }
+                        }
+                    }
+                    SAT4JAssignment assignment = solver.getAssignment();
+                    result.add(new BooleanAssignment(
+                            assignment.copy(fixedSize, solver.getAssignment().size())));
+                    solver.getAssignment().clear(fixedSize);
                 }
             }
         }
-
-        solutions = null;
-        random = null;
-        return Result.of(atomicSets);
-    }
-
-    private boolean unsat(SAT4JSolutionSolver solver, final int v, int u) {
-        solver.getAssignment().add(v);
-        solver.getAssignment().add(u);
-        try {
-            Result<Boolean> hasSolution = solver.hasSolution();
-            if (hasSolution.isEmpty()) {
-                return false;
-            } else if (hasSolution.valueEquals(Boolean.TRUE)) {
-                addSolution(solver.getInternalSolution(), Math.abs(v));
-                solver.shuffleOrder(random);
-                return false;
-            }
-            return true;
-        } finally {
-            solver.getAssignment().remove();
-            solver.getAssignment().remove();
-        }
-    }
-
-    private BitSet addSolution(final int[] solution, int min) {
-        BitSet bitSetSolution = new BitSet(bitSetSize);
-        solutions.add(bitSetSolution);
-        for (int i = min; i < variableCount; i++) {
-            boolean b = solution[i] > 0;
-            bitSetSolution.set(i << 1, b);
-            bitSetSolution.set((i << 1) + 1, !b);
-        }
-        return bitSetSolution;
+        return solver.createResult(result);
     }
 }

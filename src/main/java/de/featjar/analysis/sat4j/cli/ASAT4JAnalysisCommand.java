@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2025 FeatJAR-Development-Team
  *
- * This file is part of FeatJAR-formula-analysis-sat4j.
+ * This file is part of FeatJAR-FeatJAR-formula-analysis-sat4j.
  *
- * formula-analysis-sat4j is free software: you can redistribute it and/or modify it
+ * FeatJAR-formula-analysis-sat4j is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3.0 of the License,
  * or (at your option) any later version.
  *
- * formula-analysis-sat4j is distributed in the hope that it will be useful,
+ * FeatJAR-formula-analysis-sat4j is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
+ * along with FeatJAR-formula-analysis-sat4j. If not, see <https://www.gnu.org/licenses/>.
  *
  * See <https://github.com/FeatureIDE/FeatJAR-formula-analysis-sat4j> for further information.
  */
@@ -27,7 +27,7 @@ import de.featjar.base.computation.Computations;
 import de.featjar.base.computation.IComputation;
 import de.featjar.base.io.IO;
 import de.featjar.formula.assignment.BooleanAssignmentGroups;
-import de.featjar.formula.assignment.BooleanAssignmentList;
+import de.featjar.formula.assignment.BooleanClauseList;
 import de.featjar.formula.assignment.ComputeBooleanClauseList;
 import de.featjar.formula.computation.ComputeCNFFormula;
 import de.featjar.formula.computation.ComputeNNFFormula;
@@ -58,7 +58,7 @@ public abstract class ASAT4JAnalysisCommand<T, U> extends AAnalysisCommand<T> {
     @Override
     protected IComputation<T> newComputation(OptionList optionParser) {
         Path inputPath = optionParser.getResult(INPUT_OPTION).orElseThrow();
-        IComputation<BooleanAssignmentList> computation;
+        IComputation<BooleanClauseList> computation;
         BooleanAssignmentGroups cnf =
                 IO.load(inputPath, BooleanAssignmentGroupsFormats.getInstance()).orElse(null);
         if (cnf != null) {
@@ -73,6 +73,5 @@ public abstract class ASAT4JAnalysisCommand<T, U> extends AAnalysisCommand<T> {
         return newAnalysis(optionParser, computation);
     }
 
-    protected abstract IComputation<T> newAnalysis(
-            OptionList optionParser, IComputation<BooleanAssignmentList> formula);
+    protected abstract IComputation<T> newAnalysis(OptionList optionParser, IComputation<BooleanClauseList> formula);
 }
